@@ -1,0 +1,63 @@
+/* MainPage.css */
+.main-container {
+  padding: 20px;
+  background-color: #364049;
+}
+
+.header {
+  background-color: #424f5e;
+  padding: 20px;
+  color: white;
+}
+
+.title {
+  color: white;
+}
+
+.button {
+  color: white;
+  font-size: 16px;
+  margin: 0 10px;
+}
+
+.content-title {
+  color: white;
+}
+
+.content-text {
+  color: white;
+  font-size: 18px;
+}
+
+/* Layout Services */
+.services {
+  margin-top: 40px;
+}
+
+.service-card {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+/* Media Query for Small Screens */
+@media (max-width: 768px) {
+  .header {
+    text-align: center;
+  }
+
+  .button {
+    margin: 10px 0;
+  }
+
+  .services {
+    flex-direction: column;
+  }
+
+  .service-card {
+    margin-bottom: 20px;
+  }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&display=swap');
+

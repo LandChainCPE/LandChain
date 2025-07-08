@@ -4,6 +4,7 @@ import Loadable from "../component/third-patry/Loadable";
 
 const Login = Loadable(lazy(() => import("../pages/LoginRegister/Login")));
 const MainUser = Loadable(lazy(() => import("../pages/LoginRegister/UserMain")));
+const MainPage = Loadable(lazy(() => import("../pages/MainPage/MainPage")));
 
 const UserRoutes = (): RouteObject[] => [
   {
@@ -22,7 +23,12 @@ const UserRoutes = (): RouteObject[] => [
 
 const MainRoutes = (): RouteObject[] => [
   {
-    path: "/", element: <Login />, 
+    path: "/", 
+    element: <MainPage />, 
+    children: [
+      { index: true, element: <MainPage /> },
+      { path: "*", element: <MainPage /> },
+    ],
   },                                          
   {
     path: "/login",
