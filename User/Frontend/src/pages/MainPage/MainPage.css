@@ -1,4 +1,7 @@
 /* MainPage.css */
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&display=swap');
+
+
 .main-container {
   padding: 20px;
   background-color: #364049;
@@ -59,5 +62,4 @@
   }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&display=swap');
 
