@@ -1,7 +1,9 @@
-import { Link, useNavigate } from "react-router-dom";
-import Loader from "../../component/third-patry/Loader";
 import { useState } from "react";
-function Login() {
+import Loader from "../../component/third-patry/Loader";
+
+import { useNavigate } from "react-router-dom";
+
+function UserMain() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
@@ -15,7 +17,7 @@ function Login() {
 
   return (
     <div>
-      <h1>Login</h1>
+      <h1>Register</h1>
       <button onClick={gotomainuser} style={{ height: "50px", width: "100px" }}>
         gotoMainUser
       </button>
@@ -24,4 +26,4 @@ function Login() {
   );
 
 }
-export default Login;
+export default UserMain;
