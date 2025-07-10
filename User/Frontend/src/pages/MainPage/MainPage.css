@@ -1,6 +1,9 @@
 /* MainPage.css */
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&display=swap');
 
+body {
+  font-family: 'Kanit', sans-serif;
+}
 
 .main-container {
   padding: 20px;
@@ -62,4 +65,8 @@
   }
 }
 
+.custom-label {
+  color: white;
+  font-family: 'Kanit';
+}
 
