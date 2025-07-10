@@ -9,25 +9,41 @@ interface Name {
 function App() {
   const [names, setNames] = useState<Name[]>([]);
   const [newName, setNewName] = useState('');
+  const [responseMessage, setResponseMessage] = useState('');  // สถานะข้อความตอบกลับจาก Backend
 
-  const API = 'http://localhost:3001';
+  const API = 'https://simple-backend-production-3e57.up.railway.app';  // ใช้ URL ของ Backend บน Railway
 
+  // ดึงข้อมูลชื่อทั้งหมดจาก Backend
   const fetchNames = async () => {
     const res = await axios.get(`${API}/names`);
     setNames(res.data);
   };
 
+  // เพิ่มชื่อใหม่
   const addName = async () => {
     if (newName.trim()) {
-      await axios.post(`${API}/names`, { name: newName });
-      setNewName('');
-      fetchNames();
+      try {
+        const res = await axios.post(`${API}/names`, { name: newName });
+        setResponseMessage('ดำเนินการสำเร็จ');  // ตั้งข้อความตอบกลับเป็นภาษาไทย
+        setNewName('');
+        fetchNames();
+      } catch (err) {
+        setResponseMessage('เกิดข้อผิดพลาดในการเพิ่มชื่อ');
+        console.error(err);
+      }
     }
   };
 
+  // ลบชื่อ
   const deleteName = async (id: number) => {
-    await axios.delete(`${API}/names/${id}`);
-    fetchNames();
+    try {
+      await axios.delete(`${API}/names/${id}`);
+      setResponseMessage('ดำเนินการสำเร็จ');  // ตั้งข้อความตอบกลับเป็นภาษาไทย
+      fetchNames();
+    } catch (err) {
+      setResponseMessage('เกิดข้อผิดพลาดในการลบชื่อ');
+      console.error(err);
+    }
   };
 
   useEffect(() => {
@@ -37,6 +53,10 @@ function App() {
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
       <h2>ระบบเพิ่ม-ลบชื่อ</h2>
+
+      {/* แสดงข้อความตอบกลับ */}
+      {responseMessage && <p style={{ color: 'green' }}>{responseMessage}</p>}
+
       <input
         value={newName}
         onChange={(e) => setNewName(e.target.value)}
