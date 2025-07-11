@@ -163,16 +163,16 @@ const MainPage = (): JSX.Element => {
               cover={<img alt="Landpic" src={Landpic} style={{ height: 200, objectFit: 'cover' }} />}
               style={{ fontFamily: 'Kanit', borderRadius: '12px' }}
             >
-              <Title level={4}><EnvironmentOutlined /> ขายที่ดิน นนทบุรี</Title>
-              <Text type="secondary">2-3-43 ไร่ • ติดแม่น้ำเจ้าพระยา</Text>
+              <Title level={4} style={{ fontFamily: 'Kanit'  }}><EnvironmentOutlined /> ขายที่ดิน นนทบุรี</Title>
+              <Text type="secondary" style={{ fontFamily: 'Kanit'  }}>2-3-43 ไร่ • ติดแม่น้ำเจ้าพระยา</Text>
               <br />
-              <Tag color="blue">ติดน้ำ</Tag>
+              <Tag color="blue" style={{ fontFamily: 'Kanit'  }}>ติดน้ำ</Tag>
               <br />
-              <Text strong>ราคา: 18 ล้านบาท</Text>
+              <Text strong style={{ fontFamily: 'Kanit'  }}>ราคา: 18 ล้านบาท</Text>
               <p style={{ marginTop: 8, color: '#555' }}>
                 ที่ดินเหมาะสำหรับทำบ้านพักตากอากาศ เงียบสงบ บรรยากาศดี
               </p> 
-              <Button type="link">ดูรายละเอียด</Button>
+              <Button type="link" style={{ fontFamily: 'Kanit'  }}>ดูรายละเอียด</Button>
             </Card>
 
           </Col>
@@ -182,16 +182,16 @@ const MainPage = (): JSX.Element => {
               cover={<img alt="LandpicKorat" src={LandpicKorat} style={{ height: 200, objectFit: 'cover' }} />}
               style={{ fontFamily: 'Kanit', borderRadius: '12px' }}
             >
-              <Title level={4}> <EnvironmentOutlined /> ขายที่ดิน นครราชสีมา</Title>
-              <Text type="secondary">5-3-16 ไร่ • ติดถนนใหญ่</Text>
+              <Title level={4} style={{ fontFamily: 'Kanit'  }}> <EnvironmentOutlined /> ขายที่ดิน นครราชสีมา</Title>
+              <Text type="secondary" style={{ fontFamily: 'Kanit'  }}>5-3-16 ไร่ • ติดถนนใหญ่</Text>
                <br />
-              <Tag color="green">ติดถนน</Tag>
+              <Tag color="green" style={{ fontFamily: 'Kanit'  }}>ติดถนน</Tag>
               <br />
-              <Text strong>ราคา: 35 ล้านบาท</Text>
+              <Text strong style={{ fontFamily: 'Kanit'  }}>ราคา: 35 ล้านบาท</Text>
               <p style={{ marginTop: 8, color: '#555' }}>
                 ที่ดินเหมาะสำหรับทำบ้านที่อยู่อาศัย เดินทางสะดวก ใกล้ตลาดและโรงเรียน
               </p> 
-              <Button type="link">ดูรายละเอียด</Button>
+              <Button type="link" style={{ fontFamily: 'Kanit'  }}>ดูรายละเอียด</Button>
             </Card>
           </Col>
         </Row>
@@ -226,57 +226,64 @@ const MainPage = (): JSX.Element => {
           ]
         */}
 
-        {/* Services Section */}
+        {/* Services + Public Relations Section */}
         <Row justify="space-between" align="top" style={{ marginTop: "40px", padding: '0 5%' }}>
-          <Col span={15} >
+          {/* Col ซ้าย: บริการของเรา + การ์ดบริการ */}
+          <Col span={16}>
             <Title level={2} style={{ color: "white", fontFamily: 'Kanit' }}>
               บริการของเรา
             </Title>
+
+            <Row justify="start" gutter={[16, 16]} style={{ marginTop: "20px" }}>
+              <Col span={11}>
+                <Card style={{ height: 250, display: 'flex',  justifyContent: 'center', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                    <CheckSquareOutlined style={{ fontSize: '70px' }} />
+                  </div>
+                  <Title level={3} style={{ fontFamily: 'Kanit', textAlign: 'center' }}>ตรวจสอบโฉนดที่ดิน</Title>
+                </Card>
+              </Col>
+              <Col span={11}>
+                <Card style={{ height: 250, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                    <SafetyCertificateOutlined style={{ fontSize: '70px' }} />
+                  </div>
+                  <Title level={3} style={{ fontFamily: 'Kanit', textAlign: 'center' }}>ยืนยันความถูกต้องด้วย Block Chain</Title>
+                </Card>
+              </Col>
+            </Row>
+
+            <Row justify="start" gutter={[16, 16]} style={{ marginTop: "20px" }}>
+              <Col span={11}>
+                <Card style={{ height: 250, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                    <CopyOutlined style={{ fontSize: '70px' }} />
+                  </div>
+                  <Title level={3} style={{ fontFamily: 'Kanit', textAlign: 'center' }}>ทำเรื่องขอคัดเอกสารออนไลน์</Title>
+                </Card>
+              </Col>
+              <Col span={11}>
+                <Card style={{ height: 250, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                    <AuditOutlined style={{ fontSize: '70px' }} />
+                  </div>
+                  <Title level={3} style={{ fontFamily: 'Kanit', textAlign: 'center' }}>ลงทะเบียนโฉนดที่ดิน</Title>
+                </Card>
+              </Col>
+            </Row>
+          </Col>
+
+          {/* Col ขวา: ประชาสัมพันธ์ */}
+          <Col span={7}>
+            <Title level={2} style={{ color: "white", fontFamily: 'Kanit'}}>
+              ประชาสัมพันธ์
+            </Title>
+            <Card style={{ height: 550, marginTop: "20px" }}>
+              <p style={{ fontFamily: 'Kanit' }}>ใส่ข้อความประชาสัมพันธ์ เช่น ข่าวล่าสุด หรือประกาศสำคัญ</p>
+            </Card>
           </Col>
         </Row>
 
-        <Row justify="start" gutter={[16, 16]} style={{ marginTop: "20px" }}>
-          <Col span={5} offset={1}>
-            <Card  style={{ height: 250, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-              <div style={{ display: 'flex', justifyContent: 'center'}}>
-                <CheckSquareOutlined style={{ fontSize: '70px'}} />
-              </div>
-              <Title level={3} style={{ fontFamily: 'Kanit', textAlign: 'center' }}>ตรวจสอบโฉนดที่ดิน</Title>
-            </Card>
-          </Col>
-          <Col span={5}>
-            <Card style={{ height: 250, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <SafetyCertificateOutlined style={{ fontSize: '70px'}} />
-              </div>
-              <Title level={3} style={{ fontFamily: 'Kanit', textAlign: 'center' }}>ยืนยันความถูกต้องด้วย Block Chain</Title>
-            </Card>
-          </Col>
-        </Row>
-        <Row justify="start" gutter={[16, 16]} style={{ marginTop: "20px" }}>
-          <Col span={5} offset={1}>
-            <Card style={{ height: 250, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <CopyOutlined style={{ fontSize: '70px'}} /> 
-              </div>
-              <Title level={3} style={{ fontFamily: 'Kanit', textAlign: 'center' }}>ทำเรื่องขอคัดเอกสารออนไลน์</Title>
-            </Card>
-          </Col>
-          <Col span={5}>
-            <Card style={{ height: 250, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <AuditOutlined style={{ fontSize: '70px'}} />
-              </div>
-              <Title level={3} style={{ fontFamily: 'Kanit', textAlign: 'center' }}>ลงทะเบียนโฉนดที่ดิน</Title>
-            </Card>
-          </Col>
-        </Row>
-        <Col span={7} style={{ textAlign: "center" }}>
-          <Title level={2} style={{ color: "white" }}>
-              ประชาสัมพันธ์
-          </Title>
-          <Card/>
-        </Col>
 
         {/* Steps Section */}
         <Col xs={24} sm={24} md={24} lg={24} style={{ marginTop: "200px" }}>
@@ -288,7 +295,7 @@ const MainPage = (): JSX.Element => {
                 <Steps current={-1} labelPlacement="vertical">
                   <Step title="กรอกข้อมูลเลือกวันลงทะเบียน" />
                   <Step title="ยืนยันข้อมูลที่กรมที่ดิน" />
-                  <Step title="ใช้งานโฉนดที่ดิน แบบอิเล็กทรอนิกส์" />
+                  <Step title="ใช้งานโฉนดที่ดินแบบอิเล็กทรอนิกส์" />
                 </Steps>
               </Col>
             </Row>
