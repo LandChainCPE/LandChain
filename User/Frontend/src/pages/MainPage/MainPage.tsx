@@ -1,5 +1,5 @@
 import { CheckSquareOutlined, CopyOutlined, EnvironmentOutlined, SearchOutlined, AuditOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
-import { Button, Card, Col, Input, Row, Select, Typography, Form, Tag, Pagination } from "antd";
+import { Button, Card, Col, Input, Row, Select, Typography, Form, Tag, Pagination, Steps } from "antd";
 import "./MainPage.css";
 import Logo from "../../assets/LogoLandchain.png";
 import Landpic from "../../assets/LandPic.jpg";
@@ -7,7 +7,7 @@ import LandpicKorat from "../../assets/LandPicKorat.jpg"
 import type { JSX } from "react";
 const { Title, Text } = Typography;
 const { Option } = Select;
-
+const { Step } = Steps;
 const MainPage = (): JSX.Element => {
   return (
     <div className="main-container">
@@ -227,7 +227,7 @@ const MainPage = (): JSX.Element => {
         */}
 
         {/* Services Section */}
-        <Row justify="center" style={{ marginTop: "40px" }}>
+        <Row justify="space-between" align="top" style={{ marginTop: "40px", padding: '0 5%' }}>
           <Col span={15} >
             <Title level={2} style={{ color: "white", fontFamily: 'Kanit' }}>
               บริการของเรา
@@ -271,79 +271,28 @@ const MainPage = (): JSX.Element => {
             </Card>
           </Col>
         </Row>
+        <Col span={7} style={{ textAlign: "center" }}>
+          <Title level={2} style={{ color: "white" }}>
+              ประชาสัมพันธ์
+          </Title>
+          <Card/>
+        </Col>
 
         {/* Steps Section */}
-        <Col xs={24} sm={24} md={24} lg={24}>
-          <Card style={{ marginTop: "40px", backgroundColor: "#424f5e", border: "none", width: "100%"}}>
+        <Col xs={24} sm={24} md={24} lg={24} style={{ marginTop: "200px" }}>
             <Title level={2} style={{ color: "white", fontFamily: 'Kanit', textAlign: "center" }}>
               ขั้นตอนการลงทะเบียนโฉนดที่ดิน
             </Title>
-            <Row justify="center" gutter={[20, 16]} style={{ marginTop: "50px" }}>
-              <Col span={4}>
-                <Card>
-                  <Title level={1}>1</Title>
-                  <Text style={{ fontFamily: 'Kanit' }}>กรอกข้อมูล เลือกวันลงทะเบียน</Text>
-                </Card>
-              </Col>
-              <Col span={4}>
-                <Card>
-                  <Title level={1}>2</Title>
-                  <Text style={{ fontFamily: 'Kanit' }}>ยืนยันข้อมูลที่กรมที่ดิน</Text>
-                </Card>
-              </Col>
-              <Col span={4}>
-                <Card>
-                  <Title level={1}>3</Title>
-                  <Text style={{ fontFamily: 'Kanit' }}>ใช้งานโฉนดที่ดิน แบบอิเล็กทรอนิกส์</Text>
-                </Card>
+            <Row justify="center" style={{ marginTop: "80px" }}>
+              <Col span={13} >
+                <Steps current={-1} labelPlacement="vertical">
+                  <Step title="กรอกข้อมูลเลือกวันลงทะเบียน" />
+                  <Step title="ยืนยันข้อมูลที่กรมที่ดิน" />
+                  <Step title="ใช้งานโฉนดที่ดิน แบบอิเล็กทรอนิกส์" />
+                </Steps>
               </Col>
             </Row>
-          </Card>
         </Col>
-
-        <Row justify="center" style={{ marginTop: "40px" }}>
-          <Col span={24} style={{ textAlign: "center" }}>
-            <Title level={2} style={{ color: "white", fontFamily: 'Kanit' }}>
-              ขั้นตอนการลงทะเบียนโฉนดที่ดิน
-            </Title>
-          </Col>
-        </Row>
-
-        <Row justify="center" gutter={[20, 16]} style={{ marginTop: "20px" }}>
-          <Col span={4}>
-            <Card>
-              <Title level={1}>1</Title>
-              <Text style={{ fontFamily: 'Kanit' }}>กรอกข้อมูล เลือกวันลงทะเบียน</Text>
-            </Card>
-          </Col>
-          <Col span={4}>
-            <Card>
-              <Title level={1}>2</Title>
-              <Text style={{ fontFamily: 'Kanit' }}>ยืนยันข้อมูลที่กรมที่ดิน</Text>
-            </Card>
-          </Col>
-          <Col span={4}>
-            <Card>
-              <Title level={1}>3</Title>
-              <Text style={{ fontFamily: 'Kanit' }}>ใช้งานโฉนดที่ดิน แบบอิเล็กทรอนิกส์</Text>
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Public Relations Section */}
-        <Row justify="center" style={{ marginTop: "40px" }}>
-          <Col span={24} style={{ textAlign: "center" }}>
-            <Title level={2} style={{ color: "white" }}>
-              ประชาสัมพันธ์
-            </Title>
-          </Col>
-        </Row>
-
-        <Row justify="center" style={{ marginTop: "20px" }}>
-          <Col span={12}>
-            <Card />
-          </Col>
-        </Row>
       </div>
     </div>
   );

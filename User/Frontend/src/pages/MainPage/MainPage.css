@@ -70,3 +70,23 @@ body {
   font-family: 'Kanit';
 }
 
+.custom-step .ant-steps-item-description {
+  color: white !important;
+  border-color: white !important;
+  font-family: 'Kanit', sans-serif;
+}
+
+.ant-steps .ant-steps-item-title {
+  color: white !important;
+  font-family: 'Kanit', sans-serif;
+}
+.ant-steps .ant-steps-item-icon {
+  background-color: #424f5e !important;
+  color: white !important;
+}
+.ant-steps .ant-steps-icon {
+  color: white !important;
+}
+.ant-steps-item-tail::after {
+  background-color: white !important;
+}
