@@ -5,6 +5,7 @@ import Loadable from "../component/third-patry/Loadable";
 const LoginUser = Loadable(lazy(() => import("../pages/LoginRegister/Login")));
 const RegisterUser = Loadable(lazy(() => import("../pages/LoginRegister/Register")));
 const MainPageUser = Loadable(lazy(() => import("../pages/Main/Main")));
+const Regisland = Loadable(lazy(() => import("../pages/RegisLand/RegisLand")));
 
 const UserRoutes = (): RouteObject[] => [
   {
@@ -15,6 +16,7 @@ const UserRoutes = (): RouteObject[] => [
     children: [
       { index: true, element: <MainPageUser /> },
       {path: "main", element: <MainPageUser /> },
+      {path: "regisland", element: <Regisland /> },
       { path: "*", element: <MainPageUser /> },
     ],
   },
