@@ -7,23 +7,23 @@ const Login = Loadable(lazy(() => import("../pages/LoginRegister/Login")));
 const MainPage = Loadable(lazy(() => import("../pages/MainPage/MainPage")));
 const LoginUser = Loadable(lazy(() => import("../pages/LoginRegister/Login")));
 const RegisterUser = Loadable(lazy(() => import("../pages/LoginRegister/Register")));
-const MainPageUser = Loadable(lazy(() => import("../pages/Main/Main")));
+//const MainPageUser = Loadable(lazy(() => import("../pages/Main/Main")));
 const Regisland = Loadable(lazy(() => import("../pages/RegisLand/RegisLand")));
 
 const UserRoutes = (): RouteObject[] => [
   {
-    path: "/", element: <MainPageUser />, 
+    path: "/", element: <MainPage />, 
   },                                          
   {
     path: "/user",
     children: [
-      { index: true, element: <MainPageUser /> },
-      {path: "main", element: <MainPageUser /> },
+      { index: true, element: <MainPage /> },
+      {path: "main", element: <MainPage /> },
       {path: "regisland", element: <Regisland /> },
-      { path: "*", element: <MainPageUser /> },
+      { path: "*", element: <MainPage /> },
     ],
   },
-  { path: "*", element: <MainPageUser /> }, 
+  { path: "*", element: <MainPage /> }, 
 ];
 
 

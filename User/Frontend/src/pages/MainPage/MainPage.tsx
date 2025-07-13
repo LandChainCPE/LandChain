@@ -1,6 +1,9 @@
 import { CheckSquareOutlined, CopyOutlined, EnvironmentOutlined, SearchOutlined, AuditOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
 import { Button, Card, Col, Input, Row, Select, Typography, Form, Tag, Pagination, Steps } from "antd";
+import Loader from "../../component/third-patry/Loader";
+import { useNavigate } from "react-router-dom";
 import "./MainPage.css";
+import { useState } from "react";
 import Logo from "../../assets/LogoLandchain.png";
 import Landpic from "../../assets/LandPic.jpg";
 import LandpicKorat from "../../assets/LandPicKorat.jpg"
@@ -9,6 +12,17 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 const { Step } = Steps;
 const MainPage = (): JSX.Element => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const goToRegisland = () => {
+    setLoading(true);
+    localStorage.setItem("isLogin", "true");
+    setTimeout(() => {
+      navigate("/user/regisland");
+    }, 2000);
+  };
+
   return (
     <div className="main-container">
       <div className="bg-[#364049] w-full relative">
@@ -21,7 +35,7 @@ const MainPage = (): JSX.Element => {
             <Button type="link" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
               หน้าแรก
             </Button>
-            <Button type="link" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
+            <Button type="link" onClick={goToRegisland} style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
               ลงทะเบียนโฉนดที่ดิน
             </Button>
             <Button type="link" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
@@ -300,6 +314,7 @@ const MainPage = (): JSX.Element => {
               </Col>
             </Row>
         </Col>
+        {loading && <div className="mt-3"><Loader /></div>}
       </div>
     </div>
   );
