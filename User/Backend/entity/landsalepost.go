@@ -14,7 +14,7 @@ type Landsalepost struct {
 	Landtitle   Landtitle  `gorm:"foreignKey:LandtitleID"`
 
 
-	Booking []Booking  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
+	//Booking []Booking  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
 	Roomchat []Roomchat  `gorm:"foreignKey:LandsalepostID"`
 	Transaction []Transaction  `gorm:"foreignKey:LandsalepostID"`
 	Photoland []Photoland  `gorm:"foreignKey:LandsalepostID"`

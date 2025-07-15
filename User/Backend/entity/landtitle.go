@@ -9,6 +9,6 @@ type Landtitle struct {
 	UserID uint  // 👈 FK ไปยัง role.id
 	Users  Users  `gorm:"foreignKey:UserID"` // 👈 optional: preload ได้
 
-	Booking []Booking  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
+	//Booking []Booking  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
 	Landsalepost []Landsalepost  `gorm:"foreignKey:LandtitleID"`
 }
