@@ -47,6 +47,10 @@ func SetupDatabase() {
 		&entity.Users{},
 		&entity.Role{},
 		&entity.Name{},
+		&entity.Booking{},
+		&entity.Branch{},
+		&entity.Province{},
+		&entity.Time{},
 	)
 	if err != nil {
 		log.Fatal("❌ AutoMigrate failed:", err)
