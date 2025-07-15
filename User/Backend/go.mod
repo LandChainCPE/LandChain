@@ -1,4 +1,4 @@
-module backend
+module landchain
 
 go 1.20
 

@@ -6,8 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"backend/config"
-	"backend/controller"
+	"landchain/config"
+	//"landchain/controller"
 )
 
 func main() {
@@ -17,7 +17,7 @@ func main() {
 	}
 
 	// เชื่อมต่อฐานข้อมูล PostgreSQL
-	config.ConnectionDB()
+	config.SetupDatabase()
 
 	// AutoMigrate DB (ถ้ามี entity)
 	config.SetupDatabase()
@@ -30,10 +30,8 @@ func main() {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
 
-	r.POST("/roles", controller.CreateRole)
+	//r.POST("/roles", controller.CreateRole)
 
-	// ... ส่วนอื่น ๆ
-	r.GET("/names", controller.GetAllNames)
 	r.Run(":8080")
 
 

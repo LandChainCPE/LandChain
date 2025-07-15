@@ -5,6 +5,8 @@ import ("gorm.io/gorm"
 )
 type Time struct {
 	gorm.Model
+
 	time time.Time
+	
 	Booking []Booking  `gorm:"foreignKey:TimeID"` // 👈 One-to-Many relationship
 }

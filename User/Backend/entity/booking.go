@@ -4,6 +4,7 @@ import "gorm.io/gorm"
 
 type Booking struct {
 	gorm.Model
+	
 	TimeID uint  // 👈 FK ไปยัง role.id
 	Time   Time  `gorm:"foreignKey:TimeID"` // 👈 optional: preload ได้
 
