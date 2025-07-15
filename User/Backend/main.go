@@ -30,6 +30,8 @@ func main() {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
 
+	r.POST("/roles", controller.CreateRole)
+
 	// ... ส่วนอื่น ๆ
 	r.GET("/names", controller.GetAllNames)
 	r.Run(":8080")
