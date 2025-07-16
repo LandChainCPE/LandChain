@@ -29,7 +29,8 @@ func main() {
 	})
 
 	r.GET("/getbookingdata", controller.GetBookingData)
-
+	r.POST("/userbookings", controller.CreateBooking) // สร้างการจอง
+	r.PUT("/bookings/:id", controller.UpdateBooking) // อัปเดตการจอง
 	r.Run(":8080")
 
 

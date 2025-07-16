@@ -1,21 +1,22 @@
 package entity
 
 import (
-    "time"
+    //"time"
     "gorm.io/gorm"
 )
 
+
+
 type Booking struct {
 	gorm.Model
-	DateBooking time.Time `gorm:"type:date;not null"` // เก็บวันที่จอง
-	
-	TimeID uint  // 👈 FK ไปยัง role.id
-	Time   Time  `gorm:"foreignKey:TimeID"` // 👈 optional: preload ได้
-
-	UserID uint  // 👈 FK ไปยัง role.id
-	Users   Users  `gorm:"foreignKey:UserID"` // 👈 optional: preload ได้
-
-	BranchID uint  // 👈 FK ไปยัง role.id
-	Branch   Branch  `gorm:"foreignKey:BranchID"` // 👈 optional: preload ได้
-
+	DateBooking string `json:"date_booking" gorm:"type:date;not null"`
+    
+    TimeID   uint   `json:"time_id" gorm:"not null"`
+    Time     Time   `gorm:"foreignKey:TimeID"`
+    
+    UserID   uint   `json:"user_id" gorm:"not null"`
+    Users    Users  `gorm:"foreignKey:UserID"`
+    
+    BranchID uint   `json:"branch_id" gorm:"not null"`
+    Branch   Branch `gorm:"foreignKey:BranchID"`
 }

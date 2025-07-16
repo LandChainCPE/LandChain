@@ -9,7 +9,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"landchain/entity"
-	"time"
+	//"time"
 )
 
 var db *gorm.DB
@@ -84,8 +84,12 @@ func SetupDatabase() {
 		db.Create(&entity.Users{Name: "Jo", Password: "jo123456", Land: "12กท85", RoleID: RefRole})
 		db.Create(&entity.Users{Name: "Aut", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
 
-		db.Create(&entity.Time{Timework: "09.00น.-10.00น."})
-		db.Create(&entity.Time{Timework: "13.00น.-15.00น."})
+		db.Create(&entity.Time{Timework: "09:00 - 10:00"})
+		db.Create(&entity.Time{Timework: "10:00 - 11:00"})
+		db.Create(&entity.Time{Timework: "11:00 - 12:00"})
+		db.Create(&entity.Time{Timework: "13:00 - 14:00"})
+		db.Create(&entity.Time{Timework: "14:00 - 15:00"})
+		db.Create(&entity.Time{Timework: "15:00 - 16:00"})
 
 		db.Create(&entity.Province{Province: "นครราชสีมา"})
 		db.Create(&entity.Province{Province: "อุบลราชธานี"})
@@ -94,8 +98,8 @@ func SetupDatabase() {
 		RefProvince := uint(2)
 		db.Create(&entity.Branch{Branch: "น้ำยืน", ProvinceID: RefProvince})
 
-		customDate, _ := time.Parse("2006-01-02", "2025-07-20")
-		db.Create(&entity.Booking{DateBooking: customDate, TimeID: uint(2), UserID: uint(2), BranchID: uint(1)})
+		//customDate, _ := time.Parse("2006-01-02", "2025-07-20")
+		//db.Create(&entity.Booking{DateBooking: customDate, TimeID: uint(2), UserID: uint(2), BranchID: uint(1)})
 	}
 
 	log.Println("✅ Database Migrated & Seeded Successfully")
