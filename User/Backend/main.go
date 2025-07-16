@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"landchain/config"
-	//"landchain/controller"
+	"landchain/controller"
 )
 
 func main() {
@@ -16,10 +16,10 @@ func main() {
 		log.Fatal("❌ Failed to load .env")
 	}
 
+	// ✅ 1. เชื่อมต่อฐานข้อมูลก่อน
+    config.ConnectDatabase()
+	
 	// เชื่อมต่อฐานข้อมูล PostgreSQL
-	config.SetupDatabase()
-
-	// AutoMigrate DB (ถ้ามี entity)
 	config.SetupDatabase()
 
 	r := gin.Default()
@@ -30,7 +30,7 @@ func main() {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
 
-	//r.POST("/roles", controller.CreateRole)
+	r.GET("/getbookingdata", controller.GetBookingData)
 
 	r.Run(":8080")
 

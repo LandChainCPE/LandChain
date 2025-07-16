@@ -1,45 +1,83 @@
-import { useState } from "react";
-import Loader from "../component/third-patry/Loader";
-
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Sidebar from "../component/sideabar/Sidebar";
+import { getQueueByDate } from "../service/https/aut/https";
 
 function UserMain() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const handleClick = () => {
-    setLoading(true);  // เริ่มแสดง Loader
-    setTimeout(() => {
-      navigate("/regisland");  // เปลี่ยนหน้า
-    }, 2000);  // ดีเลย์ 2 วินาที
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const res = await getQueueByDate();
+      if (res && res.data) {
+        setBookings(res.data);
+      }
+      setLoading(false);
+    };
 
+    fetchData();
+  }, []);
+
+  const handleEdit = (id: number) => {
+    console.log("Edit booking:", id);
+    // ตัวอย่าง navigate ไปหน้าแก้ไข
+    // navigate(`/edit-booking/${id}`);
+  };
+
+  const handleDelete = (id: number) => {
+    console.log("Delete booking:", id);
+    // เรียก API ลบ
   };
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      <div style={{ width: "200px", backgroundColor: "#202C6B", display: "flex", flexDirection: "column", padding: "10px", height: "100vh", boxSizing: "border-box" }}>
-        <img src="Logo2.png" alt="logo2myproject" style={{ maxWidth: "100%", height: "auto" }} />
-        <button style={{ marginTop: "10px",width: "100%", backgroundColor: "#4256D0", color: "white", borderRadius: 8, fontSize: 16, padding: "10px" }}>
-          ตรวจสอบโฉนดที่ดิน
-        </button>
-        <button style={{ marginTop: "10px", width: "100%", backgroundColor: "#4256D0", color: "white", borderRadius: 8, fontSize: 16, padding: "10px" }}>
-          รายการจองคิว
-        </button>
-        <button style={{ marginTop: "10px",width: "100%", backgroundColor: "#4256D0", color: "white", borderRadius: 8, fontSize: 16, padding: "10px" }}>
-          โอนกรรมสิทธิ์
-        </button>
-        <button onClick={handleClick} style={{ marginTop: "10px",width: "100%", backgroundColor: "#4256D0", color: "white", borderRadius: 8, fontSize: 16, padding: "10px" }}>
-          ลงทะเบียนโฉนดที่ดิน
-        </button>
-    
+    <div className="d-flex" style={{ height: "100vh" }}>
+      <Sidebar />
+      <div className="flex-grow-1 p-4">
+        <h2 className="mb-4">📅 รายการจองคิว</h2>
+
+        {loading ? (
+          <div className="alert alert-info">กำลังโหลดข้อมูล...</div>
+        ) : (
+          <table className="table table-striped table-hover align-middle">
+            <thead className="table-dark">
+              <tr>
+                <th>ชื่อผู้จอง</th>
+                <th>วันที่จอง</th>
+                <th>เวลา</th>
+                <th className="text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bookings.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.user_name}</td>
+                  <td>{item.date_booking}</td>
+                  <td>{item.time_slot}</td>
+                  <td className="text-center">
+                    <button
+                      className="btn btn-sm btn-primary me-2"
+                      onClick={() => handleEdit(item.id)}
+                    >
+                      แก้ไข
+                    </button>
+                    <button
+                      className="btn btn-sm btn-danger"
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      ลบ
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
-      <h1>MAIN</h1>
-
-
-
-      {loading && <Loader />}
     </div>
   );
-
 }
+
 export default UserMain;
