@@ -9,6 +9,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"landchain/entity"
+	"time"
 )
 
 var DB *gorm.DB
@@ -94,7 +95,8 @@ func SetupDatabase() {
 		RefProvince := uint(2)
 		db.Create(&entity.Branch{Branch: "น้ำยืน", ProvinceID: RefProvince})
 
-		db.Create(&entity.Booking{TimeID: uint(2), UserID: uint(2), BranchID: uint(1)})
+		customDate, _ := time.Parse("2006-01-02", "2025-07-20")
+		db.Create(&entity.Booking{DateBooking: customDate,TimeID: uint(2), UserID: uint(2), BranchID: uint(1)})
 	}
 
 	if err != nil {

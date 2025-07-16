@@ -1,9 +1,13 @@
 package entity
 
-import "gorm.io/gorm"
+import (
+    "time"
+    "gorm.io/gorm"
+)
 
 type Booking struct {
 	gorm.Model
+	DateBooking time.Time `gorm:"type:date;not null"` // เก็บวันที่จอง
 	
 	TimeID uint  // 👈 FK ไปยัง role.id
 	Time   Time  `gorm:"foreignKey:TimeID"` // 👈 optional: preload ได้
