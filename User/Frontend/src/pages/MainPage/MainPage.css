@@ -1,5 +1,5 @@
 /* MainPage.css */
-@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
 
 body {
   font-family: 'Kanit', sans-serif;
@@ -89,4 +89,14 @@ body {
 }
 .ant-steps-item-tail::after {
   background-color: white !important;
+}
+
+.custom-searchbt {
+  background-color: #447AA9 !important; /* สีปกติ */
+  color: white !important;
+}
+
+.custom-searchbt:hover {
+  background-color: #37648C !important; /* สีเมื่อ hover */
+  color: #fff !important;
 }

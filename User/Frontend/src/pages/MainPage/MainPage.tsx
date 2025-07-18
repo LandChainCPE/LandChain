@@ -18,16 +18,16 @@ const MainPage = (): JSX.Element => {
             <img src={Logo} alt="LandChain Logo" style={{ width: "100%",height: "auto",maxWidth: "200px" }} />
           </Col>
           <Col style={{ textAlign: "right" }}>
-            <Button type="link" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
+            <Button type="link" style={{ color: "white", fontSize: "20px", fontFamily: 'Kanit'}}>
               หน้าแรก
             </Button>
-            <Button type="link" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
+            <Button type="link" style={{ color: "white", fontSize: "20px", fontFamily: 'Kanit'}}>
               ลงทะเบียนโฉนดที่ดิน
             </Button>
-            <Button type="link" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
+            <Button type="link" style={{ color: "white", fontSize: "20px", fontFamily: 'Kanit'}}>
               ข่าวสาร
             </Button>
-            <Button type="link" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
+            <Button type="link" style={{ color: "white", fontSize: "20px", fontFamily: 'Kanit'}}>
               เข้าสู่ระบบ
             </Button>
           </Col>
@@ -36,7 +36,7 @@ const MainPage = (): JSX.Element => {
         {/* Title Section */}
         <Row justify="center" style={{ marginTop: "40px" }}>
           <Col span={24} style={{ textAlign: "center" }}>
-            <Title level={1} style={{ color: "white", fontFamily: 'Kanit' }}>
+            <Title level={1} style={{ color: "white", fontFamily: 'Kanit', fontSize: "42px", fontWeight: '' }}>
               บริการกรมที่ดินออนไลน์
             </Title>
             <Text style={{ color: "white", fontSize: "18px", fontFamily: 'Kanit' }}>
@@ -56,7 +56,7 @@ const MainPage = (): JSX.Element => {
             />
           </Col>
           <Col>
-            <Button type="primary" size="large" style={{ marginLeft: "10px", fontFamily: 'Kanit' }}>
+            <Button className="custom-searchbt" type="primary" size="large" style={{ marginLeft: "10px", fontFamily: 'Kanit'}}>
               ค้นหา
             </Button>
           </Col>
@@ -138,7 +138,7 @@ const MainPage = (): JSX.Element => {
 
               <Col span={3}>
                 <Form.Item label=" " style={{ marginBottom: 0 }}>
-                  <Button type="primary" size="large" style={{ fontFamily: 'Kanit', marginRight: '10px' }}>
+                  <Button className="custom-searchbt" type="primary" size="large" style={{ marginRight: "10px", fontFamily: 'Kanit'}}>
                     ค้นหา
                   </Button>
                 </Form.Item>
