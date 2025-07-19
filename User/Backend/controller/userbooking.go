@@ -2,7 +2,8 @@ package controller
 
 import (
 	"net/http"
-
+	"time"
+	"strconv"
 	"landchain/config"
 	"landchain/entity"
 	"github.com/gin-gonic/gin"
@@ -55,3 +56,50 @@ func DeleteBooking(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Booking deleted successfully"})
 }
+
+// GET /bookings?date=2025-08-01&branchID=1
+func GetBookingsByDateAndBranch(c *gin.Context) {
+    var bookings []entity.Booking
+
+    // รับค่า date และ branchID จาก query params
+    date := c.Query("date")
+    branchIDStr := c.Query("branchID")
+
+    // ตรวจสอบว่ามีการส่งค่ามาหรือไม่
+    if date == "" || branchIDStr == "" {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Missing date or branchID"})
+        return
+    }
+
+    // แปลง branchID เป็น int
+    branchID, err := strconv.Atoi(branchIDStr)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid branchID"})
+        return
+    }
+
+    // ตรวจสอบและแปลงรูปแบบวันที่ให้ตรงกับฐานข้อมูล
+    // เช่น date ต้องเป็น "YYYY-MM-DD"
+    parsedDate, err := time.Parse("2006-01-02", date)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
+        return
+    }
+
+    // ค้นหาการจองในวันที่และสาขาที่กำหนดที่สถานะเป็น success
+    err = config.DB().
+        Where("date_booking = ? AND branch_id = ? AND status = ?", parsedDate, branchID, "success").
+        Preload("Time").
+        Find(&bookings).Error
+
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    // ส่งข้อมูลการจองที่ค้นพบกลับไป
+    c.JSON(http.StatusOK, bookings)
+}
+
+
+

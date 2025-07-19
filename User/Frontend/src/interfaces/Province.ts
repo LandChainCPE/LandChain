@@ -1,4 +1,4 @@
 export interface ProvinceInterface {
   id?: number;
-  province: string; // ชื่อจังหวัด
+  Province: string; // ชื่อจังหวัด
 }
