@@ -20,4 +20,7 @@ type Booking struct {
     
     BranchID uint   `json:"branch_id" gorm:"not null"`
     Branch   Branch `gorm:"foreignKey:BranchID"`
+
+    ServiceTypeID uint `json:"service_type_id""`
+    ServiceType   ServiceType `gorm:"foreignKey:ServiceTypeID"`
 }

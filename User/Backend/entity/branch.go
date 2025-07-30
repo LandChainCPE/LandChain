@@ -11,4 +11,7 @@ type Branch struct {
 	Province   Province  `gorm:"foreignKey:ProvinceID"` 
 
 	Booking []Booking `gorm:"foreignKey:BranchID"`
+	time []Time `gorm:"foreignKey:BranchID"` // 👈 One-to-Many relationship
+
 }
+
