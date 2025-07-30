@@ -29,10 +29,8 @@ func main() {
 
 	r.GET("/getbookingdata", controller.GetBookingData)
 	r.POST("/userbookings", controller.CreateBooking) // สร้างการจอง
-<<<<<<< HEAD
 	r.PUT("/bookings/:id", controller.UpdateBooking)  // อัปเดตการจอง
-=======
-	r.PUT("/bookings/:id", controller.UpdateBooking) // อัปเดตการจอง
+	//r.PUT("/bookings/:id", controller.UpdateBooking) // อัปเดตการจอง
 
 	//J
 	r.GET("/petitions", controller.GetAllPetition)
@@ -47,7 +45,6 @@ func main() {
 	r.GET("/bookings/status/:id", controller.GetBookingStatus) // ดึงข้อมูลการจองตาม ID
 	r.GET("/bookings/checklim", controller.CheckAvailableSlots) // ดึงข้อมูลการจองตาม ID
 	r.Run(":8080")
->>>>>>> origin
 
 	// CONTROLLER lANDSELLPOST
 	r.GET("/user/sellpost", controller.GetAllPostLandData)

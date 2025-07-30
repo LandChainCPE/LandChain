@@ -17,7 +17,6 @@ async function CreateBooking(data: BookingInterface) {
     .catch((e) => e.response); // ถ้า error คืน response error
 }
 
-<<<<<<< HEAD
 export async function getAllPostData() {
   try {
     const res = await axios.get(`${apiUrl}/user/sellpost`);
@@ -28,7 +27,6 @@ export async function getAllPostData() {
     else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
   }
 }
-=======
 // services/booking/index.tsx
 async function GetProvinces(p?: any) {
   return await axios
@@ -114,7 +112,6 @@ export async function GetBookingStatus(id: number, selectedDate: string, selecte
   }
 }
 
->>>>>>> origin
 
 export async function GetAllLandDatabyID() {
   try {

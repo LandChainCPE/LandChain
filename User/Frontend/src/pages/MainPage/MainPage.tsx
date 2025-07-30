@@ -8,6 +8,8 @@ import Logo from "../../assets/LogoLandchain.png";
 import Landpic from "../../assets/LandPic.jpg";
 import LandpicKorat from "../../assets/LandPicKorat.jpg"
 import type { JSX } from "react";
+import { Link } from 'react-router-dom';
+
 const { Title, Text } = Typography;
 const { Option } = Select;
 const { Step } = Steps;
@@ -269,12 +271,15 @@ const MainPage = (): JSX.Element => {
 
             <Row justify="start" gutter={[16, 16]} style={{ marginTop: "20px" }}>
               <Col span={11}>
+              <Link to="/user/dashboard"> 
                 <Card style={{ height: 250, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                     <CopyOutlined style={{ fontSize: '70px' }} />
                   </div>
                   <Title level={3} style={{ fontFamily: 'Kanit', textAlign: 'center' }}>ทำเรื่องขอคัดเอกสารออนไลน์</Title>
                 </Card>
+              </Link>
+
               </Col>
               <Col span={11}>
                 <Card style={{ height: 250, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
