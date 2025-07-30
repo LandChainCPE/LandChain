@@ -74,6 +74,9 @@ func SetupDatabase() {
 		&entity.Copyrequest{},
 		&entity.LandProvinces{},
 		&entity.ServiceType{},
+		&entity.Petition{},
+		&entity.State{},
+
 	); err != nil {
 		log.Fatal("❌ AutoMigrate failed:", err)
 	}
@@ -95,11 +98,12 @@ func SetupDatabase() {
 		db.Create(&entity.Role{Role: "Admin"})
 
 		RefRole := uint(1)
-		
-		// สร้าง Users
 		db.Create(&entity.Users{Name: "Jo", Email: "@good", Phonenumber: "0912345678", Password: "jo123456", Land: "12กท85", RoleID: RefRole})
 		db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
 		db.Create(&entity.Users{Name: "Bam", Email: "@goods1", Phonenumber: "0912345677", Password: "1234564", Land: "ผหก5ป58ก", RoleID: RefRole})
+		//RefServiceType := uint(1)
+		db.Create(&entity.Users{Name: "Jo", Password: "jo123456", Land: "12กท85", RoleID: RefRole,})
+		db.Create(&entity.Users{Name: "Aut", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
 
 		// สร้าง Time slots
 		db.Create(&entity.Time{Timework: "09:00 - 10:00", MaxCapacity: 5})
@@ -265,4 +269,18 @@ func createRoomchatsAndMessages() {
 			log.Println("✅ Created messages for UserID:", userID)
 		}
 	}
+	
+
+	log.Println("✅ Database Migrated & Seeded Successfully")
+
+	// ✅ Seed State (แยกจาก Users)
+	var stateCount int64
+	db.Model(&entity.State{}).Count(&stateCount)
+	if stateCount == 0 {
+		db.Create(&entity.State{Name: "รอตรวจสอบ", Color: "orange"})
+		db.Create(&entity.State{Name: "กำลังดำเนินการ", Color: "blue"})
+		db.Create(&entity.State{Name: "เสร็จสิ้น", Color: "green"})
+	}
+	
+	log.Println("✅ Database Migrated & Seeded Successfully")
 }

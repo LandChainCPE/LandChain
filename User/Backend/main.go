@@ -30,6 +30,13 @@ func main() {
 	r.GET("/getbookingdata", controller.GetBookingData)
 	r.POST("/userbookings", controller.CreateBooking) // สร้างการจอง
 	r.PUT("/bookings/:id", controller.UpdateBooking)  // อัปเดตการจอง
+	//r.PUT("/bookings/:id", controller.UpdateBooking) // อัปเดตการจอง
+
+	//J
+	r.GET("/petitions", controller.GetAllPetition)
+	r.POST("/petitions", controller.CreatePetition)
+	r.GET("/states", controller.GetAllStates)
+
 	r.GET("/provinces", controller.GetProvince) // ดึงข้อมูลจังหวัด
 	r.GET("/branches", controller.GetBranch) // ดึงข้อมูลสาขา
 	r.GET("/time", controller.GetTime) // ดึงข้อมูลช่วงเวลา

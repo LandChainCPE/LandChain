@@ -18,4 +18,7 @@ type Users struct {
 	Landtitle []Landtitle  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
 	Roomchat []Roomchat  `gorm:"foreignKey:UserID"`
 	Transaction []Transaction  `gorm:"foreignKey:UserID"`
+	Petition []Petition  `gorm:"foreignKey:UserID"`
+	State []State  `gorm:"foreignKey:UserID"`
+
 }

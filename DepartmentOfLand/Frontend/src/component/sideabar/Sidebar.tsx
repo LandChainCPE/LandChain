@@ -4,6 +4,7 @@ import {
   FileSearchOutlined, // ตรวจสอบโฉนดที่ดิน
   SwapOutlined,       // โอนกรรมสิทธิ์
   FileAddOutlined,    // ลงทะเบียนโฉนดที่ดิน
+  CheckCircleOutlined, // ตรวจสอบคำร้อง
 } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./Sidebar.css";
@@ -17,6 +18,8 @@ const Sidebar: React.FC = () => {
   { label: "ตรวจสอบโฉนดที่ดิน",   icon: <FileSearchOutlined />, path: "/teams"       },
   { label: "โอนกรรมสิทธิ์",        icon: <SwapOutlined />,      path: "/payments"    },
   { label: "ลงทะเบียนโฉนดที่ดิน", icon: <FileAddOutlined />,   path: "/attendance"  },
+  { label: "ตรวจสอบคำร้อง", icon: <CheckCircleOutlined />,   path: "/receive"  },
+
 ];
 
   return (
