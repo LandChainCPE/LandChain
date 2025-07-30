@@ -9,6 +9,10 @@ const LoginUser = Loadable(lazy(() => import("../pages/LoginRegister/Login")));
 const RegisterUser = Loadable(lazy(() => import("../pages/LoginRegister/Register")));
 //const MainPageUser = Loadable(lazy(() => import("../pages/Main/Main")));
 const Regisland = Loadable(lazy(() => import("../pages/RegisLand/RegisLand")));
+const SellMainPage = Loadable(lazy(() => import("../pages/Sell-Buy/SellMainpage")));
+const Map = Loadable(lazy(() => import("../pages/Map/map")));
+const SellPost = Loadable(lazy(() => import("../pages/SellPost/sellpost")));
+const Chat = Loadable(lazy(() => import("../pages/ChatPage/chat")));
 
 const UserRoutes = (): RouteObject[] => [
   {
@@ -20,6 +24,10 @@ const UserRoutes = (): RouteObject[] => [
       { index: true, element: <MainPage /> },
       {path: "main", element: <MainPage /> },
       {path: "regisland", element: <Regisland /> },
+      {path: "sellmainpage", element: <SellMainPage /> },
+      {path: "map", element: <Map /> },
+      {path: "sellpost", element: <SellPost /> },
+      {path: "chat", element: <Chat /> },
       { path: "*", element: <MainPage /> },
     ],
   },

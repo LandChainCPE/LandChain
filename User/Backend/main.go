@@ -4,10 +4,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"landchain/config"
 	"landchain/controller"
+
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -16,13 +17,11 @@ func main() {
 		log.Fatal("❌ Failed to load .env")
 	}
 
-    config.ConnectDatabase()
-	
-	config.SetupDatabase()
+	config.ConnectDatabase()
 
+	config.SetupDatabase()
 	r := gin.Default()
 	r.Use(CORSMiddleware())
-
 
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
@@ -30,9 +29,18 @@ func main() {
 
 	r.GET("/getbookingdata", controller.GetBookingData)
 	r.POST("/userbookings", controller.CreateBooking) // สร้างการจอง
-	r.PUT("/bookings/:id", controller.UpdateBooking) // อัปเดตการจอง
-	r.Run(":8080")
+	r.PUT("/bookings/:id", controller.UpdateBooking)  // อัปเดตการจอง
 
+	// CONTROLLER lANDSELLPOST
+	r.GET("/user/sellpost", controller.GetAllPostLandData)
+
+	// CONTROLLER Chat
+	r.GET("/ws/roomchat/:roomID", controller.HandleWebSocket)
+	r.GET("/user/chat/:id", controller.GetAllLandDatabyID)
+	r.GET("/user/chat/roomchat/:id", controller.GetMessagesByLandPostID)
+	r.GET("/user/:id", controller.GetUserByID)
+
+	r.Run(":8080")
 
 	// เริ่มรันเซิร์ฟเวอร์
 	r.Run() // default :8080
