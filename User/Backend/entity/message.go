@@ -7,9 +7,10 @@ import (
 
 type Message struct {
 	gorm.Model
+	Type string  `gorm:"type:varchar(45)"`
 	Message    string `gorm:"type:varchar(200)"`
 	Time time.Time
 
 	RoomchatID uint  // 👈 FK ไปยัง role.id
 	Roomchat  Roomchat  `gorm:"foreignKey:RoomchatID"`
-}
+}	

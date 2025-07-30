@@ -13,6 +13,10 @@ const Dashboard = Loadable(lazy(() => import("../pages/Petition/Dashboard")));
 const Petition = Loadable(lazy(() => import("../pages/Petition/Petition")));
 const State = Loadable(lazy(() => import("../pages/Petition/State")));
 
+const SellMainPage = Loadable(lazy(() => import("../pages/Sell-Buy/SellMainpage")));
+const Map = Loadable(lazy(() => import("../pages/Map/map")));
+const SellPost = Loadable(lazy(() => import("../pages/SellPost/sellpost")));
+const Chat = Loadable(lazy(() => import("../pages/ChatPage/chat")));
 
 const UserRoutes = (): RouteObject[] => [
   {
@@ -27,6 +31,10 @@ const UserRoutes = (): RouteObject[] => [
       { path: "dashboard", element: <Dashboard /> },
       { path: "petition", element: <Petition /> },
       { path: "state", element: <State /> },
+      {path: "sellmainpage", element: <SellMainPage /> },
+      {path: "map", element: <Map /> },
+      {path: "sellpost", element: <SellPost /> },
+      {path: "chat", element: <Chat /> },
       { path: "*", element: <MainPage /> },
     ],
   },
