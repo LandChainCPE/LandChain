@@ -1,0 +1,215 @@
+/* Container หลัก */
+.MainStyle {
+  display: flex;
+  height: calc(100vh - 60px); /* ลบ navbar */
+  padding: 20px;
+  gap: 24px;
+  background-color: #f5f8ff; /* สีฟ้าอ่อนสบายตา */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #222;
+}
+
+/* ซ้าย - รายการที่ดิน + User List */
+.MassageRooms {
+  flex: 1 1 30%;
+  background-color: #ffffff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ขวา - ห้องแชท */
+.MassageChat {
+  flex: 2 1 70%;
+  background-color: #ffffff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Select dropdown เลือกที่ดิน */
+.land-select {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  font-size: 1.05rem;
+  border-radius: 10px;
+  border: 1.5px solid #a3bffa;
+  background-color: #f0f5ff;
+  color: #333;
+  margin-bottom: 1.5rem;
+  transition: border-color 0.3s ease;
+}
+
+.land-select:hover,
+.land-select:focus {
+  border-color: #3f75ff;
+  outline: none;
+}
+
+/* รายละเอียดที่ดินรูปภาพ */
+.post-detail {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.land-image {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 0.1);
+}
+
+/* ข้อความรายละเอียด */
+h6 {
+  margin: 6px 0;
+  font-weight: 600;
+  color: #444;
+}
+
+/* User List */
+.user-list {
+  border: 1.5px solid #d0dbff;
+  border-radius: 12px;
+  padding: 14px;
+  max-height: 320px;
+  overflow-y: auto;
+  background-color: #f7faff;
+  box-shadow: inset 0 0 12px rgb(63 117 255 / 0.1);
+}
+
+.user-list h5 {
+  margin-bottom: 14px;
+  font-weight: 700;
+  color: #3f75ff;
+  border-bottom: 2px solid #a6baff;
+  padding-bottom: 6px;
+  font-size: 1.2rem;
+  user-select: none;
+}
+
+.user-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.user-list li {
+  padding: 12px 20px;
+  margin-bottom: 8px;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+  color: #3a3a3a;
+  user-select: none;
+  box-shadow: inset 0 0 0 0 transparent;
+  font-size: 1rem;
+}
+
+.user-list li:hover {
+  background-color: #d3e1ff;
+  color: #1a54ff;
+  box-shadow: inset 0 0 10px #a3b8ff;
+}
+
+.user-list li.selected,
+.user-list li[style*="font-weight: bold"] {
+  background-color: #3f75ff;
+  color: #fff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 12px #2952cc;
+}
+
+/* Chat window */
+.chat-window {
+  flex-grow: 1;
+  background-color: #f4f7ff;
+  border-radius: 14px;
+  padding: 20px;
+  overflow-y: auto;
+  box-shadow: inset 0 0 10px rgb(63 117 255 / 0.1);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* ข้อความแต่ละบับเบิ้ล */
+.chat-message {
+  margin: 10px 0;
+  display: flex;
+  max-width: 80%;
+}
+
+.chat-message.from-me {
+  justify-content: flex-end;
+}
+
+.chat-message.from-user {
+  justify-content: flex-start;
+}
+
+/* บับเบิ้ลข้อความ */
+.chat-message .bubble {
+  padding: 12px 18px;
+  border-radius: 24px;
+  background-color: #e3e7ff;
+  color: #222;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+  max-width: 100%;
+  word-break: break-word;
+}
+
+.chat-message.from-me .bubble {
+  background-color: #3f75ff;
+  color: white;
+  box-shadow: 0 2px 12px rgb(34 71 190 / 0.6);
+}
+
+/* แสดงชื่อ user ข้างข้อความ */
+.chat-message strong {
+  margin-right: 10px;
+  font-weight: 600;
+  color: #294ecc;
+  user-select: none;
+}
+
+/* ช่องพิมพ์ข้อความ */
+.chat-input-area {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+}
+
+.chat-input-area input[type="text"] {
+  flex-grow: 1;
+  padding: 14px 18px;
+  border-radius: 30px;
+  border: 1.5px solid #aac4ff;
+  font-size: 1rem;
+  color: #333;
+  transition: border-color 0.3s ease;
+}
+
+.chat-input-area input[type="text"]:focus {
+  outline: none;
+  border-color: #3f75ff;
+  box-shadow: 0 0 10px #a5baff;
+}
+
+.chat-input-area button {
+  background-color: #3f75ff;
+  border: none;
+  color: white;
+  font-weight: 700;
+  padding: 12px 26px;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+  box-shadow: 0 4px 12px rgb(63 117 255 / 0.6);
+}
+
+.chat-input-area button:hover {
+  background-color: #2952cc;
+}
