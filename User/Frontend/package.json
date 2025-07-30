@@ -12,9 +12,11 @@
   "dependencies": {
     "@ant-design/icons": "^6.0.0",
     "@bilions/thailand-address": "^2.0.1",
+    "@fontsource/noto-sans-thai": "^5.2.6",
     "antd": "^5.26.5",
     "axios": "^1.10.0",
     "bootstrap": "^5.3.7",
+    "lucide-react": "^0.525.0",
     "react": "^19.1.0",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.1.0",
