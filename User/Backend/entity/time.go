@@ -10,6 +10,7 @@ type Time struct {
 	MaxCapacity int     // จำนวนสูงสุดของผู้ใช้บริการ
 	
 	Booking []Booking  `gorm:"foreignKey:TimeID"` // 👈 One-to-Many relationship
+	
 	BranchID uint   `json:"branch_id"`
     Branch   Branch `gorm:"foreignKey:BranchID"`
 	// p
