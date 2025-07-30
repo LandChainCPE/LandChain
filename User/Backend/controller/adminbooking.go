@@ -24,7 +24,7 @@ func GetBookingData(c *gin.Context) {
         result = append(result, gin.H{
             "id":           b.ID,
             "date_booking": "2006-01-02", // แปลงวันที่
-            "user_name":    b.Users.Name,
+            "user_name":    b.Users.Firstname,
             "time_slot":    b.Time.Timework,
         })
     }
