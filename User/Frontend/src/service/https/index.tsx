@@ -64,11 +64,50 @@ export async function GetSuccessfulBookingsByDateAndBranch(date: string, branchI
   }
 }
 
+async function GetServiceTypes() {
+  return await axios
+    .get(`${apiUrl}/service-types`, requestOptions)
+    .then((res) => res.data) // คืนค่าข้อมูลประเภทบริการ
+    .catch((e) => e.response); // ถ้า error คืน response error
+}
+
+
+export async function GetAvailableSlots(date: string, branchID: number, timeID: number) {
+  try {
+    const response = await axios.get(`${apiUrl}/bookings/checklim`, {
+      params: {
+        date: date,
+        branchID: branchID,
+        timeID: timeID,
+      },
+    });
+    return response.data; // { available_slots: number, total_bookings: number }
+  } catch (error: any) {
+    console.error("Error checking limit:", error);
+    return { available_slots: 0, total_bookings: 0 };
+  }
+}
+
+export async function GetBookingStatus(id: number, selectedDate: string, selectedBranch: number, selectedServiceType: number) {
+  try {
+    const response = await axios.get(`${apiUrl}/bookings/status`, {
+      params: {
+        userID: id,
+      },
+    });
+    return response.data; // เช่น { message: "คุณมีการจองที่รออนุมัติอยู่แล้ว" } หรือ { message: "" }
+  } catch (error) {
+    console.error("Error checking booking status:", error);
+    return { message: "เกิดข้อผิดพลาดในการตรวจสอบสถานะการจอง" }; // ถ้าเกิดข้อผิดพลาด
+  }
+}
+
 
 
 export {
     CreateBooking,
     GetProvinces,
     GetBranches,
-    GetTimeSlots
+    GetTimeSlots,
+    GetServiceTypes,
 }

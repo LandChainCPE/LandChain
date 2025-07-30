@@ -35,6 +35,9 @@ func main() {
 	r.GET("/branches", controller.GetBranch) // ดึงข้อมูลสาขา
 	r.GET("/time", controller.GetTime) // ดึงข้อมูลช่วงเวลา
 	r.GET("/bookings", controller.GetBookingsByDateAndBranch)
+	r.GET("/service-types", controller.GetServiceType) // ดึงข้อมูลประเภทบริการ
+	r.GET("/bookings/status/:id", controller.GetBookingStatus) // ดึงข้อมูลการจองตาม ID
+	r.GET("/bookings/checklim", controller.CheckAvailableSlots) // ดึงข้อมูลการจองตาม ID
 	r.Run(":8080")
 
 
