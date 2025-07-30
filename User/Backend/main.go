@@ -29,10 +29,7 @@ func main() {
 
 	r.GET("/getbookingdata", controller.GetBookingData)
 	r.POST("/userbookings", controller.CreateBooking) // สร้างการจอง
-<<<<<<< HEAD
 	r.PUT("/bookings/:id", controller.UpdateBooking)  // อัปเดตการจอง
-=======
-	r.PUT("/bookings/:id", controller.UpdateBooking) // อัปเดตการจอง
 	r.GET("/provinces", controller.GetProvince) // ดึงข้อมูลจังหวัด
 	r.GET("/branches", controller.GetBranch) // ดึงข้อมูลสาขา
 	r.GET("/time", controller.GetTime) // ดึงข้อมูลช่วงเวลา
@@ -41,7 +38,6 @@ func main() {
 	r.GET("/bookings/status/:id", controller.GetBookingStatus) // ดึงข้อมูลการจองตาม ID
 	r.GET("/bookings/checklim", controller.CheckAvailableSlots) // ดึงข้อมูลการจองตาม ID
 	r.Run(":8080")
->>>>>>> origin
 
 	// CONTROLLER lANDSELLPOST
 	r.GET("/user/sellpost", controller.GetAllPostLandData)
