@@ -9,6 +9,10 @@ const LoginUser = Loadable(lazy(() => import("../pages/LoginRegister/Login")));
 const RegisterUser = Loadable(lazy(() => import("../pages/LoginRegister/Register")));
 //const MainPageUser = Loadable(lazy(() => import("../pages/Main/Main")));
 const Regisland = Loadable(lazy(() => import("../pages/RegisLand/RegisLand")));
+const Dashboard = Loadable(lazy(() => import("../pages/Petition/Dashboard")));
+const Petition = Loadable(lazy(() => import("../pages/Petition/Petition")));
+const State = Loadable(lazy(() => import("../pages/Petition/State")));
+
 
 const UserRoutes = (): RouteObject[] => [
   {
@@ -20,6 +24,9 @@ const UserRoutes = (): RouteObject[] => [
       { index: true, element: <MainPage /> },
       {path: "main", element: <MainPage /> },
       {path: "regisland", element: <Regisland /> },
+      { path: "dashboard", element: <Dashboard /> },
+      { path: "petition", element: <Petition /> },
+      { path: "state", element: <State /> },
       { path: "*", element: <MainPage /> },
     ],
   },

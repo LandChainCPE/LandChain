@@ -69,6 +69,9 @@ func SetupDatabase() {
 		&entity.Roomchat{},
 		&entity.Message{},
 		&entity.Copyrequest{},
+		&entity.Petition{},
+		&entity.State{},
+
 	); err != nil {
 		log.Fatal("❌ AutoMigrate failed:", err)
 	}
@@ -100,7 +103,16 @@ func SetupDatabase() {
 
 		//customDate, _ := time.Parse("2006-01-02", "2025-07-20")
 		//db.Create(&entity.Booking{DateBooking: customDate, TimeID: uint(2), UserID: uint(2), BranchID: uint(1)})
-	}
 
+	}
+	// ✅ Seed State (แยกจาก Users)
+	var stateCount int64
+	db.Model(&entity.State{}).Count(&stateCount)
+	if stateCount == 0 {
+		db.Create(&entity.State{Name: "รอตรวจสอบ", Color: "orange"})
+		db.Create(&entity.State{Name: "กำลังดำเนินการ", Color: "blue"})
+		db.Create(&entity.State{Name: "เสร็จสิ้น", Color: "green"})
+	}
+	
 	log.Println("✅ Database Migrated & Seeded Successfully")
 }
