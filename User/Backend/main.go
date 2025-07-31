@@ -55,6 +55,9 @@ func main() {
 	r.GET("/user/chat/roomchat/:id", controller.GetMessagesByLandPostID)
 	r.GET("/user/:id", controller.GetUserByID)
 
+	// CONTROLLER User
+	r.POST("/user/create", controller.SavePublicKey)
+
 	r.Run(":8080")
 
 	// เริ่มรันเซิร์ฟเวอร์
