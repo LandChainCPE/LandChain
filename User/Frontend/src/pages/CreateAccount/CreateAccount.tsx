@@ -47,7 +47,7 @@ const CreateAccount = () => {
 
   return (
     <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light">
-      <div className="bg-white p-4 shadow-sm rounded" style={{ maxWidth: '500px', width: '100%' }}>
+      <div className="bg-white p-4 shadow-sm rounded" style={{ maxWidth: '350px', width: '100%' }}>
         <img src={Logo} alt="LandChain Logo" style={{ width: "100%",height: "auto",maxWidth: "500px" }} />
         <h2 className="text-center mb-4">Create Account </h2>
         <form onSubmit={handleSubmit}>
