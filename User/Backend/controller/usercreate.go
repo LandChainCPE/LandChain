@@ -10,15 +10,13 @@ import (
 	"landchain/entity"
 )
 
-// API สำหรับรับข้อมูลผู้ใช้และ Public Key
-func SaveUser(c *gin.Context) {
+func CreateUser(c *gin.Context) {
 	var input struct {
 		Firstname    string `json:"firstname"`
 		Lastname     string `json:"lastname"`
 		Phonenumber  string `json:"phonenumber"`
 		Email        string `json:"email"`
-		WalletMetamask string `json:"walletMetamask"`
-		PublicKey    string `json:"publicKey"`
+		Metamaskaddress string `json:"Metamaskaddress"`
 	}
 
 	// รับข้อมูลจาก request body
@@ -33,8 +31,7 @@ func SaveUser(c *gin.Context) {
 		Lastname:     input.Lastname,
 		Phonenumber:  input.Phonenumber,
 		Email:        input.Email,
-		WalletMetamask: input.WalletMetamask,
-		PublicKey:    input.PublicKey,
+		Metamaskaddress: input.Metamaskaddress,
 	}
 
 	// บันทึกข้อมูลลงในฐานข้อมูล

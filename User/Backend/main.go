@@ -56,7 +56,7 @@ func main() {
 	r.GET("/user/:id", controller.GetUserByID)
 
 	// CONTROLLER User
-	r.POST("/user/create", controller.SavePublicKey)
+	r.POST("/user/create", controller.CreateUser) // สร้างผู้ใช้ใหม่
 
 	r.Run(":8080")
 

@@ -9,6 +9,7 @@ import Landpic from "../../assets/LandPic.jpg";
 import LandpicKorat from "../../assets/LandPicKorat.jpg"
 import type { JSX } from "react";
 import { Link } from 'react-router-dom';
+import CreateAccountModal from '../CreateAccount/CreateAccount';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -16,6 +17,12 @@ const { Step } = Steps;
 const MainPage = (): JSX.Element => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+
+  const [showModal, setShowModal] = useState(false);
+
+  const handleCreateAccountClick = () => {
+    setShowModal(true);
+  };
 
   const goToRegisland = () => {
     setLoading(true);
@@ -26,11 +33,9 @@ const MainPage = (): JSX.Element => {
   };
 
   const GoCreateAccount = () => {
-    setLoading(true);
-    setTimeout(() => {
-      navigate("/user/createaccount");
-    }, 2000);
+    setShowModal(true); // เปิด modal แทนการ navigate
   };
+
 
   return (
     <div className="main-container">
@@ -328,6 +333,16 @@ const MainPage = (): JSX.Element => {
         </Col>
         {loading && <div className="mt-3"><Loader /></div>}
       </div>
+      <CreateAccountModal
+        show={showModal}
+        onClose={() => setShowModal(false)}
+        onSubmitSuccess={() => {
+          setShowModal(false); // ปิด modal หลัง submit สำเร็จ
+          // หากต้องการ redirect ไปหน้าอื่นหลังสมัคร สามารถใส่ navigate() ที่นี่ได้
+        }}
+      />
+
+
     </div>
   );
 };
