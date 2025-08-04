@@ -1,3 +1,5 @@
+// controller.go (Backend)
+
 package controller
 
 import (
@@ -8,11 +10,15 @@ import (
 	"landchain/entity"
 )
 
-// API สำหรับรับข้อมูล Public Key และ Name และบันทึกลงในฐานข้อมูล
-func SavePublicKey(c *gin.Context) {
+// API สำหรับรับข้อมูลผู้ใช้และ Public Key
+func SaveUser(c *gin.Context) {
 	var input struct {
-		Name      string `json:"name"`
-		Publickey string `json:"publicKey"`
+		Firstname    string `json:"firstname"`
+		Lastname     string `json:"lastname"`
+		Phonenumber  string `json:"phonenumber"`
+		Email        string `json:"email"`
+		WalletMetamask string `json:"walletMetamask"`
+		PublicKey    string `json:"publicKey"`
 	}
 
 	// รับข้อมูลจาก request body
@@ -21,16 +27,14 @@ func SavePublicKey(c *gin.Context) {
 		return
 	}
 
-	// ตรวจสอบว่า name และ publicKey ไม่เป็นค่าว่าง
-	if input.Name == "" || input.Publickey == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Name or Public Key is missing"})
-		return
-	}
-
-	// สร้างผู้ใช้ใหม่ในฐานข้อมูลพร้อม Public Key
+	// สร้างผู้ใช้ใหม่ในฐานข้อมูล
 	user := entity.Users{
-		Firstname: input.Name,
-		Publickey: input.Publickey,
+		Firstname:    input.Firstname,
+		Lastname:     input.Lastname,
+		Phonenumber:  input.Phonenumber,
+		Email:        input.Email,
+		WalletMetamask: input.WalletMetamask,
+		PublicKey:    input.PublicKey,
 	}
 
 	// บันทึกข้อมูลลงในฐานข้อมูล
@@ -40,6 +44,6 @@ func SavePublicKey(c *gin.Context) {
 	}
 
 	// Log ข้อมูลและตอบกลับว่า Public Key ถูกบันทึกสำเร็จ
-	log.Printf("Public Key saved for user: %s", input.Name)
-	c.JSON(http.StatusOK, gin.H{"message": "Public Key saved successfully", "user": user})
+	log.Printf("User data saved for: %s", input.Firstname)
+	c.JSON(http.StatusOK, gin.H{"message": "User data saved successfully", "user": user})
 }
