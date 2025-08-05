@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useNavigate } from 'react-router-dom';  // นำเข้า useNavigate
-import Logo from "../../assets/LogoLandChainBLackVertical.png";
+import { useNavigate } from 'react-router-dom';
 import LogoMatamask from "../../assets/LogoMetamask.png";
 import Connect from "../../assets/Connect.png";
+import Logo from "../../assets/LogoLandChainBLackVertical.png";
+import { createUser } from '../../service/https/usercreate';
 
 // Declare the ethereum property on the Window interface
 declare global {
@@ -14,7 +15,7 @@ declare global {
 
 const ConnectMetamask = () => {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const navigate = useNavigate(); // ใช้ useNavigate สำหรับการนำทางไปยังหน้า MainPage
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     if (window.ethereum) {
@@ -33,7 +34,28 @@ const ConnectMetamask = () => {
           
           console.log('เชื่อมต่อกับ Wallet:', address);
 
-          navigate('/createaccount/generatekey');
+          // นำข้อมูลทั้งหมดที่เก็บไว้จาก localStorage ไปบันทึกในฐานข้อมูล
+          const firstname = localStorage.getItem('firstname');
+          const lastname = localStorage.getItem('lastname');
+          const phonenumber = localStorage.getItem('phonenumber');
+          const email = localStorage.getItem('email');
+
+          if (firstname && lastname && phonenumber && email) {
+            const userData = {
+              firstname,
+              lastname,
+              phonenumber,
+              email,
+              metamaskaddress: address
+            };
+
+            // ส่งข้อมูลทั้งหมดไปที่ backend
+            await createUser(userData); // ฟังก์ชันส่งข้อมูลไปที่ backend
+            console.log('บัญชีผู้ใช้ถูกสร้างสำเร็จ!', userData);
+          } else {
+            alert('กรุณากรอกข้อมูลให้ครบถ้วนก่อนเชื่อมต่อ MetaMask');
+            navigate('/createaccount');
+          }
         }
       } catch (error) {
         console.error('Error connecting to MetaMask:', error);
@@ -45,16 +67,10 @@ const ConnectMetamask = () => {
   };
 
   const handleCancel = () => {
-    // ลบข้อมูลที่เก็บใน localStorage
     localStorage.removeItem('walletAddress');
     setWalletAddress(null);
     console.log('การเชื่อมต่อถูกยกเลิก');
-    
-    // รีเฟรชหน้าและนำทางกลับไปยังหน้า MainPage
-    navigate('/');  // ไปที่หน้า MainPage
-
-    // รีเฟรชหน้าหลังจากลบข้อมูลจาก localStorage
-    window.location.reload();
+    navigate('/createaccount');
   };
 
   return (

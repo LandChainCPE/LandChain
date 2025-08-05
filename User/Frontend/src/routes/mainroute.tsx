@@ -21,20 +21,10 @@ const Chat = Loadable(lazy(() => import("../pages/ChatPage/chat")));
 
 const CreateAccount = Loadable(lazy(() => import("../pages/CreateAccount/CreateAccount")));
 const ConnectMetamask = Loadable(lazy(() => import("../pages/CreateAccount/ConnectMetamask")));
-const GenerateKey = Loadable(lazy(() => import("../pages/CreateAccount/GenerateKey")));
 
 const UserRoutes = (): RouteObject[] => [
   {
     path: "/", element: <MainPage />, 
-  },  
-  {
-    path: "/createaccount",
-    children: [
-      { index: true, element: <CreateAccount /> },
-      {path: "connectmetamask", element: <ConnectMetamask /> },
-      {path: "generatekey", element: <GenerateKey /> },
-      { path: "*", element: <MainPage /> },
-    ],
   },                                        
   {
     path: "/user",
@@ -49,8 +39,6 @@ const UserRoutes = (): RouteObject[] => [
       {path: "map", element: <Map /> },
       {path: "sellpost", element: <SellPost /> },
       {path: "chat", element: <Chat /> },
-      {path: "createaccount", element: <CreateAccount /> },
-      {path: "connectmetamask", element: <ConnectMetamask /> },
       { path: "*", element: <MainPage /> },
     ],
   },
@@ -73,6 +61,13 @@ const MainRoutes = (): RouteObject[] => [
       { index: true, element: <Login /> },
     //   {path: "main", element: <Login /> },
       { path: "*", element: <Login /> },
+    ],
+  },
+  {
+    path: "/createaccount",
+    element: <CreateAccount />, // หน้า CreateAccount
+    children: [
+      { path: "connectmetamask", element: <ConnectMetamask /> },
     ],
   },
   { path: "*", element: <Login /> }, 

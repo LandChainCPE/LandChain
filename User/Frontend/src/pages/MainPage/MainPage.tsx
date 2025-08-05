@@ -21,7 +21,9 @@ const MainPage = (): JSX.Element => {
   const [showModal, setShowModal] = useState(false);
 
   const handleCreateAccountClick = () => {
-    setShowModal(true);
+    setTimeout(() => {
+      navigate("/createaccount");
+    }, 2000);
   };
 
   const goToRegisland = () => {
@@ -31,11 +33,6 @@ const MainPage = (): JSX.Element => {
       navigate("/user/regisland");
     }, 2000);
   };
-
-  const GoCreateAccount = () => {
-    setShowModal(true); // เปิด modal แทนการ navigate
-  };
-
 
   return (
     <div className="main-container">
@@ -55,7 +52,7 @@ const MainPage = (): JSX.Element => {
             <Button type="link" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
               ข่าวสาร
             </Button>
-            <Button type="link" onClick={GoCreateAccount} style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
+            <Button type="link" onClick={handleCreateAccountClick} style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
               เข้าสู่ระบบ
             </Button>
           </Col>
@@ -333,16 +330,6 @@ const MainPage = (): JSX.Element => {
         </Col>
         {loading && <div className="mt-3"><Loader /></div>}
       </div>
-      <CreateAccountModal
-        show={showModal}
-        onClose={() => setShowModal(false)}
-        onSubmitSuccess={() => {
-          setShowModal(false); // ปิด modal หลัง submit สำเร็จ
-          // หากต้องการ redirect ไปหน้าอื่นหลังสมัคร สามารถใส่ navigate() ที่นี่ได้
-        }}
-      />
-
-
     </div>
   );
 };

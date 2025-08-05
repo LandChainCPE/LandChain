@@ -12,11 +12,11 @@ import (
 
 func CreateUser(c *gin.Context) {
 	var input struct {
-		Firstname    string `json:"firstname"`
-		Lastname     string `json:"lastname"`
-		Phonenumber  string `json:"phonenumber"`
-		Email        string `json:"email"`
-		Metamaskaddress string `json:"Metamaskaddress"`
+		Firstname     string `json:"firstname"`
+		Lastname      string `json:"lastname"`
+		Phonenumber   string `json:"phonenumber"`
+		Email         string `json:"email"`
+		Metamaskaddress string `json:"metamaskaddress"`
 	}
 
 	// รับข้อมูลจาก request body
@@ -27,10 +27,10 @@ func CreateUser(c *gin.Context) {
 
 	// สร้างผู้ใช้ใหม่ในฐานข้อมูล
 	user := entity.Users{
-		Firstname:    input.Firstname,
-		Lastname:     input.Lastname,
-		Phonenumber:  input.Phonenumber,
-		Email:        input.Email,
+		Firstname:     input.Firstname,
+		Lastname:      input.Lastname,
+		Phonenumber:   input.Phonenumber,
+		Email:         input.Email,
 		Metamaskaddress: input.Metamaskaddress,
 	}
 

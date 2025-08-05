@@ -1,35 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useNavigate } from 'react-router-dom';  // ใช้ useNavigate สำหรับการนำทางไปยังหน้า ConnectMetamask
 import Logo from "../../assets/LogoLandchainBlack.png";
 
-interface Props {
-  show: boolean;
-  onClose: () => void;
-  onSubmitSuccess: () => void;
-}
-
-const CreateAccountModal: React.FC<Props> = ({ show, onClose, onSubmitSuccess }) => {
+const CreateAccount = () => {
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
   const [phonenumber, setPhonenumber] = useState('');
   const [email, setEmail] = useState('');
+  const navigate = useNavigate(); // ใช้ useNavigate สำหรับการนำทางไปยังหน้า ConnectMetamask
 
   useEffect(() => {
-    if (show) {
-      const storedFirstname = localStorage.getItem('firstname');
-      const storedLastname = localStorage.getItem('lastname');
-      const storedPhonenumber = localStorage.getItem('phonenumber');
-      const storedEmail = localStorage.getItem('email');
+    // ตรวจสอบ localStorage เพื่อดึงข้อมูลก่อนหน้า
+    const storedFirstname = localStorage.getItem('firstname');
+    const storedLastname = localStorage.getItem('lastname');
+    const storedPhonenumber = localStorage.getItem('phonenumber');
+    const storedEmail = localStorage.getItem('email');
 
-      if (storedFirstname) setFirstname(storedFirstname);
-      if (storedLastname) setLastname(storedLastname);
-      if (storedPhonenumber) setPhonenumber(storedPhonenumber);
-      if (storedEmail) setEmail(storedEmail);
-    }
-  }, [show]);
+    if (storedFirstname) setFirstname(storedFirstname);
+    if (storedLastname) setLastname(storedLastname);
+    if (storedPhonenumber) setPhonenumber(storedPhonenumber);
+    if (storedEmail) setEmail(storedEmail);
+  }, []);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
+    // บันทึกข้อมูลลง localStorage
     localStorage.setItem('firstname', firstname);
     localStorage.setItem('lastname', lastname);
     localStorage.setItem('phonenumber', phonenumber);
@@ -42,46 +38,65 @@ const CreateAccountModal: React.FC<Props> = ({ show, onClose, onSubmitSuccess })
       email,
     });
 
-    onSubmitSuccess();  // หรือ redirect ไป connect metamask
-    onClose();
+    // เมื่อผู้ใช้กดยืนยันแล้ว จะนำทางไปที่หน้า ConnectMetamask
+    navigate('/createaccount/connectmetamask');  // นำทางไปที่หน้า ConnectMetamask
   };
 
-  if (!show) return null;
-
   return (
-    <div className="modal d-block" tabIndex={-1} role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog modal-dialog-centered" role="document">
-        <div className="modal-content p-4">
-          <button type="button" className="btn-close ms-auto" onClick={onClose}></button>
-          <div className="d-flex justify-content-center">
-            <img src={Logo} alt="LandChain Logo" style={{ width: "100%", height: "auto", maxWidth: "350px" }} />
+    <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light">
+      <div className="bg-white p-4 shadow-sm rounded" style={{ maxWidth: '350px', width: '100%' }}>
+        <img src={Logo} alt="LandChain Logo" style={{ width: "100%",height: "auto",maxWidth: "500px" }} />
+        <h2 className="text-center mb-4">Create Account </h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label htmlFor="firstname" className="form-label">ชื่อ</label>
+            <input
+              type="text"
+              id="firstname"
+              value={firstname}
+              onChange={(e) => setFirstname(e.target.value)}
+              required
+              className="form-control"
+            />
           </div>
-          <h2 className="text-center mb-4">Create Account</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label className="form-label">ชื่อ</label>
-              <input type="text" value={firstname} onChange={(e) => setFirstname(e.target.value)} required className="form-control" />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">นามสกุล</label>
-              <input type="text" value={lastname} onChange={(e) => setLastname(e.target.value)} required className="form-control" />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">เบอร์โทรศัพท์</label>
-              <input type="text" value={phonenumber} onChange={(e) => setPhonenumber(e.target.value)} required className="form-control" />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">อีเมล</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="form-control" />
-            </div>
-            <div className="d-flex justify-content-center">
-              <button type="submit" className="btn btn-primary w-50">ยืนยัน</button>
-            </div>
-          </form>
-        </div>
+          <div className="mb-3">
+            <label htmlFor="lastname" className="form-label">นามสกุล</label>
+            <input
+              type="text"
+              id="lastname"
+              value={lastname}
+              onChange={(e) => setLastname(e.target.value)}
+              required
+              className="form-control"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="phonenumber" className="form-label">เบอร์โทรศัพท์</label>
+            <input
+              type="text"
+              id="phonenumber"
+              value={phonenumber}
+              onChange={(e) => setPhonenumber(e.target.value)}
+              required
+              className="form-control"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label">อีเมล</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="form-control"
+            />
+          </div>
+          <button type="submit" className="btn btn-primary w-50">ยืนยัน</button>
+        </form>
       </div>
     </div>
   );
 };
 
-export default CreateAccountModal;
+export default CreateAccount;
