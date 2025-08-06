@@ -9,7 +9,6 @@ import Landpic from "../../assets/LandPic.jpg";
 import LandpicKorat from "../../assets/LandPicKorat.jpg"
 import type { JSX } from "react";
 import { Link } from 'react-router-dom';
-import CreateAccountModal from '../CreateAccount/CreateAccount';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -17,8 +16,6 @@ const { Step } = Steps;
 const MainPage = (): JSX.Element => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-
-  const [showModal, setShowModal] = useState(false);
 
   const handleCreateAccountClick = () => {
     setTimeout(() => {
