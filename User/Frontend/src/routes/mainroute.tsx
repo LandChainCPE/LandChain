@@ -63,13 +63,6 @@ const MainRoutes = (): RouteObject[] => [
       { path: "*", element: <Login /> },
     ],
   },
-  {
-    path: "/createaccount",
-    element: <CreateAccount />, // หน้า CreateAccount
-    children: [
-      { path: "connectmetamask", element: <ConnectMetamask /> },
-    ],
-  },
   { path: "*", element: <Login /> }, 
   { path: "/", element: <LoginUser /> },
   { path: "/login", element: <LoginUser /> },
