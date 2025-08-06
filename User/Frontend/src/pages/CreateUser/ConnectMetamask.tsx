@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';  // นำเข้า useNaviga
 import Logo from "../../assets/LogoLandChainBLackVertical.png";
 import LogoMatamask from "../../assets/LogoMetamask.png";
 import Connect from "../../assets/Connect.png";
+import { CreateAccount, } from "../../service/https/garfield/http";
 
 // Declare the ethereum property on the Window interface
 declare global {
@@ -27,13 +28,42 @@ const ConnectMetamask = () => {
         if (accounts.length > 0) {
           const address = accounts[0];
           setWalletAddress(address);
-          
-          // Store wallet address in localStorage
-          localStorage.setItem('walletAddress', address);
-          
-          console.log('เชื่อมต่อกับ Wallet:', address);
 
-          navigate('/createaccount/generatekey');
+          // เก็บที่อยู่กระเป๋าใน localStorage
+          localStorage.setItem('walletAddress', address);
+
+          // ดึงข้อมูลผู้ใช้จาก localStorage
+          const firstname = localStorage.getItem('firstname');
+          const lastname = localStorage.getItem('lastname');
+          const phonenumber = localStorage.getItem('phonenumber');
+          const email = localStorage.getItem('email');
+
+          if (firstname && lastname && phonenumber && email) {
+            // ส่งข้อมูลไปยัง backend
+            const userData = {
+              firstname,
+              lastname,
+              phonenumber,
+              email,
+              metamaskaddress: address,
+            };
+            console.log("userData:", userData);
+            let { response, result } = await CreateAccount(userData);
+            console.log("หลัง สร้างผู้ใช้", response);
+            console.log("หลัง สร้างผู้ใช้", result);
+
+            if (response.status === 200) {
+              localStorage.setItem("token", result.token);
+              localStorage.setItem("token_type", result.token_type);
+              localStorage.setItem("isLogin", "true");
+              localStorage.setItem("firstnameuser", result.FirstNameUser);
+              localStorage.setItem("lastnameuser", result.LastNameUser);
+              console.log(localStorage);
+            // localStorage.clear();
+
+              navigate("/user/main");
+            }
+          }
         }
       } catch (error) {
         console.error('Error connecting to MetaMask:', error);
@@ -49,7 +79,7 @@ const ConnectMetamask = () => {
     localStorage.removeItem('walletAddress');
     setWalletAddress(null);
     console.log('การเชื่อมต่อถูกยกเลิก');
-    
+
     // รีเฟรชหน้าและนำทางกลับไปยังหน้า MainPage
     navigate('/');  // ไปที่หน้า MainPage
 
@@ -62,10 +92,10 @@ const ConnectMetamask = () => {
       <div className="text-center bg-white p-5 shadow-sm rounded" style={{ maxWidth: '750px', width: '100%' }}>
         <h2 className="mb-4" style={{ fontWeight: '600', fontSize: '24px' }}>Login with WalletID</h2>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px" }}>
-            <img src={LogoMatamask} alt="MetaMask Logo" style={{ width: "100%", height: "auto", maxWidth: "200px", marginBottom: '20px' }} />
-            <img src={Connect} alt="Connect Icon" style={{ width: "100%", height: "auto", maxWidth: "200px", marginBottom: '20px' }} />        
-            <img src={Logo} alt="LandChain Logo" style={{ width: "100%", height: "auto", maxWidth: "200px", marginBottom: '20px' }} />
-        </div>    
+          <img src={LogoMatamask} alt="MetaMask Logo" style={{ width: "100%", height: "auto", maxWidth: "200px", marginBottom: '20px' }} />
+          <img src={Connect} alt="Connect Icon" style={{ width: "100%", height: "auto", maxWidth: "200px", marginBottom: '20px' }} />
+          <img src={Logo} alt="LandChain Logo" style={{ width: "100%", height: "auto", maxWidth: "200px", marginBottom: '20px' }} />
+        </div>
         <p className="mb-4" style={{ fontSize: '16px', color: '#555' }}>
           กรุณาเชื่อมต่อกับ Wallet ID ของคุณเพื่อเข้าสู่ระบบ
         </p>
