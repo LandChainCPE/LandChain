@@ -29,7 +29,7 @@ const MainPage = (): JSX.Element => {
     <div className="main-container">
       <div className="bg-[#364049] w-full relative">
         {/* Header */}
-        <Row justify="space-between" align="middle" className="bg-[#424f5e]" style={{ padding: "10px 30px" }}>
+        <Row justify="space-between" align="middle" className="navbar" style={{ padding: "10px 30px" }}>
           <Col>
             <img src={Logo} alt="LandChain Logo" style={{ width: "100%",height: "auto",maxWidth: "200px" }} />
           </Col>
