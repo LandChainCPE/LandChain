@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบสารสนเทศที่ดิน - เข้าสู่ระบบ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            min-height: 100vh;
+            background: linear-gradient(rgba(0, 32, 96, 0.9), rgba(0, 32, 96, 0.9)),
+                        url('data:image/svg+xml,<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h20v20H0z" fill="none"/><path d="M10 0l10 10-10 10L0 10z" fill="%23ffffff" opacity="0.05"/></svg>');
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .gov-header {
+            width: 100%;
+            background: #ffffff;
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 3px solid #b8860b;
+            margin-bottom: 2rem;
+        }
+
+        .gov-header img {
+            height: 80px;
+            margin-bottom: 0.5rem;
+        }
+
+        .gov-header h2 {
+            color: #002060;
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .gov-header p {
+            color: #555;
+            font-size: 1.1rem;
+        }
+
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 450px;
+            border-top: 5px solid #b8860b;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: #002060;
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #002060;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #002060;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 0.75rem;
+            background: #002060;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .login-button:hover {
+            background: #001040;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .forgot-password a {
+            color: #002060;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="gov-header">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/8f/Emblem_of_Thailand.svg" alt="ครุฑ">
+        <h2>ระบบสารสนเทศที่ดิน</h2>
+        <p>กรมที่ดิน กระทรวงมหาดไทย</p>
+    </div>
+
+    <div class="login-container">
+        <div class="login-header">
+            <h1>เข้าสู่ระบบ</h1>
+        </div>
+        <form>
+            <div class="form-group">
+                <label for="username">ชื่อผู้ใช้งาน</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">รหัสผ่าน</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit" class="login-button">เข้าสู่ระบบ</button>
+            <div class="forgot-password">
+                <a href="#">ลืมรหัสผ่าน?</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

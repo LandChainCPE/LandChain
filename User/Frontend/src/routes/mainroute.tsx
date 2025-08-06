@@ -19,8 +19,8 @@ const Map = Loadable(lazy(() => import("../pages/Map/map")));
 const SellPost = Loadable(lazy(() => import("../pages/SellPost/sellpost")));
 const Chat = Loadable(lazy(() => import("../pages/ChatPage/chat")));
 
-const CreateAccount = Loadable(lazy(() => import("../pages/CreateAccount/CreateAccount")));
-const ConnectMetamask = Loadable(lazy(() => import("../pages/CreateAccount/ConnectMetamask")));
+const CreateAccount = Loadable(lazy(() => import("../pages/CreateUser/CreateAccount")));
+const ConnectMetamask = Loadable(lazy(() => import("../pages/CreateUser/ConnectMetamask")));
 
 const UserRoutes = (): RouteObject[] => [
   {
@@ -38,7 +38,7 @@ const UserRoutes = (): RouteObject[] => [
       {path: "sellmainpage", element: <SellMainPage /> },
       {path: "map", element: <Map /> },
       {path: "sellpost", element: <SellPost /> },
-      {path: "chat", element: <Chat /> },
+      {path: "chat", element: <Chat roomId={null} onNewMessage={() => {}} /> },
       { path: "*", element: <MainPage /> },
     ],
   },
@@ -67,12 +67,14 @@ const MainRoutes = (): RouteObject[] => [
   { path: "/", element: <LoginUser /> },
   { path: "/login", element: <LoginUser /> },
   { path: "/register", element: <RegisterUser /> },
+  { path: "/createaccount", element: <CreateAccount/> },
+  { path: "/connectmetamask", element: <ConnectMetamask /> },
   { path: "*", element: <LoginUser /> },
 ];
 
 function ConfigRoutes() {
-  //localStorage.setItem('isLogin','false');
-  const isLoggedIn = localStorage.getItem('isLogin') === 'true';
+  // localStorage.setItem('isLogin','false');
+  // const isLoggedIn = localStorage.getItem('isLogin') === 'true';
 //   const roleName = localStorage.getItem('roleName');
 //   const employeeID = localStorage.getItem('employeeid');
 //   const userid = localStorage.getItem('userid');
@@ -84,7 +86,7 @@ function ConfigRoutes() {
 
   let routes: RouteObject[] = [];
 
-  if (isLoggedIn) {
+  if (false) { // เปลี่ยนเป็นเงื่อนไขที่เหมาะสมสำหรับการตรวจสอบการเข้าสู่ระบบ
     routes = UserRoutes();
   } 
   else {

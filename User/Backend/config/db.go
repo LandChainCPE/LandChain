@@ -98,7 +98,7 @@ func SetupDatabase() {
 		db.Create(&entity.Role{Role: "Admin"})
 
 		RefRole := uint(1)
-		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f469a", Publickey: "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWxLqE0u4ZbwcXpZ4MAlTsEgfjN/S9T8xEilXyal1DKolPjtiNSd44L7ZdugK5v6zHEuThHSpVqftZGugveigZQ==",RoleID: RefRole})		// db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
+		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f469a", RoleID: RefRole})		// db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
 		// db.Create(&entity.Users{Name: "Bam", Email: "@goods1", Phonenumber: "0912345677", Password: "1234564", Land: "ผหก5ป58ก", RoleID: RefRole})
 		// //RefServiceType := uint(1)
 		// db.Create(&entity.Users{Name: "Jo", Password: "jo123456", Land: "12กท85", RoleID: RefRole,})
@@ -157,6 +157,10 @@ func SetupDatabase() {
 
 		// 🔸 ตรวจสอบและสร้าง Landtitle ถ้ายังไม่มี
 		var landtitle1, landtitle2 entity.Landtitle
+
+		RefTimeID := uint(1)
+		startTime := time.Date(2025, time.August, 6, 9, 0, 0, 0, time.UTC)
+		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID, UserID: RefTimeID, BranchID: RefTimeID, ServiceTypeID: RefTimeID})
 
 		if err := db.Where("field = ?", "โฉนดเลขที่ 000008 แปลง 180").First(&landtitle1).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {

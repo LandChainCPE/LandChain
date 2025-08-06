@@ -10,7 +10,7 @@ type Users struct {
     Email    string `gorm:"type:varchar(100);uniqueIndex"`
     Phonenumber string `gorm:"type:varchar(15);uniqueIndex"`
     Metamaskaddress string `gorm:"type:varchar(255)"`
-    Publickey string `gorm:"type:varchar(255)"`
+    // Publickey string `gorm:"type:varchar(255)"`
     // Password string `gorm:"type:varchar(255)"`
     // Land     string `gorm:"type:varchar(100)"`
     RoleID uint  // :point_left: FK ไปยัง role.id
