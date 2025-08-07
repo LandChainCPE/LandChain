@@ -46,42 +46,82 @@ function UserMain() {
   };
 
   return (
-    <div className="d-flex" style={{ height: "100vh" }}>
+    <div className="d-flex" style={{ height: "100vh", backgroundColor: "#f5f6fa" }}>
       <Sidebar />
       <div className="flex-grow-1 p-4">
-        <h2 className="mb-4">📅 รายการจองคิว</h2>
+        <div className="bg-white rounded-3 shadow-sm p-4">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h2 className="m-0" style={{ color: "#2c3e50" }}>
+              <i className="bi bi-calendar-check me-2"></i>
+              รายการดำเนินการ
+            </h2>
+            <div className="d-flex gap-2">
+              <button className="btn btn-outline-secondary">
+                <i className="bi bi-filter me-1"></i>กรอง
+              </button>
+              <button className="btn btn-outline-secondary">
+                <i className="bi bi-download me-1"></i>ดาวน์โหลด
+              </button>
+            </div>
+          </div>
 
-        {loading ? (
-          <div className="alert alert-info">กำลังโหลดข้อมูล...</div>
-        ) : (
-          <table className="table table-striped table-hover align-middle">
-            <thead className="table-dark">
-              <tr>
-                <th>ชื่อผู้จอง</th>
-                <th>วันที่จอง</th>
-                <th>เวลา</th>
-                <th className="text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.user_name}</td>
-                  <td>{item.date_booking}</td>
-                  <td>{item.time_slot}</td>
-                  <td className="text-center">
-                    <button
-                      className="btn btn-sm btn-primary me-2"
-                      onClick={() => handleAction(item.id)}
-                    >
-                      ดำเนินการ
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+          {loading ? (
+            <div className="d-flex justify-content-center p-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">กำลังโหลด...</span>
+              </div>
+            </div>
+          ) : (
+            <div className="table-responsive">
+              <table className="table table-hover align-middle">
+                <thead className="table-light">
+                  <tr>
+                    <th scope="col" className="text-secondary">ชื่อผู้จอง</th>
+                    <th scope="col" className="text-secondary">วันที่จอง</th>
+                    <th scope="col" className="text-secondary">เวลา</th>
+                    <th scope="col" className="text-secondary">สาขา</th>
+                    <th scope="col" className="text-secondary">การดำเนินงาน</th>
+                    <th scope="col" className="text-center text-secondary">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bookings.map((item, index) => (
+                    <tr key={index}>
+                      <td className="fw-medium">{item.user_name}</td>
+                      <td>{item.date_booking}</td>
+                      <td>
+                        <span className="badge px-3 py-2" 
+                              style={{
+                                backgroundColor: '#8B5CF6', // สีม่วงเข้ม
+                                color: 'white',
+                                fontWeight: '500',
+                                fontSize: '0.9rem'
+                              }}>
+                          {item.time_slot}
+                        </span>
+                      </td>
+                      <td>{item.branch_name}</td>
+                      <td>
+                        <span className="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                          {item.typeofservice.service}
+                        </span>
+                      </td>
+                      <td className="text-center">
+                        <button
+                          className="btn btn-primary btn-sm px-3"
+                          onClick={() => handleAction(item.id)}
+                        >
+                          <i className="bi bi-arrow-right-circle me-1"></i>
+                          ดำเนินการ
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
