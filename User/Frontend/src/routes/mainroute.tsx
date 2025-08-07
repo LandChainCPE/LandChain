@@ -21,6 +21,7 @@ const Chat = Loadable(lazy(() => import("../pages/ChatPage/chat")));
 
 const CreateAccount = Loadable(lazy(() => import("../pages/CreateUser/CreateAccount")));
 const ConnectMetamask = Loadable(lazy(() => import("../pages/CreateUser/ConnectMetamask")));
+const VerifyUserWallet = Loadable(lazy(() => import("../pages/CreateUser/VerifyUser")));
 
 const UserRoutes = (): RouteObject[] => [
   {
@@ -39,6 +40,7 @@ const UserRoutes = (): RouteObject[] => [
       {path: "map", element: <Map /> },
       {path: "sellpost", element: <SellPost /> },
       {path: "chat", element: <Chat roomId={null} onNewMessage={() => {}} /> },
+      {path: "verifyuser", element: <VerifyUserWallet /> },
       { path: "*", element: <MainPage /> },
     ],
   },
@@ -69,6 +71,7 @@ const MainRoutes = (): RouteObject[] => [
   { path: "/register", element: <RegisterUser /> },
   { path: "/createaccount", element: <CreateAccount/> },
   { path: "/connectmetamask", element: <ConnectMetamask /> },
+  {path: "/verifyuser", element: <VerifyUserWallet /> },
   { path: "*", element: <LoginUser /> },
 ];
 
