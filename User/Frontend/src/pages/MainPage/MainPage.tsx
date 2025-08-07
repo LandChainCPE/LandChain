@@ -9,6 +9,8 @@ import Landpic from "../../assets/LandPic.jpg";
 import LandpicKorat from "../../assets/LandPicKorat.jpg"
 import type { JSX } from "react";
 import { Link } from 'react-router-dom';
+import Dropdown from 'react-bootstrap/Dropdown';
+
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -49,6 +51,16 @@ const MainPage = (): JSX.Element => {
             <Button type="link" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
               ข่าวสาร
             </Button>
+            <Dropdown>
+              <Dropdown.Toggle  id="dropdown-basic" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
+                เข้าสู่ระบบ
+              </Dropdown.Toggle>
+
+              <Dropdown.Menu>
+                <Dropdown.Item href="#/action-1" onClick={handleCreateAccountClick} style={{ fontFamily: 'Kanit'}}>เข้าสู่ระบบ</Dropdown.Item>
+                <Dropdown.Item href="#/action-2" onClick={handleCreateAccountClick} style={{ fontFamily: 'Kanit'}}>ลงทะเบียน</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
             <Button type="link" onClick={handleCreateAccountClick} style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
               เข้าสู่ระบบ
             </Button>
