@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Select, Card, Typography, Spin, message, DatePicker, Modal } from "antd";
-import { GetBranches, GetProvinces, GetTimeSlots, CreateBooking, GetServiceTypes, GetAvailableSlots, GetBookingStatus } from "../../service/https/index";
+import { Select, Card, Typography, Spin, message, DatePicker, Modal, Row, Col, Divider, Space, Badge, Timeline, Empty, Button } from "antd";
+import { CalendarOutlined, EnvironmentOutlined, ClockCircleOutlined, FileTextOutlined, CheckCircleOutlined, ExclamationCircleOutlined, StopOutlined, HistoryOutlined, ReloadOutlined } from "@ant-design/icons";
+import { GetBranches, GetProvinces, GetTimeSlots, CreateBooking, GetServiceTypes, GetAvailableSlots, GetBookingStatus, GetUserBookings } from "../../service/https/index";
 import type { BookingInterface } from "../../interfaces/Booking";
 import dayjs from "dayjs";
-import axios from "axios";
 
-const { Title, Text } = Typography;
+const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
 
 const BookingCalendar = () => {
@@ -24,32 +24,63 @@ const BookingCalendar = () => {
   const [bookingDetails, setBookingDetails] = useState<BookingInterface | null>(null);
   const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
-  
-  // New state for booking status
-  const [userBookings, setUserBookings] = useState<any[]>([]);
   const [bookingStatusMap, setBookingStatusMap] = useState<Record<number, string>>({});
+  const [userBookings, setUserBookings] = useState<any[]>([]);
+  const [loadingBookings, setLoadingBookings] = useState(false);
 
-  const currentUserId = 1; // ใช้ user ID จริงของระบบ
+  const currentUserId = 1;
+
+  const fetchUserBookings = async () => {
+    try {
+      setLoadingBookings(true);
+      const bookings = await GetUserBookings(currentUserId);
+      console.log("User bookings fetched: ", bookings);
+      
+      // แก้ไขการจัดการค่า null/undefined
+      if (bookings && Array.isArray(bookings)) {
+        setUserBookings(bookings);
+      } else {
+        setUserBookings([]); // ตั้งเป็น array ว่างถ้าเป็น null หรือไม่ใช่ array
+      }
+    } catch (error) {
+      console.error("Error fetching user bookings:", error);
+      setUserBookings([]); // ตั้งเป็น array ว่างเมื่อ error
+      message.error("ไม่สามารถดึงข้อมูลการจองได้");
+    } finally {
+      setLoadingBookings(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserBookings();
+  }, [currentUserId]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const provincesData = await GetProvinces();
-        setProvinces(provincesData);
+        setProvinces(Array.isArray(provincesData) ? provincesData : []);
 
         const serviceTypesData = await GetServiceTypes();
-        setServiceTypes(serviceTypesData);
+        setServiceTypes(Array.isArray(serviceTypesData) ? serviceTypesData : []);
 
         const timeSlotsData = await GetTimeSlots();
-        setTimes(timeSlotsData);
+        setTimes(Array.isArray(timeSlotsData) ? timeSlotsData : []);
 
         if (selectedProvince) {
           const branchesData = await GetBranches();
-          const filteredBranches = branchesData.filter((b: any) => b.ProvinceID === selectedProvince);
+          const filteredBranches = Array.isArray(branchesData) 
+            ? branchesData.filter((b: any) => b.ProvinceID === selectedProvince)
+            : [];
           setBranches(filteredBranches);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
+        // ตั้งค่าเป็น array ว่างเมื่อเกิด error
+        setProvinces([]);
+        setServiceTypes([]);
+        setTimes([]);
+        setBranches([]);
       }
     };
 
@@ -63,8 +94,13 @@ const BookingCalendar = () => {
       const newAvailability: Record<number, number> = {};
 
       for (const time of times) {
-        const res = await GetAvailableSlots(selectedDate, selectedBranch, time.ID);
-        newAvailability[time.ID] = res.available_slots;
+        try {
+          const res = await GetAvailableSlots(selectedDate, selectedBranch, time.ID);
+          newAvailability[time.ID] = res?.available_slots || 0;
+        } catch (error) {
+          console.error(`Error fetching available slots for time ${time.ID}:`, error);
+          newAvailability[time.ID] = 0;
+        }
       }
 
       setSlotAvailability(newAvailability);
@@ -75,87 +111,140 @@ const BookingCalendar = () => {
     }
   }, [selectedDate, selectedBranch, times]);
 
-  // New useEffect to check booking status when all required fields are selected
   useEffect(() => {
-    const checkBookingStatus = async () => {
-      if (!selectedDate || !selectedBranch || !selectedServiceType) {
+    const checkUserBookingStatus = async () => {
+      if (!selectedDate || !selectedBranch) {
         setBookingStatusMap({});
         return;
       }
 
       try {
-        const bookingsResponse = await GetBookingStatus(currentUserId, selectedDate, selectedBranch, selectedServiceType);
-        setUserBookings(bookingsResponse);
+        const bookingsResponse = await GetBookingStatus(
+          currentUserId,
+          selectedBranch,
+          selectedDate
+        );
 
-        // Filter bookings that match current selection
-        const matchingBookings = bookingsResponse.filter((booking: any) => {
-          const bookingDate = dayjs(booking.date_booking).format("YYYY-MM-DD");
-          return (
-            bookingDate === selectedDate &&
-            booking.branch_id === selectedBranch &&
-            booking.service_type_id === selectedServiceType
-          );
-        });
+        if (Array.isArray(bookingsResponse)) {
+          const statusMap: Record<number, string> = {};
+          
+          bookingsResponse.forEach((item: any) => {
+            if (item.time_id && item.status) {
+              statusMap[item.time_id] = item.status;
+            }
+          });
 
-        // Create status map for time slots
-        const statusMap: Record<number, string> = {};
-        matchingBookings.forEach((booking: any) => {
-          statusMap[booking.time_id] = booking.status;
-        });
-
-        setBookingStatusMap(statusMap);
+          setBookingStatusMap(statusMap);
+        } else {
+          setBookingStatusMap({});
+        }
       } catch (error) {
         console.error("Error checking booking status:", error);
         setBookingStatusMap({});
       }
     };
 
-    checkBookingStatus();
-  }, [selectedDate, selectedBranch, selectedServiceType]);
+    checkUserBookingStatus();
+  }, [selectedDate, selectedBranch, currentUserId]);
 
-  // Function to get card background color based on booking status
-  const getCardBackground = (timeSlotId: number, isSelected: boolean, isFull: boolean) => {
-    if (isFull) return "#ffccc7"; // เต็มแล้ว - สีแดงอ่อน
-    if (isSelected) return "#e6f7ff"; // เลือกแล้ว - สีฟ้าอ่อน
-    
+  const getCardStyle = (timeSlotId: number, isSelected: boolean, isFull: boolean) => {
     const bookingStatus = bookingStatusMap[timeSlotId];
-    if (bookingStatus === "pending") return "#fff7e6"; // รออนุมัติ - สีเหลือง
-    if (bookingStatus === "success") return "#ffccc7"; // อนุมัติแล้ว - สีแดงอ่อน
     
-    return "#fff"; // ปกติ - สีขาว
+    let background = "#ffffff";
+    let borderColor = "#d9d9d9";
+    let boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
+
+    if (isFull) {
+      background = "linear-gradient(135deg, #ffccc7 0%, #ff7875 100%)";
+      borderColor = "#ff4d4f";
+    } else if (isSelected) {
+      background = "linear-gradient(135deg, #e6f7ff 0%, #91d5ff 100%)";
+      borderColor = "#1677ff";
+      boxShadow = "0 4px 12px rgba(22, 119, 255, 0.3)";
+    } else if (bookingStatus === "pending") {
+      background = "linear-gradient(135deg, #fff7e6 0%, #ffd666 100%)";
+      borderColor = "#faad14";
+    } else if (bookingStatus === "success") {
+      background = "linear-gradient(135deg, #f6ffed 0%, #b7eb8f 100%)";
+      borderColor = "#52c41a";
+    }
+
+    return {
+      background,
+      borderColor,
+      boxShadow,
+      border: `2px solid ${borderColor}`,
+      borderRadius: "12px",
+      transition: "all 0.3s ease",
+    };
   };
 
-  // Function to get status text
-  const getStatusText = (timeSlotId: number, available: number) => {
+  const getStatusBadge = (timeSlotId: number, available: number) => {
     const bookingStatus = bookingStatusMap[timeSlotId];
     
     if (available <= 0) {
-      return <Text type="danger">เต็มแล้ว</Text>;
+      return <Badge status="error" text={<Text type="danger"><StopOutlined /> เต็มแล้ว</Text>} />;
     }
     
     if (bookingStatus === "pending") {
-      return <Text style={{ color: "#fa8c16" }}>รออนุมัติ</Text>;
+      return <Badge status="warning" text={<Text style={{ color: "#faad14" }}><ExclamationCircleOutlined /> รออนุมัติ</Text>} />;
     }
     
     if (bookingStatus === "success") {
-      return <Text type="danger">จองแล้ว</Text>;
+      return <Badge status="success" text={<Text type="success"><CheckCircleOutlined /> จองแล้ว</Text>} />;
     }
     
-    return <Text type="success">เหลืออีก {available} ที่</Text>;
+    return <Badge status="success" text={<Text type="success">เหลืออีก {available} ที่</Text>} />;
   };
 
-  // Function to determine if time slot is clickable
   const isTimeSlotClickable = (timeSlotId: number, isFull: boolean) => {
     if (isFull) return false;
     
     const bookingStatus = bookingStatusMap[timeSlotId];
-    // ไม่ให้จองซ้ำถ้าอยู่ในสถานะ pending หรือ success
     if (bookingStatus === "pending" || bookingStatus === "success") return false;
     
     return true;
   };
 
-  // Handle errors based on status code
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return '#faad14';
+      case 'success':
+        return '#52c41a';
+      case 'cancelled':
+        return '#ff4d4f';
+      default:
+        return '#d9d9d9';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'รออนุมัติ';
+      case 'success':
+        return 'อนุมัติแล้ว';
+      case 'cancelled':
+        return 'ยกเลิกแล้ว';
+      default:
+        return 'ไม่ทราบสถานะ';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <ExclamationCircleOutlined style={{ color: '#faad14' }} />;
+      case 'success':
+        return <CheckCircleOutlined style={{ color: '#52c41a' }} />;
+      case 'cancelled':
+        return <StopOutlined style={{ color: '#ff4d4f' }} />;
+      default:
+        return <ClockCircleOutlined style={{ color: '#d9d9d9' }} />;
+    }
+  };
+
   const handleError = (error: any) => {
     if (error.response) {
       const status = error.response.status;
@@ -178,7 +267,7 @@ const BookingCalendar = () => {
 
   const handleSubmit = async () => {
     if (!selectedTime || !selectedBranch || !selectedDate || !selectedServiceType) {
-      message.error("กรุณาเลือกวันที่ สาขา ประเภทบริการ และช่วงเวลาให้ครบ");
+      message.error("กรุณาเลือกข้อมูลให้ครบถ้วน");
       return;
     }
 
@@ -188,7 +277,6 @@ const BookingCalendar = () => {
       return;
     }
 
-    // Check if user already has booking for this time slot
     const bookingStatus = bookingStatusMap[selectedTime];
     if (bookingStatus === "pending") {
       message.error("คุณมีการจองรออนุมัติสำหรับช่วงเวลานี้อยู่แล้ว");
@@ -221,30 +309,24 @@ const BookingCalendar = () => {
         message.success("ส่งคำขอจองสำเร็จ! รอการอนุมัติ");
         setSelectedTime(null);
         
-        // Refresh booking status after successful booking
+        // Refresh user bookings
+        await fetchUserBookings();
+        
         const bookingsResponse = await GetBookingStatus(
           currentUserId,
-          selectedDate!,
           selectedBranch!,
-          selectedServiceType!
+          selectedDate!
         );
-        setUserBookings(bookingsResponse);
         
-        // Update status map
-        const matchingBookings = bookingsResponse.filter((booking: any) => {
-          const bookingDate = dayjs(booking.date_booking).format("YYYY-MM-DD");
-          return (
-            bookingDate === selectedDate &&
-            booking.branch_id === selectedBranch &&
-            booking.service_type_id === selectedServiceType
-          );
-        });
-
-        const statusMap: Record<number, string> = {};
-        matchingBookings.forEach((booking: any) => {
-          statusMap[booking.time_id] = booking.status;
-        });
-        setBookingStatusMap(statusMap);
+        if (Array.isArray(bookingsResponse)) {
+          const statusMap: Record<number, string> = {};
+          bookingsResponse.forEach((item: any) => {
+            if (item.time_id && item.status) {
+              statusMap[item.time_id] = item.status;
+            }
+          });
+          setBookingStatusMap(statusMap);
+        }
         
       } else {
         handleError(res);
@@ -258,131 +340,460 @@ const BookingCalendar = () => {
   };
 
   return (
-    <div style={{ padding: 24 }}>
-      <Title level={2} style={{ textAlign: "center" }}>นัดหมายกรมที่ดิน</Title>
-      <Text type="secondary" style={{ display: "block", textAlign: "center" }}>
-        ตรวจสอบเอกสารสิทธิ์, นำที่ดินขึ้น Blockchain, โอนกรรมสิทธิ์
-      </Text>
+    <div style={{ 
+      minHeight: "100vh",
+      background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+      padding: "24px 16px"
+    }}>
+      
+      <div style={{ maxWidth: "1600px", margin: "0 auto" }}>
+        {/* Header Section */}
+        <Card 
+          style={{ 
+            marginBottom: 32,
+            borderRadius: "16px",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            border: "none",
+            boxShadow: "0 8px 32px rgba(102, 126, 234, 0.3)"
+          }}
+        >
+          <div style={{ textAlign: "center", color: "white" }}>
+            <Title level={1} style={{ color: "white", marginBottom: 8, fontSize: "2.5rem" }}>
+              <EnvironmentOutlined style={{ marginRight: 12 }} />
+              ระบบจองการติดต่อกรมที่ดิน
+            </Title>
+            <Paragraph style={{ color: "rgba(255,255,255,0.9)", fontSize: "1.1rem", margin: 0 }}>
+              บริการตรวจสอบเอกสารสิทธิ์ • นำที่ดินขึ้น Blockchain • โอนกรรมสิทธิ์
+            </Paragraph>
+          </div>
+        </Card>
 
-      <div style={{ marginTop: 32, display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap" }}>
-        <Select placeholder="เลือกจังหวัด" style={{ width: 200 }} onChange={(val) => {
-          setSelectedProvince(val);
-          setSelectedBranch(null);
-          setSelectedServiceType(null);
-          setBookingStatusMap({}); // Clear booking status when province changes
-        }}>
-          {provinces.map((p) => (
-            <Option key={p.ID} value={p.ID}>{p.Province}</Option>
-          ))}
-        </Select>
-
-        <Select placeholder="เลือกสาขา" style={{ width: 200 }} value={selectedBranch || undefined} onChange={(val) => {
-          setSelectedBranch(val);
-          setSelectedServiceType(null);
-          setBookingStatusMap({}); // Clear booking status when branch changes
-        }} disabled={!selectedProvince}>
-          {branches.map((b) => (
-            <Option key={b.ID} value={b.ID}>{b.Branch}</Option>
-          ))}
-        </Select>
-
-        <Select placeholder="เลือกประเภทบริการ" style={{ width: 200 }} onChange={(val) => {
-          setSelectedServiceType(val);
-        }} disabled={!selectedBranch}>
-          {serviceTypes.map((service) => (
-            <Option key={service.ID} value={service.ID}>{service.service}</Option>
-          ))}
-        </Select>
-
-        <DatePicker placeholder="เลือกวันที่" style={{ width: 200 }} onChange={(date) => {
-          setSelectedDate(date ? dayjs(date).format("YYYY-MM-DD") : null);
-        }} />
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginTop: 32 }}>
-        {times.map((timeSlot) => {
-          const available = slotAvailability[timeSlot.ID] ?? 5;
-          const isFull = available <= 0;
-          const isClickable = isTimeSlotClickable(timeSlot.ID, isFull);
-          const isSelected = selectedTime === timeSlot.ID;
-
-          return (
-            <Card
-              key={timeSlot.ID}
-              hoverable={isClickable}
-              style={{
-                background: getCardBackground(timeSlot.ID, isSelected, isFull),
-                cursor: isClickable ? "pointer" : "not-allowed",
-                opacity: isClickable ? 1 : 0.6,
-                border: isSelected ? "2px solid #1677ff" : "1px solid #d9d9d9",
-              }}
-              onClick={() => {
-                if (isClickable) setSelectedTime(timeSlot.ID);
+        <Row gutter={24}>
+          {/* Left Column - Booking Form */}
+          <Col xs={24} lg={16}>
+            {/* Selection Form */}
+            <Card 
+              title={
+                <Space>
+                  <FileTextOutlined style={{ color: "#1677ff" }} />
+                  <span>เลือกข้อมูลการจอง</span>
+                </Space>
+              }
+              style={{ 
+                marginBottom: 32,
+                borderRadius: "16px",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.1)"
               }}
             >
-              <Text strong>{timeSlot.Timework}</Text>
-              <br />
-              {getStatusText(timeSlot.ID, available)}
+              <Row gutter={[16, 16]}>
+                <Col xs={24} sm={12} md={6}>
+                  <Text strong style={{ display: "block", marginBottom: 8 }}>
+                    <EnvironmentOutlined style={{ color: "#1677ff", marginRight: 4 }} />
+                    จังหวัด
+                  </Text>
+                  <Select 
+                    placeholder="เลือกจังหวัด" 
+                    style={{ width: "100%" }}
+                    size="large"
+                    onChange={(val) => {
+                      setSelectedProvince(val);
+                      setSelectedBranch(null);
+                      setSelectedServiceType(null);
+                      setBookingStatusMap({});
+                    }}
+                  >
+                    {provinces.map((p) => (
+                      <Option key={p.ID} value={p.ID}>{p.Province}</Option>
+                    ))}
+                  </Select>
+                </Col>
+
+                <Col xs={24} sm={12} md={6}>
+                  <Text strong style={{ display: "block", marginBottom: 8 }}>
+                    <EnvironmentOutlined style={{ color: "#1677ff", marginRight: 4 }} />
+                    สาขา
+                  </Text>
+                  <Select 
+                    placeholder="เลือกสาขา" 
+                    style={{ width: "100%" }}
+                    size="large"
+                    value={selectedBranch || undefined} 
+                    onChange={(val) => {
+                      setSelectedBranch(val);
+                      setSelectedServiceType(null);
+                      setBookingStatusMap({});
+                    }} 
+                    disabled={!selectedProvince}
+                  >
+                    {branches.map((b) => (
+                      <Option key={b.ID} value={b.ID}>{b.Branch}</Option>
+                    ))}
+                  </Select>
+                </Col>
+
+                <Col xs={24} sm={12} md={6}>
+                  <Text strong style={{ display: "block", marginBottom: 8 }}>
+                    <FileTextOutlined style={{ color: "#1677ff", marginRight: 4 }} />
+                    ประเภทบริการ
+                  </Text>
+                  <Select 
+                    placeholder="เลือกประเภทบริการ" 
+                    style={{ width: "100%" }}
+                    size="large"
+                    onChange={(val) => setSelectedServiceType(val)} 
+                    disabled={!selectedBranch}
+                  >
+                    {serviceTypes.map((service) => (
+                      <Option key={service.ID} value={service.ID}>{service.service}</Option>
+                    ))}
+                  </Select>
+                </Col>
+
+                <Col xs={24} sm={12} md={6}>
+                  <Text strong style={{ display: "block", marginBottom: 8 }}>
+                    <CalendarOutlined style={{ color: "#1677ff", marginRight: 4 }} />
+                    วันที่
+                  </Text>
+                  <DatePicker 
+                    placeholder="เลือกวันที่" 
+                    style={{ width: "100%" }}
+                    size="large"
+                    disabledDate={(current) => {
+                      return current && current <= dayjs().endOf('day');
+                    }}
+                    onChange={(date) => {
+                      setSelectedDate(date ? dayjs(date).format("YYYY-MM-DD") : null);
+                    }}
+                  />
+                </Col>
+              </Row>
             </Card>
-          );
-        })}
+
+            {/* Time Slots */}
+            {selectedDate && selectedBranch && (
+              <Card 
+                title={
+                  <Space>
+                    <ClockCircleOutlined style={{ color: "#1677ff" }} />
+                    <span>เลือกช่วงเวลา</span>
+                    <Badge count={`${dayjs(selectedDate).format('DD/MM/YYYY')}`} style={{ backgroundColor: '#52c41a' }} />
+                  </Space>
+                }
+                style={{ 
+                  marginBottom: 32,
+                  borderRadius: "16px",
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.1)"
+                }}
+              >
+                <Row gutter={[16, 16]}>
+                  {times.map((timeSlot) => {
+                    const available = slotAvailability[timeSlot.ID] ?? 5;
+                    const isFull = available <= 0;
+                    const isClickable = isTimeSlotClickable(timeSlot.ID, isFull);
+                    const isSelected = selectedTime === timeSlot.ID;
+
+                    return (
+                      <Col key={timeSlot.ID} xs={24} sm={12} md={8} lg={6}>
+                        <Card
+                          hoverable={isClickable}
+                          style={{
+                            ...getCardStyle(timeSlot.ID, isSelected, isFull),
+                            cursor: isClickable ? "pointer" : "not-allowed",
+                            opacity: isClickable ? 1 : 0.7,
+                            height: "120px",
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "center"
+                          }}
+                          onClick={() => {
+                            if (isClickable) setSelectedTime(timeSlot.ID);
+                          }}
+                          bodyStyle={{ 
+                            textAlign: "center", 
+                            padding: "16px 12px",
+                            height: "100%",
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "center"
+                          }}
+                        >
+                          <Title level={4} style={{ margin: "0 0 8px 0", color: "#1677ff" }}>
+                            <ClockCircleOutlined style={{ marginRight: 6 }} />
+                            {timeSlot.Timework}
+                          </Title>
+                          {getStatusBadge(timeSlot.ID, available)}
+                        </Card>
+                      </Col>
+                    );
+                  })}
+                </Row>
+              </Card>
+            )}
+
+            {/* Submit Button */}
+            <Card 
+              style={{ 
+                borderRadius: "16px",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+                textAlign: "center"
+              }}
+            >
+              {loading ? (
+                <Spin size="large" />
+              ) : (
+                <button 
+                  style={{ 
+                    padding: "16px 48px", 
+                    fontSize: "1.2rem", 
+                    fontWeight: "600",
+                    background: (!selectedTime || !selectedBranch || !selectedDate || !selectedServiceType) 
+                      ? "#d9d9d9" 
+                      : "linear-gradient(135deg, #1677ff 0%, #722ed1 100%)",
+                    color: "white", 
+                    border: "none", 
+                    borderRadius: "12px",
+                    cursor: (!selectedTime || !selectedBranch || !selectedDate || !selectedServiceType) 
+                      ? "not-allowed" 
+                      : "pointer",
+                    boxShadow: "0 4px 16px rgba(22, 119, 255, 0.3)",
+                    transition: "all 0.3s ease",
+                    minWidth: "200px"
+                  }} 
+                  onClick={handleSubmit}
+                  disabled={!selectedTime || !selectedBranch || !selectedDate || !selectedServiceType}
+                  onMouseEnter={(e) => {
+                    if (!e.currentTarget.disabled) {
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.boxShadow = "0 6px 20px rgba(22, 119, 255, 0.4)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!e.currentTarget.disabled) {
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = "0 4px 16px rgba(22, 119, 255, 0.3)";
+                    }
+                  }}
+                >
+                  <CheckCircleOutlined style={{ marginRight: 8 }} />
+                  ยืนยันการจอง
+                </button>
+              )}
+            </Card>
+
+            {/* Legend */}
+            <Card 
+              title="คำอธิบายสถานะ"
+              style={{ 
+                marginTop: 24,
+                borderRadius: "16px",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.1)"
+              }}
+            >
+              <Row gutter={[16, 8]}>
+                <Col xs={24} sm={8}>
+                  <Space>
+                    <div style={{ width: 16, height: 16, background: "linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)", border: "2px solid #d9d9d9", borderRadius: 4 }}></div>
+                    <Text>ช่วงเวลาว่าง</Text>
+                  </Space>
+                </Col>
+                <Col xs={24} sm={8}>
+                  <Space>
+                    <div style={{ width: 16, height: 16, background: "linear-gradient(135deg, #fff7e6 0%, #ffd666 100%)", border: "2px solid #faad14", borderRadius: 4 }}></div>
+                    <Text>รออนุมัติ</Text>
+                  </Space>
+                </Col>
+                <Col xs={24} sm={8}>
+                  <Space>
+                    <div style={{ width: 16, height: 16, background: "linear-gradient(135deg, #ffccc7 0%, #ff7875 100%)", border: "2px solid #ff4d4f", borderRadius: 4 }}></div>
+                    <Text>จองแล้ว/เต็มแล้ว</Text>
+                  </Space>
+                </Col>
+              </Row>
+              
+              <Divider />
+              
+              <Paragraph type="secondary" style={{ textAlign: "center", margin: 0 }}>
+                <strong>หมายเหตุ:</strong> ระบบจำกัดจำนวนการจองไม่เกิน 5 คนต่อช่วงเวลา | 
+                ท่านสามารถจองได้เฉพาะวันที่ในอนาคตเท่านั้น
+              </Paragraph>
+            </Card>
+          </Col>
+
+          {/* Right Column - User Bookings History */}
+          <Col xs={24} lg={8}>
+            <Card 
+              title={
+                <Space>
+                  <HistoryOutlined style={{ color: "#1677ff" }} />
+                  <span>ประวัติการจองของคุณ</span>
+                  <Badge count={userBookings.length} style={{ backgroundColor: '#1677ff' }} />
+                </Space>
+              }
+              extra={
+                <Button
+                  type="text"
+                  icon={<ReloadOutlined />}
+                  loading={loadingBookings}
+                  onClick={fetchUserBookings}
+                  size="small"
+                >
+                  รีเฟรช
+                </Button>
+              }
+              style={{ 
+                borderRadius: "16px",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+                height: "fit-content",
+                position: "sticky",
+                top: "24px"
+              }}
+              bodyStyle={{ maxHeight: "80vh", overflowY: "auto" }}
+            >
+              {loadingBookings ? (
+                <div style={{ textAlign: "center", padding: "40px 0" }}>
+                  <Spin size="large" />
+                  <Text style={{ display: "block", marginTop: 16 }}>กำลังโหลดข้อมูล...</Text>
+                </div>
+              ) : userBookings.length === 0 ? (
+                <Empty
+                  description="ไม่พบประวัติการจอง"
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  style={{ padding: "40px 0" }}
+                >
+                  <Text type="secondary">คุณยังไม่เคยทำการจองมาก่อน</Text>
+                </Empty>
+              ) : (
+                <Timeline
+                  mode="left"
+                  items={userBookings
+                    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                    .map((booking) => ({
+                      dot: getStatusIcon(booking.status),
+                      color: getStatusColor(booking.status),
+                      children: (
+                        <Card
+                          size="small"
+                          style={{
+                            marginBottom: 16,
+                            borderRadius: "8px",
+                            border: `1px solid ${getStatusColor(booking.status)}`,
+                            backgroundColor: booking.status === 'pending' 
+                              ? '#fff7e6' 
+                              : booking.status === 'success'
+                              ? '#f6ffed'
+                              : '#fff2f0'
+                          }}
+                          bodyStyle={{ padding: "12px" }}
+                        >
+                          <div style={{ marginBottom: 8 }}>
+                            <Badge 
+                              color={getStatusColor(booking.status)}
+                              text={
+                                <Text strong style={{ color: getStatusColor(booking.status) }}>
+                                  {getStatusText(booking.status)}
+                                </Text>
+                              }
+                            />
+                          </div>
+                          
+                          <Space direction="vertical" size={4} style={{ width: "100%" }}>
+                            <div>
+                              <CalendarOutlined style={{ color: "#1677ff", marginRight: 6 }} />
+                              <Text strong>
+                                {dayjs(booking.date_booking).format('DD/MM/YYYY')}
+                              </Text>
+                            </div>
+                            
+                            <div>
+                              <ClockCircleOutlined style={{ color: "#52c41a", marginRight: 6 }} />
+                              <Text>{booking.timework}</Text>
+                            </div>
+                            
+                            <div>
+                              <EnvironmentOutlined style={{ color: "#722ed1", marginRight: 6 }} />
+                              <Text>{booking.branch}, {booking.province}</Text>
+                            </div>
+                          </Space>
+
+                          <Divider style={{ margin: "8px 0" }} />
+                          
+                          <Text type="secondary" style={{ fontSize: "12px" }}>
+                            จองเมื่อ: {dayjs(booking.created_at).format('DD/MM/YYYY HH:mm')}
+                          </Text>
+                        </Card>
+                      )
+                    }))}
+                />
+              )}
+            </Card>
+            
+            {/* Booking Statistics Card */}
+            
+          </Col>
+        </Row>
       </div>
 
-      <div style={{ marginTop: 32, textAlign: "center" }}>
-        {loading ? <Spin /> : (
-          <button 
-            style={{ 
-              padding: "8px 24px", 
-              fontSize: 16, 
-              background: "#1677ff", 
-              color: "white", 
-              border: "none", 
-              borderRadius: 8,
-              opacity: (!selectedTime || !selectedBranch || !selectedDate || !selectedServiceType) ? 0.6 : 1,
-              cursor: (!selectedTime || !selectedBranch || !selectedDate || !selectedServiceType) ? "not-allowed" : "pointer"
-            }} 
-            onClick={handleSubmit}
-            disabled={!selectedTime || !selectedBranch || !selectedDate || !selectedServiceType}
-          >
-            ยืนยันการจอง
-          </button>
-        )}
-      </div>
-
+      {/* Modals */}
       <Modal
-        title="ยืนยันการจอง"
+        title={
+          <Space>
+            <CheckCircleOutlined style={{ color: "#1677ff" }} />
+            <span>ยืนยันการจอง</span>
+          </Space>
+        }
         visible={confirmationVisible}
         onOk={confirmBooking}
         onCancel={() => setConfirmationVisible(false)}
-        okText="ยืนยัน"
+        okText="ยืนยันการจอง"
         cancelText="ยกเลิก"
+        okButtonProps={{ 
+          style: { 
+            background: "linear-gradient(135deg, #1677ff 0%, #722ed1 100%)",
+            border: "none"
+          } 
+        }}
       >
-        <p>คุณต้องการจองเวลานี้จริงหรือไม่?</p>
-        <p>วันที่: {selectedDate}</p>
-        <p>ช่วงเวลา: {times.find((t) => t.ID === selectedTime)?.Timework}</p>
-        <p>ประเภทบริการ: {serviceTypes.find((s) => s.ID === selectedServiceType)?.service}</p>
-        <p>สาขา: {branches.find((b) => b.ID === selectedBranch)?.Branch}</p>
+        <div style={{ padding: "16px 0" }}>
+          <Paragraph><strong>กรุณาตรวจสอบข้อมูลการจองของท่าน:</strong></Paragraph>
+          <div style={{ background: "#f5f5f5", padding: 16, borderRadius: 8, marginTop: 16 }}>
+            <Row gutter={[0, 8]}>
+              <Col span={24}>
+                <Text strong><CalendarOutlined /> วันที่: </Text>
+                <Text>{dayjs(selectedDate).format('DD/MM/YYYY (dddd)')}</Text>
+              </Col>
+              <Col span={24}>
+                <Text strong><ClockCircleOutlined /> ช่วงเวลา: </Text>
+                <Text>{times.find((t) => t.ID === selectedTime)?.Timework}</Text>
+              </Col>
+              <Col span={24}>
+                <Text strong><FileTextOutlined /> ประเภทบริการ: </Text>
+                <Text>{serviceTypes.find((s) => s.ID === selectedServiceType)?.service}</Text>
+              </Col>
+              <Col span={24}>
+                <Text strong><EnvironmentOutlined /> สาขา: </Text>
+                <Text>{branches.find((b) => b.ID === selectedBranch)?.Branch}</Text>
+              </Col>
+            </Row>
+          </div>
+        </div>
       </Modal>
-
+        
       <Modal
-        title="การจองไม่สามารถทำได้"
+        title={
+          <Space>
+            <ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />
+            <span style={{ color: "#ff4d4f" }}>ไม่สามารถจองได้</span>
+          </Space>
+        }
         visible={showErrorModal}
         onOk={() => setShowErrorModal(false)}
         onCancel={() => setShowErrorModal(false)}
-        okText="ปิด"
+        okText="รับทราบ"
+        okButtonProps={{ danger: true }}
       >
-        <p>{errorMessage}</p>
+        <Paragraph style={{ fontSize: "1.1rem", marginTop: 16 }}>{errorMessage}</Paragraph>
       </Modal>
-
-      <div style={{ marginTop: 16, textAlign: "center" }}>
-        <Text type="secondary" style={{ fontSize: 12 }}>
-          หมายเหตุ: ระบบจำกัดจำนวนจองไม่เกิน 5 คนต่อช่วงเวลา
-        </Text>
-        <br />
-        <Text type="secondary" style={{ fontSize: 12 }}>
-          สีเหลือง = รออนุมัติ, สีแดง = จองแล้ว/เต็มแล้ว, สีขาว = ว่าง
-        </Text>
-      </div>
+      
     </div>
   );
 };

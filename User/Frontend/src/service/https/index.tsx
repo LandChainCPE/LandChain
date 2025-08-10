@@ -1,67 +1,113 @@
 const apiUrl = "http://localhost:8080";
 import axios from "axios";
 import type { BookingInterface } from "../../interfaces/Booking";
+import type { AvailableSlotsResponse } from "../../interfaces/types";
 
+// 🔧 แก้ไข: สร้าง axios instance ที่มี interceptor
+const api = axios.create({
+  baseURL: apiUrl,
+});
 
-
-const requestOptions = {
-  headers: {
-    "Content-Type": "application/json",
+// เพิ่ม Authorization header ในทุกคำขอ
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    const tokenType = localStorage.getItem("token_type") || "Bearer";
+    
+    // ตรวจสอบว่า headers มีอยู่หรือไม่ ถ้าไม่มีให้สร้างใหม่
+    if (!config.headers) {
+      config.headers = {};
+    }
+    
+    if (token) {
+      config.headers.Authorization = `${tokenType} ${token}`;
+    }
+    config.headers["Content-Type"] = "application/json";
+    
+    return config;
   },
-};
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
+// เพิ่ม response interceptor เพื่อจัดการ error
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token หมดอายุหรือไม่ถูกต้อง - redirect to login
+      localStorage.removeItem("token");
+      localStorage.removeItem("token_type");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
+// 🔧 แก้ไข: ใช้ api instance แทน axios โดยตรง
 async function CreateBooking(data: BookingInterface) {
-  return await axios
-    .post(`${apiUrl}/userbookings`, data, requestOptions)
-    .then((res) => res) // คืนค่าทั้ง response object
-    .catch((e) => e.response); // ถ้า error คืน response error
+  try {
+    const res = await api.post("/userbookings", data);
+    return res;
+  } catch (error: any) {
+    console.error("CreateBooking Error:", error);
+    return error.response;
+  }
 }
 
 export async function getAllPostData() {
   try {
-    const res = await axios.get(`${apiUrl}/user/sellpost`);
-    return res.data; // คืนแค่ data
-  } catch (e) {
-    const err = e as any;
-    if (err.response) return err.response.data; // คืนเฉพาะ error message ถ้ามี
+    const res = await api.get("/user/sellpost");
+    return res.data;
+  } catch (e: any) {
+    console.error("getAllPostData Error:", e);
+    if (e.response) return e.response.data;
     else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
   }
 }
-// services/booking/index.tsx
-async function GetProvinces(p?: any) {
-  return await axios
-    .get(`${apiUrl}/provinces`, requestOptions)
-    .then((res) => res.data)
-    .catch((e) => e.response);
+
+async function GetProvinces() {
+  try {
+    const res = await api.get("/provinces");
+    return res.data;
+  } catch (e: any) {
+    console.error("GetProvinces Error:", e);
+    return e.response?.data || { error: "ไม่สามารถดึงข้อมูลจังหวัดได้" };
+  }
 }
 
-async function GetTimeSlots(t?: any) {
-  return await axios
-    .get(`${apiUrl}/time`, requestOptions)
-    .then((res) => res.data)
-    .catch((e) => e.response);
+async function GetTimeSlots() {
+  try {
+    const res = await api.get("/time");
+    return res.data;
+  } catch (e: any) {
+    console.error("GetTimeSlots Error:", e);
+    return e.response?.data || { error: "ไม่สามารถดึงข้อมูลช่วงเวลาได้" };
+  }
 }
 
-async function GetBranches(b?: any) {
-  return await axios
-    .get(`${apiUrl}/branches`, requestOptions)
-    .then((res) => res.data) // คืนค่าข้อมูลสาขา
-    .catch((e) => e.response); // ถ้า error คืน response error
+async function GetBranches() {
+  try {
+    const res = await api.get("/branches");
+    return res.data;
+  } catch (e: any) {
+    console.error("GetBranches Error:", e);
+    return e.response?.data || { error: "ไม่สามารถดึงข้อมูลสาขาได้" };
+  }
 }
-
 
 export async function GetSuccessfulBookingsByDateAndBranch(date: string, branchID: number) {
   try {
-    const response = await axios.get(`${apiUrl}/bookings`, {
+    const response = await api.get("/bookings", {
       params: {
         date: date,
         branchID: branchID,
       },
-      ...requestOptions,
     });
 
     // กรองเฉพาะ booking ที่ status = "success"
-    const filtered = response.data.filter((b: any) => b.status === "success");
+    const filtered = (response.data as any[]).filter(b => b.status === 'success');
 
     // คืนข้อมูลที่จำเป็น
     return filtered.map((b: any) => ({
@@ -75,70 +121,134 @@ export async function GetSuccessfulBookingsByDateAndBranch(date: string, branchI
 }
 
 async function GetServiceTypes() {
-  return await axios
-    .get(`${apiUrl}/service-types`, requestOptions)
-    .then((res) => res.data) // คืนค่าข้อมูลประเภทบริการ
-    .catch((e) => e.response); // ถ้า error คืน response error
+  try {
+    const res = await api.get("/service-types");
+    return res.data;
+  } catch (e: any) {
+    console.error("GetServiceTypes Error:", e);
+    return e.response?.data || { error: "ไม่สามารถดึงข้อมูลประเภทบริการได้" };
+  }
 }
 
-
-export async function GetAvailableSlots(date: string, branchID: number, timeID: number) {
+export async function GetAvailableSlots(
+  date: string,
+  branchID: number,
+  timeID: number
+): Promise<AvailableSlotsResponse> {
   try {
-    const response = await axios.get(`${apiUrl}/bookings/checklim`, {
-      params: {
-        date: date,
-        branchID: branchID,
-        timeID: timeID,
-      },
+    const { data } = await api.get<AvailableSlotsResponse>("/bookings/checklim", {
+      params: { date, branchID, timeID },
     });
-    return response.data; // { available_slots: number, total_bookings: number }
-  } catch (error: any) {
-    console.error("Error checking limit:", error);
+    return data;
+  } catch (err) {
+    console.error("Error checking available slots:", err);
     return { available_slots: 0, total_bookings: 0 };
   }
 }
 
-export async function GetBookingStatus(id: number, selectedDate: string, selectedBranch: number, selectedServiceType: number) {
+export const GetBookingStatus = async (
+  userID: number, 
+  branchID: number, 
+  date: string
+) => {
   try {
-    const response = await axios.get(`${apiUrl}/bookings/status`, {
+    const response = await api.get("/bookings/status", {
       params: {
-        userID: id,
+        userID: userID,
+        branchID: branchID,
+        date: date,
       },
     });
-    return response.data; // เช่น { message: "คุณมีการจองที่รออนุมัติอยู่แล้ว" } หรือ { message: "" }
+
+    if (Array.isArray(response.data)) {
+      return response.data;
+    } else {
+      console.error("Error: Response is not an array", response.data);
+      return [];
+    }
   } catch (error) {
     console.error("Error checking booking status:", error);
-    return { message: "เกิดข้อผิดพลาดในการตรวจสอบสถานะการจอง" }; // ถ้าเกิดข้อผิดพลาด
+    return [];
   }
-}
+};
 
+export const checkBookingStatus = async (
+  userID: number,
+  branchID: number,
+  date: string,
+  timeID?: number
+) => {
+  try {
+    const params: any = {
+      userID: userID,
+      branchID: branchID,
+      date: date,
+    };
+
+    if (timeID && timeID !== 0) {
+      params.time_id = timeID;
+    }
+
+    const response = await api.get("/bookings/status", {
+      params: params,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching booking status:", error);
+    throw new Error("ไม่สามารถดึงข้อมูลการจองได้");
+  }
+};
 
 export async function GetAllLandDatabyID() {
   try {
-    const res = await axios.get(`${apiUrl}/user/chat/:id`);
-    return res.data; // คืนแค่ data
-  } catch (e) {
-    const err = e as any;
-    if (err.response) return err.response.data; // คืนเฉพาะ error message ถ้ามี
+    const res = await api.get("/user/chat/:id");
+    return res.data;
+  } catch (e: any) {
+    console.error("GetAllLandDatabyID Error:", e);
+    if (e.response) return e.response.data;
     else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
   }
 }
 
 export async function GetMessagesByLandPostID(id: string) {
   try {
-    const res = await axios.get(`${apiUrl}/user/chat/roomchat/${id}`);
-    return res.data; // คืนแค่ data
-  } catch (e) {
-    const err = e as any;
-    if (err.response) return err.response.data; // คืนเฉพาะ error message ถ้ามี
+    const res = await api.get(`/user/chat/roomchat/${id}`);
+    return res.data;
+  } catch (e: any) {
+    console.error("GetMessagesByLandPostID Error:", e);
+    if (e.response) return e.response.data;
     else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
   }
 }
 
+export const GetUserBookings = async (userID: number) => {
+  try {
+    const response = await api.get(`/bookings/${userID}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user bookings:", error);
+    throw new Error("ไม่สามารถดึงข้อมูลการจองได้");
+  }
+};
+
+// 🔧 เพิ่ม utility function สำหรับตรวจสอบ token
+export const isTokenValid = (): boolean => {
+  const token = localStorage.getItem("token");
+  return !!token;
+};
+
+// 🔧 เพิ่ม function สำหรับ logout
+export const logout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("token_type");
+  window.location.href = "/login";
+};
+
 export {
-    CreateBooking,
-    GetProvinces,
-    GetBranches,
-    GetTimeSlots,
-    GetServiceTypes,
-}
+  CreateBooking,
+  GetProvinces,
+  GetBranches,
+  GetTimeSlots,
+  GetServiceTypes,
+};
