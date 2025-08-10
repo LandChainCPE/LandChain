@@ -13,19 +13,16 @@ import { Link } from 'react-router-dom';
 const { Title, Text } = Typography;
 const { Option } = Select;
 const { Step } = Steps;
-
 const MainPage = (): JSX.Element => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
   const goToRegisland = () => {
-    // ตั้งสถานะเข้าสู่ระบบและนำทางทันที
+    setLoading(true);
     localStorage.setItem("isLogin", "true");
-    navigate("/user/regisland");
-  };
-
-  const goToLogin = () => {
-    navigate("/login");
+    setTimeout(() => {
+      navigate("/user/regisland");
+    }, 2000);
   };
 
   return (
@@ -37,7 +34,7 @@ const MainPage = (): JSX.Element => {
             <img src={Logo} alt="LandChain Logo" style={{ width: "100%",height: "auto",maxWidth: "200px" }} />
           </Col>
           <Col style={{ textAlign: "right" }}>
-            <Button type="link" onClick={() => navigate("/")} style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
+            <Button type="link" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
               หน้าแรก
             </Button>
             <Button type="link" onClick={goToRegisland} style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
@@ -46,7 +43,7 @@ const MainPage = (): JSX.Element => {
             <Button type="link" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
               ข่าวสาร
             </Button>
-            <Button type="link" onClick={goToLogin} style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
+            <Button type="link" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
               เข้าสู่ระบบ
             </Button>
           </Col>
@@ -216,6 +213,34 @@ const MainPage = (): JSX.Element => {
         </Row>
         <br />
         <Pagination align="center" defaultCurrent={1} total={50} />
+        {/* เอาไว้ใช้เวลาดึงข้อมูลจริงมาแสดง
+          {data.map((item, index) => (
+            <Col key={index} span={8}>
+              <Card
+                hoverable
+                cover={<img alt="land" src={item.image} style={{ height: 200, objectFit: 'cover' }} />}
+                style={{ fontFamily: 'Kanit', borderRadius: '12px' }}
+              >
+                <Title level={4}>{item.title}</Title>
+                <Text type="secondary">{item.area} • {item.location}</Text>
+                <br />
+                <Text strong>ราคา: {item.price} บาท</Text>
+                <p style={{ marginTop: 8 }}>{item.description}</p>
+              </Card>
+            </Col>
+          ))}
+          const data = [
+            {
+              title: "ขายที่ดิน นนทบุรี",
+              location: "ติดแม่น้ำเจ้าพระยา",
+              area: "2-3-43 ไร่",
+              price: "18,000,000",
+              description: "เหมาะสร้างบ้านพักตากอากาศ",
+              image: "/images/land1.jpg"
+            },
+            ...
+          ]
+        */}
 
         {/* Services + Public Relations Section */}
         <Row justify="space-between" align="top" style={{ marginTop: "40px", padding: '0 5%' }}>
@@ -246,26 +271,18 @@ const MainPage = (): JSX.Element => {
 
             <Row justify="start" gutter={[16, 16]} style={{ marginTop: "20px" }}>
               <Col span={11}>
-                <Card 
-                  hoverable
-                  onClick={() => {
-                    localStorage.setItem("isLogin", "true");
-                    navigate("/user/dashboard");
-                  }}
-                  style={{ height: 250, display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}
-                >
+              <Link to="/user/dashboard"> 
+                <Card style={{ height: 250, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                     <CopyOutlined style={{ fontSize: '70px' }} />
                   </div>
                   <Title level={3} style={{ fontFamily: 'Kanit', textAlign: 'center' }}>ทำเรื่องขอคัดเอกสารออนไลน์</Title>
                 </Card>
+              </Link>
+
               </Col>
               <Col span={11}>
-                <Card 
-                  hoverable
-                  onClick={goToRegisland}
-                  style={{ height: 250, display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}
-                >
+                <Card style={{ height: 250, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                     <AuditOutlined style={{ fontSize: '70px' }} />
                   </div>
@@ -285,6 +302,7 @@ const MainPage = (): JSX.Element => {
             </Card>
           </Col>
         </Row>
+
 
         {/* Steps Section */}
         <Col xs={24} sm={24} md={24} lg={24} style={{ marginTop: "200px" }}>
