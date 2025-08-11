@@ -273,14 +273,38 @@ func createRoomchatsAndMessages() {
 
 	log.Println("✅ Database Migrated & Seeded Successfully")
 
-	// ✅ Seed State (แยกจาก Users)
-	var stateCount int64
-	db.Model(&entity.State{}).Count(&stateCount)
-	if stateCount == 0 {
-		db.Create(&entity.State{Name: "รอตรวจสอบ", Color: "orange"})
-		db.Create(&entity.State{Name: "กำลังดำเนินการ", Color: "blue"})
-		db.Create(&entity.State{Name: "เสร็จสิ้น", Color: "green"})
-	}
-	
-	log.Println("✅ Database Migrated & Seeded Successfully")
+states := []entity.State{
+    {Name: "รอตรวจสอบ", Color: "orange"},
+    {Name: "กำลังดำเนินการ", Color: "blue"},
+    {Name: "เสร็จสิ้น", Color: "green"},
+}
+
+// สร้าง State
+for _, state := range states {
+    if err := db.Create(&state).Error; err != nil {
+        log.Fatal("❌ Failed to create state:", err)
+    }
+}
+
+log.Println("✅ States have been created successfully")
+
+// สร้าง Petition
+petition := entity.Petition{
+    FirstName:   "มาลี",
+    LastName:    "มาดี",
+    Tel:         "0987654321",
+    Email:       "j@gmail.com",
+    Description: "โฉนดเก่าหาย",
+    Date:        "2025-07-31",
+    Topic:       "ขอคัดสำเนาโฉนด",
+    StateID:     1, // ตรวจสอบว่า StateID นี้มีอยู่ในตาราง State
+    UserID:      1, // ตรวจสอบว่า UserID นี้มีอยู่ในตาราง Users
+}
+
+if err := db.Create(&petition).Error; err != nil {
+    log.Fatal("❌ Failed to create petition:", err)
+}
+
+log.Println("✅ Petition created successfully")
+
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { Layout, Menu, Card, Row, Col, Button, Badge, Avatar } from "antd";
-import { HomeOutlined, ProfileOutlined, FileTextOutlined,BlockOutlined,RightOutlined,UserOutlined} from "@ant-design/icons";
+import { HomeOutlined, ProfileOutlined, FileTextOutlined,RightOutlined,UserOutlined} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
 const { Header, Sider, Content } = Layout;
@@ -16,14 +16,6 @@ const Dashboard: React.FC = () => {
       icon: <FileTextOutlined style={{ fontSize: 32, color: "#1890ff" }} />,
       gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
       count: "12"
-    },
-    {
-      title: "โฉนดที่ดิน",
-      description: "ขอดูข้อมูลใน Blockchain",
-      route: "/transfer",
-      icon: <BlockOutlined style={{ fontSize: 32, color: "#52c41a" }} />,
-      gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-      count: "8"
     },
   ];
 

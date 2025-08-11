@@ -44,7 +44,7 @@ func main() {
 	r.GET("/service-types", controller.GetServiceType) // ดึงข้อมูลประเภทบริการ
 	r.GET("/bookings/status/:id", controller.GetBookingStatus) // ดึงข้อมูลการจองตาม ID
 	r.GET("/bookings/checklim", controller.CheckAvailableSlots) // ดึงข้อมูลการจองตาม ID
-	r.Run(":8080")
+	//r.Run(":8080")
 
 	// CONTROLLER lANDSELLPOST
 	r.GET("/user/sellpost", controller.GetAllPostLandData)
@@ -54,6 +54,7 @@ func main() {
 	r.GET("/user/chat/:id", controller.GetAllLandDatabyID)
 	r.GET("/user/chat/roomchat/:id", controller.GetMessagesByLandPostID)
 	r.GET("/user/:id", controller.GetUserByID)
+
 
 	r.Run(":8080")
 

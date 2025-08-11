@@ -13,11 +13,11 @@ const Regisland = Loadable(lazy(() => import("../pages/RegisLand/RegisLand")));
 const Dashboard = Loadable(lazy(() => import("../pages/Petition/Dashboard")));
 const Petition = Loadable(lazy(() => import("../pages/Petition/Petition")));
 const State = Loadable(lazy(() => import("../pages/Petition/State")));
-
 const SellMainPage = Loadable(lazy(() => import("../pages/Sell-Buy/SellMainpage")));
 const Map = Loadable(lazy(() => import("../pages/Map/map")));
 const SellPost = Loadable(lazy(() => import("../pages/SellPost/sellpost")));
 const Chat = Loadable(lazy(() => import("../pages/ChatPage/chat")));
+const Countservice = Loadable(lazy(() => import("../pages/service/countservice")));
 
 const UserRoutes = (): RouteObject[] => [
   {
@@ -36,6 +36,7 @@ const UserRoutes = (): RouteObject[] => [
       {path: "map", element: <Map /> },
       {path: "sellpost", element: <SellPost /> },
       {path: "chat", element: <Chat /> },
+      {path: "service", element: <Countservice /> },
       { path: "*", element: <MainPage /> },
     ],
   },

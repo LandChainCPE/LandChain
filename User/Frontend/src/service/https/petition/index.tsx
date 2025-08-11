@@ -11,7 +11,7 @@ const requestOptions = {
   },
 };
 
-// ✅ ดึงรายการคำร้อง
+//ดึงรายการคำร้อง
 async function GetAllPetition() {
   return await axios
     .get(`${apiUrl}/petitions`, requestOptions)
@@ -19,7 +19,7 @@ async function GetAllPetition() {
     .catch((e) => e.response);
 }
 
-// ✅ สร้างคำร้องใหม่
+//สร้างคำร้องใหม่
 async function CreatePetition(data: any) {
   return await axios
     .post(`${apiUrl}/petitions`, data, requestOptions) // ✅ ส่ง data เป็น body
@@ -27,7 +27,7 @@ async function CreatePetition(data: any) {
     .catch((e) => e.response);
 }
 
-// ✅ อัปเดตคำร้องทั้งหมด
+//อัปเดตคำร้องทั้งหมด
 async function UpdatePetition(id: string, data: any) {
   return await axios
     .put(`${apiUrl}/petitions/${id}`, data, requestOptions)
@@ -35,7 +35,7 @@ async function UpdatePetition(id: string, data: any) {
     .catch((e) => e.response);
 }
 
-// ✅ อัปเดตเฉพาะสถานะ
+//อัปเดตเฉพาะสถานะ
 async function UpdatePetitionState(id: string, state_id: number) {
   return await axios
     .patch(`${apiUrl}/petitions/${id}/state`, { state_id }, requestOptions)
