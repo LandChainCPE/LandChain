@@ -118,7 +118,7 @@ func GetMessagesByLandPostID(c *gin.Context) {
 			Message:    msg.Message,
 			RoomchatID: msg.RoomchatID,
 			UserID:     user.ID,
-			UserName:   user.Name,  // สมมติฟิลด์ชื่อว่า Name
+			UserName:   user.Firstname,  // สมมติฟิลด์ชื่อว่า Name
 		})
 	}
 

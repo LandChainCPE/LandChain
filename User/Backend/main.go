@@ -9,6 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+
+	"landchain/middlewares"
 )
 
 func main() {
@@ -23,43 +25,62 @@ func main() {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 
+	// เริ่มต้น Scheduler สำหรับลบการจองที่หมดอายุ
+	controller.StartBookingCleanupScheduler()
+
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
 
-	r.GET("/getbookingdata", controller.GetBookingData)
-	r.POST("/userbookings", controller.CreateBooking) // สร้างการจอง
-	r.PUT("/bookings/:id", controller.UpdateBooking)  // อัปเดตการจอง
-	//r.PUT("/bookings/:id", controller.UpdateBooking) // อัปเดตการจอง
+	r.POST("/createaccount", controller.CreateAccount)
 
-	//J
-	r.GET("/petitions", controller.GetAllPetition)
-	r.POST("/petitions", controller.CreatePetition)
-	r.GET("/states", controller.GetAllStates)
+	authorized := r.Group("")
+	authorized.Use(middlewares.Authorizes())
+	{
+		authorized.GET("/getbookingdata", controller.GetBookingData)
+		authorized.POST("/userbookings", controller.CreateBooking) // สร้างการจอง
+		authorized.PUT("/bookings/:id", controller.UpdateBooking)  // อัปเดตการจอง
+		//r.PUT("/bookings/:id", controller.UpdateBooking) // อัปเดตการจอง
 
-	r.GET("/provinces", controller.GetProvince) // ดึงข้อมูลจังหวัด
-	r.GET("/branches", controller.GetBranch) // ดึงข้อมูลสาขา
-	r.GET("/time", controller.GetTime) // ดึงข้อมูลช่วงเวลา
-	r.GET("/bookings", controller.GetBookingsByDateAndBranch)
-	r.GET("/service-types", controller.GetServiceType) // ดึงข้อมูลประเภทบริการ
-	r.GET("/bookings/status/:id", controller.GetBookingStatus) // ดึงข้อมูลการจองตาม ID
-	r.GET("/bookings/checklim", controller.CheckAvailableSlots) // ดึงข้อมูลการจองตาม ID
-	//r.Run(":8080")
+		//J
+		authorized.GET("/petitions", controller.GetAllPetition)
+		authorized.POST("/petitions", controller.CreatePetition)
+		authorized.GET("/states", controller.GetAllStates)
 
-	// CONTROLLER lANDSELLPOST
-	r.GET("/user/sellpost", controller.GetAllPostLandData)
+		authorized.GET("/provinces", controller.GetProvince) // ดึงข้อมูลจังหวัด
+		authorized.GET("/branches", controller.GetBranch)    // ดึงข้อมูลสาขา
+		authorized.GET("/time", controller.GetTime)          // ดึงข้อมูลช่วงเวลา
+		authorized.GET("/bookings", controller.GetBookingsByDateAndBranch)
+		authorized.GET("/service-types", controller.GetServiceType)          // ดึงข้อมูลประเภทบริการ
+		authorized.GET("/bookings/checklim", controller.CheckAvailableSlots) // ดึงข้อมูลการจองตาม ID
+		authorized.GET("/bookings/status", controller.CheckBookingStatus)
+// 🎯 Routes สำหรับลบการจองที่หมดอายุ
+		authorized.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
+		authorized.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)  
+		authorized.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
+		authorized.GET("/bookings/:userID", controller.GetUserBookings) // ดึงข้อมูลการจองตาม ID
 
-	// CONTROLLER Chat
-	r.GET("/ws/roomchat/:roomID", controller.HandleWebSocket)
-	r.GET("/user/chat/:id", controller.GetAllLandDatabyID)
-	r.GET("/user/chat/roomchat/:id", controller.GetMessagesByLandPostID)
-	r.GET("/user/:id", controller.GetUserByID)
+		// CONTROLLER lANDSELLPOST
+		r.GET("/user/sellpost", controller.GetAllPostLandData)
+
+		// CONTROLLER Chat
+		r.GET("/ws/roomchat/:roomID", controller.HandleWebSocket)
+		r.GET("/user/chat/:id", controller.GetAllLandDatabyID)
+		r.GET("/user/chat/roomchat/:id", controller.GetMessagesByLandPostID)
+		r.GET("/user/:id", controller.GetUserByID)
+	}
+
+	// public := r.Group("")
+	// {
+	// 	public.GET("/uploads/*filename", animal.ServeImage)
+	// 	public.GET("/genders", user.ListGenders)
+	// 	public.POST("/signup", user.CreateUser)
+
+	// }
 
 
 	r.Run(":8080")
-
-	// เริ่มรันเซิร์ฟเวอร์
-	r.Run() // default :8080
+	r.Run()
 }
 
 // Middleware CORS
