@@ -1,0 +1,1010 @@
+import React, { useState, useEffect } from 'react';
+import Web3 from 'web3';
+import detectEthereumProvider from '@metamask/detect-provider';
+import { Button, TextField, Box, Typography, Container, Card, CardContent } from '@mui/material';
+
+const App = () => {
+    const [web3, setWeb3] = useState<Web3 | null>(null);
+    const [accounts, setAccounts] = useState<string[]>([]);
+    const [contract, setContract] = useState<any>(null);
+    const [walletAddress, setWalletAddress] = useState('');
+
+    const [walletAddress1, setWalletAddress1] = useState('');
+    const [walletAddress2, setWalletAddress2] = useState('');
+    const [walletAddress3, setWalletAddress3] = useState('');
+    const [walletAddress4, setWalletAddress4] = useState('');
+    const [walletAddress5, setWalletAddress5] = useState('');
+
+    const [nameHash, setNameHash] = useState('');
+    const [landTitleHash, setLandTitleHash] = useState('');
+    const [tokenId, setTokenId] = useState<number | string>('');
+    const [transactionStatus, setTransactionStatus] = useState('');
+
+    const contractAddress = '0xc598E0e0C193eA1D5229Ec77E5974f5cAC7e0555'; // Use your contract address
+    const contractABI = [
+        {
+            "inputs": [],
+            "stateMutability": "nonpayable",
+            "type": "constructor"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "owner",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "approved",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "Approval",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "owner",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "operator",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "bool",
+                    "name": "approved",
+                    "type": "bool"
+                }
+            ],
+            "name": "ApprovalForAll",
+            "type": "event"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "to",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "approve",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "to",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "string",
+                    "name": "landTitleHash",
+                    "type": "string"
+                }
+            ],
+            "name": "LandMinted",
+            "type": "event"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "to",
+                    "type": "address"
+                },
+                {
+                    "internalType": "string",
+                    "name": "landTitleHash",
+                    "type": "string"
+                }
+            ],
+            "name": "mintLandTitleNFT",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "wallet",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "string",
+                    "name": "nameHash",
+                    "type": "string"
+                }
+            ],
+            "name": "OwnerRegistered",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "to",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "OwnershipTransferred",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "previousOwner",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "newOwner",
+                    "type": "address"
+                }
+            ],
+            "name": "OwnershipTransferred",
+            "type": "event"
+        },
+        {
+            "inputs": [],
+            "name": "pause",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "internalType": "address",
+                    "name": "account",
+                    "type": "address"
+                }
+            ],
+            "name": "Paused",
+            "type": "event"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "wallet",
+                    "type": "address"
+                },
+                {
+                    "internalType": "string",
+                    "name": "nameHash",
+                    "type": "string"
+                }
+            ],
+            "name": "registerOwner",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "renounceOwnership",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "internalType": "address",
+                    "name": "to",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "safeTransferFrom",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "internalType": "address",
+                    "name": "to",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "bytes",
+                    "name": "data",
+                    "type": "bytes"
+                }
+            ],
+            "name": "safeTransferFrom",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "operator",
+                    "type": "address"
+                },
+                {
+                    "internalType": "bool",
+                    "name": "approved",
+                    "type": "bool"
+                }
+            ],
+            "name": "setApprovalForAll",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "to",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "Transfer",
+            "type": "event"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "internalType": "address",
+                    "name": "to",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "transferFrom",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "to",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "transferOwnership",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "newOwner",
+                    "type": "address"
+                }
+            ],
+            "name": "transferOwnership",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "unpause",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "internalType": "address",
+                    "name": "account",
+                    "type": "address"
+                }
+            ],
+            "name": "Unpaused",
+            "type": "event"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "owner",
+                    "type": "address"
+                }
+            ],
+            "name": "balanceOf",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "getApproved",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "getLandTitleHash",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "wallet",
+                    "type": "address"
+                }
+            ],
+            "name": "getLandTitleInfoByWallet",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "wallet",
+                    "type": "address"
+                }
+            ],
+            "name": "getOwnerInfo",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "nameHash",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "getOwnershipHistory",
+            "outputs": [
+                {
+                    "internalType": "address[]",
+                    "name": "",
+                    "type": "address[]"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "owner",
+                    "type": "address"
+                },
+                {
+                    "internalType": "address",
+                    "name": "operator",
+                    "type": "address"
+                }
+            ],
+            "name": "isApprovedForAll",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "name",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "owner",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "ownerOf",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "name": "owners",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "wallet",
+                    "type": "address"
+                },
+                {
+                    "internalType": "string",
+                    "name": "nameHash",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "name": "ownershipHistory",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "paused",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "bytes4",
+                    "name": "interfaceId",
+                    "type": "bytes4"
+                }
+            ],
+            "name": "supportsInterface",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "symbol",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "tokenURI",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }
+    ];
+
+    useEffect(() => {
+        const initWeb3 = async () => {
+            const provider = await detectEthereumProvider();
+
+            if (provider) {
+                const web3Instance = new Web3(provider);
+                setWeb3(web3Instance);
+
+                // Request accounts
+                const accounts = await web3Instance.eth.requestAccounts();
+                setAccounts(accounts);
+                setWalletAddress(accounts[0]);
+
+                const contractInstance = new web3Instance.eth.Contract(contractABI, contractAddress);
+                setContract(contractInstance);
+            } else {
+                alert('Please install MetaMask!');
+            }
+        };
+
+        initWeb3();
+    }, []);
+
+    const connectMetaMask = async () => {
+        if (web3 && contract) {
+            const accounts = await web3.eth.requestAccounts();
+            setAccounts(accounts);
+            setWalletAddress(accounts[0]);
+        }
+    };
+
+    const handleRegisterOwner = async () => {
+        if (!web3 || !contract || !walletAddress1 || !nameHash) {
+            alert('Please connect MetaMask and fill in all required fields');
+            return;
+        }
+
+        try {
+            await contract.methods.registerOwner(walletAddress1, nameHash).send({ from: walletAddress });
+            alert('Owner registration successful!');
+            setTransactionStatus('Success');
+        } catch (error) {
+            console.error('Error registering owner:', error);
+            alert('Error: ' + error.message);
+            setTransactionStatus('Failed');
+        }
+    };
+
+    const handleMintLandNFT = async () => {
+        if (!web3 || !contract || !walletAddress2 || !landTitleHash) {
+            alert('Please connect MetaMask and fill in all required fields');
+            return;
+        }
+
+        try {
+            await contract.methods.mintLandTitleNFT(walletAddress2, landTitleHash).send({ from: walletAddress });
+            alert('NFT minting successful!');
+            setTransactionStatus('Success');
+        } catch (error) {
+            console.error('Error minting NFT:', error);
+            alert('Error: ' + error.message);
+            setTransactionStatus('Failed');
+        }
+    };
+
+    const getOwnerInfo = async () => {
+        if (!web3 || !contract || !walletAddress3) {
+            alert('Please connect MetaMask');
+            return;
+        }
+
+        try {
+            const ownerInfo = await contract.methods.getOwnerInfo(walletAddress3).call();
+            alert(`Owner Info: ${ownerInfo}`);
+        } catch (error) {
+            console.error('Error fetching owner info:', error);
+            alert('Error: ' + error.message);
+        }
+    };
+
+    const getLandTitleInfoByWallet = async () => {
+        if (!web3 || !contract || !walletAddress4) {
+            alert('Please connect MetaMask');
+            return;
+        }
+
+        try {
+            const landTitleInfo = await contract.methods.getLandTitleInfoByWallet(walletAddress4).call();
+            alert(`Land Title Info: ${landTitleInfo}`);
+        } catch (error) {
+            console.error('Error fetching land title info:', error);
+            alert('Error: ' + error.message);
+        }
+    };
+
+    const transferOwnership = async () => {
+        if (!web3 || !contract || !walletAddress5 || !tokenId) {
+            alert('Please connect MetaMask and fill in all required fields');
+            return;
+        }
+
+        try {
+            await contract.methods.transferOwnership(walletAddress5, tokenId).send({ from: walletAddress });
+            alert('Ownership transfer successful');
+            setTransactionStatus('Success');
+        } catch (error) {
+            console.error('Error transferring ownership:', error);
+            alert('Error: ' + error.message);
+            setTransactionStatus('Failed');
+        }
+    };
+
+    const getOwnershipHistory = async () => {
+        if (!web3 || !contract || !tokenId) {
+            alert('Please connect MetaMask and fill in all required fields');
+            return;
+        }
+
+        try {
+            const history = await contract.methods.getOwnershipHistory(tokenId).call();
+            alert(`Ownership History: ${history}`);
+        } catch (error) {
+            console.error('Error fetching ownership history:', error);
+            alert('Error: ' + error.message);
+        }
+    };
+
+    return (
+        <Container maxWidth="sm">
+            <Box textAlign="center" mb={2}>
+                <Typography variant="h4" gutterBottom>Land Title Registration System</Typography>
+            </Box>
+
+            <Card variant="outlined" sx={{ mb: 3 }}>
+                <CardContent>
+                    <Button variant="contained" color="primary" onClick={connectMetaMask} fullWidth>
+                        Connect MetaMask
+                    </Button>
+                    <Typography variant="h6" sx={{ marginTop: 2 }}>My Wallet Address: {walletAddress}</Typography>
+                </CardContent>
+            </Card>
+
+            {/* Register Owner */}
+            <Card variant="outlined" sx={{ mb: 3 }}>
+                <CardContent>
+                    {/* ช่องกรอก Wallet ID */}
+                    <TextField
+                        label="Wallet Address"
+                        value={walletAddress1}
+                        onChange={(e) => setWalletAddress1(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                    />
+
+                    {/* ช่องกรอก Name Hash */}
+                    <TextField
+                        label="Name Hash"
+                        value={nameHash}
+                        onChange={(e) => setNameHash(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                    />
+
+                    <Button variant="contained" color="secondary" onClick={handleRegisterOwner} fullWidth>
+                        Register Owner
+                    </Button>
+                </CardContent>
+            </Card>
+
+
+            {/* Mint Land Title NFT */}
+            <Card variant="outlined" sx={{ mb: 3 }}>
+                <CardContent>
+                    {/* ช่องกรอก Wallet ID */}
+                    <TextField
+                        label="Wallet Address"
+                        value={walletAddress2}
+                        onChange={(e) => setWalletAddress2(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                    />
+
+                    {/* ช่องกรอก Land Title Hash */}
+                    <TextField
+                        label="Land Title Hash"
+                        value={landTitleHash}
+                        onChange={(e) => setLandTitleHash(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                    />
+
+                    <Button variant="contained" color="secondary" onClick={handleMintLandNFT} fullWidth>
+                        Mint Land Title NFT
+                    </Button>
+                </CardContent>
+            </Card>
+
+
+            {/* Get Owner Info */}
+            <Card variant="outlined" sx={{ mb: 3 }}>
+                <CardContent>
+                    {/* ช่องกรอก Wallet ID */}
+                    <TextField
+                        label="Wallet Address"
+                        value={walletAddress3}
+                        onChange={(e) => setWalletAddress3(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                    />
+
+                    <Button variant="contained" color="primary" onClick={getOwnerInfo} fullWidth>
+                        Get Owner Info
+                    </Button>
+                </CardContent>
+            </Card>
+
+
+            {/* Get Land Title Info */}
+            <Card variant="outlined" sx={{ mb: 3 }}>
+                <CardContent>
+                    {/* ช่องกรอก Wallet ID */}
+                    <TextField
+                        label="Wallet Address"
+                        value={walletAddress4}
+                        onChange={(e) => setWalletAddress4(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                    />
+
+                    <Button variant="contained" color="primary" onClick={getLandTitleInfoByWallet} fullWidth>
+                        Get Land Title Info
+                    </Button>
+                </CardContent>
+            </Card>
+
+
+            {/* Transfer Ownership */}
+            <Card variant="outlined" sx={{ mb: 3 }}>
+                <CardContent>
+                    {/* ช่องกรอก Wallet ID */}
+                    <TextField
+                        label="Wallet Address"
+                        value={walletAddress5}
+                        onChange={(e) => setWalletAddress5(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                    />
+
+                    {/* ช่องกรอก Token ID */}
+                    <TextField
+                        label="Token ID"
+                        value={tokenId}
+                        onChange={(e) => setTokenId(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                    />
+
+                    <Button variant="contained" color="warning" onClick={transferOwnership} fullWidth>
+                        Transfer Ownership
+                    </Button>
+                </CardContent>
+            </Card>
+
+
+            {/* Get Ownership History */}
+            <Card variant="outlined" sx={{ mb: 3 }}>
+                <CardContent>
+                    {/* ช่องกรอก Token ID */}
+                    <TextField
+                        label="Token ID"
+                        value={tokenId}
+                        onChange={(e) => setTokenId(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                    />
+
+                    <Button variant="contained" color="info" onClick={getOwnershipHistory} fullWidth>
+                        Get Ownership History
+                    </Button>
+                </CardContent>
+            </Card>
+
+
+            <Typography variant="body1" color="textSecondary" textAlign="center">
+                {transactionStatus && `Status: ${transactionStatus}`}
+            </Typography>
+        </Container>
+    );
+};
+
+export default App;
