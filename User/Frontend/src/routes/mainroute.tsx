@@ -22,6 +22,8 @@ const Chat = Loadable(lazy(() => import("../pages/ChatPage/chat")));
 const CreateAccount = Loadable(lazy(() => import("../pages/CreateUser/CreateAccount")));
 const ConnectMetamask = Loadable(lazy(() => import("../pages/CreateUser/ConnectMetamask")));
 
+const LoginMetamask = Loadable(lazy(() => import("../pages/LoginRegister/LoginMetamask")));
+
 const UserRoutes = (): RouteObject[] => [
   {
     path: "/", element: <MainPage />, 
@@ -58,7 +60,7 @@ const MainRoutes = (): RouteObject[] => [
   {
     path: "/login",
     children: [
-      { index: true, element: <Login /> },
+      { index: true, element: <LoginMetamask /> },
     //   {path: "main", element: <Login /> },
       { path: "*", element: <Login /> },
     ],

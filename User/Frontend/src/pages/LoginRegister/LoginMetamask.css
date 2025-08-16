@@ -1,0 +1,77 @@
+/* Login.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f4f4f9;
+  font-family: 'Arial', sans-serif;
+  padding: 0 20px;  /* เพิ่ม padding เพื่อไม่ให้เนื้อหาชิดขอบ */
+}
+
+.heading {
+  color: #333;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  text-align: center; /* ให้ข้อความอยู่กลาง */
+}
+
+.button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%; /* ทำให้ปุ่มกว้างเต็มหน้าจอ */
+}
+
+.button:hover {
+  background-color: #45a049;
+}
+
+.error-text {
+  color: #f44336;
+  font-size: 1rem;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.success-text {
+  color: #4caf50;
+  font-size: 1.2rem;
+  margin-top: 10px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* เพิ่ม Media Queries สำหรับ Mobile */
+@media (max-width: 600px) {
+  .heading {
+    font-size: 1.5rem; /* ขนาดข้อความหัวข้อเล็กลงสำหรับมือถือ */
+  }
+
+  .button {
+    padding: 12px 20px; /* ปรับขนาดปุ่มสำหรับหน้าจอเล็ก */
+    font-size: 1rem; /* ขนาดฟอนต์เล็กลง */
+  }
+
+  .error-text,
+  .success-text {
+    font-size: 0.9rem; /* ขนาดข้อความเล็กลงสำหรับมือถือ */
+  }
+}
+
+/* Media query สำหรับ Desktop */
+@media (min-width: 601px) {
+  .container {
+    padding: 0 50px; /* เพิ่ม padding บนหน้าจอที่ใหญ่ขึ้น */
+  }
+
+  .button {
+    width: auto; /* ปรับให้ปุ่มมีขนาดตามเนื้อหาบน Desktop */
+  }
+}
