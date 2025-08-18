@@ -21,8 +21,44 @@ async function CreateAccount(DataCreateAccount: any) {
   return {result, response};
   
 }
+
+// ฟังก์ชัน Login ผ่าน Metamask
+async function LoginWallet(walletAddress: string) {
+  const requestOptions: RequestInit = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ metamaskaddress: walletAddress.toLowerCase() }),
+  };
+
+  const response = await fetch(`${apiUrl}/api/auth/check-wallet`, requestOptions);
+  const result = await response.json();
+
+  if (result.success && result.exists) {
+    // เก็บข้อมูลลง localStorage
+    localStorage.setItem("walletAddress", walletAddress);
+    localStorage.setItem("token", result.token || "");
+    localStorage.setItem("token_type", "Bearer");
+    localStorage.setItem("firstName", result.first_name || "");
+    localStorage.setItem("lastName", result.last_name || "");
+  }
+
+  return { result, response };
+}
+
+// ฟังก์ชัน Logout
+function LogoutWallet() {
+  localStorage.removeItem("walletAddress");
+  localStorage.removeItem("token");
+  localStorage.removeItem("token_type");
+  localStorage.removeItem("firstName");
+  localStorage.removeItem("lastName");
+}
+
   
 
 export {
+  getAuthHeaders,
   CreateAccount,
+  LoginWallet,
+  LogoutWallet
 };

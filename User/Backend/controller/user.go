@@ -69,3 +69,29 @@ func CreateAccount(c *gin.Context) {
 		"LastNameUser":  user.Lastname,
 	})
 }
+
+// CheckWallet ฟังก์ชันสำหรับตรวจสอบว่า Wallet ID มีในฐานข้อมูลหรือไม่
+func CheckWallet(c *gin.Context) {
+	var request struct {
+		WalletId string `json:"walletId"`
+	}
+
+	// รับข้อมูลจาก Body ของ request
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	// เชื่อมต่อกับฐานข้อมูล
+	db := config.DB()
+
+	// ตรวจสอบว่า Wallet ID นี้มีในฐานข้อมูลหรือไม่
+	var user entity.Users
+	if err := db.Where("metamaskaddress = ?", request.WalletId).First(&user).Error; err == nil {
+		// ถ้ามีผู้ใช้ในระบบแล้ว
+		c.JSON(http.StatusOK, gin.H{"exists": true})
+	} else {
+		// ถ้าไม่มีผู้ใช้ในระบบ
+		c.JSON(http.StatusOK, gin.H{"exists": false})
+	}
+}

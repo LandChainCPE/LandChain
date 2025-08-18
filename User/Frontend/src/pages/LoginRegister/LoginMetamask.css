@@ -1,77 +1,264 @@
-/* Login.css */
-.container {
+/* General styles */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.connect-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.connect-btn:active {
+  transform: scale(0.98);
+}
+
+.register-link:hover {
+  color: #1d4ed8;
+}
+
+.disconnect-btn:hover {
+  border-color: #f87171;
+  color: #b91c1c;
+}
+
+.bottom-link:hover {
+  color: #1d4ed8;
+}
+
+/* Specific component styles */
+/* .container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-color: #f4f4f9;
-  font-family: 'Arial', sans-serif;
-  padding: 0 20px;  /* เพิ่ม padding เพื่อไม่ให้เนื้อหาชิดขอบ */
+  justify-content: center;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+} */
+
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 400px;
+  width: 100%;
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
 }
 
-.heading {
-  color: #333;
-  font-size: 2rem;
-  margin-bottom: 20px;
-  text-align: center; /* ให้ข้อความอยู่กลาง */
-}
-
-.button {
-  background-color: #4caf50;
+.header {
+  background: linear-gradient(135deg, #364049 0%, #424f5e 100%);
+  padding: 32px;
+  text-align: center;
   color: white;
-  border: none;
-  padding: 15px 30px;
-  font-size: 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  width: 100%; /* ทำให้ปุ่มกว้างเต็มหน้าจอ */
 }
 
-.button:hover {
-  background-color: #45a049;
-}
-
-.error-text {
-  color: #f44336;
-  font-size: 1rem;
-  margin-top: 10px;
-  text-align: center;
-}
-
-.success-text {
-  color: #4caf50;
-  font-size: 1.2rem;
-  margin-top: 10px;
+.headerTitle {
+  font-size: 24px;
   font-weight: bold;
+  margin: 0 0 8px 0;
+}
+
+.headerSubtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+.content {
+  padding: 32px;
+}
+
+.errorAlert {
+  padding: 16px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.errorIcon {
+  color: #ef4444;
+  font-size: 20px;
+  margin-top: 2px;
+}
+
+.errorText {
+  color: #dc2626;
+  font-size: 14px;
+  margin: 0;
+}
+
+.connectedWallet {
+  padding: 16px;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.walletInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.walletLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.walletIcon {
+  width: 40px;
+  height: 40px;
+  background-color: #dcfce7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #16a34a;
+  font-size: 20px;
+}
+
+.walletLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #166534;
+  margin: 0 0 4px 0;
+}
+
+.walletAddress {
+  font-size: 12px;
+  color: #15803d;
+  font-family: Monaco, Consolas, monospace;
+  margin: 0;
+}
+
+.disconnectBtn {
+  font-size: 12px;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  background-color: transparent;
+  padding: 4px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.connectButton {
+  width: 100%;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+  font-weight: 600;
+  padding: 16px 24px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.connectButtonHover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.connectButtonDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.metamaskIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.divider {
+  margin: 32px 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background-color: #e5e7eb;
+}
+
+.dividerText {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.registerSection {
   text-align: center;
 }
 
-/* เพิ่ม Media Queries สำหรับ Mobile */
-@media (max-width: 600px) {
-  .heading {
-    font-size: 1.5rem; /* ขนาดข้อความหัวข้อเล็กลงสำหรับมือถือ */
-  }
-
-  .button {
-    padding: 12px 20px; /* ปรับขนาดปุ่มสำหรับหน้าจอเล็ก */
-    font-size: 1rem; /* ขนาดฟอนต์เล็กลง */
-  }
-
-  .error-text,
-  .success-text {
-    font-size: 0.9rem; /* ขนาดข้อความเล็กลงสำหรับมือถือ */
-  }
+.registerText {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 12px;
 }
 
-/* Media query สำหรับ Desktop */
-@media (min-width: 601px) {
-  .container {
-    padding: 0 50px; /* เพิ่ม padding บนหน้าจอที่ใหญ่ขึ้น */
-  }
+.registerLink {
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  border-bottom: 1px solid #2563eb;
+  transition: color 0.2s;
+}
 
-  .button {
-    width: auto; /* ปรับให้ปุ่มมีขนาดตามเนื้อหาบน Desktop */
-  }
+.footer {
+  background-color: #f9fafb;
+  padding: 16px 32px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* .footerContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #f9fafb;
+} */
+
+.bottomInfo {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.bottomText {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.bottomLink {
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: none;
 }

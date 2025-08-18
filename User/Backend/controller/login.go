@@ -3,7 +3,6 @@ package controller
 import (
 	"landchain/config"
 	"landchain/entity"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
