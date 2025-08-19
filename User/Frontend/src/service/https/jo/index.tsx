@@ -245,6 +245,9 @@ export const logout = () => {
   window.location.href = "/login";
 };
 
+
+
+
 export {
   CreateBooking,
   GetProvinces,
