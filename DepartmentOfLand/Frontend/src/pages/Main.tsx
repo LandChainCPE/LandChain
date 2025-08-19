@@ -8,13 +8,30 @@ function UserMain() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+  // ฟังก์ชันแปลงวันที่จากปี ค.ศ. เป็นปี พ.ศ.
+  const convertToThaiDate = (dateString: string) => {
+    const date = new Date(dateString);
+
+    // คำนวณปี พ.ศ.
+    const thaiYear = date.getFullYear() + 543;
+
+    // ดึงวันและเดือน
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // เดือนเริ่มต้นที่ 0
+    return `${day}-${month}-${thaiYear}`;
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       const res = await getQueueByDate();
       if (res && res.data) {
+        const transformedBookings = res.data.map((booking: any) => ({
+          ...booking,
+          date_booking: convertToThaiDate(booking.date_booking), // แปลงวันที่
+        }));
+        setBookings(transformedBookings);
         console.log(res.data);
-        setBookings(res.data);
       }
       setLoading(false);
     };
@@ -22,15 +39,10 @@ function UserMain() {
     fetchData();
   }, []);
 
-  const handleEdit = (id: number) => {
-    console.log("Edit booking:", id);
-    // ตัวอย่าง navigate ไปหน้าแก้ไข
+  const handleAction = (id: number) => {
+    console.log("ดำเนินการกับการจอง:", id);
+    // ตัวอย่าง navigate ไปหน้าแก้ไขหรือดำเนินการอื่นๆ
     // navigate(`/edit-booking/${id}`);
-  };
-
-  const handleDelete = (id: number) => {
-    console.log("Delete booking:", id);
-    // เรียก API ลบ
   };
 
   return (
@@ -60,15 +72,9 @@ function UserMain() {
                   <td className="text-center">
                     <button
                       className="btn btn-sm btn-primary me-2"
-                      onClick={() => handleEdit(item.id)}
+                      onClick={() => handleAction(item.id)}
                     >
-                      แก้ไข
-                    </button>
-                    <button
-                      className="btn btn-sm btn-danger"
-                      onClick={() => handleDelete(item.id)}
-                    >
-                      ลบ
+                      ดำเนินการ
                     </button>
                   </td>
                 </tr>
