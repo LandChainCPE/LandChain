@@ -25,6 +25,13 @@ const MainPage = (): JSX.Element => {
     }, 2000);
   };
 
+  const goToLogin = () => {
+    setLoading(true);
+    setTimeout(() => {
+      navigate("/login");
+    }, 2000);
+  };
+
   return (
     <div className="main-container">
       <div className="bg-[#364049] w-full relative">
@@ -43,7 +50,7 @@ const MainPage = (): JSX.Element => {
             <Button type="link" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
               ข่าวสาร
             </Button>
-            <Button type="link" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
+            <Button type="link" onClick={goToLogin} style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
               เข้าสู่ระบบ
             </Button>
           </Col>

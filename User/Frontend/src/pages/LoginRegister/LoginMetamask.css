@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&display=swap');
+
 /* General styles */
 @keyframes spin {
   from { transform: rotate(0deg); }
@@ -26,16 +28,13 @@
   color: #1d4ed8;
 }
 
-/* Specific component styles */
-/* .container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.container {
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-} */
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  background: #f9fafb; /* Optional background color */
+}
 
 .card {
   display: flex;

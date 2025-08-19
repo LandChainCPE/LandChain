@@ -4,7 +4,7 @@ import Logo from '../../assets/LogoLandchain.png';
 import { LoginWallet, LogoutWallet } from '../../service/https/garfield/http';
 
 const LoginMetamask = () => {
-  const [walletAddress, setWalletAddress] = useState(null);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -56,16 +56,16 @@ const LoginMetamask = () => {
   };
 
   const handleRegisterClick = () => {
-    window.location.href = '/creataccount';
+    window.location.href = '/createaccount';
   };
 
   return (
-    
+    <div className="container">
       <div className="card">
         {/* Header */}
         <div className="header">
           <img src={Logo} alt="Logo" style={{ width: '350px' }} />
-          <p className="headerSubtitle">Connect your wallet to continue</p>
+          <p className="headerSubtitle" style={{ fontFamily: 'Kanit' }}>เชื่อม Metamask เพื่อดำเนินการต่อ</p>
         </div>
 
         {/* Content */}
@@ -161,7 +161,7 @@ const LoginMetamask = () => {
         </p>
         </div>
       </div>
-    
+    </div>
   );
 };
 

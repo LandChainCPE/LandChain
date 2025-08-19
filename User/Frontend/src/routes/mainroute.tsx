@@ -24,6 +24,10 @@ const ConnectMetamask = Loadable(lazy(() => import("../pages/CreateUser/ConnectM
 
 const LoginMetamask = Loadable(lazy(() => import("../pages/LoginRegister/LoginMetamask")));
 
+const UserRegisLand = Loadable(lazy(() => import("../pages/RegisLand/UserRegisLand")));
+
+const UserVerifyLand = Loadable(lazy(() => import("../pages/VerifyLand/VerifyLand")));
+
 const UserRoutes = (): RouteObject[] => [
   {
     path: "/", element: <MainPage />, 
@@ -67,10 +71,14 @@ const MainRoutes = (): RouteObject[] => [
   },
   { path: "*", element: <Login /> }, 
   { path: "/", element: <LoginUser /> },
-  { path: "/login", element: <LoginUser /> },
+  { path: "/login", element: <LoginMetamask /> },
   { path: "/register", element: <RegisterUser /> },
   { path: "/createaccount", element: <CreateAccount/> },
   { path: "/connectmetamask", element: <ConnectMetamask /> },
+
+  { path: "/userregisland", element: <UserRegisLand /> },
+  { path: "/verifyland", element: <UserVerifyLand /> },
+  
   { path: "*", element: <LoginUser /> },
 ];
 

@@ -31,7 +31,7 @@ func main() {
 
 	r.POST("/createaccount", controller.CreateAccount)
 	r.POST("/check-wallet", controller.CheckWallet)
-	r.POST("/login", controller.LoginUser)
+	r.POST("/login", controller.LogiำnUser)
 
 	authorized := r.Group("")
 	authorized.Use(middlewares.Authorizes())
