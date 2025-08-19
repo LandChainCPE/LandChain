@@ -55,7 +55,7 @@ const App = () => {
 
     const [loading, setLoading] = useState<string>('');
 
-    const contractAddress = '0xc598E0e0C193eA1D5229Ec77E5974f5cAC7e0555';
+    const contractAddress = '0xbd76F7D3371667020c6fDC8ea13e7FdBF6e51193';
     const contractABI = [
         {
             "inputs": [],
