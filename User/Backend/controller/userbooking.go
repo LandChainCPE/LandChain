@@ -785,6 +785,34 @@ func GetUserBookingsDebug(c *gin.Context) {
 }
 
 
+// เพิ่มฟังก์ชันนี้ใน controller
+func GetUserByEmail(c *gin.Context) {
+    email := c.Query("email")
+    if email == "" {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Email is required"})
+        return
+    }
+
+    var user entity.User
+    err := config.DB().Where("email = ?", email).First(&user).Error
+    if err != nil {
+        if err.Error() == "record not found" {
+            c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบผู้ใช้งานที่มีอีเมลนี้"})
+        } else {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "เกิดข้อผิดพลาดในการค้นหาผู้ใช้งาน"})
+        }
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "user_id": user.ID,
+        "email": user.Email,
+        "firstname": user.FirstName,
+        "lastname": user.LastName,
+    })
+}
+
+
 
 
 

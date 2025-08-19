@@ -28,7 +28,7 @@ const BookingCalendar = () => {
   const [userBookings, setUserBookings] = useState<any[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
 
-  const currentUserId = 1;
+  const currentUserId = Number(localStorage.getItem("user_id") || 7);
 
   const fetchUserBookings = async () => {
     try {
