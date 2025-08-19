@@ -1,7 +1,7 @@
 const apiUrl = "http://localhost:8080";
 import axios from "axios";
-import type { BookingInterface } from "../../interfaces/Booking";
-import type { AvailableSlotsResponse } from "../../interfaces/types";
+import type { BookingInterface } from "../../../interfaces/Booking";
+import type { AvailableSlotsResponse } from "../../../interfaces/types";
 
 // 🔧 แก้ไข: สร้าง axios instance ที่มี interceptor
 const api = axios.create({

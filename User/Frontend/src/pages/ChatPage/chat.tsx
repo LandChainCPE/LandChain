@@ -4,7 +4,7 @@ import "./chat.css";
 import "./picture.css";
 import axios from "axios";
 import Picture from "../../assets/Land-shape-for-buy.jpg";
-import { GetMessagesByLandPostID } from "../../service/https/index";
+import { GetMessagesByLandPostID } from "../../service/https/jo/index";
 
 type MessageWithUser = {
   message_id: number;
