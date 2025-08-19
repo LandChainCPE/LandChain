@@ -67,5 +67,6 @@ func CreateAccount(c *gin.Context) {
 		"token":         signedToken,
 		"FirstNameUser": user.Firstname,
 		"LastNameUser":  user.Lastname,
+		"UserID":        user.ID,
 	})
 }
