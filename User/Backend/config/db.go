@@ -89,7 +89,7 @@ func SetupDatabase() {
 	var serviceCount int64
 	db.Model(&entity.ServiceType{}).Count(&serviceCount)
 	if serviceCount == 0 {
-		db.Create(&entity.ServiceType{Service: "ขึ้นทะเบียนที่ดิน"})
+		db.Create(&entity.ServiceType{Service: "ยืนยันWalletID"})
 	}
 
 	if count == 0 {
