@@ -37,7 +37,7 @@ const UserRoutes = (): RouteObject[] => [
   {
     path: "/user",
     children: [
-      { index: true, element: <MainPage /> },
+      { index: true, element: <UserMain /> },
       {path: "main", element: <UserMain /> },
       {path: "regisland", element: <Regisland /> },
       {path: "dashboard", element: <Dashboard /> },
@@ -47,7 +47,7 @@ const UserRoutes = (): RouteObject[] => [
       {path: "map", element: <Map /> },
       {path: "sellpost", element: <SellPost /> },
       {path: "chat", element: <Chat roomId={null} onNewMessage={() => {}} /> },
-      { path: "*", element: <MainPage /> },
+      { path: "*", element: <UserMain /> },
     ],
   },
   { path: "*", element: <MainPage /> }, 
@@ -80,6 +80,9 @@ const MainRoutes = (): RouteObject[] => [
 
   { path: "/userregisland", element: <UserRegisLand /> },
   { path: "/verifyland", element: <UserVerifyLand /> },
+  { path: "/usermain", element: <UserMain /> },
+
+
 
   { path: "*", element: <LoginUser /> },
 ];
@@ -95,10 +98,9 @@ function ConfigRoutes() {
 //   console.log("roleName:", roleN  console.log("ค่า isLoggedIn:", isLoggedIn);ame);
 //   console.log("employeeid:", employeeID);
 //   console.log("userid:", userid);
-
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   let routes: RouteObject[] = [];
-
-  if (false) { // เปลี่ยนเป็นเงื่อนไขที่เหมาะสมสำหรับการตรวจสอบการเข้าสู่ระบบ
+  if (isLoggedIn) { // เปลี่ยนเป็นเงื่อนไขที่เหมาะสมสำหรับการตรวจสอบการเข้าสู่ระบบ
     routes = UserRoutes();
   } 
   else {

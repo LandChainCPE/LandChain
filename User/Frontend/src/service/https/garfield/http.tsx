@@ -30,7 +30,7 @@ async function LoginWallet(walletAddress: string) {
     body: JSON.stringify({ metamaskaddress: walletAddress.toLowerCase() }),
   };
 
-  const response = await fetch(`${apiUrl}/api/auth/check-wallet`, requestOptions);
+  const response = await fetch(`${apiUrl}/login`, requestOptions);
   const result = await response.json();
 
   if (result.success && result.exists) {

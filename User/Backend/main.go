@@ -31,7 +31,7 @@ func main() {
 
 	r.POST("/createaccount", controller.CreateAccount)
 	r.POST("/check-wallet", controller.CheckWallet)
-	r.POST("/login", controller.LogiำnUser)
+	r.POST("/login", controller.LoginUser)
 
 	authorized := r.Group("")
 	authorized.Use(middlewares.Authorizes())
@@ -58,7 +58,7 @@ func main() {
 		r.GET("/user/sellpost", controller.GetAllPostLandData)
 
 		// CONTROLLER Chat
-		r.GET("/ws/roomchat/:roomID", controller.HandleWebSocket)
+		// r.GET("/ws/roomchat/:roomID", controller.HandleWebSocket)
 		r.GET("/user/chat/:id", controller.GetAllLandDatabyID)
 		r.GET("/user/chat/roomchat/:id", controller.GetMessagesByLandPostID)
 		r.GET("/user/:id", controller.GetUserByID)

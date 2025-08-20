@@ -18,21 +18,6 @@ const MainPage = (): JSX.Element => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const goToRegisland = () => {
-    setLoading(true);
-    localStorage.setItem("isLogin", "true");
-    setTimeout(() => {
-      navigate("/user/regisland");
-    }, 2000);
-  };
-
-  const goToLogin = () => {
-    setLoading(true);
-    setTimeout(() => {
-      navigate("/login");
-    }, 2000);
-  };
-
   return (
     <div className="main-container">
       <div className="bg-[#364049] w-full relative">
