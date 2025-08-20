@@ -22,6 +22,7 @@ function UserMain() {
   };
 
   useEffect(() => {
+    navigate("/operations");
     const fetchData = async () => {
       setLoading(true);
       const res = await getQueueByDate();
@@ -39,10 +40,9 @@ function UserMain() {
     fetchData();
   }, []);
 
-  const handleAction = (id: number) => {
-    console.log("ดำเนินการกับการจอง:", id);
-    // ตัวอย่าง navigate ไปหน้าแก้ไขหรือดำเนินการอื่นๆ
-    // navigate(`/edit-booking/${id}`);
+  const handleAction = (item: any) => {
+    // ส่ง object ของรายการทั้งหมดไปเป็น state
+    navigate(`/verify`, { state: { booking: item } });
   };
 
   return (
@@ -60,15 +60,17 @@ function UserMain() {
                 <th>ชื่อผู้จอง</th>
                 <th>วันที่จอง</th>
                 <th>เวลา</th>
+                <th>ประเภทการติดต่อ</th>
                 <th className="text-center">Action</th>
               </tr>
             </thead>
             <tbody>
               {bookings.map((item, index) => (
                 <tr key={index}>
-                  <td>{item.user_name}</td>
+                  <td>{item.firstname} {item.lastname}</td>
                   <td>{item.date_booking}</td>
                   <td>{item.time_slot}</td>
+                  <td>{item.service_type}</td>
                   <td className="text-center">
                     <button
                       className="btn btn-sm btn-primary me-2"

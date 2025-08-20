@@ -4,12 +4,14 @@ import Loadable from "../component/third-patry/Loadable";
 
 const Login = Loadable(lazy(() => import("../pages/LoginRegister/Login")));
 const Main = Loadable(lazy(() => import("../pages/Main")));
+const Verify = Loadable(lazy(() => import("../pages/Verify")));
 const RegisLand = Loadable(lazy(() => import("../pages/regisland/RegisLand")));
 
 const UserRoutes = (): RouteObject[] => [
   
   {path: "/", element: <Main />, },                                          
-  {path: "main", element: <Main /> },
+  {path: "operations", element: <Main /> },
+  {path: "verify", element: <Verify /> },
   {path: "regisland", element: <RegisLand /> },
   { path: "*", element: <Main /> },
 
