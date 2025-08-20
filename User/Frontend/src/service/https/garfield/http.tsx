@@ -27,7 +27,7 @@ async function LoginWallet(walletAddress: string) {
   const requestOptions: RequestInit = {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ metamaskaddress: walletAddress.toLowerCase() }),
+    body: JSON.stringify({ metamaskaddress: walletAddress}),
   };
 
   const response = await fetch(`${apiUrl}/login`, requestOptions);

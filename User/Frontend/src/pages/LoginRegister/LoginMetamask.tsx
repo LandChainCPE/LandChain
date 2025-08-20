@@ -23,6 +23,7 @@ const LoginMetamask = () => {
 
         if (accounts.length > 0) {
           const address = accounts[0];
+          console.log("Wallet address from MetaMask:", address); 
           setWalletAddress(address);
 
           // เรียกใช้ service LoginWallet

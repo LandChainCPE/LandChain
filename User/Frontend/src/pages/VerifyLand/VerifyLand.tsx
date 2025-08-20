@@ -28,16 +28,6 @@ const VerifyLand: React.FC = () => {
   return (
     <div className="container">
       <div className="wrapper">
-        {/* Header */}
-        <div className="header">
-          <h1 className="title">
-            <Shield size={40} />
-            ระบบยืนยันข้อมูลที่ดิน
-          </h1>
-          <p className="subtitle">
-            ยืนยันความถูกต้องของข้อมูลที่ดินด้วยเทคโนโลยี Blockchain
-          </p>
-        </div>
 
         {/* Main Card */}
         <div className="mainCard">

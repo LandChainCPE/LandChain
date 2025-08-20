@@ -50,14 +50,6 @@ const UserRegisLand: React.FC = () => {
   return (
     <div className="container">
       <div className="wrapper">
-        {/* Header */}
-        <div className="header">
-          <h1 className="title">
-            ระบบจัดการข้อมูลที่ดิน
-          </h1>
-          <p className="subtitle">เพิ่มข้อมูลที่ดินใหม่อย่างง่ายดายและรวดเร็ว</p>
-        </div>
-
         {/* Main Form Card */}
         <div className="card">
           {/* Card Header */}
