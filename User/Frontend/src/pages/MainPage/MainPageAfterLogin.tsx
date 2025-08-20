@@ -9,7 +9,7 @@ import Landpic from "../../assets/LandPic.jpg";
 import LandpicKorat from "../../assets/LandPicKorat.jpg"
 import type { JSX } from "react";
 import { Link } from 'react-router-dom';
-import Header from "./HeaderMain";
+import Header from "./HeaderUserMain";
 
 const { Title, Text } = Typography;
 const { Option } = Select;

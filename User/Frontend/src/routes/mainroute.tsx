@@ -28,6 +28,8 @@ const UserRegisLand = Loadable(lazy(() => import("../pages/RegisLand/UserRegisLa
 
 const UserVerifyLand = Loadable(lazy(() => import("../pages/VerifyLand/VerifyLand")));
 
+const UserMain = Loadable(lazy(() => import("../pages/MainPage/MainPageAfterLogin")));
+
 const UserRoutes = (): RouteObject[] => [
   {
     path: "/", element: <MainPage />, 
@@ -36,7 +38,7 @@ const UserRoutes = (): RouteObject[] => [
     path: "/user",
     children: [
       { index: true, element: <MainPage /> },
-      {path: "main", element: <MainPage /> },
+      {path: "main", element: <UserMain /> },
       {path: "regisland", element: <Regisland /> },
       {path: "dashboard", element: <Dashboard /> },
       {path: "petition", element: <Petition /> },
@@ -78,7 +80,7 @@ const MainRoutes = (): RouteObject[] => [
 
   { path: "/userregisland", element: <UserRegisLand /> },
   { path: "/verifyland", element: <UserVerifyLand /> },
-  
+
   { path: "*", element: <LoginUser /> },
 ];
 

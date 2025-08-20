@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import './LoginMetamask.css'; // นำเข้าไฟล์ CSS ที่สร้างขึ้นมา
 import Logo from '../../assets/LogoLandchain.png';
 import { LoginWallet, LogoutWallet } from '../../service/https/garfield/http';
+import { useNavigate } from 'react-router-dom';
 
 const LoginMetamask = () => {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // ฟังก์ชันเชื่อมต่อ Metamask
   const connectMetamask = async () => {
@@ -26,8 +28,10 @@ const LoginMetamask = () => {
           // เรียกใช้ service LoginWallet
           const { result } = await LoginWallet(address);
           if (result.success && result.exists) {
-            window.location.href = '/dashboard';
+            // ถ้ามีข้อมูลในฐานข้อมูล ให้ไปที่หน้า UserMain
+            navigate('/user/main');
           } else {
+            // ถ้าไม่มีข้อมูลในฐานข้อมูล ให้แสดงข้อความว่าไม่มีบัญชีผู้ใช้
             setErrorMessage('Wallet not registered. Please sign up first.');
           }
         } else {
@@ -48,6 +52,7 @@ const LoginMetamask = () => {
       setErrorMessage('MetaMask not installed. Please install MetaMask to continue.');
     }
   };
+
   // ฟังก์ชัน disconnect wallet
   const disconnectWallet = () => {
     LogoutWallet();
@@ -56,7 +61,7 @@ const LoginMetamask = () => {
   };
 
   const handleRegisterClick = () => {
-    window.location.href = '/createaccount';
+    navigate('/createaccount');
   };
 
   return (
@@ -75,31 +80,6 @@ const LoginMetamask = () => {
             <div className="errorAlert">
               <span className="errorIcon">⚠️</span>
               <p className="errorText">{errorMessage}</p>
-            </div>
-          )}
-
-          {/* Connected Wallet Display */}
-          {walletAddress && (
-            <div className="connectedWallet">
-              <div className="walletInfo">
-                <div className="walletLeft">
-                  <div className="walletIcon">
-                    👛
-                  </div>
-                  <div>
-                    <p className="walletLabel">Wallet Connected</p>
-                    <p className="walletAddress">
-                      {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={disconnectWallet}
-                  className="disconnect-btn"
-                >
-                  Disconnect
-                </button>
-              </div>
             </div>
           )}
 
@@ -149,16 +129,16 @@ const LoginMetamask = () => {
         {/* Footer */}
         <div className="footer">
           <p className="bottomText">
-          New to MetaMask?{' '}
-          <a
-            href="https://metamask.io"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bottomLink"
-          >
-            Learn more
-          </a>
-        </p>
+            New to MetaMask?{' '}
+            <a
+              href="https://metamask.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bottomLink"
+            >
+              Learn more
+            </a>
+          </p>
         </div>
       </div>
     </div>
