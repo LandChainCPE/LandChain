@@ -76,6 +76,7 @@ func SetupDatabase() {
 		&entity.ServiceType{},
 		&entity.Petition{},
 		&entity.State{},
+		&entity.Location{},
 
 	); err != nil {
 		log.Fatal("❌ AutoMigrate failed:", err)
