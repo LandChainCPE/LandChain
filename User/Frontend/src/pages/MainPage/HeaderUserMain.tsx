@@ -72,6 +72,7 @@ const MainPage = (): JSX.Element => {
             // ถ้าไม่มี Metamask ก็รีเฟรชหน้าเลย
             window.location.reload();
         }
+        navigate("/", { replace: true });
     };
 
     return (

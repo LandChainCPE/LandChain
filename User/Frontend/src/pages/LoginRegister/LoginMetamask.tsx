@@ -23,22 +23,38 @@ const LoginMetamask = () => {
 
         if (accounts.length > 0) {
           const address = accounts[0];
-          console.log("Wallet address from MetaMask:", address); 
+          console.log("Wallet address from MetaMask:", address);
           setWalletAddress(address);
 
           // เรียกใช้ service LoginWallet
-          const { result } = await LoginWallet(address);
-          if (result.success && result.exists) {
-            // ถ้ามีข้อมูลในฐานข้อมูล ให้ไปที่หน้า UserMain
-            navigate('/user/main');
-          } else {
-            // ถ้าไม่มีข้อมูลในฐานข้อมูล ให้แสดงข้อความว่าไม่มีบัญชีผู้ใช้
-            setErrorMessage('Wallet not registered. Please sign up first.');
-          }
-        } else {
-          setErrorMessage('No accounts found. Please unlock MetaMask.');
-        }
+          const loginResp = await LoginWallet(address);
+          console.log("LoginWallet API response:", loginResp);
+          const { result } = loginResp || {};
+          const { wallet_address, message, token } = result || {};
 
+          if (wallet_address) {
+            // login สำเร็จ
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('walletAddress', wallet_address);
+            if (token) {
+              localStorage.setItem('token', token);
+            } else {
+              localStorage.removeItem('token');
+            }
+
+            navigate('/user/main', { replace: true });
+          } else {
+            // wallet ยังไม่ได้สมัคร
+            setErrorMessage(message || 'Wallet not registered. Please sign up first.');
+
+            // simulate disconnect
+            setWalletAddress(null);
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('walletAddress');
+            localStorage.removeItem('token');
+          }
+
+        }
       } catch (error: any) {
         console.error('Error connecting to MetaMask:', error);
         if (error.code === 4001) {
@@ -54,12 +70,6 @@ const LoginMetamask = () => {
     }
   };
 
-  // ฟังก์ชัน disconnect wallet
-  const disconnectWallet = () => {
-    LogoutWallet();
-    setWalletAddress(null);
-    setErrorMessage('');
-  };
 
   const handleRegisterClick = () => {
     navigate('/createaccount');

@@ -39,12 +39,6 @@ const Header = (): JSX.Element => {
         navigate("/login");
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem("isLogin");
-        setIsLogin(false);
-        navigate("/login");
-    };
-
     return (
         <div className="header-container">            
             <Row justify="space-between" align="middle" className="navbar">
