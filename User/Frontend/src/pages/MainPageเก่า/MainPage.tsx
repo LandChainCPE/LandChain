@@ -9,35 +9,64 @@ import Landpic from "../../assets/LandPic.jpg";
 import LandpicKorat from "../../assets/LandPicKorat.jpg"
 import type { JSX } from "react";
 import { Link } from 'react-router-dom';
-import Header from "./HeaderMain";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 const { Step } = Steps;
+
 const MainPage = (): JSX.Element => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
+  // แก้ไข: ตรวจสอบ login status ก่อนไป regisland
   const goToRegisland = () => {
+    const token = localStorage.getItem("token");
+    const isLogin = localStorage.getItem("isLogin") === "true";
+    
+    if (!token || !isLogin) {
+      // หากยังไม่ได้ login ให้ไปหน้า login และเก็บ path ปลายทางไว้
+      localStorage.setItem("redirectPath", "/user/regisland");
+      navigate("/login");
+      return;
+    }
+    
+    // หากมี login แล้ว ไป regisland ได้เลย
     setLoading(true);
-    localStorage.setItem("isLogin", "true");
     setTimeout(() => {
       navigate("/user/regisland");
-    }, 2000);
+      setLoading(false);
+    }, 1000);
   };
 
+  // เพิ่มฟังก์ชัน goToLogin แยก
   const goToLogin = () => {
-    setLoading(true);
-    setTimeout(() => {
-      navigate("/login");
-    }, 2000);
+    navigate("/login");
   };
 
   return (
     <div className="main-container">
       <div className="bg-[#364049] w-full relative">
         {/* Header */}
-        <Header />
+        <Row justify="space-between" align="middle" className="bg-[#424f5e]" style={{ padding: "10px 30px" }}>
+          <Col>
+            <img src={Logo} alt="LandChain Logo" style={{ width: "100%",height: "auto",maxWidth: "200px" }} />
+          </Col>
+          <Col style={{ textAlign: "right" }}>
+            <Button type="link" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
+              หน้าแรก
+            </Button>
+            <Button type="link" onClick={goToRegisland} style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
+              ลงทะเบียนโฉนดที่ดิน
+            </Button>
+            <Button type="link" style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
+              ข่าวสาร
+            </Button>
+            {/* แก้ไข: เพิ่ม onClick ให้ปุ่มเข้าสู่ระบบ */}
+            <Button type="link" onClick={goToLogin} style={{ color: "white", fontSize: "22px", fontFamily: 'Kanit'}}>
+              เข้าสู่ระบบ
+            </Button>
+          </Col>
+        </Row>
 
         {/* Title Section */}
         <Row justify="center" style={{ marginTop: "40px" }}>
@@ -203,34 +232,6 @@ const MainPage = (): JSX.Element => {
         </Row>
         <br />
         <Pagination align="center" defaultCurrent={1} total={50} />
-        {/* เอาไว้ใช้เวลาดึงข้อมูลจริงมาแสดง
-          {data.map((item, index) => (
-            <Col key={index} span={8}>
-              <Card
-                hoverable
-                cover={<img alt="land" src={item.image} style={{ height: 200, objectFit: 'cover' }} />}
-                style={{ fontFamily: 'Kanit', borderRadius: '12px' }}
-              >
-                <Title level={4}>{item.title}</Title>
-                <Text type="secondary">{item.area} • {item.location}</Text>
-                <br />
-                <Text strong>ราคา: {item.price} บาท</Text>
-                <p style={{ marginTop: 8 }}>{item.description}</p>
-              </Card>
-            </Col>
-          ))}
-          const data = [
-            {
-              title: "ขายที่ดิน นนทบุรี",
-              location: "ติดแม่น้ำเจ้าพระยา",
-              area: "2-3-43 ไร่",
-              price: "18,000,000",
-              description: "เหมาะสร้างบ้านพักตากอากาศ",
-              image: "/images/land1.jpg"
-            },
-            ...
-          ]
-        */}
 
         {/* Services + Public Relations Section */}
         <Row justify="space-between" align="top" style={{ marginTop: "40px", padding: '0 5%' }}>
@@ -272,7 +273,18 @@ const MainPage = (): JSX.Element => {
 
               </Col>
               <Col span={11}>
-                <Card style={{ height: 250, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                {/* แก้ไข: เปลี่ยนจาก Card ธรรมดาเป็น clickable card */}
+                <Card 
+                  style={{ 
+                    height: 250, 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center',
+                    cursor: 'pointer'
+                  }}
+                  hoverable
+                  onClick={goToRegisland}
+                >
                   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                     <AuditOutlined style={{ fontSize: '70px' }} />
                   </div>
@@ -292,7 +304,6 @@ const MainPage = (): JSX.Element => {
             </Card>
           </Col>
         </Row>
-
 
         {/* Steps Section */}
         <Col xs={24} sm={24} md={24} lg={24} style={{ marginTop: "200px" }}>

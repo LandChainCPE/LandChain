@@ -2,8 +2,9 @@ import { lazy, useEffect } from "react";
 import { useRoutes, type RouteObject, useNavigate, useLocation } from "react-router-dom";
 import Loadable from "../component/third-patry/Loadable";
 
-const Login = Loadable(lazy(() => import("../pages/LoginRegister/Login")));
+const Login = Loadable(lazy(() => import("../pages/LoginRegister/LoginMetamask")));
 const MainPage = Loadable(lazy(() => import("../pages/MainPage/MainPage")));
+const MainPageAfterLogin = Loadable(lazy(() => import("../pages/MainPage/MainPageAfterLogin")));
 const LoginUser = Loadable(lazy(() => import("../pages/LoginRegister/Login")));
 const RegisterUser = Loadable(lazy(() => import("../pages/LoginRegister/Register")));
 const Regisland = Loadable(lazy(() => import("../pages/RegisLand/RegisLand")));
@@ -50,8 +51,8 @@ const UserRoutes = (): RouteObject[] => [
   {
     path: "/user",
     children: [
-      { index: true, element: <MainPage /> },
-      { path: "main", element: <MainPage /> },
+      { index: true, element: <MainPageAfterLogin /> },
+      { path: "main", element: <MainPageAfterLogin /> },
       { 
         path: "regisland", 
         element: (
@@ -128,7 +129,7 @@ const MainRoutes = (): RouteObject[] => [
   },                                          
   {
     path: "/login",
-    element: <LoginUser />
+    element: <Login />
   },
   { 
     path: "/register", 
