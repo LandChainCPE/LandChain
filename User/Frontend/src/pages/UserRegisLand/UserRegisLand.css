@@ -1,0 +1,202 @@
+
+.container {
+  min-height: 100vh;
+  /* background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 50%, #fce4ec 100%); */
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, #2196f3, #9c27b0);
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 16px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.subtitle {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  overflow: hidden;
+}
+
+.cardHeader {
+  background: linear-gradient(135deg, #364049, #364049);
+  padding: 24px;
+  color: white;
+}
+
+.cardTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+}
+
+.formContent {
+  padding: 32px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.inputGroup {
+  margin-bottom: 24px;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1rem;
+  background: rgba(249, 250, 251, 0.5);
+  transition: all 0.2s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.inputFocus {
+  border-color: #2196f3;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1rem;
+  background: rgba(249, 250, 251, 0.5);
+  transition: all 0.2s ease;
+  outline: none;
+  resize: none;
+  min-height: 100px;
+  box-sizing: border-box;
+}
+
+.uploadArea {
+  width: 100%;
+  height: 120px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  background: rgba(249, 250, 251, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.uploadAreaHover {
+  border-color: #2196f3;
+  background: rgba(33, 150, 243, 0.05);
+}
+
+.uploadText {
+  margin: 8px 0 4px 0;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.uploadSubtext {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.imagePreview {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.previewImage {
+  max-width: 400px;
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.footer {
+  background: rgba(249, 250, 251, 0.5);
+  padding: 24px 32px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.cancelButton {
+  padding: 12px 24px;
+  border: 2px solid #d1d5db;
+  background: white;
+  color: #374151;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submitButton {
+  padding: 12px 32px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.submitButtonHover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
+}
+
+.pageFooter {
+  text-align: center;
+  margin-top: 32px;
+  color: #9ca3af;
+}

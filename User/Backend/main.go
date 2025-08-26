@@ -32,6 +32,8 @@ func main() {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
 
+	r.POST("/login", controller.LoginUser)
+
 	r.POST("/createaccount", controller.CreateAccount)
 
 	authorized := r.Group("")
@@ -68,6 +70,9 @@ func main() {
 		r.GET("/user/chat/:id", controller.GetAllLandDatabyID)
 		r.GET("/user/chat/roomchat/:id", controller.GetMessagesByLandPostID)
 		r.GET("/user/:id", controller.GetUserByID)
+
+		// CONTROLLER RegisterLand
+		r.POST("/user/regisland", controller.RegisterLand)
 	}
 
 	// public := r.Group("")

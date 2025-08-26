@@ -4,14 +4,35 @@ import "gorm.io/gorm"
 
 type Landtitle struct {
 	gorm.Model
-	Field string `gorm:"type:varchar(100)"`
+	HouseNumber     string `gorm:"type:varchar(100)"` 
+	VillageNo       string `gorm:"type:varchar(50)"`
+	Soi             string `gorm:"type:varchar(100)"`
+	Road            string `gorm:"type:varchar(100)"`
+	Rai             int
+	Ngan            int
+	SquareWa        int
+	ImagePath       string
 
-	UserID uint  // 👈 FK ไปยัง role.id
-	Users  Users `gorm:"foreignKey:UserID"` // 👈 optional: preload ได้
+	// FK: ผู้ใช้ที่เป็นเจ้าของโฉนด
+	UserID uint
+	User   Users `gorm:"foreignKey:UserID"`
 
-	LandProvincesID uint
-	LandProvinces   LandProvinces
+	// FK: จังหวัด
+	LandProvinceID uint
+	LandProvince   LandProvinces `gorm:"foreignKey:LandProvinceID"`
 
-	//Booking []Booking  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
-	Landsalepost []Landsalepost `gorm:"foreignKey:LandtitleID"`
+	// // FK: อำเภอ
+	// LandDistrictID uint
+	// LandDistrict   LandDistricts `gorm:"foreignKey:LandDistrictID"`
+
+	// // FK: ตำบล
+	// LandSubdistrictID uint
+	// LandSubdistrict   LandSubdistricts `gorm:"foreignKey:LandSubdistrictID"`
+
+	// // FK: สถานะโฉนด
+	// StatusID uint
+	// Status   Status `gorm:"foreignKey:StatusID"`
+
+	// ความสัมพันธ์กับตาราง land_transfer หรือ landsalepost (1:N)
+	Landsaleposts []Landsalepost `gorm:"foreignKey:LandtitleID"`
 }
