@@ -9,7 +9,7 @@ import Landpic from "../../assets/LandPic.jpg";
 import LandpicKorat from "../../assets/LandPicKorat.jpg"
 import type { JSX } from "react";
 import { Link } from 'react-router-dom';
-import Header from "./HeaderMain";
+import Header from "./HeaderUserMain";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -17,21 +17,6 @@ const { Step } = Steps;
 const MainPage = (): JSX.Element => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-
-  const goToRegisland = () => {
-    setLoading(true);
-    localStorage.setItem("isLogin", "true");
-    setTimeout(() => {
-      navigate("/user/regisland");
-    }, 2000);
-  };
-
-  const goToLogin = () => {
-    setLoading(true);
-    setTimeout(() => {
-      navigate("/login");
-    }, 2000);
-  };
 
   return (
     <div className="main-container">

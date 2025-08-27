@@ -1,13 +1,6 @@
 /* MainPage.css */
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&display=swap');
 
-.navbar {
-  position: sticky;
-  top: 0;
-  z-index: 1000; /* เพื่อให้อยู่เหนือส่วนอื่นๆ */
-  background-color: #364049; /* ให้สีพื้นหลังเหมือนเดิม */
-}
-
 body {
   font-family: 'Kanit', sans-serif;
 }
