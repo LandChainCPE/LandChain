@@ -32,8 +32,6 @@ func main() {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
 
-	r.POST("/login", controller.LoginUser)
-
 	r.POST("/createaccount", controller.CreateAccount)
 	r.POST("/check-wallet", controller.CheckWallet)
 	r.POST("/login", controller.LoginUser)

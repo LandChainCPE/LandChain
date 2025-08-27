@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, MapPin, FileText, Save, Camera } from 'lucide-react';
+import { Upload, MapPin, Save, Camera } from 'lucide-react';
 import './UserRegisLand.css';
 import { RegisterLand } from '../../service/https/garfield/http'; // ปรับ path ตามจริง
 
