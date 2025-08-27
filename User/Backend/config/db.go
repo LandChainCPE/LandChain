@@ -168,7 +168,7 @@ func SetupDatabase() {
 				landtitle1 = entity.Landtitle{
 					Field:           "โฉนดเลขที่ 000008 แปลง 180",
 					UserID:          1,
-					LandProvincesID: 1,
+					LandProvincesID:  1,
 				}
 				db.Create(&landtitle1)
 			}
@@ -179,7 +179,7 @@ func SetupDatabase() {
 				landtitle2 = entity.Landtitle{
 					Field:           "โฉนดเลขที่ 000009 แปลง 264",
 					UserID:          1,
-					LandProvincesID: 1,
+					LandProvincesID:  1,
 				}
 				db.Create(&landtitle2)
 			}
