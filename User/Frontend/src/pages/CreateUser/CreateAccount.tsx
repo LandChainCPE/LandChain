@@ -16,11 +16,13 @@ const CreateAccount = () => {
     const storedLastname = localStorage.getItem('lastname');
     const storedPhonenumber = localStorage.getItem('phonenumber');
     const storedEmail = localStorage.getItem('email');
+    const storedUserID = localStorage.getItem('user_id');
 
     if (storedFirstname) setFirstname(storedFirstname);
     if (storedLastname) setLastname(storedLastname);
     if (storedPhonenumber) setPhonenumber(storedPhonenumber);
     if (storedEmail) setEmail(storedEmail);
+    if (storedUserID) localStorage.setItem('user_id', storedUserID);
   }, []);
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -29,6 +31,7 @@ const CreateAccount = () => {
     localStorage.setItem('lastname', lastname);
     localStorage.setItem('phonenumber', phonenumber);
     localStorage.setItem('email', email);
+    localStorage.setItem('user_id', localStorage.getItem('user_id') || '');
 
     console.log('Account created!', { firstname, lastname, phonenumber, email });
     navigate('/connectmetamask');

@@ -8,7 +8,7 @@ import { Container, Form, Button } from "react-bootstrap";
 import { FaSearch } from 'react-icons/fa'; 
 import { Modal } from "react-bootstrap";
 import Picture from '../../assets/LandPicKorat.jpg'
-import { getAllPostData } from "../../service/https/index";
+import { getAllPostData } from "../../service/https/jo/index";
 
 function SellPost() {
   const [showModal, setShowModal] = useState(false);

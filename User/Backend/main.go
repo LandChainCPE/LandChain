@@ -25,9 +25,14 @@ func main() {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 
+	// เริ่มต้น Scheduler สำหรับลบการจองที่หมดอายุ
+	controller.StartBookingCleanupScheduler()
+
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
+
+	r.POST("/login", controller.LoginUser)
 
 	r.POST("/createaccount", controller.CreateAccount)
 	r.POST("/check-wallet", controller.CheckWallet)
@@ -51,8 +56,13 @@ func main() {
 		authorized.GET("/time", controller.GetTime)          // ดึงข้อมูลช่วงเวลา
 		authorized.GET("/bookings", controller.GetBookingsByDateAndBranch)
 		authorized.GET("/service-types", controller.GetServiceType)          // ดึงข้อมูลประเภทบริการ
-		authorized.GET("/bookings/status/:id", controller.GetBookingStatus)  // ดึงข้อมูลการจองตาม ID
 		authorized.GET("/bookings/checklim", controller.CheckAvailableSlots) // ดึงข้อมูลการจองตาม ID
+		authorized.GET("/bookings/status", controller.CheckBookingStatus)
+// 🎯 Routes สำหรับลบการจองที่หมดอายุ
+		authorized.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
+		authorized.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)  
+		authorized.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
+		authorized.GET("/bookings/:userID", controller.GetUserBookings) // ดึงข้อมูลการจองตาม ID
 
 		// CONTROLLER lANDSELLPOST
 		r.GET("/user/sellpost", controller.GetAllPostLandData)
@@ -62,6 +72,9 @@ func main() {
 		r.GET("/user/chat/:id", controller.GetAllLandDatabyID)
 		r.GET("/user/chat/roomchat/:id", controller.GetMessagesByLandPostID)
 		r.GET("/user/:id", controller.GetUserByID)
+
+		// CONTROLLER RegisterLand
+		r.POST("/user/regisland", controller.RegisterLand)
 	}
 
 	// public := r.Group("")

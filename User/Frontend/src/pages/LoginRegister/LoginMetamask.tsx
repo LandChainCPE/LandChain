@@ -34,7 +34,7 @@ const LoginMetamask = () => {
 
           if (wallet_address) {
             // login สำเร็จ
-            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('isLogin', 'true');
             localStorage.setItem('walletAddress', wallet_address);
             if (token) {
               localStorage.setItem('token', token);
@@ -42,14 +42,14 @@ const LoginMetamask = () => {
               localStorage.removeItem('token');
             }
 
-            navigate('/user/main', { replace: true });
+            navigate('/user', { replace: true });
           } else {
             // wallet ยังไม่ได้สมัคร
             setErrorMessage(message || 'Wallet not registered. Please sign up first.');
 
             // simulate disconnect
             setWalletAddress(null);
-            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('isLogin');
             localStorage.removeItem('walletAddress');
             localStorage.removeItem('token');
           }
