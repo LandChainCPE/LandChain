@@ -19,6 +19,7 @@ const Chat = Loadable(lazy(() => import("../pages/ChatPage/chat")));
 
 const CreateAccount = Loadable(lazy(() => import("../pages/CreateUser/CreateAccount")));
 const ConnectMetamask = Loadable(lazy(() => import("../pages/CreateUser/ConnectMetamask")));
+const LandMarkingMap = Loadable(lazy(() => import("../pages/mapbox_test/mapbox_test")));
 
 const UserRegisland = Loadable(lazy(() => import("../pages/UserRegisLand/UserRegisLand")));
 
@@ -147,16 +148,22 @@ const MainRoutes = (): RouteObject[] => [
     path: "/createaccount", 
     element: <CreateAccount/> 
   },
+    {
+    path: "/mapbox_test",
+    element: <LandMarkingMap />
+  },
   { 
     path: "/connectmetamask", 
     element: <ConnectMetamask /> 
   },
+
   // เพิ่ม user routes เข้ามาด้วย
   ...UserRoutes(),
   { 
     path: "*", 
     element: <MainPage /> 
   },
+  
 ];
 
 function ConfigRoutes() {

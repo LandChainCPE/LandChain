@@ -76,6 +76,7 @@ func SetupDatabase() {
 		&entity.ServiceType{},
 		&entity.Petition{},
 		&entity.State{},
+		&entity.Location{},
 
 	); err != nil {
 		log.Fatal("❌ AutoMigrate failed:", err)
@@ -159,15 +160,15 @@ func SetupDatabase() {
 		var landtitle1, landtitle2 entity.Landtitle
 
 		RefTimeID := uint(1)
-		startTime := time.Date(2025, time.August, 31, 9, 0, 0, 0, time.UTC)
-		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "pending", TimeID: RefTimeID, UserID: RefTimeID, BranchID: RefTimeID, ServiceTypeID: RefTimeID})
+		startTime := time.Date(2025, time.August, 6, 9, 0, 0, 0, time.UTC)
+		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID, UserID: RefTimeID, BranchID: RefTimeID, ServiceTypeID: RefTimeID})
 
 		if err := db.Where("field = ?", "โฉนดเลขที่ 000008 แปลง 180").First(&landtitle1).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				landtitle1 = entity.Landtitle{
 					Field:           "โฉนดเลขที่ 000008 แปลง 180",
 					UserID:          1,
-					LandProvincesID: 1,
+					LandProvincesID:  1,
 				}
 				db.Create(&landtitle1)
 			}
@@ -178,7 +179,7 @@ func SetupDatabase() {
 				landtitle2 = entity.Landtitle{
 					Field:           "โฉนดเลขที่ 000009 แปลง 264",
 					UserID:          1,
-					LandProvincesID: 1,
+					LandProvincesID:  1,
 				}
 				db.Create(&landtitle2)
 			}

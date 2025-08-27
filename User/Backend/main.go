@@ -63,7 +63,14 @@ func main() {
 		authorized.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)  
 		authorized.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
 		authorized.GET("/bookings/:userID", controller.GetUserBookings) // ดึงข้อมูลการจองตาม ID
+		authorized.GET("/locations/:landsalepost_id", controller.GetLocationsByLandSalePostId)
 
+
+
+
+		//location
+		authorized.GET("/location", controller.GetLocations) // ดึงข้อมูลโฉนดที่ดิน
+		authorized.POST("/location", controller.CreateLocation) // สร้างโฉนดที่ดิน
 		// CONTROLLER lANDSELLPOST
 		r.GET("/user/sellpost", controller.GetAllPostLandData)
 
@@ -74,7 +81,7 @@ func main() {
 		r.GET("/user/:id", controller.GetUserByID)
 
 		// CONTROLLER RegisterLand
-		r.POST("/user/regisland", controller.RegisterLand)
+		//r.POST("/user/regisland", controller.RegisterLand)
 	}
 
 	// public := r.Group("")

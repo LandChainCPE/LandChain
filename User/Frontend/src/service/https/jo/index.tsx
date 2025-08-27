@@ -245,8 +245,50 @@ export const logout = () => {
   window.location.href = "/login";
 };
 
+// ใช้ instance api แทนที่จะเรียก apiUrl ตรง ๆ
+export const createLocation = async (latitude: number, longitude: number, landsalepostId: number) => {
+  const response = await api.post('/location', {
+    latitude,
+    longitude,
+    landsalepost_id: landsalepostId,
+  });
+  return response.data;
+};
 
+// 🔧 แก้ไข: ใช้ api instance แทน axios โดยตรง และเพิ่ม error handling
+export async function getAllLocations() {
+  try {
+    const response = await api.get("/locations");
+    console.log("getAllLocations API Response:", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching all locations:", error);
+    
+    // ส่งกลับข้อมูลที่มีรูปแบบเดียวกัน
+    if (error.response) {
+      return error.response.data;
+    } else {
+      return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+    }
+  }
+}
 
+// 🔧 เพิ่ม function สำหรับ get locations by land sale post id
+export async function getLocationsByLandSalePostId(landsalepostId: number) {
+  try {
+    const response = await api.get(`/locations/${landsalepostId}`);
+    console.log(`getLocationsByLandSalePostId(${landsalepostId}) API Response:`, response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching locations by land sale post id:", error);
+    
+    if (error.response) {
+      return error.response.data;
+    } else {
+      return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+    }
+  }
+}
 
 export {
   CreateBooking,
