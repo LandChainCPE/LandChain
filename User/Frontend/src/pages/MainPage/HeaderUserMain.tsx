@@ -43,6 +43,13 @@ const MainPage = (): JSX.Element => {
         }, 2000);
     };
 
+    const goToUserDashboard = () => {
+        setLoading(true);
+        setTimeout(() => {
+            navigate("/user/userdashboard");
+        }, 2000);
+    };
+
     const goToLogin = () => {
         setLoading(true);
         setTimeout(() => {
@@ -104,6 +111,7 @@ const MainPage = (): JSX.Element => {
                         <>
                             <NavButton
                                 variant="secondary"
+                                onClick={goToUserDashboard}
                                 icon={<UserOutlined />}
                             >
                                 โปรไฟล์
