@@ -12,7 +12,7 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	
+	"gorm.io/gorm/clause"
 )
 
 var db *gorm.DB
@@ -77,6 +77,8 @@ func SetupDatabase() {
 		&entity.Petition{},
 		&entity.State{},
 		&entity.Location{},
+		&entity.Verification{},
+    	&entity.VerificationEvent{},
 
 	); err != nil {
 		log.Fatal("❌ AutoMigrate failed:", err)
@@ -294,4 +296,56 @@ func createRoomchatsAndMessages() {
 	}
 	
 	log.Println("✅ Database Migrated & Seeded Successfully")
+}
+
+func StartUserVerify(db *gorm.DB, userID, requestedBy uint) (*entity.Verification, error) {
+    v := &entity.Verification{
+        SubjectID:        userID,
+        SubjectType:      entity.SubjectUserIdentity,
+        Status:           entity.StatusPending,
+        RequestedByUserID: &requestedBy,
+    }
+    return v, db.Transaction(func(tx *gorm.DB) error {
+        if err := tx.Create(v).Error; err != nil { return err }
+        e := entity.VerificationEvent{ VerificationID: v.ID, ToStatus: entity.StatusPending }
+        return tx.Create(&e).Error
+    })
+}
+
+func UpdateVerificationStatus(db *gorm.DB, verID uint, to entity.VerificationStatus, changedBy *uint, reason *string) error {
+    return db.Transaction(func(tx *gorm.DB) error {
+        var v entity.Verification
+        if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+            First(&v, verID).Error; err != nil { return err }
+
+        from := v.Status
+        v.Status = to
+        if err := tx.Save(&v).Error; err != nil { return err }
+
+        ev := entity.VerificationEvent{
+            VerificationID:  v.ID,
+            FromStatus:      &from,
+            ToStatus:        to,
+            ChangedByUserID: changedBy,
+            Reason:          reason,
+        }
+        if err := tx.Create(&ev).Error; err != nil { return err }
+
+        // อัปเดตฟิลด์สรุปที่ Users/Landtitle (denormalized)
+        switch v.SubjectType {
+        case entity.SubjectUserIdentity:
+            // เขียนแบบนี้ให้ชัดเจนและเลี่ยง race
+            updates := map[string]any{
+                "identity_verification_status": string(v.Status),
+            }
+            if v.Status == entity.StatusApproved {
+                updates["identity_verified_at"] = time.Now()
+            }
+            if err := tx.Model(&entity.Users{}).
+                Where("id = ?", v.SubjectID).
+                Updates(updates).Error; err != nil { return err }
+        // case entity.SubjectLandTitleOwnership: ... ทำคล้ายกัน
+        }
+        return nil
+    })
 }

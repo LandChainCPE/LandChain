@@ -63,8 +63,12 @@ func main() {
 		authorized.GET("/bookings/:userID", controller.GetUserBookings) // ดึงข้อมูลการจองตาม ID
 		authorized.GET("/locations/:landsalepost_id", controller.GetLocationsByLandSalePostId)
 
-
-
+		//Verification ผู้ใช้และที่ดิน
+		authorized.POST("/verifications", controller.StartVerification) //สร้าง Verification สถานะเริ่มต้นใช้เมื่อผู้ใช้กด “ขอยืนยัน” จากหน้าโปรไฟล์
+		authorized.GET("/verifications/latest", controller.GetLatestVerification) //ดึง “สถานะล่าสุด” ของสิ่งที่ถูกยืนยัน
+		authorized.PUT("/verifications/:id/status", controller.UpdateVerificationStatus) //ดึง “สถานะล่าสุด” ของสิ่งที่ถูกยืนยัน
+		authorized.GET("/verifications/:id/events", controller.ListVerificationEvents) //ดึงไทม์ไลน์เมื่ออยากเห็นประวัติว่าเปลี่ยนสถานะเพราะอะไร เมื่อไหร่ ใครเปลี่ยน
+		authorized.POST("/landtitles/:id/verify", controller.StartLandVerification) //สร้าง Verification สถานะเริ่มต้นใช้เมื่อผู้ใช้กด “ขอยืนยัน” จากหน้าหน้าโฉนด
 
 		//location
 		authorized.GET("/location", controller.GetLocations) // ดึงข้อมูลโฉนดที่ดิน

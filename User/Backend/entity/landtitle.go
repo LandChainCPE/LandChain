@@ -1,6 +1,9 @@
 package entity
 
-import "gorm.io/gorm"
+import(
+	"gorm.io/gorm"
+	"time"
+)
 
 type Landtitle struct {
 	gorm.Model
@@ -14,4 +17,10 @@ type Landtitle struct {
 
 	//Booking []Booking  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
 	Landsalepost []Landsalepost `gorm:"foreignKey:LandtitleID"`
+
+	Verifications []Verification `gorm:"polymorphic:Subject;"`
+	OwnershipVerificationStatus *string    `gorm:"type:varchar(20)"`
+    OwnershipVerifiedAt         *time.Time `gorm:""`
+
+
 }
