@@ -32,4 +32,6 @@ type Landsalepost struct {
 	Roomchat []Roomchat  `gorm:"foreignKey:LandsalepostID"`
 	Transaction []Transaction  `gorm:"foreignKey:LandsalepostID"`
 	//Photoland []Photoland  `gorm:"foreignKey:LandsalepostID"`
+	Photoland []Photoland  `gorm:"foreignKey:LandsalepostID"`
+	Location []Location `gorm:"foreignKey:LandsalepostID"` // One-to-One relationship with Location
 }

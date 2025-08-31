@@ -37,10 +37,12 @@ const ConnectMetamask = () => {
           const lastname = localStorage.getItem('lastname');
           const phonenumber = localStorage.getItem('phonenumber');
           const email = localStorage.getItem('email');
+          const userID = localStorage.getItem('user_id');
 
           if (firstname && lastname && phonenumber && email) {
             // ส่งข้อมูลไปยัง backend
             const userData = {
+              userID,
               firstname,
               lastname,
               phonenumber,
@@ -58,6 +60,7 @@ const ConnectMetamask = () => {
               localStorage.setItem("isLogin", "true");
               localStorage.setItem("firstnameuser", result.FirstNameUser);
               localStorage.setItem("lastnameuser", result.LastNameUser);
+              localStorage.setItem("user_id", result.UserID);
               console.log(localStorage);
             // localStorage.clear();
 

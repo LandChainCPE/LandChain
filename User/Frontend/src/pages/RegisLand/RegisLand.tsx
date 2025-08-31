@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Select, Card, Typography, Spin, message, DatePicker, Modal, Row, Col, Divider, Space, Badge, Timeline, Empty, Button } from "antd";
 import { CalendarOutlined, EnvironmentOutlined, ClockCircleOutlined, FileTextOutlined, CheckCircleOutlined, ExclamationCircleOutlined, StopOutlined, HistoryOutlined, ReloadOutlined } from "@ant-design/icons";
-import { GetBranches, GetProvinces, GetTimeSlots, CreateBooking, GetServiceTypes, GetAvailableSlots, GetBookingStatus, GetUserBookings } from "../../service/https/index";
+import { GetBranches, GetProvinces, GetTimeSlots, CreateBooking, GetServiceTypes, GetAvailableSlots, GetBookingStatus, GetUserBookings } from "../../service/https/jo/index";
 import type { BookingInterface } from "../../interfaces/Booking";
 import dayjs from "dayjs";
 
@@ -28,7 +28,7 @@ const BookingCalendar = () => {
   const [userBookings, setUserBookings] = useState<any[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
 
-  const currentUserId = 1;
+  const currentUserId = Number(localStorage.getItem("user_id") || 1);
 
   const fetchUserBookings = async () => {
     try {

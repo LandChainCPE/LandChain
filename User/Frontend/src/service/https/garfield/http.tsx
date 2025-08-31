@@ -21,8 +21,72 @@ async function CreateAccount(DataCreateAccount: any) {
   return {result, response};
   
 }
+
+// ฟังก์ชัน Login ผ่าน Metamask
+async function LoginWallet(walletAddress: string) {
+  const requestOptions: RequestInit = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ metamaskaddress: walletAddress}),
+  };
+
+  const response = await fetch(`${apiUrl}/login`, requestOptions);
+  const result = await response.json();
+
+  if (result.success && result.exists) {
+    // เก็บข้อมูลลง localStorage
+    localStorage.setItem("walletAddress", walletAddress);
+    localStorage.setItem("token", result.token || "");
+    localStorage.setItem("token_type", "Bearer");
+    localStorage.setItem("firstName", result.first_name || "");
+    localStorage.setItem("lastName", result.last_name || "");
+  }
+
+  return { result, response };
+}
+
+// ฟังก์ชัน Logout
+function LogoutWallet() {
+  localStorage.removeItem("walletAddress");
+  localStorage.removeItem("token");
+  localStorage.removeItem("token_type");
+  localStorage.removeItem("firstName");
+  localStorage.removeItem("lastName");
+}
+
+// ฟังก์ชันบันทึกข้อมูลที่ดิน
+async function RegisterLand(DataCreateLand: any, imageFile?: File) {
+  const formData = new FormData();
+
+  // เพิ่มข้อมูลลง FormData
+  Object.entries(DataCreateLand).forEach(([key, value]) => {
+    formData.append(key, value as any);
+  });
+
+  // เพิ่มไฟล์ภาพถ้ามี
+  if (imageFile) {
+    formData.append("image", imageFile);
+  }
+
+  const response = await fetch(`${apiUrl}/user/userregisland`, {
+    method: "POST",
+    headers: {
+      ...getAuthHeaders(), // ใส่ token สำหรับ auth
+      // **ห้ามใส่ Content-Type แบบ JSON เมื่อใช้ FormData**
+    },
+    body: formData,
+  });
+
+  const result = await response.json();
+  return { result, response };
+}
+
   
 
 export {
+  getAuthHeaders,
+  RegisterLand,
   CreateAccount,
+  LoginWallet,
+  LogoutWallet
 };
