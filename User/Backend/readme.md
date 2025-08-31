@@ -5,3 +5,5 @@ go get gorm.io/gorm
 
 go get gorm.io/driver/postgres
 go get github.com/joho/godotenv
+
+go get github.com/gocarina/gocsv

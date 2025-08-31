@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, Form, Input, Button, Space, Typography, Row, Col, message, Steps, Divider } from "antd";
 import { FileTextOutlined, UserOutlined, PhoneOutlined, MailOutlined, CalendarOutlined, SendOutlined, ReloadOutlined, ArrowLeftOutlined } from "@ant-design/icons";
-import { CreatePetition } from "../../service/https/petition"; 
+import { CreatePetition } from "../../service/https/jib/jib"; 
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;

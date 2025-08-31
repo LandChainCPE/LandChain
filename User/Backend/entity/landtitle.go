@@ -6,6 +6,8 @@ type Landtitle struct {
 	gorm.Model
 	Field string `gorm:"type:varchar(100)"`
 
+	Number string `gorm:"type:varchar(100)"`
+
 	UserID uint  // 👈 FK ไปยัง role.id
 	Users  Users `gorm:"foreignKey:UserID"` // 👈 optional: preload ได้
 

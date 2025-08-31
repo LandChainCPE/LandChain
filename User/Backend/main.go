@@ -11,6 +11,8 @@ import (
 	"github.com/joho/godotenv"
 
 	"landchain/middlewares"
+
+
 )
 
 func main() {
@@ -46,6 +48,12 @@ func main() {
 		authorized.GET("/petitions", controller.GetAllPetition)
 		authorized.POST("/petitions", controller.CreatePetition)
 		authorized.GET("/states", controller.GetAllStates)
+		authorized.GET("/tags", controller.GetTags)
+		authorized.POST("/landpost", controller.CreateLandPost)
+		authorized.GET("/landposts", controller.GetAllPostLandData)
+		authorized.GET("/province", controller.GetAllProvinces)
+		authorized.GET("/district/:id", controller.GetDistrict)
+		authorized.GET("/subdistrict/:id", controller.GetSubdistrict)
 
 		authorized.GET("/provinces", controller.GetProvince) // ดึงข้อมูลจังหวัด
 		authorized.GET("/branches", controller.GetBranch)    // ดึงข้อมูลสาขา
@@ -61,7 +69,7 @@ func main() {
 		authorized.GET("/bookings/:userID", controller.GetUserBookings) // ดึงข้อมูลการจองตาม ID
 
 		// CONTROLLER lANDSELLPOST
-		r.GET("/user/sellpost", controller.GetAllPostLandData)
+		//r.GET("/user/sellpost", controller.GetAllPostLandData)
 
 		// CONTROLLER Chat
 		r.GET("/ws/roomchat/:roomID", controller.HandleWebSocket)

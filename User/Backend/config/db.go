@@ -12,6 +12,11 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	"strconv" 
+	"encoding/csv"
+
+
 	
 )
 
@@ -56,8 +61,14 @@ func SetupDatabase() {
 		log.Fatal("❌ Database connection not initialized. Please call ConnectDatabase() first.")
 	}
 
+	// Import CSV
+	ImportProvincesCSV(db, "./config/data/address/provinces.csv")
+	ImportDistrictsCSV(db, "./config/data/address/districts.csv")
+	ImportSubDistrictsCSV(db, "./config/data/address/subdistricts.csv")
+
 	// AutoMigrate
 	if err := db.AutoMigrate(
+		
 		&entity.Role{},
 		&entity.Users{},
 		&entity.Time{},
@@ -76,6 +87,9 @@ func SetupDatabase() {
 		&entity.ServiceType{},
 		&entity.Petition{},
 		&entity.State{},
+		&entity.Tag{},
+		&entity.District{},
+		&entity.Subdistrict{},
 
 	); err != nil {
 		log.Fatal("❌ AutoMigrate failed:", err)
@@ -105,9 +119,9 @@ func SetupDatabase() {
 		// db.Create(&entity.Users{Name: "Aut", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
 
 		// สร้าง Province
-		db.Create(&entity.Province{Province: "นครราชสีมา"})
-		db.Create(&entity.Province{Province: "อุบลราชธานี"})
-		db.Create(&entity.Province{Province: "มหาสารคาม"})
+		//db.Create(&entity.Province{Province: "นครราชสีมา"})
+		//db.Create(&entity.Province{Province: "อุบลราชธานี"})
+		//db.Create(&entity.Province{Province: "มหาสารคาม"})
 
 
 		RefProvince := uint(2)
@@ -166,6 +180,7 @@ func SetupDatabase() {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				landtitle1 = entity.Landtitle{
 					Field:           "โฉนดเลขที่ 000008 แปลง 180",
+					Number:		"121212",
 					UserID:          1,
 					LandProvincesID: 1,
 				}
@@ -177,6 +192,7 @@ func SetupDatabase() {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				landtitle2 = entity.Landtitle{
 					Field:           "โฉนดเลขที่ 000009 แปลง 264",
+					Number:  "123456",
 					UserID:          1,
 					LandProvincesID: 1,
 				}
@@ -185,7 +201,7 @@ func SetupDatabase() {
 		}
 
 		// 🔸 ตรวจสอบและสร้าง Landsalepost ถ้ายังไม่มี
-		var post1, post2 entity.Landsalepost
+		/*var post1, post2 entity.Landsalepost
 
 		if err := db.Where("num_of_land_title = ?", "180").First(&post1).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -213,7 +229,7 @@ func SetupDatabase() {
 				}
 				db.Create(&post2)
 			}
-		}
+		}*/
 
 		// 🔸 สร้าง Roomchat หลังจากสร้าง Landsalepost แล้ว
 		createRoomchatsAndMessages()
@@ -224,7 +240,7 @@ func SetupDatabase() {
 
 // แยกการสร้าง Roomchat และ Message ออกมาเป็น function แยก
 func createRoomchatsAndMessages() {
-	var post entity.Landsalepost
+	/*var post entity.Landsalepost
 	if err := db.Where("num_of_land_title = ?", "180").First(&post).Error; err != nil {
 		log.Println("❌ Cannot find Landsalepost with num_of_land_title = 180")
 		return
@@ -281,40 +297,153 @@ func createRoomchatsAndMessages() {
 	}
 	
 
-	log.Println("✅ Database Migrated & Seeded Successfully")
+	log.Println("✅ Database Migrated & Seeded Successfully")*/
+//j
+	states := []entity.State{
+		{Name: "รอตรวจสอบ", Color: "orange"},
+		{Name: "กำลังดำเนินการ", Color: "blue"},
+		{Name: "เสร็จสิ้น", Color: "green"},
+	}
 
-states := []entity.State{
-    {Name: "รอตรวจสอบ", Color: "orange"},
-    {Name: "กำลังดำเนินการ", Color: "blue"},
-    {Name: "เสร็จสิ้น", Color: "green"},
+	// สร้าง State
+	for _, state := range states {
+		if err := db.Create(&state).Error; err != nil {
+			log.Fatal("❌ Failed to create state:", err)
+		}
+	}
+
+	log.Println("✅ States have been created successfully")
+
+	// สร้าง Petition
+	petition := entity.Petition{
+		FirstName:   "มาลี",
+		LastName:    "มาดี",
+		Tel:         "0987654321",
+		Email:       "j@gmail.com",
+		Description: "โฉนดเก่าหาย",
+		Date:        "2025-07-31",
+		Topic:       "ขอคัดสำเนาโฉนด",
+		StateID:     1, // ตรวจสอบว่า StateID นี้มีอยู่ในตาราง State
+		UserID:      1, // ตรวจสอบว่า UserID นี้มีอยู่ในตาราง Users
+	}
+
+	if err := db.Create(&petition).Error; err != nil {
+		log.Fatal("❌ Failed to create petition:", err)
+	}
+
+	log.Println("✅ Petition created successfully")
+
+	tags := []entity.Tag{
+		{Tag: "ติดถนน"},
+		{Tag: "ติดทะเล"},
+		{Tag: "ติดแม่น้ำ"},
+	}
+		// เพิ่ม tags ลงในฐานข้อมูล
+	if err := db.Create(&tags).Error; err != nil {
+		log.Fatal("Error inserting tags:", err)
+	}
+
+	// แสดงผลการบันทึกข้อมูล
+	fmt.Println("Tags have been inserted successfully")
+
+//postlad
+	landpost := entity.Landsalepost{
+		FirstName:   "มาลี",
+		LastName:    "มาดี",
+		PhoneNumber:  "0987654321",
+		Image:       "j@gmail.com",
+		Name: 		"สวนคุณตา",
+		Price:        	120000,
+		TagID:       		1,
+		ProvinceID:     	20, 
+		DistrictID:      	1, 
+		SubdistrictID: 		1,
+		Map: 		"aaa",
+		LandtitleID:	1,
+	}
+
+	if err := db.Create(&landpost).Error; err != nil {
+		log.Fatal("❌ Failed to create petition:", err)
+	}
+
+	log.Println("✅ Landpost created successfully")
 }
 
-// สร้าง State
-for _, state := range states {
-    if err := db.Create(&state).Error; err != nil {
-        log.Fatal("❌ Failed to create state:", err)
-    }
+func ImportProvincesCSV(db *gorm.DB, filePath string) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatalf("❌ Open file error: %v", err)
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		log.Fatalf("❌ Read CSV error: %v", err)
+	}
+
+	if len(records) <= 1 {
+		log.Println("⚠️ No data found")
+		return
+	}
+
+	for i, row := range records {
+		if i == 0 {
+			log.Printf("🔍 Header: %+v", row)
+			continue
+		}
+		if len(row) < 3 {
+			log.Printf("⚠️ Skipped row %d: %+v (too few columns)", i, row)
+			continue
+		}
+
+		province := entity.Province{
+			NameTH: row[1],
+			NameEN: row[2],
+		}
+		db.Where("name_th = ?", province.NameTH).FirstOrCreate(&province)
+	}
+	log.Println("✅ Provinces imported")
 }
 
-log.Println("✅ States have been created successfully")
+func ImportDistrictsCSV(db *gorm.DB, filePath string) {
+	file, _ := os.Open(filePath)
+	defer file.Close()
+	reader := csv.NewReader(file)
+	records, _ := reader.ReadAll()
 
-// สร้าง Petition
-petition := entity.Petition{
-    FirstName:   "มาลี",
-    LastName:    "มาดี",
-    Tel:         "0987654321",
-    Email:       "j@gmail.com",
-    Description: "โฉนดเก่าหาย",
-    Date:        "2025-07-31",
-    Topic:       "ขอคัดสำเนาโฉนด",
-    StateID:     1, // ตรวจสอบว่า StateID นี้มีอยู่ในตาราง State
-    UserID:      1, // ตรวจสอบว่า UserID นี้มีอยู่ในตาราง Users
+	for i, row := range records {
+		if i == 0 {
+			continue
+		}
+		provinceID, _ := strconv.Atoi(row[1])
+		district := entity.District{
+			NameTH:     row[2],
+			NameEN:     row[3],
+			ProvinceID: uint(provinceID),
+		}
+		db.FirstOrCreate(&district, entity.District{NameTH: district.NameTH, ProvinceID: district.ProvinceID})
+	}
+	log.Println("✅ Districts imported")
 }
 
-if err := db.Create(&petition).Error; err != nil {
-    log.Fatal("❌ Failed to create petition:", err)
-}
+func ImportSubDistrictsCSV(db *gorm.DB, filePath string) {
+	file, _ := os.Open(filePath)
+	defer file.Close()
+	reader := csv.NewReader(file)
+	records, _ := reader.ReadAll()
 
-log.Println("✅ Petition created successfully")
-
+	for i, row := range records {
+		if i == 0 {
+			continue
+		}
+		districtID, _ := strconv.Atoi(row[1])
+		subDistrict := entity.Subdistrict{
+			NameTH:     row[2],
+			NameEN:     row[3],
+			DistrictID: uint(districtID),
+		}
+		db.FirstOrCreate(&subDistrict, entity.Subdistrict{NameTH: subDistrict.NameTH, DistrictID: subDistrict.DistrictID})
+	}
+	log.Println("✅ SubDistricts imported")
 }

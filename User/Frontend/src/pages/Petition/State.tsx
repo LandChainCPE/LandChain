@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Layout, Menu, Table, Tag, Card, Row, Col, Statistic, Avatar, Empty } from "antd";
 import { HomeOutlined, ProfileOutlined, FileTextOutlined, CalendarOutlined, UserOutlined, ClockCircleOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
-import { GetAllPetition } from "../../service/https/petition";
+import { GetAllPetition } from "../../service/https/jib/jib";
 import { useNavigate } from "react-router-dom";
 
 const { Header, Sider, Content } = Layout;
