@@ -4,14 +4,23 @@ import "gorm.io/gorm"
 
 type Landtitle struct {
 	gorm.Model
-	Field string `gorm:"type:varchar(100)"`
+	// FK ไปยัง Geography / Province / Amphure / District
+	GeographyID uint
+	Geography   LandGeographies `gorm:"foreignKey:GeographyID"`
 
-	UserID uint  // 👈 FK ไปยัง role.id
-	Users  Users `gorm:"foreignKey:UserID"` // 👈 optional: preload ได้
+	ProvinceID uint
+	Province   LandProvinces `gorm:"foreignKey:ProvinceID"`
 
-	LandProvincesID uint
-	LandProvinces   LandProvinces
+	AmphureID uint
+	Amphure   LandAmphures `gorm:"foreignKey:AmphureID"`
 
+	TambonID uint
+	Tambon   LandTambons `gorm:"foreignKey:TambonID"`
+	// LandProvincesID uint
+	// LandProvinces   LandProvinces
 	//Booking []Booking  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
 	Landsalepost []Landsalepost `gorm:"foreignKey:LandtitleID"`
+	Transaction  []Transaction  `gorm:"foreignKey:LandID"`
+	RequestSell  []RequestSell  `gorm:"foreignKey:LandID"`
+	RequestBuy   []RequestBuy   `gorm:"foreignKey:LandID"`
 }
