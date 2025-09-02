@@ -61,27 +61,23 @@ contract LandTitleNFT is ERC721, Ownable, Pausable {
 
     function mintLandTitleNFT(
         address wallet,
-        bytes32 hashMetadata,
-        bytes32 dataHash,
         string[9] calldata metaFields,
         bytes calldata signature
     ) external whenNotPaused returns (uint256) {
         require(msg.sender == wallet, "not wallet");
-        require(!usedDataHash[dataHash], "dataHash used");
         string memory metaConcat = _concatMeta(metaFields);
-        bytes32 calcHashMetadata = keccak256(abi.encodePacked(metaConcat));
-        require(calcHashMetadata == hashMetadata, "hashMetadata mismatch");
-        bytes32 calcDataHash = keccak256(abi.encodePacked(wallet, metaConcat, hashMetadata));
-        require(calcDataHash == dataHash, "dataHash mismatch");
-        bytes32 ethHash = _toEthSignedMessageHash(dataHash);
+        bytes32 metaHash = keccak256(abi.encodePacked(metaConcat));
+        require(!usedNameHash[metaHash], "metadata used");
+    
+        // สร้าง hash สำหรับเซ็น
+        bytes32 messageHash = keccak256(abi.encodePacked(wallet, metaConcat));
+        bytes32 ethHash = _toEthSignedMessageHash(messageHash);
         address signer = ECDSA.recover(ethHash, signature);
         require(signer == trustedSigner, "invalid signer");
-
+    
         uint256 tokenId = _tokenIdTracker;
         _tokenIdTracker += 1;
-        usedDataHash[dataHash] = true;
-        dataHashes[tokenId] = dataHash;
-        hashMetadatas[tokenId] = hashMetadata;
+        usedNameHash[metaHash] = true;
         _safeMint(wallet, tokenId);
         for (uint256 i = 0; i < 9; i++) {
             _landMetadata[tokenId][i] = metaFields[i];
@@ -93,12 +89,14 @@ contract LandTitleNFT is ERC721, Ownable, Pausable {
     function getLandMetadata(uint256 tokenId) external view returns (
         string[9] memory metaFields,
         uint256 price,
-        address buyer
+        address buyer,
+        address walletID // เพิ่มบรรทัดนี้
     ) {
         metaFields = _landMetadata[tokenId];
         SaleInfo memory info = saleInfos[tokenId];
         price = info.price;
         buyer = info.buyer;
+        walletID = ownerOf(tokenId); // คืน address เจ้าของ token ปัจจุบัน
     }
 
     function getDataHash(uint256 tokenId) external view returns (bytes32) {

@@ -21,7 +21,7 @@ contract LandTitleNFT is ERC721, Ownable, Pausable {
     uint256 private _tokenIdTracker;
     mapping(uint256 => SaleInfo) public saleInfos;
 
-    mapping(uint256 => string[9]) private _landMetadata;
+    mapping(uint256 => string) private _landMetadata;
     mapping(uint256 => address[]) private _ownershipHistory;
     mapping(uint256 => bytes32) public dataHashes;
     mapping(uint256 => bytes32) public hashMetadatas;
@@ -50,55 +50,53 @@ contract LandTitleNFT is ERC721, Ownable, Pausable {
     }
 
     // Helper: รวม metadata เป็น string เดียว
-    function _concatMeta(string[9] memory metaFields) internal pure returns (string memory) {
+    function _concatMeta(string[13] memory metaFields) internal pure returns (string memory) {
         return string(
             abi.encodePacked(
                 metaFields[0], metaFields[1], metaFields[2], metaFields[3], metaFields[4],
-                metaFields[5], metaFields[6], metaFields[7], metaFields[8]
+                metaFields[5], metaFields[6], metaFields[7], metaFields[8],
+                metaFields[9], metaFields[10], metaFields[11], metaFields[12]
             )
         );
     }
 
+    // mintLandTitleNFT รับ metadata เป็น string เดียว
     function mintLandTitleNFT(
         address wallet,
-        bytes32 hashMetadata,
-        bytes32 dataHash,
-        string[9] calldata metaFields,
+        string calldata metaFields,
         bytes calldata signature
     ) external whenNotPaused returns (uint256) {
         require(msg.sender == wallet, "not wallet");
-        require(!usedDataHash[dataHash], "dataHash used");
-        string memory metaConcat = _concatMeta(metaFields);
-        bytes32 calcHashMetadata = keccak256(abi.encodePacked(metaConcat));
-        require(calcHashMetadata == hashMetadata, "hashMetadata mismatch");
-        bytes32 calcDataHash = keccak256(abi.encodePacked(wallet, metaConcat, hashMetadata));
-        require(calcDataHash == dataHash, "dataHash mismatch");
-        bytes32 ethHash = _toEthSignedMessageHash(dataHash);
+        bytes32 metaHash = keccak256(abi.encodePacked(metaFields));
+        require(!usedNameHash[metaHash], "metadata used");
+
+        // สร้าง hash สำหรับเซ็น
+        bytes32 messageHash = keccak256(abi.encodePacked(wallet, metaFields));
+        bytes32 ethHash = _toEthSignedMessageHash(messageHash);
         address signer = ECDSA.recover(ethHash, signature);
         require(signer == trustedSigner, "invalid signer");
 
         uint256 tokenId = _tokenIdTracker;
         _tokenIdTracker += 1;
-        usedDataHash[dataHash] = true;
-        dataHashes[tokenId] = dataHash;
-        hashMetadatas[tokenId] = hashMetadata;
+        usedNameHash[metaHash] = true;
         _safeMint(wallet, tokenId);
-        for (uint256 i = 0; i < 9; i++) {
-            _landMetadata[tokenId][i] = metaFields[i];
-        }
+        _landMetadata[tokenId] = metaFields;
         _ownershipHistory[tokenId].push(wallet);
         return tokenId;
     }
 
+    // getLandMetadata คืน string เดียว
     function getLandMetadata(uint256 tokenId) external view returns (
-        string[9] memory metaFields,
+        string memory metaFields,
         uint256 price,
-        address buyer
+        address buyer,
+        address walletID
     ) {
         metaFields = _landMetadata[tokenId];
         SaleInfo memory info = saleInfos[tokenId];
         price = info.price;
         buyer = info.buyer;
+        walletID = ownerOf(tokenId);
     }
 
     function getDataHash(uint256 tokenId) external view returns (bytes32) {
@@ -162,24 +160,10 @@ contract LandTitleNFT is ERC721, Ownable, Pausable {
     }
 
     // ERC721 Metadata: tokenURI (คืน string ธรรมดา)
-        function tokenURI(uint256 tokenId) public view override returns (string memory) {
+    function tokenURI(uint256 tokenId) public view override returns (string memory) {
         require(ownerOf(tokenId) != address(0));
-        string[9] memory meta = _landMetadata[tokenId];
-    
-        // สร้างข้อความแนวนอนแบบกำหนดเอง
-        string memory summary = string(abi.encodePacked(
-            "Land Position: ", meta[0],
-            ", Land Number: ", meta[1],
-            ", Survey Page: ", meta[2],
-            ", Tambon: ", meta[3],
-            ", Deed Number: ", meta[4],
-            ", Book: ", meta[5],
-            ", Page: ", meta[6],
-            ", Amphoe: ", meta[7],
-            ", Province: ", meta[8]
-        ));
-    
-        // คืน JSON ฟิลด์เดียว (แสดงในเว็บ NFT ได้)
+        string memory summary = _landMetadata[tokenId];
+
         string memory json = string(abi.encodePacked(
             '{',
                 '"name":"Land Title #', tokenId.toString(), '",',

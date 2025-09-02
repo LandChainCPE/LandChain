@@ -13,7 +13,7 @@ const privateKey = "0x11c1f346bfe76f45058d04a7d42ad9a70d51f597b5880bc41ae7af819a
 const wallet = new ethers.Wallet(privateKey);
 
 async function main() {
-  // signMessage จะเพิ่ม prefix ให้อัตโนมัติ
+  // signMessage จะเพิ่ม prefix ให้อัตโนมัติ    **** ตรงนี้ที่เติม Prefix ****
   const signature = await wallet.signMessage(ethers.getBytes(messageHash));
   console.log("wallet:", walletID);
   console.log("nameHash:", nameHash);
