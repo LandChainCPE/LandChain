@@ -13,6 +13,7 @@
     "@ant-design/icons": "^6.0.0",
     "@bilions/thailand-address": "^2.0.1",
     "@fontsource/noto-sans-thai": "^5.2.6",
+    "@metamask/detect-provider": "^2.0.0",
     "antd": "^5.26.5",
     "axios": "^1.11.0",
     "bootstrap": "^5.3.7",

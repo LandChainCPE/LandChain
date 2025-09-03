@@ -38,6 +38,8 @@ const Petition: React.FC = () => {
       return;
     }
 
+  //const userId = localStorage.getItem("id");
+
 //อย่าลืมแก้ตรงState,user_id
     try {
       const payload = {

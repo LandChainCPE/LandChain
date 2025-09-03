@@ -338,6 +338,10 @@ func createRoomchatsAndMessages() {
 		{Tag: "ติดถนน"},
 		{Tag: "ติดทะเล"},
 		{Tag: "ติดแม่น้ำ"},
+		{Tag: "ใกล้BTS"},
+		{Tag: "ใกล้MRT"},
+		{Tag: "ติดภูเขา"},
+
 	}
 		// เพิ่ม tags ลงในฐานข้อมูล
 	if err := db.Create(&tags).Error; err != nil {
@@ -359,8 +363,9 @@ func createRoomchatsAndMessages() {
 		ProvinceID:     	20, 
 		DistrictID:      	1, 
 		SubdistrictID: 		1,
-		Map: 		"aaa",
+		//Map: 		"aaa",
 		LandtitleID:	1,
+		UserID: 1,
 	}
 
 	if err := db.Create(&landpost).Error; err != nil {
