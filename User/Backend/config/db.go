@@ -240,114 +240,114 @@ func SetupDatabase() {
 		}
 
 		// 🔸 ตรวจสอบและสร้าง Landsalepost ถ้ายังไม่มี
-		var post1, post2 entity.Landsalepost
+// 		var post1, post2 entity.Landsalepost
 
-		if err := db.Where("num_of_land_title = ?", "180").First(&post1).Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				post1 = entity.Landsalepost{
-					Name:           "นายสมชาย ใจดี",
-					PhoneNumber:    "0812345678",
-					NumOfLandTitle: "180",
-					AdressLandplot: "ต.ในเมือง อ.เมือง จ.นครราชสีมา",
-					Price:          260000.00,
-					LandtitleID:    landtitle1.ID,
-				}
-				db.Create(&post1)
-			}
-		}
+// 		if err := db.Where("num_of_land_title = ?", "180").First(&post1).Error; err != nil {
+// 			if errors.Is(err, gorm.ErrRecordNotFound) {
+// 				post1 = entity.Landsalepost{
+// 					Name:           "นายสมชาย ใจดี",
+// 					PhoneNumber:    "0812345678",
+// 					NumOfLandTitle: "180",
+// 					AdressLandplot: "ต.ในเมือง อ.เมือง จ.นครราชสีมา",
+// 					Price:          260000.00,
+// 					LandtitleID:    landtitle1.ID,
+// 				}
+// 				db.Create(&post1)
+// 			}
+// 		}
 
-		if err := db.Where("num_of_land_title = ?", "264").First(&post2).Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				post2 = entity.Landsalepost{
-					Name:           "นางสาววิภา รัตน์เรือง",
-					PhoneNumber:    "0898765432",
-					NumOfLandTitle: "264",
-					AdressLandplot: "ต.หนองจะบก อ.เมือง จ.นครราชสีมา",
-					Price:          350000.00,
-					LandtitleID:    landtitle2.ID,
-				}
-				db.Create(&post2)
-			}
-		}
+// 		if err := db.Where("num_of_land_title = ?", "264").First(&post2).Error; err != nil {
+// 			if errors.Is(err, gorm.ErrRecordNotFound) {
+// 				post2 = entity.Landsalepost{
+// 					Name:           "นางสาววิภา รัตน์เรือง",
+// 					PhoneNumber:    "0898765432",
+// 					NumOfLandTitle: "264",
+// 					AdressLandplot: "ต.หนองจะบก อ.เมือง จ.นครราชสีมา",
+// 					Price:          350000.00,
+// 					LandtitleID:    landtitle2.ID,
+// 				}
+// 				db.Create(&post2)
+// 			}
+// 		}
 
-		// 🔸 สร้าง Roomchat หลังจากสร้าง Landsalepost แล้ว
-		createRoomchatsAndMessages()
-	}
+// 		// 🔸 สร้าง Roomchat หลังจากสร้าง Landsalepost แล้ว
+// 		createRoomchatsAndMessages()
+// 	}
 
-	log.Println("✅ Database Migrated & Seeded Successfully")
-}
+// 	log.Println("✅ Database Migrated & Seeded Successfully")
+// }
 
-// แยกการสร้าง Roomchat และ Message ออกมาเป็น function แยก
-func createRoomchatsAndMessages() {
-	var post entity.Landsalepost
-	if err := db.Where("num_of_land_title = ?", "180").First(&post).Error; err != nil {
-		log.Println("❌ Cannot find Landsalepost with num_of_land_title = 180")
-		return
-	}
+// // แยกการสร้าง Roomchat และ Message ออกมาเป็น function แยก
+// func createRoomchatsAndMessages() {
+// 	var post entity.Landsalepost
+// 	if err := db.Where("num_of_land_title = ?", "180").First(&post).Error; err != nil {
+// 		log.Println("❌ Cannot find Landsalepost with num_of_land_title = 180")
+// 		return
+// 	}
 
-	// รายชื่อผู้ใช้ที่ต้องการสร้างห้องแชท
-	userIDs := []uint{2, 3}
+// 	// รายชื่อผู้ใช้ที่ต้องการสร้างห้องแชท
+// 	userIDs := []uint{2, 3}
 
-	for _, userID := range userIDs {
-		// เช็คว่ามี Roomchat นี้อยู่แล้วหรือยัง
-		var existingRoomchat entity.Roomchat
-		err := db.Where("landsalepost_id = ? AND user_id = ?", post.ID, userID).First(&existingRoomchat).Error
-		if err == nil {
-			log.Println("⚠️ Roomchat already exists for UserID:", userID)
-			continue
-		}
+// 	for _, userID := range userIDs {
+// 		// เช็คว่ามี Roomchat นี้อยู่แล้วหรือยัง
+// 		var existingRoomchat entity.Roomchat
+// 		err := db.Where("landsalepost_id = ? AND user_id = ?", post.ID, userID).First(&existingRoomchat).Error
+// 		if err == nil {
+// 			log.Println("⚠️ Roomchat already exists for UserID:", userID)
+// 			continue
+// 		}
 
-		// สร้าง Roomchat ใหม่
-		roomchat := entity.Roomchat{
-			LandsalepostID: post.ID,
-			UserID:         userID,
-		}
+// 		// สร้าง Roomchat ใหม่
+// 		roomchat := entity.Roomchat{
+// 			LandsalepostID: post.ID,
+// 			UserID:         userID,
+// 		}
 
-		if err := db.Create(&roomchat).Error; err != nil {
-			log.Println("❌ Failed to create Roomchat for user", userID, ":", err)
-			continue
-		}
-		log.Println("✅ Created Roomchat for UserID:", userID, "RoomchatID:", roomchat.ID)
+// 		if err := db.Create(&roomchat).Error; err != nil {
+// 			log.Println("❌ Failed to create Roomchat for user", userID, ":", err)
+// 			continue
+// 		}
+// 		log.Println("✅ Created Roomchat for UserID:", userID, "RoomchatID:", roomchat.ID)
 
-		// เพิ่มข้อความตัวอย่างในห้องแชท
-		messages := []entity.Message{
-			{
-				Message:    "สวัสดีครับ สนใจที่ดินแปลงนี้ไหม?",
-				Time:       time.Now(),
-				RoomchatID: roomchat.ID,
-			},
-			{
-				Message:    "สนใจครับ อยากทราบรายละเอียดเพิ่มเติม",
-				Time:       time.Now().Add(1 * time.Minute),
-				RoomchatID: roomchat.ID,
-			},
-			{
-				Message:    "ที่ดินขนาด 5 ไร่ ราคา 2 ล้านบาทครับ",
-				Time:       time.Now().Add(2 * time.Minute),
-				RoomchatID: roomchat.ID,
-			},
-		}
+// 		// เพิ่มข้อความตัวอย่างในห้องแชท
+// 		messages := []entity.Message{
+// 			{
+// 				Message:    "สวัสดีครับ สนใจที่ดินแปลงนี้ไหม?",
+// 				Time:       time.Now(),
+// 				RoomchatID: roomchat.ID,
+// 			},
+// 			{
+// 				Message:    "สนใจครับ อยากทราบรายละเอียดเพิ่มเติม",
+// 				Time:       time.Now().Add(1 * time.Minute),
+// 				RoomchatID: roomchat.ID,
+// 			},
+// 			{
+// 				Message:    "ที่ดินขนาด 5 ไร่ ราคา 2 ล้านบาทครับ",
+// 				Time:       time.Now().Add(2 * time.Minute),
+// 				RoomchatID: roomchat.ID,
+// 			},
+// 		}
 
-		if err := db.Create(&messages).Error; err != nil {
-			log.Println("❌ Failed to create messages for UserID:", userID, ":", err)
-		} else {
-			log.Println("✅ Created messages for UserID:", userID)
-		}
-	}
+// 		if err := db.Create(&messages).Error; err != nil {
+// 			log.Println("❌ Failed to create messages for UserID:", userID, ":", err)
+// 		} else {
+// 			log.Println("✅ Created messages for UserID:", userID)
+// 		}
+// 	}
 
-	log.Println("✅ Database Migrated & Seeded Successfully")
+// 	log.Println("✅ Database Migrated & Seeded Successfully")
 
-	// ✅ Seed State (แยกจาก Users)
-	var stateCount int64
-	db.Model(&entity.State{}).Count(&stateCount)
-	if stateCount == 0 {
-		db.Create(&entity.State{Name: "รอตรวจสอบ", Color: "orange"})
-		db.Create(&entity.State{Name: "กำลังดำเนินการ", Color: "blue"})
-		db.Create(&entity.State{Name: "เสร็จสิ้น", Color: "green"})
-	}
+// 	// ✅ Seed State (แยกจาก Users)
+// 	var stateCount int64
+// 	db.Model(&entity.State{}).Count(&stateCount)
+// 	if stateCount == 0 {
+// 		db.Create(&entity.State{Name: "รอตรวจสอบ", Color: "orange"})
+// 		db.Create(&entity.State{Name: "กำลังดำเนินการ", Color: "blue"})
+// 		db.Create(&entity.State{Name: "เสร็จสิ้น", Color: "green"})
+// 	}
 
-	log.Println("✅ Database Migrated & Seeded Successfully")
-}
+// 	log.Println("✅ Database Migrated & Seeded Successfully")
+// }
 
 func StartUserVerify(db *gorm.DB, userID, requestedBy uint) (*entity.Verification, error) {
 	v := &entity.Verification{
@@ -410,3 +410,4 @@ func UpdateVerificationStatus(db *gorm.DB, verID uint, to entity.VerificationSta
 		return nil
 	})
 }
+
