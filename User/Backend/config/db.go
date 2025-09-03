@@ -29,14 +29,13 @@ func ConnectDatabase() *gorm.DB {
 
 	// DSN
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Bangkok",
-		os.Getenv("DB_HOST"),	
+		os.Getenv("DB_HOST"),
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
 		os.Getenv("DB_PORT"),
 	)
 	// log.Println("DSN:", dsn) // ✅ สำหรับ Debug
-	
 
 	// เชื่อมต่อ DB
 	connection, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -77,9 +76,10 @@ func SetupDatabase() {
 		&entity.Petition{},
 		&entity.State{},
 		&entity.Location{},
+		&entity.District{},
+		&entity.Subdistrict{},
 		&entity.Verification{},
-    	&entity.VerificationEvent{},
-
+		&entity.VerificationEvent{},
 	); err != nil {
 		log.Fatal("❌ AutoMigrate failed:", err)
 	}
@@ -87,7 +87,7 @@ func SetupDatabase() {
 	// Seed Data
 	var count int64
 	db.Model(&entity.Users{}).Count(&count)
-	
+
 	// สร้าง ServiceType ก่อน
 	var serviceCount int64
 	db.Model(&entity.ServiceType{}).Count(&serviceCount)
@@ -101,7 +101,7 @@ func SetupDatabase() {
 		db.Create(&entity.Role{Role: "Admin"})
 
 		RefRole := uint(1)
-		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f469a", RoleID: RefRole})		// db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
+		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f469a", RoleID: RefRole}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
 		// db.Create(&entity.Users{Name: "Bam", Email: "@goods1", Phonenumber: "0912345677", Password: "1234564", Land: "ผหก5ป58ก", RoleID: RefRole})
 		// //RefServiceType := uint(1)
 		// db.Create(&entity.Users{Name: "Jo", Password: "jo123456", Land: "12กท85", RoleID: RefRole,})
@@ -111,7 +111,6 @@ func SetupDatabase() {
 		db.Create(&entity.Province{Province: "นครราชสีมา"})
 		db.Create(&entity.Province{Province: "อุบลราชธานี"})
 		db.Create(&entity.Province{Province: "มหาสารคาม"})
-
 
 		RefProvince := uint(2)
 		db.Create(&entity.Branch{Branch: "น้ำยืน", ProvinceID: RefProvince})
@@ -125,10 +124,6 @@ func SetupDatabase() {
 		db.Create(&entity.Time{Timework: "13:00 - 14:00", MaxCapacity: 5, BranchID: RefBranch})
 		db.Create(&entity.Time{Timework: "14:00 - 15:00", MaxCapacity: 5, BranchID: RefBranch})
 		db.Create(&entity.Time{Timework: "15:00 - 16:00", MaxCapacity: 5, BranchID: RefBranch})
-
-
-
-		
 
 		// สร้าง LandProvinces
 		var provinces = []string{
@@ -161,29 +156,86 @@ func SetupDatabase() {
 		// 🔸 ตรวจสอบและสร้าง Landtitle ถ้ายังไม่มี
 		var landtitle1, landtitle2 entity.Landtitle
 
-		RefTimeID := uint(1)
-		startTime := time.Date(2025, time.August, 6, 9, 0, 0, 0, time.UTC)
-		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID, UserID: RefTimeID, BranchID: RefTimeID, ServiceTypeID: RefTimeID})
+		// ใช้เวลาเดียวกันเป็นค่าเริ่มต้นให้ StatusUpdatedAt
+		now := time.Now()
 
-		if err := db.Where("field = ?", "โฉนดเลขที่ 000008 แปลง 180").First(&landtitle1).Error; err != nil {
+		// ตัวอย่างกำหนด Province/District/Subdistrict เป็น 1 ทั้งหมด
+		// (ถ้าคุณมีข้อมูลจังหวัด/อำเภอ/ตำบลจริงในตาราง ให้เปลี่ยนเป็น ID ที่มีอยู่)
+		defaultProvinceID := uint(1)
+		defaultDistrictID := uint(1)
+		defaultSubdistrictID := uint(1)
+
+		// โฉนดชุดแรก
+		if err := db.
+			Where("deed_number = ? AND deleted_at IS NULL", "000008-180").
+			First(&landtitle1).Error; err != nil {
+
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				landtitle1 = entity.Landtitle{
-					Field:           "โฉนดเลขที่ 000008 แปลง 180",
-					UserID:          1,
-					LandProvincesID:  1,
+					DeedNumber: "000008-180",
+					VillageNo:  "5",
+					Soi:        "ซอยตัวอย่าง 1",
+					Road:       "ถนนตัวอย่าง 1",
+
+					Rai:      1,
+					Ngan:     2,
+					SquareWa: 30,
+
+					DeedImagePath: "", // ใส่ path ถ้ามีไฟล์สแกน
+
+					UserID:        1,
+					ProvinceID:    defaultProvinceID,
+					DistrictID:    defaultDistrictID,
+					SubdistrictID: defaultSubdistrictID,
+
+					Status:          "PENDING",
+					StatusUpdatedAt: &now,
+
+					// Verification เริ่มว่างไว้ก่อน
+					// OwnershipVerificationStatus: ptr("PENDING"),
+					// OwnershipVerifiedAt:        nil,
+
+					// TokenID เว้นไว้ก่อนจนกว่าจะ mint
 				}
-				db.Create(&landtitle1)
+				if err := db.Create(&landtitle1).Error; err != nil {
+					log.Println("❌ Create landtitle1 failed:", err)
+				}
+			} else {
+				log.Println("❌ Query landtitle1 failed:", err)
 			}
 		}
 
-		if err := db.Where("field = ?", "โฉนดเลขที่ 000009 แปลง 264").First(&landtitle2).Error; err != nil {
+		// โฉนดชุดสอง
+		if err := db.
+			Where("deed_number = ? AND deleted_at IS NULL", "000009-264").
+			First(&landtitle2).Error; err != nil {
+
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				landtitle2 = entity.Landtitle{
-					Field:           "โฉนดเลขที่ 000009 แปลง 264",
-					UserID:          1,
-					LandProvincesID:  1,
+					DeedNumber: "000009-264",
+					VillageNo:  "7",
+					Soi:        "ซอยสุขใจ",
+					Road:       "ถนนบางนา-ตราด",
+
+					Rai:      2,
+					Ngan:     1,
+					SquareWa: 12,
+
+					DeedImagePath: "",
+
+					UserID:        1,
+					ProvinceID:    defaultProvinceID,
+					DistrictID:    defaultDistrictID,
+					SubdistrictID: defaultSubdistrictID,
+
+					Status:          "PENDING",
+					StatusUpdatedAt: &now,
 				}
-				db.Create(&landtitle2)
+				if err := db.Create(&landtitle2).Error; err != nil {
+					log.Println("❌ Create landtitle2 failed:", err)
+				}
+			} else {
+				log.Println("❌ Query landtitle2 failed:", err)
 			}
 		}
 
@@ -282,7 +334,6 @@ func createRoomchatsAndMessages() {
 			log.Println("✅ Created messages for UserID:", userID)
 		}
 	}
-	
 
 	log.Println("✅ Database Migrated & Seeded Successfully")
 
@@ -294,58 +345,68 @@ func createRoomchatsAndMessages() {
 		db.Create(&entity.State{Name: "กำลังดำเนินการ", Color: "blue"})
 		db.Create(&entity.State{Name: "เสร็จสิ้น", Color: "green"})
 	}
-	
+
 	log.Println("✅ Database Migrated & Seeded Successfully")
 }
 
 func StartUserVerify(db *gorm.DB, userID, requestedBy uint) (*entity.Verification, error) {
-    v := &entity.Verification{
-        SubjectID:        userID,
-        SubjectType:      entity.SubjectUserIdentity,
-        Status:           entity.StatusPending,
-        RequestedByUserID: &requestedBy,
-    }
-    return v, db.Transaction(func(tx *gorm.DB) error {
-        if err := tx.Create(v).Error; err != nil { return err }
-        e := entity.VerificationEvent{ VerificationID: v.ID, ToStatus: entity.StatusPending }
-        return tx.Create(&e).Error
-    })
+	v := &entity.Verification{
+		SubjectID:         userID,
+		SubjectType:       entity.SubjectUserIdentity,
+		Status:            entity.StatusPending,
+		RequestedByUserID: &requestedBy,
+	}
+	return v, db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(v).Error; err != nil {
+			return err
+		}
+		e := entity.VerificationEvent{VerificationID: v.ID, ToStatus: entity.StatusPending}
+		return tx.Create(&e).Error
+	})
 }
 
 func UpdateVerificationStatus(db *gorm.DB, verID uint, to entity.VerificationStatus, changedBy *uint, reason *string) error {
-    return db.Transaction(func(tx *gorm.DB) error {
-        var v entity.Verification
-        if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
-            First(&v, verID).Error; err != nil { return err }
+	return db.Transaction(func(tx *gorm.DB) error {
+		var v entity.Verification
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			First(&v, verID).Error; err != nil {
+			return err
+		}
 
-        from := v.Status
-        v.Status = to
-        if err := tx.Save(&v).Error; err != nil { return err }
+		from := v.Status
+		v.Status = to
+		if err := tx.Save(&v).Error; err != nil {
+			return err
+		}
 
-        ev := entity.VerificationEvent{
-            VerificationID:  v.ID,
-            FromStatus:      &from,
-            ToStatus:        to,
-            ChangedByUserID: changedBy,
-            Reason:          reason,
-        }
-        if err := tx.Create(&ev).Error; err != nil { return err }
+		ev := entity.VerificationEvent{
+			VerificationID:  v.ID,
+			FromStatus:      &from,
+			ToStatus:        to,
+			ChangedByUserID: changedBy,
+			Reason:          reason,
+		}
+		if err := tx.Create(&ev).Error; err != nil {
+			return err
+		}
 
-        // อัปเดตฟิลด์สรุปที่ Users/Landtitle (denormalized)
-        switch v.SubjectType {
-        case entity.SubjectUserIdentity:
-            // เขียนแบบนี้ให้ชัดเจนและเลี่ยง race
-            updates := map[string]any{
-                "identity_verification_status": string(v.Status),
-            }
-            if v.Status == entity.StatusApproved {
-                updates["identity_verified_at"] = time.Now()
-            }
-            if err := tx.Model(&entity.Users{}).
-                Where("id = ?", v.SubjectID).
-                Updates(updates).Error; err != nil { return err }
-        // case entity.SubjectLandTitleOwnership: ... ทำคล้ายกัน
-        }
-        return nil
-    })
+		// อัปเดตฟิลด์สรุปที่ Users/Landtitle (denormalized)
+		switch v.SubjectType {
+		case entity.SubjectUserIdentity:
+			// เขียนแบบนี้ให้ชัดเจนและเลี่ยง race
+			updates := map[string]any{
+				"identity_verification_status": string(v.Status),
+			}
+			if v.Status == entity.StatusApproved {
+				updates["identity_verified_at"] = time.Now()
+			}
+			if err := tx.Model(&entity.Users{}).
+				Where("id = ?", v.SubjectID).
+				Updates(updates).Error; err != nil {
+				return err
+			}
+			// case entity.SubjectLandTitleOwnership: ... ทำคล้ายกัน
+		}
+		return nil
+	})
 }

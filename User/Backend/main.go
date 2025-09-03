@@ -63,6 +63,11 @@ func main() {
 		authorized.GET("/bookings/:userID", controller.GetUserBookings) // ดึงข้อมูลการจองตาม ID
 		authorized.GET("/locations/:landsalepost_id", controller.GetLocationsByLandSalePostId)
 
+		//จังหวัด อำเภอ ตำบล
+		authorized.GET("/province", controller.GetAllProvinces)
+		authorized.GET("/district/:id", controller.GetDistrict)
+		authorized.GET("/subdistrict/:id", controller.GetSubdistrict)
+		
 		//Verification ผู้ใช้และที่ดิน
 		authorized.POST("/verifications", controller.StartVerification) //สร้าง Verification สถานะเริ่มต้นใช้เมื่อผู้ใช้กด “ขอยืนยัน” จากหน้าโปรไฟล์
 		authorized.GET("/verifications/latest", controller.GetLatestVerification) //ดึง “สถานะล่าสุด” ของสิ่งที่ถูกยืนยัน
