@@ -20,9 +20,9 @@ func main() {
 	}
 
 	config.ConnectDatabase()
-
 	config.SetupDatabase()
 	r := gin.Default()
+	controller.InitContract()
 	r.Use(CORSMiddleware())
 
 	// เริ่มต้น Scheduler สำหรับลบการจองที่หมดอายุ
@@ -74,6 +74,12 @@ func main() {
 		r.GET("/user/chat/:id", controller.GetAllLandDatabyID)
 		// r.GET("/user/chat/roomchat/:id", controller.GetMessagesByLandPostID)
 		r.GET("/user/:id", controller.GetUserByID)
+
+		authorized.GET("/user/info/:id", controller.GetInfoUserByUserID)
+		authorized.GET("/user/landinfo/:id", controller.GetLandInfoByTokenID)
+		authorized.GET("/user/lands", controller.GetLandTitleInfoByWallet)
+		authorized.GET("/user/info", controller.GetInfoUserByToken)
+		authorized.GET("/user/lands/metadata", controller.GetLandMetadataByWallet)
 
 		// CONTROLLER RegisterLand
 		//r.POST("/user/regisland", controller.RegisterLand)

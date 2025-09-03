@@ -23,6 +23,7 @@ const LandMarkingMap = Loadable(lazy(() => import("../pages/mapbox_test/mapbox_t
 
 const UserRegisland = Loadable(lazy(() => import("../pages/UserRegisLand/UserRegisLand")));
 
+const DashboardUser = Loadable(lazy(() => import("../pages/RequestSell/ReausetSell")));
 // Component สำหรับป้องกันหน้าที่ต้อง login
 const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
   const navigate = useNavigate();
@@ -123,6 +124,14 @@ const UserRoutes = (): RouteObject[] => [
         element: (
           <ProtectedRoute>
             <UserRegisland />
+          </ProtectedRoute>
+        ) 
+      },
+      { 
+        path: "requestsell", 
+        element: (
+          <ProtectedRoute>
+            <DashboardUser />
           </ProtectedRoute>
         ) 
       },

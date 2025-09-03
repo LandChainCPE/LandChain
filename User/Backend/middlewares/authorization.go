@@ -1,15 +1,15 @@
 package middlewares
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"landchain/services"
-)
 
-var HashKey = []byte("very-secret")
-var BlockKey = []byte("a-lot-secret1234")
+	"github.com/gin-gonic/gin"
+)
 
 func Authorizes() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -18,23 +18,37 @@ func Authorizes() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "No Authorization header provided"})
 			return
 		}
-		extractedToken := strings.Split(clientToken, "Bearer ") 
-		if len(extractedToken) == 2 {
-			clientToken = strings.TrimSpace(extractedToken[1])
-		} else {
+
+		// ✅ ดึง Bearer token ออกมา
+		extractedToken := strings.Split(clientToken, "Bearer ")
+		if len(extractedToken) != 2 {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Incorrect Format of Authorization Token"})
 			return
 		}
+		clientToken = strings.TrimSpace(extractedToken[1])
+
+		// ✅ ใช้ JwtWrapper validate
 		jwtWrapper := services.JwtWrapper{
-			SecretKey: "RhE9Q6zyV8Ai5jnPq2ZDsXMmLuy5eNkw",
-			Issuer:    "AuthService",
+			SecretKey:       os.Getenv("JWT_SECRET"),
+			Issuer:          os.Getenv("JWT_ISSUER"),
+			ExpirationHours: 1,
 		}
-		_, err := jwtWrapper.ValidateToken(clientToken)
+
+		claims, err := jwtWrapper.ValidateToken(clientToken)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
+
+		if claims == nil || claims.Wallet == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+			return
+		}
+
+		// ✅ เก็บ wallet ลง context
+		c.Set("wallet", claims.Wallet)
+
+		fmt.Println("✅ Token validated for wallet:", claims.Wallet)
 		c.Next()
 	}
-
 }

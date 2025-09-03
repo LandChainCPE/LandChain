@@ -4,9 +4,11 @@ import (
 	"landchain/config"
 	"landchain/entity"
 	"net/http"
+	"os"
+
+	"landchain/services"
 
 	"github.com/gin-gonic/gin"
-	"landchain/services"
 )
 
 // LoginUser ฟังก์ชั่นสำหรับการ Login โดยใช้ Metamask Wallet Address
@@ -31,9 +33,9 @@ func LoginUser(c *gin.Context) {
 
 	// สร้าง JWT Token สำหรับผู้ใช้
 	jwtWrapper := services.JwtWrapper{
-		SecretKey:       "RhE9Q6zyV8Ai5jnPq2ZDsXMmLuy5eNkw", // ใช้ key ของคุณเอง
-		Issuer:          "LandChainAuth",
-		ExpirationHours: 24,
+		SecretKey:       os.Getenv("JWT_SECRET"), // ใช้ key ของคุณเอง
+		Issuer:          os.Getenv("JWT_ISSUER"),
+		ExpirationHours: 1,
 	}
 
 	// สร้าง Token โดยใช้ Metamask Wallet Address
