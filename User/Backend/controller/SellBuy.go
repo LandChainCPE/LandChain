@@ -48,36 +48,6 @@ func GetAllLandTitleByUserID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"landtitles": lands})
 }
 
-func GetAllRequestByLandID(c *gin.Context) {
-	LandID := c.Param("id")
-
-	var Land []entity.RequestSell
-	db := config.DB()
-
-	// ดึงข้อความห้องแชทพร้อมเรียงเวลาข้อความ
-	if err := db.Preload("Users").Where("land_id = ?", LandID).Find(&Land).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลข้อความได้"})
-		return
-	}
-
-	c.JSON(http.StatusOK, Land)
-}
-
-func GetAllRequestSellByUserID(c *gin.Context) {
-	UserID := c.Param("id")
-
-	var Land []entity.RequestBuy
-	db := config.DB()
-
-	// ดึงข้อความห้องแชทพร้อมเรียงเวลาข้อความ
-	if err := db.Preload("Landtitle").Preload("Landtitle.Users").Where("user_id = ?", UserID).Find(&Land).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลข้อความได้"})
-		return
-	}
-
-	c.JSON(http.StatusOK, Land)
-}
-
 func CreateTransaction(c *gin.Context) {
 	// สร้างตัวแปรธุรกรรม
 	var transaction entity.Transaction
@@ -271,6 +241,20 @@ func GetInfoUserByToken(c *gin.Context) {
 		"email":          user.Email,
 		"wallet_address": user.Metamaskaddress,
 	})
+}
+
+func GetRequestBuybyLandID(c *gin.Context) {
+	var request []entity.RequestBuy
+	landID := c.Param("id")
+	db := config.DB()
+
+	// ดึงข้อความห้องแชทพร้อมเรียงเวลาข้อความ
+	if err := db.Where("land_id = ?", landID).Preload("Users").Find(&request).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลผู้ใช้ได้"})
+		return
+	}
+
+	c.JSON(http.StatusOK, request)
 }
 
 // สมมติ contractInstance ถูก init แล้วเป็น global

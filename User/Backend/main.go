@@ -80,6 +80,7 @@ func main() {
 		authorized.GET("/user/lands", controller.GetLandTitleInfoByWallet)
 		authorized.GET("/user/info", controller.GetInfoUserByToken)
 		authorized.GET("/user/lands/metadata", controller.GetLandMetadataByWallet)
+		authorized.GET("/user/lands/requestbuy/:id", controller.GetRequestBuybyLandID)
 
 		// CONTROLLER RegisterLand
 		//r.POST("/user/regisland", controller.RegisterLand)

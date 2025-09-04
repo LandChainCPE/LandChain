@@ -2,7 +2,7 @@ import Loader from "../../component/third-patry/Loader";
 import Navbar from "../../component/user/Navbar";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByWallet } from "../../service/https/bam/bam";
+import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByWallet, GetRequestBuybyLandID } from "../../service/https/bam/bam";
 import { useNavigate } from "react-router-dom";
 import './RequestSell.css'
 
@@ -42,6 +42,7 @@ function RequestSell() {
                 // จากนั้นดึง Land Token
                 const res = await GetLandTitleInfoByWallet();
                 console.log("User land tokens:", res.tokens);
+                console.log(localStorage);
                 setLandTokens(res.tokens || []);
                 
 
@@ -63,8 +64,26 @@ function RequestSell() {
     const [selectedLand, setSelectedLand] = useState<string | null>(null);
     const handleSelectLand = (tokenID: string) => {
         setSelectedLand(tokenID);
+        if (tokenID) {
+            getRequestbuy(tokenID);
+        }
         console.log("Selected land token:", tokenID);
         // TODO: ส่ง tokenID ไป backend หรือ smart contract ต่อ
+    };
+    const selectedLandData = landMetadata.find(
+        (land) => land.tokenID === selectedLand
+    );
+
+    const [requestBuyData, setRequestBuyData] = useState<any | null>(null);
+    const getRequestbuy = async (tokenID: string) => {
+    try {
+        console.log("📡 Fetching request buy for token:", tokenID);
+        const res = await GetRequestBuybyLandID(tokenID); // ✅ เรียก API พร้อม id
+        setRequestBuyData(res);
+        console.log("✅ Request buy data:", res);
+    } catch (err) {
+        console.error("❌ Error fetching request buy:", err);
+    }
     };
 
     if (loading) return <Loader />;
@@ -162,39 +181,39 @@ function RequestSell() {
                         <div className="land-summary">
                             <div className="land-count">
                                {/* Land Tokens Section */}
-{landMetadata.length > 0 && (
-  <div className="land-tokens-section">
-    <h3 className="section-title">เลือกที่ดินที่ต้องการจำหน่าย</h3>
-    <div className="land-tokens-container">
-      {landMetadata.map((land, index) => (
-        <div
-          key={index}
-          className={`land-token-card ${
-            selectedLand === land.tokenID ? "selected" : ""
-          }`}
-          onClick={() => handleSelectLand(land.tokenID)}
-        >
-          <div className="land-token-content">
-            <div className="token-header">
-              <h4 className="token-title">โฉนด #{land.metaFields[0]}</h4>
-              {land.buyer === "0x0000000000000000000000000000000000000000" ? (
-                <span className="status-badge available">พร้อมจำหน่าย</span>
-              ) : (
-                <span className="status-badge sold">ขายแล้ว</span>
-              )}
-            </div>
-            <div className="contract-info">
-              <p className="contract-label">จังหวัด</p>
-              <p className="contract-value">{land.metaFields[8]}</p>
-              <p className="contract-label">ราคา</p>
-              <p className="contract-value">{land.price}</p>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
+                                {landMetadata.length > 0 && (
+                                <div className="land-tokens-section">
+                                    <h3 className="section-title">เลือกที่ดินที่ต้องการจำหน่าย</h3>
+                                    <div className="land-tokens-container">
+                                    {landMetadata.map((land, index) => (
+                                        <div
+                                        key={index}
+                                        className={`land-token-card ${
+                                            selectedLand === land.tokenID ? "selected" : ""
+                                        }`}
+                                        onClick={() => handleSelectLand(land.tokenID)}
+                                        >
+                                        <div className="land-token-content">
+                                            <div className="token-header">
+                                            <h4 className="token-title">โฉนด #{land.metaFields[0]}</h4>
+                                            {land.buyer === "0x0000000000000000000000000000000000000000" ? (
+                                                <span className="status-badge available">พร้อมจำหน่าย</span>
+                                            ) : (
+                                                <span className="status-badge sold">ขายแล้ว</span>
+                                            )}
+                                            </div>
+                                            <div className="contract-info">
+                                            <p className="contract-label">จังหวัด</p>
+                                            <p className="contract-value">{land.metaFields[8]}</p>
+                                            <p className="contract-label">ราคา</p>
+                                            <p className="contract-value">{land.price}</p>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    ))}
+                                    </div>
+                                </div>
+                                )}
 
 
                             </div>
@@ -203,32 +222,27 @@ function RequestSell() {
                 </div>
 
                 {/* Land Tokens Grid */}
-                {landTokens.length > 0 && (
-                    <div className="land-tokens-section">
-                        <h3 className="section-title">เลือกที่ดินที่ต้องการจำหน่าย</h3>
-                        <div className="grid-3">
-                            {landTokens.map((token, index) => (
-                                <div key={index} className="land-token-card">
-                                    <div className="land-token-content">
-                                        <div className="token-header">
-                                            <h4 className="token-title">Token #{token.id || index + 1}</h4>
-                                            <span className="status-badge">พร้อมจำหน่าย</span>
-                                        </div>
-                                        <div className="contract-info">
-                                            <p className="contract-label">Contract Address</p>
-                                            <p className="contract-address">
-                                                {token.contract_address || 'N/A'}
-                                            </p>
-                                        </div>
-                                        <button className="btn btn-primary">
-                                            เลือกจำหน่าย
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
+                <div className="land-tokens-section">
+    <h3 className="section-title">รายละเอียดโฉนด</h3>
+
+    {/* แสดงรายละเอียดโฉนดที่เลือก */}
+    {selectedLandData && (
+      <div className="selected-land-details">
+        <h4>รายละเอียดโฉนด #{selectedLandData.metaFields[0]}</h4>
+        <p><strong>จังหวัด:</strong> {selectedLandData.metaFields[8]}</p>
+        <p><strong>หมู่บ้าน:</strong> {selectedLandData.metaFields[3]}</p>
+        <p><strong>เลขแปลง:</strong> {selectedLandData.metaFields[1]}</p>
+        <p><strong>ราคา:</strong> {selectedLandData.price}</p>
+        <p>
+          <strong>สถานะ:</strong>{" "}
+          {selectedLandData.buyer ===
+          "0x0000000000000000000000000000000000000000"
+            ? "พร้อมจำหน่าย"
+            : "ขายแล้ว"}
+        </p>
+      </div>
+    )}
+  </div>
 
                 {/* Empty State */}
                 {landTokens.length === 0 && !loading && (

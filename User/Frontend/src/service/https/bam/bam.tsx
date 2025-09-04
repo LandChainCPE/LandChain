@@ -97,3 +97,14 @@ export async function GetLandMetadataByWallet() {
     else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
   }
 }
+
+export async function GetRequestBuybyLandID(id: number | string) {
+  try {
+    const res = await api.get(`/user/lands/requestbuy/${id}`); // ✅ แทนค่า id จริง
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}

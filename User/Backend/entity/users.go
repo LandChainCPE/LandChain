@@ -9,7 +9,7 @@ type Users struct {
 	// Name     string `gorm:"type:varchar(100)"`
 	Email           string `gorm:"type:varchar(100);uniqueIndex"`
 	Phonenumber     string `gorm:"type:varchar(15);uniqueIndex"`
-	Metamaskaddress string `gorm:"type:varchar(255)"`
+	Metamaskaddress string `gorm:"type:varchar(255);uniqueIndex"`
 	// Publickey string `gorm:"type:varchar(255)"`
 	// Password string `gorm:"type:varchar(255)"`
 	// Land     string `gorm:"type:varchar(100)"`

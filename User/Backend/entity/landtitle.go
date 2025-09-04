@@ -4,6 +4,7 @@ import "gorm.io/gorm"
 
 type Landtitle struct {
 	gorm.Model
+	TokenID uint
 	// FK ไปยัง Geography / Province / Amphure / District
 	GeographyID uint
 	Geography   LandGeographies `gorm:"foreignKey:GeographyID"`
