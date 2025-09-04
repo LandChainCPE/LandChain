@@ -1,0 +1,8 @@
+registerOwner
+mintLandTitleNFT
+getOwnerInfo
+getLandTitleInfoByWallet
+getLandMetadata
+setSaleInfo
+buyLandTitle
+getOwnershipHistory
