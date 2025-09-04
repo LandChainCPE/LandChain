@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	"landchain/entity"
 
@@ -260,6 +261,10 @@ func SetupDatabase() {
 		db.Create(&entity.Time{Timework: "13:00 - 14:00", MaxCapacity: 5, BranchID: RefBranch})
 		db.Create(&entity.Time{Timework: "14:00 - 15:00", MaxCapacity: 5, BranchID: RefBranch})
 		db.Create(&entity.Time{Timework: "15:00 - 16:00", MaxCapacity: 5, BranchID: RefBranch})
+		
+		RefTimeID := uint(1)
+		startTime := time.Date(2025, time.August, 6, 9, 0, 0, 0, time.UTC)
+		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID, UserID: RefTimeID, BranchID: RefTimeID, ServiceTypeID: RefTimeID})
 
 		SeedGeographyExample(db)
 		SeedProvinces(db)
