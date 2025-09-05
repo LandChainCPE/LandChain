@@ -1,43 +1,57 @@
+import axios from "axios";
+
 const apiUrl = "http://localhost:8080";
 
-
-function getAuthHeaders() {
-    const token = localStorage.getItem("token");
-    const tokenType = localStorage.getItem("token_type");
-    return {
-      "Authorization": `${tokenType} ${token}`,
-      "Content-Type": "application/json",
-    };
+/** ใส่เฉพาะ Authorization (อย่าใส่ Content-Type ที่นี่) */
+function getAuthHeaders(): Record<string, string> {
+  const token = localStorage.getItem("token");
+  const tokenType = localStorage.getItem("token_type") || "Bearer";
+  return token ? { Authorization: `${tokenType} ${token}` } : {};
 }
 
+/** Header สำหรับ JSON โดยเฉพาะ */
+function getJsonHeaders(): Record<string, string> {
+  return {
+    "Content-Type": "application/json",
+    ...getAuthHeaders(),
+  };
+}
 
+/** axios instance พร้อม baseURL และ auth interceptor */
+const api = axios.create({ baseURL: apiUrl });
+
+api.interceptors.request.use((config) => {
+  Object.entries(getAuthHeaders()).forEach(([key, value]) => {
+    config.headers?.set(key, value);
+  });
+  return config;
+});
+
+/** สร้างบัญชี (JSON) */
 async function CreateAccount(DataCreateAccount: any) {
-  const requestOptions: RequestInit = {
+  const response = await fetch(`${apiUrl}/createaccount`, {
     method: "POST",
+    headers: getJsonHeaders(),
     body: JSON.stringify(DataCreateAccount),
-  };
-  const response = await fetch(`${apiUrl}/createaccount`, requestOptions);
+  });
   const result = await response.json();
-  return {result, response};
-  
+  return { result, response };
 }
 
-// ฟังก์ชัน Login ผ่าน Metamask
+/** Login ด้วย Metamask (JSON) */
 async function LoginWallet(walletAddress: string) {
-  const requestOptions: RequestInit = {
+  const response = await fetch(`${apiUrl}/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ metamaskaddress: walletAddress}),
-  };
+    headers: getJsonHeaders(),
+    body: JSON.stringify({ metamaskaddress: walletAddress }),
+  });
 
-  const response = await fetch(`${apiUrl}/login`, requestOptions);
   const result = await response.json();
 
   if (result.success && result.exists) {
-    // เก็บข้อมูลลง localStorage
     localStorage.setItem("walletAddress", walletAddress);
     localStorage.setItem("token", result.token || "");
-    localStorage.setItem("token_type", "Bearer");
+    localStorage.setItem("token_type", result.token_type || "Bearer");
     localStorage.setItem("firstName", result.first_name || "");
     localStorage.setItem("lastName", result.last_name || "");
   }
@@ -45,7 +59,7 @@ async function LoginWallet(walletAddress: string) {
   return { result, response };
 }
 
-// ฟังก์ชัน Logout
+/** Logout: ลบทุกค่าใน localStorage ที่เกี่ยวข้อง */
 function LogoutWallet() {
   localStorage.removeItem("walletAddress");
   localStorage.removeItem("token");
@@ -54,26 +68,27 @@ function LogoutWallet() {
   localStorage.removeItem("lastName");
 }
 
-// ฟังก์ชันบันทึกข้อมูลที่ดิน
-async function RegisterLand(DataCreateLand: any, imageFile?: File) {
+/** บันทึกข้อมูลที่ดิน (multipart/form-data) */
+async function RegisterLand(
+  DataCreateLand: Record<string, any>,
+  imageFile?: File
+) {
   const formData = new FormData();
 
-  // เพิ่มข้อมูลลง FormData
+  // append ฟิลด์ทั้งหมดเป็น string (FormData รองรับ string/Blob เท่านั้น)
   Object.entries(DataCreateLand).forEach(([key, value]) => {
-    formData.append(key, value as any);
+    formData.append(key, value != null ? String(value) : "");
   });
 
-  // เพิ่มไฟล์ภาพถ้ามี
+  // แนบไฟล์ (ชื่อฟิลด์ต้องตรงกับ backend handler)
   if (imageFile) {
-    formData.append("image", imageFile);
+    formData.append("deed_image", imageFile);
   }
 
   const response = await fetch(`${apiUrl}/user/userregisland`, {
     method: "POST",
-    headers: {
-      ...getAuthHeaders(), // ใส่ token สำหรับ auth
-      // **ห้ามใส่ Content-Type แบบ JSON เมื่อใช้ FormData**
-    },
+    // ห้าม set Content-Type เองเมื่อใช้ FormData
+    headers: { ...getAuthHeaders() },
     body: formData,
   });
 
@@ -81,37 +96,57 @@ async function RegisterLand(DataCreateLand: any, imageFile?: File) {
   return { result, response };
 }
 
-// ดึงข้อมูลจังหวัด
-async function GetAllProvinces() {
-  return await axios
-    .get(`${apiUrl}/province`, requestOptions)
+/** ดึงจังหวัด (รองรับ AbortSignal) */
+async function GetProvinces(signal?: AbortSignal) {
+  return await api
+    .get("/province", { signal })
     .then((res) => res.data)
     .catch((e) => e.response);
 }
 
-// ดึงข้อมูลอำเภอ
-async function GetDistrict(Id: number) {
-  return await axios
-    .get(`${apiUrl}/district/${Id}`, requestOptions) // ส่ง path param
-    .then((res) => res.data)
-    .catch((e) => e.response);
+/** ดึงอำเภอตาม province id */
+async function GetDistrict(provinceId: number, signal?: AbortSignal) {
+  // ทดลองแบบ A
+  try {
+    const resA = await api.get(`/district/${provinceId}`, { signal });
+    if (Array.isArray(resA.data) && resA.data.length) return resA.data;
+    if (Array.isArray(resA.data?.result) && resA.data.result.length) return resA.data.result;
+  } catch (_) {}
+
+  // ทดลองแบบ B
+  const resB = await api.get(`/district`, { params: { province_id: provinceId }, signal });
+  const dataB = resB.data;
+  if (Array.isArray(dataB)) return dataB;
+  if (Array.isArray(dataB?.result)) return dataB.result;
+  if (Array.isArray(dataB?.data)) return dataB.data;
+  return [];
 }
 
-async function GetSubdistrict(Id: number) {
-  return await axios
-    .get(`${apiUrl}/subdistrict/${Id}`, requestOptions)
-    .then((res) => res.data)
-    .catch((e) => e.response);
-}
+/** ดึงตำบลตาม district id */
+async function GetSubdistrict(districtId: number, signal?: AbortSignal) {
+  // ทดลองแบบ A
+  try {
+    const resA = await api.get(`/subdistrict/${districtId}`, { signal });
+    if (Array.isArray(resA.data) && resA.data.length) return resA.data;
+    if (Array.isArray(resA.data?.result) && resA.data.result.length) return resA.data.result;
+  } catch (_) {}
 
+  // ทดลองแบบ B
+  const resB = await api.get(`/subdistrict`, { params: { district_id: districtId }, signal });
+  const dataB = resB.data;
+  if (Array.isArray(dataB)) return dataB;
+  if (Array.isArray(dataB?.result)) return dataB.result;
+  if (Array.isArray(dataB?.data)) return dataB.data;
+  return [];
+}
 
 export {
   getAuthHeaders,
-  RegisterLand,
   CreateAccount,
   LoginWallet,
   LogoutWallet,
+  RegisterLand,
   GetProvinces,
-  GetDistricts,
-  GetSubdistricts
+  GetDistrict,
+  GetSubdistrict,
 };

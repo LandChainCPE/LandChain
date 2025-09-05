@@ -28,11 +28,11 @@ type Landtitle struct {
 	Users  Users `gorm:"foreignKey:UserID"`
 
 	// ===== Province/District/Subdistrict (กำหนดตามที่คุณมีอยู่ในโปรเจค)
-	ProvinceID  	uint        `gorm:"index"`
+	ProvinceID  	uint        `form:"province_id"`
 	Province   		Province 	`gorm:"foreignKey:ProvinceID"`
-	DistrictID  	uint        `gorm:"index"`
+	DistrictID  	uint        `form:"district_id"`
 	District   		District 	`gorm:"foreignKey:DistrictID"`
-	SubdistrictID 	uint        `gorm:"index"`
+	SubdistrictID 	uint        `form:"subdistrict_id"`
 	Subdistrict  	Subdistrict `gorm:"foreignKey:SubdistrictID"`
 
 	LandProvinceID uint

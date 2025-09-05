@@ -2,11 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Upload, MapPin, Save, Camera } from "lucide-react";
 import "./UserRegisLand.css";
 import { RegisterLand } from "../../service/https/garfield/http";
-import {
-  GetProvinces,
-  GetDistricts,
-  GetSubdistricts,
-} from "../../service/https/garfield/http";
+import { GetProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield/http";
 
 type ProvinceDTO = { id: number; name_th: string; name_en?: string };
 type DistrictDTO = { id: number; name_th: string; province_id: number; name_en?: string };
@@ -14,17 +10,16 @@ type SubdistrictDTO = { id: number; name_th: string; district_id: number; name_e
 
 const UserRegisLand: React.FC = () => {
   const [formData, setFormData] = useState({
-    house_number: "",
+    deed_number: "",
     village_no: "",
     soi: "",
     road: "",
     rai: "",
     ngan: "",
     square_wa: "",
-    land_province_id: "",
-    land_district_id: "",
-    land_subdistrict_id: "",
-    status_id: "",
+    province_id: "",
+    district_id: "",
+    subdistrict_id: "",
   });
 
   const [image, setImage] = useState<File | null>(null);
@@ -65,9 +60,9 @@ const UserRegisLand: React.FC = () => {
       // ถ้าต้องการบังคับเป็นตัวเลขตอนส่ง ให้แปลงก่อน (แบ็กเอนด์บางที่รับ string ก็ได้)
       const payload = {
         ...formData,
-        land_province_id: formData.land_province_id,
-        land_district_id: formData.land_district_id,
-        land_subdistrict_id: formData.land_subdistrict_id,
+        province_id: formData.province_id,
+        district_id: formData.district_id,
+        subdistrict_id: formData.subdistrict_id,
       };
 
       const { result } = await RegisterLand(payload, image || undefined);
@@ -89,17 +84,16 @@ const UserRegisLand: React.FC = () => {
 
   const handleCancel = () => {
     setFormData({
-      house_number: "",
+      deed_number: "",
       village_no: "",
       soi: "",
       road: "",
       rai: "",
       ngan: "",
       square_wa: "",
-      land_province_id: "",
-      land_district_id: "",
-      land_subdistrict_id: "",
-      status_id: "",
+      province_id: "",
+      district_id: "",
+      subdistrict_id: "",
     });
     setImage(null);
     setImagePreview("");
@@ -109,14 +103,15 @@ const UserRegisLand: React.FC = () => {
 
   // ----- effects: load cascading geo -----
 
-  // load provinces once
   useEffect(() => {
     const ctrl = new AbortController();
     (async () => {
       setLoadingP(true);
       try {
-        const { result } = await GetProvinces(ctrl.signal);
-        setProvinces(result);
+        const data = await GetProvinces(ctrl.signal);
+        // เผื่อ backend บางตัวส่ง { result: [] } มา
+        const list: ProvinceDTO[] = Array.isArray(data) ? data : data?.result ?? [];
+        setProvinces(list);
       } catch (e) {
         if ((e as any).name !== "AbortError") console.error(e);
       } finally {
@@ -126,25 +121,28 @@ const UserRegisLand: React.FC = () => {
     return () => ctrl.abort();
   }, []);
 
+
   // when province changes -> load districts & reset district/subdistrict
   useEffect(() => {
-    const pid = formData.land_province_id;
+    const pidStr = formData.province_id;
     const ctrl = new AbortController();
 
-    if (!pid) {
+    const pidNum = Number(pidStr);
+    if (!Number.isFinite(pidNum) || pidNum <= 0) {
       setDistricts([]);
       setSubdistricts([]);
-      setFormData((p) => ({ ...p, land_district_id: "", land_subdistrict_id: "" }));
+      setFormData((p) => ({ ...p, district_id: "", subdistrict_id: "" }));
       return;
     }
 
     (async () => {
       setLoadingD(true);
       try {
-        const { result } = await GetDistricts(pid, ctrl.signal);
-        setDistricts(result);
+        const data = await GetDistrict(pidNum, ctrl.signal);
+        const list: DistrictDTO[] = Array.isArray(data) ? data : data?.result ?? [];
+        setDistricts(list);
         setSubdistricts([]);
-        setFormData((p) => ({ ...p, land_district_id: "", land_subdistrict_id: "" }));
+        setFormData((p) => ({ ...p, district_id: "", subdistrict_id: "" }));
       } catch (e) {
         if ((e as any).name !== "AbortError") console.error(e);
       } finally {
@@ -153,25 +151,28 @@ const UserRegisLand: React.FC = () => {
     })();
 
     return () => ctrl.abort();
-  }, [formData.land_province_id]);
+  }, [formData.province_id]);
+
 
   // when district changes -> load subdistricts & reset subdistrict
   useEffect(() => {
-    const did = formData.land_district_id;
+    const didStr = formData.district_id;
     const ctrl = new AbortController();
 
-    if (!did) {
+    const didNum = Number(didStr);
+    if (!Number.isFinite(didNum) || didNum <= 0) {
       setSubdistricts([]);
-      setFormData((p) => ({ ...p, land_subdistrict_id: "" }));
+      setFormData((p) => ({ ...p, subdistrict_id: "" }));
       return;
     }
 
     (async () => {
       setLoadingS(true);
       try {
-        const { result } = await GetSubdistricts(did, ctrl.signal);
-        setSubdistricts(result);
-        setFormData((p) => ({ ...p, land_subdistrict_id: "" }));
+        const data = await GetSubdistrict(didNum, ctrl.signal);
+        const list: SubdistrictDTO[] = Array.isArray(data) ? data : data?.result ?? [];
+        setSubdistricts(list);
+        setFormData((p) => ({ ...p, subdistrict_id: "" }));
       } catch (e) {
         if ((e as any).name !== "AbortError") console.error(e);
       } finally {
@@ -180,7 +181,7 @@ const UserRegisLand: React.FC = () => {
     })();
 
     return () => ctrl.abort();
-  }, [formData.land_district_id]);
+  }, [formData.district_id]);
 
   return (
     <div className="container">
@@ -198,14 +199,14 @@ const UserRegisLand: React.FC = () => {
           <div className="formContent">
             <div className="grid">
               <div className="inputGroup">
-                <label className="label">บ้านเลขที่</label>
+                <label className="label">เลขโฉนด</label>
                 <input
                   type="text"
-                  name="house_number"
-                  value={formData.house_number}
+                  name="deed_number"
+                  value={formData.deed_number}
                   onChange={handleChange}
                   className="input"
-                  placeholder="บ้านเลขที่"
+                  placeholder="เลขโฉนด"
                 />
               </div>
 
@@ -288,8 +289,8 @@ const UserRegisLand: React.FC = () => {
               <div className="inputGroup">
                 <label className="label">จังหวัด</label>
                 <select
-                  name="land_province_id"
-                  value={formData.land_province_id}
+                  name="province_id"
+                  value={formData.province_id}
                   onChange={handleChange}
                   className="input"
                 >
@@ -308,17 +309,17 @@ const UserRegisLand: React.FC = () => {
               <div className="inputGroup">
                 <label className="label">อำเภอ</label>
                 <select
-                  name="land_district_id"
-                  value={formData.land_district_id}
+                  name="district_id"
+                  value={formData.district_id}
                   onChange={handleChange}
                   className="input"
-                  disabled={!formData.land_province_id || loadingD}
+                  disabled={!formData.province_id || loadingD}
                 >
                   <option value="">
                     {loadingD ? "กำลังโหลด..." : "-- เลือกอำเภอ --"}
                   </option>
                   {districts.map((d) => (
-                    <option key={d.id} value={d.id}>
+                    <option key={d.id} value={String(d.id)}>
                       {d.name_th}
                     </option>
                   ))}
@@ -329,11 +330,11 @@ const UserRegisLand: React.FC = () => {
               <div className="inputGroup">
                 <label className="label">ตำบล</label>
                 <select
-                  name="land_subdistrict_id"
-                  value={formData.land_subdistrict_id}
+                  name="subdistrict_id"
+                  value={formData.subdistrict_id}
                   onChange={handleChange}
                   className="input"
-                  disabled={!formData.land_district_id || loadingS}
+                  disabled={!formData.district_id || loadingS}
                 >
                   <option value="">
                     {loadingS ? "กำลังโหลด..." : "-- เลือกตำบล --"}
@@ -343,20 +344,6 @@ const UserRegisLand: React.FC = () => {
                       {s.name_th}
                     </option>
                   ))}
-                </select>
-              </div>
-
-              <div className="inputGroup">
-                <label className="label">สถานะ</label>
-                <select
-                  name="status_id"
-                  value={formData.status_id}
-                  onChange={handleChange}
-                  className="input"
-                >
-                  <option value="">-- เลือกสถานะ --</option>
-                  <option value="1">ว่าง</option>
-                  <option value="2">ขายแล้ว</option>
                 </select>
               </div>
             </div>
