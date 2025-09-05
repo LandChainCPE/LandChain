@@ -35,6 +35,9 @@ type Landtitle struct {
 	SubdistrictID 	uint        `gorm:"index"`
 	Subdistrict  	Subdistrict `gorm:"foreignKey:SubdistrictID"`
 
+	LandProvinceID uint
+    LandProvince   LandProvinces `gorm:"foreignKey:LandProvinceID"`
+
 	// ===== Status (สถานะโฉนดในระบบแอป; แนะนำทำเป็นตาราง Status แยก หรือ enum string)
 	Status           string     `form:"status"` // เช่น PENDING/ACTIVE/ENCUMBERED/REVOKED
 	StatusUpdatedAt  *time.Time

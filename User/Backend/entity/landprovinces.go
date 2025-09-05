@@ -6,5 +6,5 @@ type LandProvinces struct {
 	gorm.Model
 	Name string
 
-	Landtitle *Landtitle `gorm:"foreignKey:LandProvincesID"` // ✅ ใช้ pointer
+	Landtitles []Landtitle `gorm:"foreignKey:LandProvinceID"` // ✅ ใช้ pointer
 }

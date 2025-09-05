@@ -1,89 +1,186 @@
-import React, { useState } from 'react';
-import { Upload, MapPin, Save, Camera } from 'lucide-react';
-import './UserRegisLand.css';
-import { RegisterLand } from '../../service/https/garfield/http'; // ปรับ path ตามจริง
+import React, { useEffect, useState } from "react";
+import { Upload, MapPin, Save, Camera } from "lucide-react";
+import "./UserRegisLand.css";
+import { RegisterLand } from "../../service/https/garfield/http";
+import {
+  GetProvinces,
+  GetDistricts,
+  GetSubdistricts,
+} from "../../service/https/garfield/http";
+
+type ProvinceDTO = { id: number; name_th: string; name_en?: string };
+type DistrictDTO = { id: number; name_th: string; province_id: number; name_en?: string };
+type SubdistrictDTO = { id: number; name_th: string; district_id: number; name_en?: string };
 
 const UserRegisLand: React.FC = () => {
   const [formData, setFormData] = useState({
-    house_number: '',
-    village_no: '',
-    soi: '',
-    road: '',
-    rai: '',
-    ngan: '',
-    square_wa: '',
-    land_province_id: '',
-    land_district_id: '',
-    land_subdistrict_id: '',
-    status_id: '',
+    house_number: "",
+    village_no: "",
+    soi: "",
+    road: "",
+    rai: "",
+    ngan: "",
+    square_wa: "",
+    land_province_id: "",
+    land_district_id: "",
+    land_subdistrict_id: "",
+    status_id: "",
   });
 
   const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [imagePreview, setImagePreview] = useState<string>("");
+
+  // geo lists
+  const [provinces, setProvinces] = useState<ProvinceDTO[]>([]);
+  const [districts, setDistricts] = useState<DistrictDTO[]>([]);
+  const [subdistricts, setSubdistricts] = useState<SubdistrictDTO[]>([]);
+
+  // loading flags
+  const [loadingP, setLoadingP] = useState(false);
+  const [loadingD, setLoadingD] = useState(false);
+  const [loadingS, setLoadingS] = useState(false);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Generic input handler
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  // ----- handlers -----
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Image change
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setImage(file);
 
       const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
+      reader.onload = (ev) => setImagePreview(ev.target?.result as string);
       reader.readAsDataURL(file);
     }
   };
 
-  // Submit
   const handleSubmit = async () => {
     setIsSubmitting(true);
-
     try {
-      const { result } = await RegisterLand(formData, image || undefined);
+      // ถ้าต้องการบังคับเป็นตัวเลขตอนส่ง ให้แปลงก่อน (แบ็กเอนด์บางที่รับ string ก็ได้)
+      const payload = {
+        ...formData,
+        land_province_id: formData.land_province_id,
+        land_district_id: formData.land_district_id,
+        land_subdistrict_id: formData.land_subdistrict_id,
+      };
+
+      const { result } = await RegisterLand(payload, image || undefined);
       console.log(result);
 
-      if (result && result.message) {
-        alert('บันทึกข้อมูลเรียบร้อยแล้ว!');
-        handleCancel(); // รีเซ็ตฟอร์มหลังบันทึก
+      if (result && (result.message || result.success)) {
+        alert("บันทึกข้อมูลเรียบร้อยแล้ว!");
+        handleCancel();
       } else {
-        alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
       }
     } catch (err) {
       console.error(err);
-      alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Reset form
   const handleCancel = () => {
     setFormData({
-      house_number: '',
-      village_no: '',
-      soi: '',
-      road: '',
-      rai: '',
-      ngan: '',
-      square_wa: '',
-      land_province_id: '',
-      land_district_id: '',
-      land_subdistrict_id: '',
-      status_id: '',
+      house_number: "",
+      village_no: "",
+      soi: "",
+      road: "",
+      rai: "",
+      ngan: "",
+      square_wa: "",
+      land_province_id: "",
+      land_district_id: "",
+      land_subdistrict_id: "",
+      status_id: "",
     });
     setImage(null);
-    setImagePreview('');
+    setImagePreview("");
+    setDistricts([]);
+    setSubdistricts([]);
   };
+
+  // ----- effects: load cascading geo -----
+
+  // load provinces once
+  useEffect(() => {
+    const ctrl = new AbortController();
+    (async () => {
+      setLoadingP(true);
+      try {
+        const { result } = await GetProvinces(ctrl.signal);
+        setProvinces(result);
+      } catch (e) {
+        if ((e as any).name !== "AbortError") console.error(e);
+      } finally {
+        setLoadingP(false);
+      }
+    })();
+    return () => ctrl.abort();
+  }, []);
+
+  // when province changes -> load districts & reset district/subdistrict
+  useEffect(() => {
+    const pid = formData.land_province_id;
+    const ctrl = new AbortController();
+
+    if (!pid) {
+      setDistricts([]);
+      setSubdistricts([]);
+      setFormData((p) => ({ ...p, land_district_id: "", land_subdistrict_id: "" }));
+      return;
+    }
+
+    (async () => {
+      setLoadingD(true);
+      try {
+        const { result } = await GetDistricts(pid, ctrl.signal);
+        setDistricts(result);
+        setSubdistricts([]);
+        setFormData((p) => ({ ...p, land_district_id: "", land_subdistrict_id: "" }));
+      } catch (e) {
+        if ((e as any).name !== "AbortError") console.error(e);
+      } finally {
+        setLoadingD(false);
+      }
+    })();
+
+    return () => ctrl.abort();
+  }, [formData.land_province_id]);
+
+  // when district changes -> load subdistricts & reset subdistrict
+  useEffect(() => {
+    const did = formData.land_district_id;
+    const ctrl = new AbortController();
+
+    if (!did) {
+      setSubdistricts([]);
+      setFormData((p) => ({ ...p, land_subdistrict_id: "" }));
+      return;
+    }
+
+    (async () => {
+      setLoadingS(true);
+      try {
+        const { result } = await GetSubdistricts(did, ctrl.signal);
+        setSubdistricts(result);
+        setFormData((p) => ({ ...p, land_subdistrict_id: "" }));
+      } catch (e) {
+        if ((e as any).name !== "AbortError") console.error(e);
+      } finally {
+        setLoadingS(false);
+      }
+    })();
+
+    return () => ctrl.abort();
+  }, [formData.land_district_id]);
 
   return (
     <div className="container">
@@ -157,6 +254,7 @@ const UserRegisLand: React.FC = () => {
                   onChange={handleChange}
                   className="input"
                   placeholder="จำนวนไร่"
+                  min={0}
                 />
               </div>
 
@@ -169,6 +267,7 @@ const UserRegisLand: React.FC = () => {
                   onChange={handleChange}
                   className="input"
                   placeholder="จำนวนงาน"
+                  min={0}
                 />
               </div>
 
@@ -181,9 +280,11 @@ const UserRegisLand: React.FC = () => {
                   onChange={handleChange}
                   className="input"
                   placeholder="จำนวนตารางวา"
+                  min={0}
                 />
               </div>
 
+              {/* จังหวัด */}
               <div className="inputGroup">
                 <label className="label">จังหวัด</label>
                 <select
@@ -192,13 +293,18 @@ const UserRegisLand: React.FC = () => {
                   onChange={handleChange}
                   className="input"
                 >
-                  <option value="">-- เลือกจังหวัด --</option>
-                  <option value="1">กรุงเทพมหานคร</option>
-                  <option value="2">เชียงใหม่</option>
-                  <option value="3">ขอนแก่น</option>
+                  <option value="">
+                    {loadingP ? "กำลังโหลด..." : "-- เลือกจังหวัด --"}
+                  </option>
+                  {provinces.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name_th}
+                    </option>
+                  ))}
                 </select>
               </div>
 
+              {/* อำเภอ */}
               <div className="inputGroup">
                 <label className="label">อำเภอ</label>
                 <select
@@ -206,13 +312,20 @@ const UserRegisLand: React.FC = () => {
                   value={formData.land_district_id}
                   onChange={handleChange}
                   className="input"
+                  disabled={!formData.land_province_id || loadingD}
                 >
-                  <option value="">-- เลือกอำเภอ --</option>
-                  <option value="1">เมือง</option>
-                  <option value="2">บางเขน</option>
+                  <option value="">
+                    {loadingD ? "กำลังโหลด..." : "-- เลือกอำเภอ --"}
+                  </option>
+                  {districts.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name_th}
+                    </option>
+                  ))}
                 </select>
               </div>
 
+              {/* ตำบล */}
               <div className="inputGroup">
                 <label className="label">ตำบล</label>
                 <select
@@ -220,10 +333,16 @@ const UserRegisLand: React.FC = () => {
                   value={formData.land_subdistrict_id}
                   onChange={handleChange}
                   className="input"
+                  disabled={!formData.land_district_id || loadingS}
                 >
-                  <option value="">-- เลือกตำบล --</option>
-                  <option value="1">สุเทพ</option>
-                  <option value="2">ในเมือง</option>
+                  <option value="">
+                    {loadingS ? "กำลังโหลด..." : "-- เลือกตำบล --"}
+                  </option>
+                  {subdistricts.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name_th}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -250,12 +369,13 @@ const UserRegisLand: React.FC = () => {
               <label className="uploadArea">
                 <Upload size={32} color="#94a3b8" />
                 <p className="uploadText">
-                  <span style={{ fontWeight: 600 }}>คลิกเพื่ออัพโหลด</span> หรือลากไฟล์มาวาง
+                  <span style={{ fontWeight: 600 }}>คลิกเพื่ออัพโหลด</span>{" "}
+                  หรือลากไฟล์มาวาง
                 </p>
                 <p className="uploadSubtext">PNG, JPG, JPEG (MAX. 10MB)</p>
                 <input
                   type="file"
-                  style={{ display: 'none' }}
+                  style={{ display: "none" }}
                   onChange={handleImageChange}
                   accept="image/*"
                 />
@@ -271,20 +391,12 @@ const UserRegisLand: React.FC = () => {
 
           {/* Actions */}
           <div className="footer">
-            <button
-              type="button"
-              className="cancelButton"
-              onClick={handleCancel}
-            >
+            <button type="button" className="cancelButton" onClick={handleCancel}>
               ยกเลิก
             </button>
-            <button
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="submitButton"
-            >
+            <button onClick={handleSubmit} disabled={isSubmitting} className="submitButton">
               <Save size={16} />
-              {isSubmitting ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
+              {isSubmitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
             </button>
           </div>
         </div>

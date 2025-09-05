@@ -13,6 +13,13 @@ type Landsalepost struct {
 	LandtitleID uint
 	Landtitle   Landtitle  `gorm:"foreignKey:LandtitleID"`
 
+	ProvinceID  	uint        `gorm:"index"`
+	Province   		Province 	`gorm:"foreignKey:ProvinceID"`
+	DistrictID  	uint        `gorm:"index"`
+	District   		District 	`gorm:"foreignKey:DistrictID"`
+	SubdistrictID 	uint        `gorm:"index"`
+	Subdistrict  	Subdistrict `gorm:"foreignKey:SubdistrictID"`
+
 
 	//Booking []Booking  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
 	Roomchat []Roomchat  `gorm:"foreignKey:LandsalepostID"`

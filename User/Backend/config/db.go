@@ -1,10 +1,12 @@
 package config
 
 import (
+	"encoding/csv"
 	"errors"
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"landchain/entity"
@@ -13,6 +15,8 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+
+	
 )
 
 var db *gorm.DB
@@ -35,7 +39,6 @@ func ConnectDatabase() *gorm.DB {
 		os.Getenv("DB_NAME"),
 		os.Getenv("DB_PORT"),
 	)
-	// log.Println("DSN:", dsn) // ✅ สำหรับ Debug
 
 	// เชื่อมต่อ DB
 	connection, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -48,12 +51,16 @@ func ConnectDatabase() *gorm.DB {
 	return db
 }
 
-// ✅ SetupDatabase: ทำ Drop Table, AutoMigrate, และ Seed ข้อมูล
-// แก้ไขในส่วน SetupDatabase() - ย้ายการสร้าง Roomchat ไปหลัง Landsalepost
+// ✅ SetupDatabase: AutoMigrate และ Seed ข้อมูลเริ่มต้น
 func SetupDatabase() {
 	if db == nil {
 		log.Fatal("❌ Database connection not initialized. Please call ConnectDatabase() first.")
 	}
+
+	// Import CSV
+	ImportProvincesCSV(db, "./config/data/address/provinces.csv")
+	ImportDistrictsCSV(db, "./config/data/address/districts.csv")
+	ImportSubDistrictsCSV(db, "./config/data/address/subdistricts.csv")
 
 	// AutoMigrate
 	if err := db.AutoMigrate(
@@ -101,11 +108,14 @@ func SetupDatabase() {
 		db.Create(&entity.Role{Role: "Admin"})
 
 		RefRole := uint(1)
-		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f469a", RoleID: RefRole}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
-		// db.Create(&entity.Users{Name: "Bam", Email: "@goods1", Phonenumber: "0912345677", Password: "1234564", Land: "ผหก5ป58ก", RoleID: RefRole})
-		// //RefServiceType := uint(1)
-		// db.Create(&entity.Users{Name: "Jo", Password: "jo123456", Land: "12กท85", RoleID: RefRole,})
-		// db.Create(&entity.Users{Name: "Aut", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
+		db.Create(&entity.Users{
+			Firstname:      "Rattapon",
+			Lastname:       "Phonthaisong",
+			Email:          "ponthaisongfc@gmail.com",
+			Phonenumber:    "0555555555",
+			Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f469a",
+			RoleID:         RefRole,
+		})
 
 		// สร้าง Province
 		db.Create(&entity.Province{Province: "นครราชสีมา"})
@@ -117,7 +127,6 @@ func SetupDatabase() {
 
 		// สร้าง Time slots
 		RefBranch := uint(1)
-
 		db.Create(&entity.Time{Timework: "09:00 - 10:00", MaxCapacity: 5, BranchID: RefBranch})
 		db.Create(&entity.Time{Timework: "10:00 - 11:00", MaxCapacity: 5, BranchID: RefBranch})
 		db.Create(&entity.Time{Timework: "11:00 - 12:00", MaxCapacity: 5, BranchID: RefBranch})
@@ -160,7 +169,6 @@ func SetupDatabase() {
 		now := time.Now()
 
 		// ตัวอย่างกำหนด Province/District/Subdistrict เป็น 1 ทั้งหมด
-		// (ถ้าคุณมีข้อมูลจังหวัด/อำเภอ/ตำบลจริงในตาราง ให้เปลี่ยนเป็น ID ที่มีอยู่)
 		defaultProvinceID := uint(1)
 		defaultDistrictID := uint(1)
 		defaultSubdistrictID := uint(1)
@@ -181,7 +189,7 @@ func SetupDatabase() {
 					Ngan:     2,
 					SquareWa: 30,
 
-					DeedImagePath: "", // ใส่ path ถ้ามีไฟล์สแกน
+					DeedImagePath: "",
 
 					UserID:        1,
 					ProvinceID:    defaultProvinceID,
@@ -190,12 +198,6 @@ func SetupDatabase() {
 
 					Status:          "PENDING",
 					StatusUpdatedAt: &now,
-
-					// Verification เริ่มว่างไว้ก่อน
-					// OwnershipVerificationStatus: ptr("PENDING"),
-					// OwnershipVerifiedAt:        nil,
-
-					// TokenID เว้นไว้ก่อนจนกว่าจะ mint
 				}
 				if err := db.Create(&landtitle1).Error; err != nil {
 					log.Println("❌ Create landtitle1 failed:", err)
@@ -239,115 +241,96 @@ func SetupDatabase() {
 			}
 		}
 
-		// 🔸 ตรวจสอบและสร้าง Landsalepost ถ้ายังไม่มี
-// 		var post1, post2 entity.Landsalepost
+		// ===== ส่วนนี้ถ้ายังไม่ใช้ เก็บไว้คอมเมนต์ได้ =====
+		// // 🔸 ตรวจสอบและสร้าง Landsalepost ถ้ายังไม่มี
+		// var post1, post2 entity.Landsalepost
+		// ...
+		// createRoomchatsAndMessages()
+		// ===== สิ้นสุดส่วนคอมเมนต์ =====
+	} // <<<<<<<<<<<<<< ปิด if count == 0
 
-// 		if err := db.Where("num_of_land_title = ?", "180").First(&post1).Error; err != nil {
-// 			if errors.Is(err, gorm.ErrRecordNotFound) {
-// 				post1 = entity.Landsalepost{
-// 					Name:           "นายสมชาย ใจดี",
-// 					PhoneNumber:    "0812345678",
-// 					NumOfLandTitle: "180",
-// 					AdressLandplot: "ต.ในเมือง อ.เมือง จ.นครราชสีมา",
-// 					Price:          260000.00,
-// 					LandtitleID:    landtitle1.ID,
-// 				}
-// 				db.Create(&post1)
-// 			}
-// 		}
+	log.Println("✅ Database Migrated & Seeded Successfully")
+} // <<<<<<<<<<<<<< ปิดฟังก์ชัน SetupDatabase()
+// // แยกการสร้าง Roomchat และ Message ออกมาเป็น function แยก (ยังไม่ใช้ก็เว้นไว้ได้)
+// func createRoomchatsAndMessages() { ... }
+func ImportProvincesCSV(db *gorm.DB, filePath string) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatalf("❌ Open file error: %v", err)
+	}
+	defer file.Close()
 
-// 		if err := db.Where("num_of_land_title = ?", "264").First(&post2).Error; err != nil {
-// 			if errors.Is(err, gorm.ErrRecordNotFound) {
-// 				post2 = entity.Landsalepost{
-// 					Name:           "นางสาววิภา รัตน์เรือง",
-// 					PhoneNumber:    "0898765432",
-// 					NumOfLandTitle: "264",
-// 					AdressLandplot: "ต.หนองจะบก อ.เมือง จ.นครราชสีมา",
-// 					Price:          350000.00,
-// 					LandtitleID:    landtitle2.ID,
-// 				}
-// 				db.Create(&post2)
-// 			}
-// 		}
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		log.Fatalf("❌ Read CSV error: %v", err)
+	}
 
-// 		// 🔸 สร้าง Roomchat หลังจากสร้าง Landsalepost แล้ว
-// 		createRoomchatsAndMessages()
-// 	}
+	if len(records) <= 1 {
+		log.Println("⚠️ No data found")
+		return
+	}
 
-// 	log.Println("✅ Database Migrated & Seeded Successfully")
-// }
+	for i, row := range records {
+		if i == 0 {
+			log.Printf("🔍 Header: %+v", row)
+			continue
+		}
+		if len(row) < 3 {
+			log.Printf("⚠️ Skipped row %d: %+v (too few columns)", i, row)
+			continue
+		}
 
-// // แยกการสร้าง Roomchat และ Message ออกมาเป็น function แยก
-// func createRoomchatsAndMessages() {
-// 	var post entity.Landsalepost
-// 	if err := db.Where("num_of_land_title = ?", "180").First(&post).Error; err != nil {
-// 		log.Println("❌ Cannot find Landsalepost with num_of_land_title = 180")
-// 		return
-// 	}
+		province := entity.Province{
+			NameTH: row[1],
+			NameEN: row[2],
+		}
+		db.Where("name_th = ?", province.NameTH).FirstOrCreate(&province)
+	}
+	log.Println("✅ Provinces imported")
+}
 
-// 	// รายชื่อผู้ใช้ที่ต้องการสร้างห้องแชท
-// 	userIDs := []uint{2, 3}
+func ImportDistrictsCSV(db *gorm.DB, filePath string) {
+	file, _ := os.Open(filePath)
+	defer file.Close()
+	reader := csv.NewReader(file)
+	records, _ := reader.ReadAll()
 
-// 	for _, userID := range userIDs {
-// 		// เช็คว่ามี Roomchat นี้อยู่แล้วหรือยัง
-// 		var existingRoomchat entity.Roomchat
-// 		err := db.Where("landsalepost_id = ? AND user_id = ?", post.ID, userID).First(&existingRoomchat).Error
-// 		if err == nil {
-// 			log.Println("⚠️ Roomchat already exists for UserID:", userID)
-// 			continue
-// 		}
+	for i, row := range records {
+		if i == 0 {
+			continue
+		}
+		provinceID, _ := strconv.Atoi(row[1])
+		district := entity.District{
+			NameTH:     row[2],
+			NameEN:     row[3],
+			ProvinceID: uint(provinceID),
+		}
+		db.FirstOrCreate(&district, entity.District{NameTH: district.NameTH, ProvinceID: district.ProvinceID})
+	}
+	log.Println("✅ Districts imported")
+}
 
-// 		// สร้าง Roomchat ใหม่
-// 		roomchat := entity.Roomchat{
-// 			LandsalepostID: post.ID,
-// 			UserID:         userID,
-// 		}
+func ImportSubDistrictsCSV(db *gorm.DB, filePath string) {
+	file, _ := os.Open(filePath)
+	defer file.Close()
+	reader := csv.NewReader(file)
+	records, _ := reader.ReadAll()
 
-// 		if err := db.Create(&roomchat).Error; err != nil {
-// 			log.Println("❌ Failed to create Roomchat for user", userID, ":", err)
-// 			continue
-// 		}
-// 		log.Println("✅ Created Roomchat for UserID:", userID, "RoomchatID:", roomchat.ID)
-
-// 		// เพิ่มข้อความตัวอย่างในห้องแชท
-// 		messages := []entity.Message{
-// 			{
-// 				Message:    "สวัสดีครับ สนใจที่ดินแปลงนี้ไหม?",
-// 				Time:       time.Now(),
-// 				RoomchatID: roomchat.ID,
-// 			},
-// 			{
-// 				Message:    "สนใจครับ อยากทราบรายละเอียดเพิ่มเติม",
-// 				Time:       time.Now().Add(1 * time.Minute),
-// 				RoomchatID: roomchat.ID,
-// 			},
-// 			{
-// 				Message:    "ที่ดินขนาด 5 ไร่ ราคา 2 ล้านบาทครับ",
-// 				Time:       time.Now().Add(2 * time.Minute),
-// 				RoomchatID: roomchat.ID,
-// 			},
-// 		}
-
-// 		if err := db.Create(&messages).Error; err != nil {
-// 			log.Println("❌ Failed to create messages for UserID:", userID, ":", err)
-// 		} else {
-// 			log.Println("✅ Created messages for UserID:", userID)
-// 		}
-// 	}
-
-// 	log.Println("✅ Database Migrated & Seeded Successfully")
-
-// 	// ✅ Seed State (แยกจาก Users)
-// 	var stateCount int64
-// 	db.Model(&entity.State{}).Count(&stateCount)
-// 	if stateCount == 0 {
-// 		db.Create(&entity.State{Name: "รอตรวจสอบ", Color: "orange"})
-// 		db.Create(&entity.State{Name: "กำลังดำเนินการ", Color: "blue"})
-// 		db.Create(&entity.State{Name: "เสร็จสิ้น", Color: "green"})
-// 	}
-
-// 	log.Println("✅ Database Migrated & Seeded Successfully")
-// }
+	for i, row := range records {
+		if i == 0 {
+			continue
+		}
+		districtID, _ := strconv.Atoi(row[1])
+		subDistrict := entity.Subdistrict{
+			NameTH:     row[2],
+			NameEN:     row[3],
+			DistrictID: uint(districtID),
+		}
+		db.FirstOrCreate(&subDistrict, entity.Subdistrict{NameTH: subDistrict.NameTH, DistrictID: subDistrict.DistrictID})
+	}
+	log.Println("✅ SubDistricts imported")
+}
 
 func StartUserVerify(db *gorm.DB, userID, requestedBy uint) (*entity.Verification, error) {
 	v := &entity.Verification{
@@ -393,7 +376,6 @@ func UpdateVerificationStatus(db *gorm.DB, verID uint, to entity.VerificationSta
 		// อัปเดตฟิลด์สรุปที่ Users/Landtitle (denormalized)
 		switch v.SubjectType {
 		case entity.SubjectUserIdentity:
-			// เขียนแบบนี้ให้ชัดเจนและเลี่ยง race
 			updates := map[string]any{
 				"identity_verification_status": string(v.Status),
 			}

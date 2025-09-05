@@ -81,13 +81,37 @@ async function RegisterLand(DataCreateLand: any, imageFile?: File) {
   return { result, response };
 }
 
+// ดึงข้อมูลจังหวัด
+async function GetAllProvinces() {
+  return await axios
+    .get(`${apiUrl}/province`, requestOptions)
+    .then((res) => res.data)
+    .catch((e) => e.response);
+}
 
-  
+// ดึงข้อมูลอำเภอ
+async function GetDistrict(Id: number) {
+  return await axios
+    .get(`${apiUrl}/district/${Id}`, requestOptions) // ส่ง path param
+    .then((res) => res.data)
+    .catch((e) => e.response);
+}
+
+async function GetSubdistrict(Id: number) {
+  return await axios
+    .get(`${apiUrl}/subdistrict/${Id}`, requestOptions)
+    .then((res) => res.data)
+    .catch((e) => e.response);
+}
+
 
 export {
   getAuthHeaders,
   RegisterLand,
   CreateAccount,
   LoginWallet,
-  LogoutWallet
+  LogoutWallet,
+  GetProvinces,
+  GetDistricts,
+  GetSubdistricts
 };
