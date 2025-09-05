@@ -1,180 +1,350 @@
-import { CheckCircle, User, Wallet, Shield } from "lucide-react";
+import { CheckCircle, User, Shield, FileText, Clock, AlertCircle, Building2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { getDataUserForVerify, VerifyWalletID } from "../service/https/aut/https";
 import Loader from "../component/third-patry/Loader";
-import { verifyMessage } from "ethers";
 
 function Verify() {
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [showConfirmPopup, setShowConfirmPopup] = useState<boolean>(false);
+  const [isHolding, setIsHolding] = useState<boolean>(false);
+  const [holdProgress, setHoldProgress] = useState<number>(0);
 
-  // จำลองข้อมูล bookingID (ใน production จริงจะมาจาก useLocation)
   const location = useLocation();
   const bookingID = location.state?.booking;
-  console.log("BookingID", bookingID);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            let { response, result } = await getDataUserForVerify(bookingID);
-            console.log("response", response);
-            console.log("result", result);
+  useEffect(() => {
+    const fetchData = async () => {
+      let { response, result } = await getDataUserForVerify(bookingID);
+      if (response && result) {
+        setUserData(result);
+      }
+      setLoading(false);
+    };
+    fetchData();
+  }, [bookingID]);
 
-            if (response && result) {
-                setUserData(result);
-            }
-            setTimeout(() => {
-                setLoading(false);
-            }, 1000);
-        };
-
-        fetchData();
-    }, [bookingID]);
-
-
-  // ข้อมูลจำลองสำหรับการแสดงผล
-  const userInfo = {
-    firstName: "สมชาย",
-    lastName: "ใจดี",
-    walletID: "0x742d35Cc6cC55c3E6e4A5F5cB6D79C4e8a3F2B1A"
+  const handleAction = async (bookingID: any) => {
+    setShowConfirmPopup(true);
   };
-  
 
-  if (loading) {
-        return <div>Loading...</div>; // สามารถแสดงข้อความหรือ loading indicator ระหว่างที่กำลังดึงข้อมูล
-}
+  const handleConfirmHold = () => {
+    setIsHolding(true);
+    setHoldProgress(0);
+    let progress = 0;
+    let intervalRef: NodeJS.Timeout;
 
-    const handleAction = async (bookingID: any) => {
-        let { response, result } = await VerifyWalletID(bookingID);
-        console.log("response", response);
-        console.log("result", result);
+    intervalRef = setInterval(() => {
+      progress += 2;
+      setHoldProgress(progress);
+      if (progress >= 100) {
+        clearInterval(intervalRef);
+        // เรียก API จริง
+        processVerification(bookingID);
+      }
+    }, 20); // 2 วินาที (100 * 20ms = 2000ms)
 
-        setTimeout(() => {
-            setLoading(true);
-        }, 1000);
-
+    // ฟังก์ชันรีเซ็ตเมื่อปล่อย
+    const resetOnRelease = () => {
+      clearInterval(intervalRef);
+      if (progress < 100) {
+        setIsHolding(false);
+        setHoldProgress(0);
+      }
+      // ลบ event listeners
+      document.removeEventListener('mouseup', resetOnRelease);
+      document.removeEventListener('touchend', resetOnRelease);
     };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-100">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-red-600 rounded-full mb-4 shadow-lg">
-            <Shield className="w-10 h-10 text-white" />
-          </div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">ยืนยันตัวตนผู้ใช้งาน</h1>
-          <p className="text-gray-600 text-lg">กรุณาตรวจสอบข้อมูลของคุณก่อนดำเนินการต่อ</p>
-        </div>
+    // เพิ่ม event listeners
+    document.addEventListener('mouseup', resetOnRelease);
+    document.addEventListener('touchend', resetOnRelease);
+  };
 
-        {/* Main Verification Card */}
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-white rounded-3xl shadow-2xl border border-red-100 overflow-hidden">
-            {/* Card Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6">
-              <div className="flex items-center justify-center space-x-3">
-                <CheckCircle className="w-8 h-8 text-white" />
-                <h2 className="text-2xl font-bold text-white">ข้อมูลผู้ใช้งาน</h2>
+  const processVerification = async (bookingID: any) => {
+    setLoading(true);
+    setShowConfirmPopup(false);
+    let { response, result } = await VerifyWalletID(bookingID);
+    console.log("response", response);
+    console.log("result", result);
+    setLoading(false);
+    setIsHolding(false);
+    setHoldProgress(0);
+  };
+
+  if (loading || !userData) {
+    return <Loader />;
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {loading && <Loader />}
+
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center space-x-3">
+              <Building2 className="h-8 w-8 text-blue-600" />
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">กรมที่ดิน</h1>
+                <p className="text-sm text-gray-500">ระบบยืนยันตัวตนดิจิทัล</p>
               </div>
             </div>
+            <div className="flex items-center space-x-2 bg-green-50 text-green-700 px-4 py-2 rounded-full border border-green-200">
+              <Shield className="w-4 h-4" />
+              <span className="text-sm font-medium">ระบบปลอดภัย</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            {/* Card Body */}
-            <div className="p-8 space-y-6">
-              {/* User Information Section */}
-              <div className="bg-blue-50 rounded-2xl p-6">
-                <div className="flex items-center mb-4">
-                  <User className="w-6 h-6 text-blue-600 mr-3" />
-                  <h3 className="text-xl font-semibold text-gray-800">ข้อมูลส่วนตัว</h3>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-white rounded-xl p-4 shadow-sm">
-                    <label className="text-sm font-medium text-gray-500 block mb-1">ชื่อ</label>
-                    <p className="text-lg font-semibold text-gray-800">{userData.firstname}</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+          {/* User Information Card */}
+          <div className="lg:col-span-5">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-8">
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <User className="w-10 h-10 text-white" />
                   </div>
-                  <div className="bg-white rounded-xl p-4 shadow-sm">
-                    <label className="text-sm font-medium text-gray-500 block mb-1">นามสกุล</label>
-                    <p className="text-lg font-semibold text-gray-800">{userData.lastname}</p>
-                  </div>
+                  <h3 className="text-xl font-bold text-white">ข้อมูลผู้ใช้งาน</h3>
+                  <p className="text-blue-100 text-sm mt-1">User Information</p>
                 </div>
               </div>
 
-              {/* Wallet Information Section */}
-              <div className="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-2xl p-6">
-                <div className="flex items-center mb-4">
-                  <Wallet className="w-6 h-6 text-orange-600 mr-3" />
-                  <h3 className="text-xl font-semibold text-gray-800">ข้อมูล Wallet</h3>
-                </div>
-                
-                <div className="bg-white rounded-xl p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-medium text-gray-500">Wallet ID</label>
-                    <div className="flex items-center">
-                      {/* MetaMask Logo */}
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-400 to-yellow-500 flex items-center justify-center mr-2 shadow-lg">
-                        <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="currentColor">
-                          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                        </svg>
-                      </div>
-                      <span className="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
-                        MetaMask
-                      </span>
+              <div className="p-6 space-y-6">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center mb-3">
+                    <FileText className="w-5 h-5 text-gray-600 mr-2" />
+                    <h4 className="font-semibold text-gray-900">ข้อมูลส่วนตัว</h4>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">ชื่อ:</span>
+                      <span className="font-medium text-gray-900">{userData.firstname}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">นามสกุล:</span>
+                      <span className="font-medium text-gray-900">{userData.lastname}</span>
                     </div>
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-3 font-mono text-sm text-gray-700 break-all">
+                </div>
+
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                  <div className="flex items-center mb-3">
+                    <div className="w-6 h-6 bg-orange-500 rounded flex items-center justify-center mr-2">
+                      <span className="text-white text-xs font-bold">M</span>
+                    </div>
+                    <h4 className="font-semibold text-gray-900">Wallet Address</h4>
+                  </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="bg-orange-500 text-white px-2 py-1 rounded text-xs font-medium">
+                      MetaMask
+                    </span>
+                    <span className="text-green-600 text-xs font-medium">● Connected</span>
+                  </div>
+                  <p className="text-lg font-bold text-gray-900 break-all bg-white p-2 rounded border font-mono">
                     {userData.wallet_id}
-                  </div>
+                  </p>
                 </div>
-              </div>
-
-              {/* Booking Information */}
-              {bookingID && (
-                <div className="bg-green-50 rounded-2xl p-6">
-                  <div className="flex items-center mb-4">
-                    <CheckCircle className="w-6 h-6 text-green-600 mr-3" />
-                    <h3 className="text-xl font-semibold text-gray-800">ข้อมูลการจอง</h3>
-                  </div>
-                  
-                  <div className="bg-white rounded-xl p-4 shadow-sm">
-                    <label className="text-sm font-medium text-gray-500 block mb-1">การดำเนินการ</label>
-                    <p className="text-lg font-semibold text-green-600">{userData.service_type}</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                <button onClick={() => handleAction(bookingID)} className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-4 px-6 rounded-2xl shadow-lg hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200">
-                  ยืนยันข้อมูล
-                </button>
-                <button className="flex-1 bg-gray-100 text-gray-700 font-semibold py-4 px-6 rounded-2xl shadow-lg hover:bg-gray-200 transform hover:scale-105 transition-all duration-200 border border-gray-200">
-                  แก้ไขข้อมูล
-                </button>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Security Notice */}
-        <div className="max-w-6xl mx-auto mt-8">
-          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
-            <div className="flex items-start">
-              <Shield className="w-6 h-6 text-blue-600 mr-3 mt-1 flex-shrink-0" />
-              <div>
-                <h4 className="font-semibold text-blue-800 mb-2">ความปลอดภัย</h4>
-                <p className="text-blue-700 text-sm leading-relaxed">
-                  ข้อมูลของคุณได้รับการเข้ารหัสและป้องกันด้วยมาตรฐานความปลอดภัยสูงสุด 
-                  กรุณาตรวจสอบข้อมูล Wallet ID ให้ถูกต้องก่อนดำเนินการต่อ
-                </p>
+          {/* Main Content */}
+          <div className="lg:col-span-7">
+            <div className="space-y-6">
+
+              {/* Page Title */}
+              <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">ยืนยันตัวตนผู้ใช้งาน</h2>
+                    <p className="text-gray-600">Digital Identity Verification System</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm text-gray-500 mb-1">Booking ID</div>
+                    <div className="font-mono text-sm bg-gray-100 px-3 py-1 rounded">
+                      #{bookingID}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Verification Details */}
+              <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                  <h3 className="text-lg font-bold text-white flex items-center">
+                    <CheckCircle className="mr-3" size={24} />
+                    รายละเอียดการยืนยัน
+                  </h3>
+                </div>
+
+                <div className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <label className="text-blue-700 text-sm font-medium block mb-2">ประเภทบริการ</label>
+                      <div className="text-lg font-bold text-blue-900">{userData.service_type}</div>
+                    </div>
+
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                      <label className="text-amber-700 text-sm font-medium block mb-2">สถานะปัจจุบัน</label>
+                      <div className="flex items-center">
+                        <Clock className="w-5 h-5 text-amber-600 mr-2" />
+                        <span className="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                          รอการยืนยัน
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <button
+                      onClick={() => handleAction(bookingID)}
+                      disabled={loading}
+                      className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-4 px-6 rounded-lg flex items-center justify-center transition-all duration-200 transform hover:scale-105 shadow-lg"
+                    >
+                      <CheckCircle className="mr-3" size={20} />
+                      {loading ? 'กำลังยืนยัน...' : 'ยืนยันข้อมูล'}
+                    </button>
+
+                    <button
+                      className="flex-1 bg-white border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700 font-semibold py-4 px-6 rounded-lg transition-all duration-200 shadow-lg"
+                    >
+                      แก้ไขข้อมูล
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Security Information */}
+              <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-slate-600 to-slate-700 px-6 py-4">
+                  <h3 className="text-lg font-bold text-white flex items-center">
+                    <Shield className="mr-3" size={24} />
+                    ความปลอดภัยและการรักษาความลับ
+                  </h3>
+                </div>
+
+                <div className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">การเข้ารหัสข้อมูล</h4>
+                        <p className="text-sm text-gray-600">ข้อมูลทั้งหมดได้รับการเข้ารหัสด้วยมาตรฐาน AES-256</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Shield className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">การตรวจสอบ Blockchain</h4>
+                        <p className="text-sm text-gray-600">Wallet Address จะถูกตรวจสอบผ่านเครือข่าย Ethereum</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-start space-x-3">
+                      <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-yellow-800">
+                        <strong>คำแนะนำ:</strong> กรุณาตรวจสอบข้อมูล Wallet Address ให้ถูกต้องก่อนดำเนินการยืนยัน
+                        เนื่องจากข้อมูลที่ยืนยันแล้วจะไม่สามารถแก้ไขได้
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      {loading && <div className="mt-3"><Loader /></div>}
+
+      {/* Confirmation Popup */}
+      {showConfirmPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex items-center">
+                <AlertCircle className="w-6 h-6 text-yellow-500 mr-2" />
+                <h3 className="text-lg font-bold text-gray-900">ยืนยันการดำเนินการ</h3>
+              </div>
+              <button
+                onClick={() => setShowConfirmPopup(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="mb-6 w-full max-w-6xl mx-auto">
+              <b className="text-gray-600 mb-4 block">
+              คุณต้องการยืนยันตัวตนด้วยข้อมูลดังต่อไปนี้หรือไม่?
+              </b>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-3">
+              <div className="flex items-center mb-2">
+                <User className="w-5 h-5 text-blue-600 mr-2" />
+                <span className="font-semibold text-blue-900 text-base">ชื่อ-นามสกุล</span>
+              </div>
+              <div className="text-lg font-bold text-blue-900 ml-7">
+                {userData.firstname} {userData.lastname}
+              </div>
+              </div>
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+              <div className="flex items-center mb-2">
+                <Shield className="w-5 h-5 text-orange-600 mr-2" />
+                <span className="font-semibold text-orange-900 text-base">Wallet ID</span>
+              </div>
+              <div className="text-lg font-mono font-bold text-orange-900 break-all ml-7">
+                {userData.wallet_id}
+              </div>
+              </div>
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-800 text-sm">
+                <strong>คำเตือน:</strong> การยืนยันนี้ไม่สามารถยกเลิกได้ กรุณาตรวจสอบข้อมูลให้ถูกต้อง
+              </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmPopup(false)}
+                className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                ยกเลิก
+              </button>
+              <div className="flex-1 relative">
+                <button
+                  onMouseDown={handleConfirmHold}
+                  onTouchStart={handleConfirmHold}
+                  disabled={isHolding && holdProgress >= 100}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold transition-all relative overflow-hidden disabled:opacity-75"
+                >
+                  <div
+                    className="absolute inset-0 bg-red-800 transition-all duration-75 ease-out"
+                    style={{ width: `${holdProgress}%` }}
+                  ></div>
+                  <span className="relative z-10">
+                    {isHolding ?
+                      (holdProgress >= 100 ? 'กำลังยืนยัน...' : `กดค้าง... ${Math.round(holdProgress)}%`)
+                      : 'กดค้างเพื่อยืนยัน'}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

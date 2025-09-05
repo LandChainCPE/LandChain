@@ -2,7 +2,6 @@ import { lazy } from "react";
 import { useRoutes, type RouteObject} from "react-router-dom";
 import Loadable from "../component/third-patry/Loadable";
 
-const Login = Loadable(lazy(() => import("../pages/LoginRegister/Login")));
 const Main = Loadable(lazy(() => import("../pages/Main")));
 const Verify = Loadable(lazy(() => import("../pages/Verify")));
 const RegisLand = Loadable(lazy(() => import("../pages/regisland/RegisLand")));
@@ -19,30 +18,21 @@ const UserRoutes = (): RouteObject[] => [
 
 const MainRoutes = (): RouteObject[] => [
   {
-    path: "/", element: <Login />, 
+    path: "/", element: <Main />, 
   },                                          
   {
     path: "/login",
     children: [
-      { index: true, element: <Login /> },
-    //   {path: "main", element: <Login /> },
-      { path: "*", element: <Login /> },
+      { index: true, element: <Main /> },
+      { path: "*", element: <Main /> },
     ],
   },
-  { path: "*", element: <Login /> }, 
+  { path: "*", element: <Main /> }, 
 ];
 
 function ConfigRoutes() {
   const isLoggedIn = localStorage.getItem('isLogin') === 'true';
-//   const roleName = localStorage.getItem('roleName');
-//   const employeeID = localStorage.getItem('employeeid');
-//   const userid = localStorage.getItem('userid');
-
   console.log("ค่า isLoggedIn:", isLoggedIn);
-//   console.log("roleName:", roleName);
-//   console.log("employeeid:", employeeID);
-//   console.log("userid:", userid);
-
   let routes: RouteObject[] = [];
 
   if (isLoggedIn) {

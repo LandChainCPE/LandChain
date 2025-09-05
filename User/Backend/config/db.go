@@ -230,6 +230,7 @@ func SetupDatabase() {
 	db.Model(&entity.ServiceType{}).Count(&serviceCount)
 	if serviceCount == 0 {
 		db.Create(&entity.ServiceType{Service: "ขึ้นทะเบียนที่ดิน"})
+		db.Create(&entity.ServiceType{Service: "ลงทะเบียนชื่อผู้ใช้"})
 	}
 
 	if count == 0 {
@@ -263,8 +264,9 @@ func SetupDatabase() {
 		db.Create(&entity.Time{Timework: "15:00 - 16:00", MaxCapacity: 5, BranchID: RefBranch})
 		
 		RefTimeID := uint(1)
+		RefTypeID := uint(2)
 		startTime := time.Date(2025, time.August, 6, 9, 0, 0, 0, time.UTC)
-		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID, UserID: RefTimeID, BranchID: RefTimeID, ServiceTypeID: RefTimeID})
+		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID, UserID: RefTimeID, BranchID: RefTimeID, ServiceTypeID: RefTypeID})
 
 		SeedGeographyExample(db)
 		SeedProvinces(db)
