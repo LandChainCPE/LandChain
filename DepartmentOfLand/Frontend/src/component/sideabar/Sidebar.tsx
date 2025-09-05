@@ -13,7 +13,7 @@ const Sidebar: React.FC = () => {
   const navigate = useNavigate();
 
   const menus = [
-  { label: "รายการจองคิว",       icon: <CalendarOutlined />,   path: "/dashboard"   },
+  { label: "รายการดำเนินการ",       icon: <CalendarOutlined />,   path: "/operations"   },
   { label: "ตรวจสอบโฉนดที่ดิน",   icon: <FileSearchOutlined />, path: "/teams"       },
   { label: "โอนกรรมสิทธิ์",        icon: <SwapOutlined />,      path: "/payments"    },
   { label: "ลงทะเบียนโฉนดที่ดิน", icon: <FileAddOutlined />,   path: "/attendance"  },
@@ -22,7 +22,7 @@ const Sidebar: React.FC = () => {
   return (
     <div className="sidebar">
       <div className="logo">
-        <img src="Logo2.png" alt="Logo" style={{width: "85%"}}/>
+        <img src="/LogoLandchain.png" alt="Logo" style={{width: "85%"}}/>
       </div>
 
       <div className="menu">
