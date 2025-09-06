@@ -4,7 +4,7 @@ import './index.css';
 
 const App: React.FC = () => {
   return (
-      <ConfigRoutes />
+    <ConfigRoutes />
   );
 };
 

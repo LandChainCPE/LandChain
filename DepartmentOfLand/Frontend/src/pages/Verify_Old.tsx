@@ -40,20 +40,24 @@ function Verify() {
       setHoldProgress(progress);
       if (progress >= 100) {
         clearInterval(intervalRef);
+        // เรียก API จริง
         processVerification(bookingID);
       }
-    }, 20);
+    }, 20); // 2 วินาที (100 * 20ms = 2000ms)
 
+    // ฟังก์ชันรีเซ็ตเมื่อปล่อย
     const resetOnRelease = () => {
       clearInterval(intervalRef);
       if (progress < 100) {
         setIsHolding(false);
         setHoldProgress(0);
       }
+      // ลบ event listeners
       document.removeEventListener('mouseup', resetOnRelease);
       document.removeEventListener('touchend', resetOnRelease);
     };
 
+    // เพิ่ม event listeners
     document.addEventListener('mouseup', resetOnRelease);
     document.addEventListener('touchend', resetOnRelease);
   };
@@ -78,7 +82,7 @@ function Verify() {
       {loading && <Loader />}
 
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm mb-6 -mx-4 lg:-mx-8 -mt-4 lg:-mt-8">
+      <div className="bg-white border-b border-gray-200 shadow-sm mb-4 -mx-4 -mt-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
@@ -96,8 +100,9 @@ function Verify() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
           {/* User Information Card */}
           <div className="lg:col-span-5">
             <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
@@ -153,6 +158,7 @@ function Verify() {
           {/* Main Content */}
           <div className="lg:col-span-7">
             <div className="space-y-6">
+
               {/* Page Title */}
               <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
                 <div className="flex items-center justify-between">
@@ -207,7 +213,9 @@ function Verify() {
                       {loading ? 'กำลังยืนยัน...' : 'ยืนยันข้อมูล'}
                     </button>
 
-                    <button className="flex-1 bg-white border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700 font-semibold py-4 px-6 rounded-lg transition-all duration-200 shadow-lg">
+                    <button
+                      className="flex-1 bg-white border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700 font-semibold py-4 px-6 rounded-lg transition-all duration-200 shadow-lg"
+                    >
                       แก้ไขข้อมูล
                     </button>
                   </div>
@@ -279,32 +287,32 @@ function Verify() {
               </button>
             </div>
 
-            <div className="mb-6">
-              <p className="text-gray-600 mb-4">
-                คุณต้องการยืนยันตัวตนด้วยข้อมูลดังต่อไปนี้หรือไม่?
-              </p>
+            <div className="mb-6 w-full max-w-6xl mx-auto">
+              <b className="text-gray-600 mb-4 block">
+              คุณต้องการยืนยันตัวตนด้วยข้อมูลดังต่อไปนี้หรือไม่?
+              </b>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-3">
-                <div className="flex items-center mb-2">
-                  <User className="w-5 h-5 text-blue-600 mr-2" />
-                  <span className="font-semibold text-blue-900">ชื่อ-นามสกุล</span>
-                </div>
-                <div className="text-lg font-bold text-blue-900 ml-7">
-                  {userData.firstname} {userData.lastname}
-                </div>
+              <div className="flex items-center mb-2">
+                <User className="w-5 h-5 text-blue-600 mr-2" />
+                <span className="font-semibold text-blue-900 text-base">ชื่อ-นามสกุล</span>
+              </div>
+              <div className="text-lg font-bold text-blue-900 ml-7">
+                {userData.firstname} {userData.lastname}
+              </div>
               </div>
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                <div className="flex items-center mb-2">
-                  <Shield className="w-5 h-5 text-orange-600 mr-2" />
-                  <span className="font-semibold text-orange-900">Wallet ID</span>
-                </div>
-                <div className="text-lg font-mono font-bold text-orange-900 break-all ml-7">
-                  {userData.wallet_id}
-                </div>
+              <div className="flex items-center mb-2">
+                <Shield className="w-5 h-5 text-orange-600 mr-2" />
+                <span className="font-semibold text-orange-900 text-base">Wallet ID</span>
+              </div>
+              <div className="text-lg font-mono font-bold text-orange-900 break-all ml-7">
+                {userData.wallet_id}
+              </div>
               </div>
               <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-800 text-sm">
-                  <strong>คำเตือน:</strong> การยืนยันนี้ไม่สามารถยกเลิกได้ กรุณาตรวจสอบข้อมูลให้ถูกต้อง
-                </p>
+              <p className="text-red-800 text-sm">
+                <strong>คำเตือน:</strong> การยืนยันนี้ไม่สามารถยกเลิกได้ กรุณาตรวจสอบข้อมูลให้ถูกต้อง
+              </p>
               </div>
             </div>
 

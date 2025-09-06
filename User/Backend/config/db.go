@@ -193,12 +193,14 @@ func SetupDatabase() {
 	// AutoMigrate
 	if err := db.AutoMigrate(
 		&entity.Role{},
+		&entity.UserVerification{}, /////
 		&entity.Users{},
 		&entity.Time{},
 		&entity.Province{},
 		&entity.Branch{},
 		&entity.Booking{},
 		&entity.Typetransaction{},
+		&entity.LandVerification{},/////
 		&entity.Landtitle{},
 		&entity.Landsalepost{},
 		&entity.Transaction{},
@@ -240,6 +242,7 @@ func SetupDatabase() {
 
 		RefRole := uint(1)
 		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f469a", RoleID: RefRole}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
+		db.Create(&entity.Users{Firstname: "JoJo", Lastname: "Jo12345", Email: "Jpooo@gmail.com", Phonenumber: "255555", Metamaskaddress: "0xC3dCE9c6953f9D64527F80e7682078B3643D6B2E", RoleID: RefRole})
 		// db.Create(&entity.Users{Name: "Bam", Email: "@goods1", Phonenumber: "0912345677", Password: "1234564", Land: "ผหก5ป58ก", RoleID: RefRole})
 		// //RefServiceType := uint(1)
 		// db.Create(&entity.Users{Name: "Jo", Password: "jo123456", Land: "12กท85", RoleID: RefRole,})
@@ -251,7 +254,9 @@ func SetupDatabase() {
 		db.Create(&entity.Province{Province: "มหาสารคาม"})
 
 		RefProvince := uint(2)
+		RefProvince1 := uint(1)
 		db.Create(&entity.Branch{Branch: "น้ำยืน", ProvinceID: RefProvince})
+		db.Create(&entity.Branch{Branch: "เมืองนครราขสีมา", ProvinceID: RefProvince1})
 
 		// สร้าง Time slots
 		RefBranch := uint(1)
@@ -264,9 +269,11 @@ func SetupDatabase() {
 		db.Create(&entity.Time{Timework: "15:00 - 16:00", MaxCapacity: 5, BranchID: RefBranch})
 		
 		RefTimeID := uint(1)
+		RefTimeID1 := uint(6)
 		RefTypeID := uint(2)
 		startTime := time.Date(2025, time.August, 6, 9, 0, 0, 0, time.UTC)
 		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID, UserID: RefTimeID, BranchID: RefTimeID, ServiceTypeID: RefTypeID})
+		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID1, UserID: RefTypeID, BranchID: RefTypeID, ServiceTypeID: RefTypeID})
 
 		SeedGeographyExample(db)
 		SeedProvinces(db)
