@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Upload, MapPin, Save, Camera } from "lucide-react";
 import "./UserRegisLand.css";
 import { RegisterLand } from "../../service/https/garfield/http";
-import { GetProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield/http";
+import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield/http";
 
-type ProvinceDTO = { id: number; name_th: string; name_en?: string };
-type DistrictDTO = { id: number; name_th: string; province_id: number; name_en?: string };
-type SubdistrictDTO = { id: number; name_th: string; district_id: number; name_en?: string };
+type ProvinceDTO = { ID: number; name_th: string; name_en?: string };
+type DistrictDTO = { ID: number; name_th: string; province_id: number; name_en?: string };
+type SubdistrictDTO = { ID: number; name_th: string; district_id: number; name_en?: string };
 
 const UserRegisLand: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -38,10 +38,15 @@ const UserRegisLand: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // ----- handlers -----
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  // const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  //   const { name, value } = e.target;
+  //   console.log(`Selected ${name}:`, value);
+  //   setFormData((prev) => ({ ...prev, [name]: value }));
+  //   // ตรวจสอบว่า province_id ถูกเลือกหรือไม่
+  //   if (name === "province_id") {
+  //     console.log("Selected province_id:", value);  // แสดงค่า province_id ที่เลือก
+  //   }
+  // };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -108,7 +113,7 @@ const UserRegisLand: React.FC = () => {
     (async () => {
       setLoadingP(true);
       try {
-        const data = await GetProvinces(ctrl.signal);
+        const data = await GetAllProvinces(ctrl.signal);
         // เผื่อ backend บางตัวส่ง { result: [] } มา
         const list: ProvinceDTO[] = Array.isArray(data) ? data : data?.result ?? [];
         setProvinces(list);
@@ -128,6 +133,9 @@ const UserRegisLand: React.FC = () => {
     const ctrl = new AbortController();
 
     const pidNum = Number(pidStr);
+    
+    console.log("province_id (ID):", pidNum);
+
     if (!Number.isFinite(pidNum) || pidNum <= 0) {
       setDistricts([]);
       setSubdistricts([]);
@@ -139,8 +147,14 @@ const UserRegisLand: React.FC = () => {
       setLoadingD(true);
       try {
         const data = await GetDistrict(pidNum, ctrl.signal);
+
+        console.log("Received districts data:", data);
+
         const list: DistrictDTO[] = Array.isArray(data) ? data : data?.result ?? [];
         setDistricts(list);
+
+        console.log("Districts after setting:", list);
+        
         setSubdistricts([]);
         setFormData((p) => ({ ...p, district_id: "", subdistrict_id: "" }));
       } catch (e) {
@@ -152,6 +166,7 @@ const UserRegisLand: React.FC = () => {
 
     return () => ctrl.abort();
   }, [formData.province_id]);
+
 
 
   // when district changes -> load subdistricts & reset subdistrict
@@ -182,6 +197,14 @@ const UserRegisLand: React.FC = () => {
 
     return () => ctrl.abort();
   }, [formData.district_id]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const { name, value } = e.target;
+  if (name === "province_id") {
+    console.log("Selected province_id (value):", value, typeof value); // ควรเป็นเลข string เช่น "1"
+  }
+  setFormData((prev) => ({ ...prev, [name]: value }));
+};
 
   return (
     <div className="container">
@@ -298,7 +321,7 @@ const UserRegisLand: React.FC = () => {
                     {loadingP ? "กำลังโหลด..." : "-- เลือกจังหวัด --"}
                   </option>
                   {provinces.map((p) => (
-                    <option key={p.id} value={p.id}>
+                    <option key={p.ID} value={String(p.ID)}> {/* ใช้ province.ID แทนชื่อจังหวัด */}
                       {p.name_th}
                     </option>
                   ))}
@@ -319,7 +342,7 @@ const UserRegisLand: React.FC = () => {
                     {loadingD ? "กำลังโหลด..." : "-- เลือกอำเภอ --"}
                   </option>
                   {districts.map((d) => (
-                    <option key={d.id} value={String(d.id)}>
+                    <option key={d.ID} value={String(d.ID)}>
                       {d.name_th}
                     </option>
                   ))}
@@ -340,7 +363,7 @@ const UserRegisLand: React.FC = () => {
                     {loadingS ? "กำลังโหลด..." : "-- เลือกตำบล --"}
                   </option>
                   {subdistricts.map((s) => (
-                    <option key={s.id} value={s.id}>
+                    <option key={s.ID} value={String(s.ID)}>
                       {s.name_th}
                     </option>
                   ))}

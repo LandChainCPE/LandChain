@@ -29,8 +29,8 @@ type LandtitleCreateRequest struct {
 	SquareWa int `form:"square_wa"`
 
 	// Location IDs
-	ProvinceID   uint `form:"province_id"`
-	DistrictID   uint `form:"district_id"`
+	ProvinceID    uint `form:"province_id"`
+	DistrictID    uint `form:"district_id"`
 	SubdistrictID uint `form:"subdistrict_id"`
 
 	// Status (ถ้าอยากกำหนดเองจากฟอร์ม; ไม่ส่งมาก็ตั้งค่าเริ่มต้น)
@@ -107,14 +107,14 @@ func RegisterLand(c *gin.Context) {
 
 	// map เข้า entity
 	land := entity.Landtitle{
-		Model:        gorm.Model{},
-		DeedNumber:   req.DeedNumber,
-		VillageNo:    req.VillageNo,
-		Soi:          req.Soi,
-		Road:         req.Road,
-		Rai:          req.Rai,
-		Ngan:         req.Ngan,
-		SquareWa:     req.SquareWa,
+		Model:         gorm.Model{},
+		DeedNumber:    req.DeedNumber,
+		VillageNo:     req.VillageNo,
+		Soi:           req.Soi,
+		Road:          req.Road,
+		Rai:           req.Rai,
+		Ngan:          req.Ngan,
+		SquareWa:      req.SquareWa,
 		DeedImagePath: deedImagePath,
 
 		UserID:        userID,

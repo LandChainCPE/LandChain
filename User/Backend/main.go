@@ -88,7 +88,7 @@ func main() {
 		r.GET("/user/:id", controller.GetUserByID)
 
 		// CONTROLLER RegisterLand
-		//r.POST("/user/regisland", controller.RegisterLand)
+		r.POST("/user/createland", controller.CreateLandtitle)
 	}
 
 	// public := r.Group("")

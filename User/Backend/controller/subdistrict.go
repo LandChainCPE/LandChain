@@ -10,12 +10,11 @@ import (
 
 // ฟังก์ชันดึงข้อมูลตำบล
 func GetSubdistrict(c *gin.Context) {
-	districtID := c.Query("district") // ใช้ Query แทน Param
-
-	var subdistricts []entity.Subdistrict
-	if err := config.DB().Where("district_id = ?", districtID).Find(&subdistricts).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลตำบลได้"})
-		return
-	}
-	c.JSON(http.StatusOK, subdistricts)
+    districtID := c.Param("id") // ใช้ Param
+    var subdistricts []entity.Subdistrict
+    if err := config.DB().Where("district_id = ?", districtID).Find(&subdistricts).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลตำบลได้"})
+        return
+    }
+    c.JSON(http.StatusOK, subdistricts)
 }

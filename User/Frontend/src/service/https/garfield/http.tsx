@@ -97,7 +97,7 @@ async function RegisterLand(
 }
 
 /** ดึงจังหวัด (รองรับ AbortSignal) */
-async function GetProvinces(signal?: AbortSignal) {
+async function GetAllProvinces(signal?: AbortSignal) {
   return await api
     .get("/province", { signal })
     .then((res) => res.data)
@@ -146,7 +146,7 @@ export {
   LoginWallet,
   LogoutWallet,
   RegisterLand,
-  GetProvinces,
+  GetAllProvinces,
   GetDistrict,
   GetSubdistrict,
 };
