@@ -85,15 +85,25 @@ async function RegisterLand(
     formData.append("deed_image", imageFile);
   }
 
-  const response = await fetch(`${apiUrl}/user/userregisland`, {
-    method: "POST",
-    // ห้าม set Content-Type เองเมื่อใช้ FormData
-    headers: { ...getAuthHeaders() },
-    body: formData,
-  });
+  // ใช้ axios เพื่อให้จัดการ multipart headers อัตโนมัติ (ไม่ตั้ง Content-Type เอง)
+  try {
+    const res = await api.post("/user/userregisland", formData, {
+      headers: { ...getAuthHeaders() }, // interceptor จะรวมให้ด้วย
+    });
 
-  const result = await response.json();
-  return { result, response };
+    // พยายามคืนค่า JSON ถ้า backend ส่งมา
+    return { result: res.data, response: res };
+  } catch (err: any) {
+    // ถ้าข้อผิดพลาดจาก axios ให้พยายามอ่าน response text / data ปลอดภัย
+    const resp = err?.response;
+    let result: any = null;
+    try {
+      result = resp?.data ?? null;
+    } catch (e) {
+      result = null;
+    }
+    return { result, response: resp ?? err };
+  }
 }
 
 /** ดึงจังหวัด (รองรับ AbortSignal) */
