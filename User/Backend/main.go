@@ -40,6 +40,9 @@ func main() {
 	authorized.Use(middlewares.Authorizes())
 	{
 		authorized.GET("/getbookingdata", controller.GetBookingData)
+		authorized.GET("/getdatauserforverify/:bookingID", controller.GetDataUserForVerify)
+		authorized.POST("/verifywalletid/:bookingID", controller.VerifyWalletID)
+		
 		authorized.POST("/userbookings", controller.CreateBooking) // สร้างการจอง
 		authorized.PUT("/bookings/:id", controller.UpdateBooking)  // อัปเดตการจอง
 		//r.PUT("/bookings/:id", controller.UpdateBooking) // อัปเดตการจอง

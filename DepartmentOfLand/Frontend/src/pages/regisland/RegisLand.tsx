@@ -309,35 +309,16 @@ function RegisLand() {
 
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-
-      <div style={{ width: "200px", backgroundColor: "#202C6B", display: "flex", flexDirection: "column", padding: "10px", height: "100vh", boxSizing: "border-box" }}>
-        <img src="Logo2.png" alt="logo2myproject" style={{ maxWidth: "100%", height: "auto" }} />
-        <button style={{ marginTop: "10px", width: "100%", backgroundColor: "#4256D0", color: "white", borderRadius: 8, fontSize: 16, padding: "10px" }}>
-          ตรวจสอบโฉนดที่ดิน
-        </button>
-        <button style={{ marginTop: "10px", width: "100%", backgroundColor: "#4256D0", color: "white", borderRadius: 8, fontSize: 16, padding: "10px" }}>
-          รายการจองคิว
-        </button>
-        <button style={{ marginTop: "10px", width: "100%", backgroundColor: "#4256D0", color: "white", borderRadius: 8, fontSize: 16, padding: "10px" }}>
-          โอนกรรมสิทธิ์
-        </button>
-        <button onClick={handleClick} style={{ marginTop: "10px", width: "100%", backgroundColor: "#4256D0", color: "white", borderRadius: 8, fontSize: 16, padding: "10px" }}>
-          ลงทะเบียนโฉนดที่ดิน
-        </button>
-
-      </div>
-      {/* Main Content */}
-      <div style={{ flexGrow: 1, padding: "20px", overflowY: "auto" }}>
-        <h1 style={{ marginBottom: "20px" }}>ลงทะเบียนโฉนดที่ดิน</h1>
-        <form name="register_land" onSubmit={ClickReg}>
-          <div style={{ marginBottom: "24px" }}>
-            <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>ตำแหน่งที่ดิน</label>
-            <div style={{ display: "flex", gap: "12px" }}>
-              <div style={{ display: "flex", flexDirection: "column", flex: "1" }}>
-                <label htmlFor="ravang" style={{ marginBottom: "4px", fontSize: "14px" }}>ระวาง</label>
-                <input name="ravang" id="ravang" type="text" style={{ padding: "8px", fontSize: "16px", borderRadius: "8px", border: "1px solid #3f51b5", boxSizing: "border-box" }} />
-              </div>
+    <>
+      <h1 style={{ marginBottom: "20px" }}>ลงทะเบียนโฉนดที่ดิน</h1>
+      <form name="register_land" onSubmit={ClickReg}>
+        <div style={{ marginBottom: "24px" }}>
+          <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>ตำแหน่งที่ดิน</label>
+          <div style={{ display: "flex", gap: "12px" }}>
+            <div style={{ display: "flex", flexDirection: "column", flex: "1" }}>
+              <label htmlFor="ravang" style={{ marginBottom: "4px", fontSize: "14px" }}>ระวาง</label>
+              <input name="ravang" id="ravang" type="text" style={{ padding: "8px", fontSize: "16px", borderRadius: "8px", border: "1px solid #3f51b5", boxSizing: "border-box" }} />
+            </div>
               <div style={{ display: "flex", flexDirection: "column", flex: "1" }}>
                 <label htmlFor="landNumber" style={{ marginBottom: "4px", fontSize: "14px" }}>เลขที่ดิน</label>
                 <input name="landNumber" id="landNumber" type="text" style={{ padding: "8px", fontSize: "16px", borderRadius: "8px", border: "1px solid #3f51b5", boxSizing: "border-box" }} />
@@ -384,12 +365,9 @@ function RegisLand() {
             ลงทะเบียน
           </button>
         </form>
-      </div>
-
-
 
       {loading && <Loader />}
-    </div>
+    </>
   );
 
 }

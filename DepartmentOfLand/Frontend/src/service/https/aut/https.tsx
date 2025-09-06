@@ -1,13 +1,12 @@
 const apiUrl = "http://localhost:8080";
 
-
 function getAuthHeaders() {
-    const token = localStorage.getItem("token");
-    const tokenType = localStorage.getItem("token_type");
-    return {
-      "Authorization": `${tokenType} ${token}`,
-      "Content-Type": "application/json",
-    };
+  const token = localStorage.getItem("token");
+  const tokenType = localStorage.getItem("token_type");
+  return {
+    "Authorization": `${tokenType} ${token}`,
+    "Content-Type": "application/json",
+  };
 }
 
 
@@ -26,8 +25,34 @@ async function getQueueByDate() {
         }
         });
     return res;
-}
+};
+
+
+async function getDataUserForVerify(bookingID: any) {
+    const requestOptions = {
+        method: "GET",
+        headers: getAuthHeaders(),
+    };
+
+    let response = await fetch(`${apiUrl}/getdatauserforverify/${bookingID}`, requestOptions)
+    const result = await response.json();
+    return { response, result };
+};
+
+async function VerifyWalletID(bookingID: any) {
+    const requestOptions = {
+        method: "POST",
+        headers: getAuthHeaders(),
+    };
+
+    let response = await fetch(`${apiUrl}/verifywalletid/${bookingID}`, requestOptions)
+    const result = await response.json();
+    return { response, result };
+};
+
 
 export {
     getQueueByDate,
+    getDataUserForVerify,
+    VerifyWalletID
 }
