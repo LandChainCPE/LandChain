@@ -1,8 +1,10 @@
 package config
 
 import (
-	"errors"
+	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -17,7 +19,7 @@ import (
 	"encoding/csv"
 
 
-	
+	"gorm.io/gorm/clause"
 )
 
 var db *gorm.DB
@@ -34,14 +36,13 @@ func ConnectDatabase() *gorm.DB {
 
 	// DSN
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Bangkok",
-		os.Getenv("DB_HOST"),	
+		os.Getenv("DB_HOST"),
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
 		os.Getenv("DB_PORT"),
 	)
 	// log.Println("DSN:", dsn) // ✅ สำหรับ Debug
-	
 
 	// เชื่อมต่อ DB
 	connection, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -52,6 +53,139 @@ func ConnectDatabase() *gorm.DB {
 	db = connection // ✅ เก็บไว้ใน global variable
 	log.Println("✅ Database Connected")
 	return db
+}
+
+func SeedGeographiesFromJSON(db *gorm.DB, jsonPath string) error {
+	// เปิดไฟล์ JSON
+	file, err := os.Open(jsonPath)
+	if err != nil {
+		return fmt.Errorf("cannot open geography JSON: %w", err)
+	}
+	defer file.Close()
+
+	// อ่านไฟล์
+	bytes, err := io.ReadAll(file)
+	if err != nil {
+		return fmt.Errorf("cannot read geography JSON: %w", err)
+	}
+
+	// แปลง JSON เป็น slice ของ LandGeographies
+	var geographies []entity.LandGeographies
+	if err := json.Unmarshal(bytes, &geographies); err != nil {
+		return fmt.Errorf("cannot unmarshal geography JSON: %w", err)
+	}
+
+	// เริ่ม transaction
+	tx := db.Begin()
+	for _, geo := range geographies {
+		// เพิ่มข้อมูล ถ้ามี conflict ให้ข้าม
+		if err := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&geo).Error; err != nil {
+			tx.Rollback()
+			return fmt.Errorf("cannot create geography: %w", err)
+		}
+	}
+	return tx.Commit().Error
+}
+
+func SeedGeographyExample(db *gorm.DB) {
+	// เปิดไฟล์ JSON
+	jsonFile, err := os.Open("ProvincesData/thai_geographies.json")
+	if err != nil {
+		log.Fatalf("cannot open provinces JSON: %v", err)
+	}
+	defer jsonFile.Close()
+
+	// อ่านข้อมูล
+	byteValue, _ := io.ReadAll(jsonFile)
+
+	// แปลง JSON → struct
+	var geographies []entity.LandGeographies
+	if err := json.Unmarshal(byteValue, &geographies); err != nil {
+		log.Fatalf("cannot unmarshal provinces JSON: %v", err)
+	}
+
+	// Insert ลง DB
+	for _, geography := range geographies {
+		if err := db.Create(&geography).Error; err != nil {
+			fmt.Printf("❌ Failed to insert province %s: %v\n", geography.Name, err)
+		}
+	}
+}
+
+// ------------------ Seed Provinces ------------------
+func SeedProvinces(db *gorm.DB) {
+	// เปิดไฟล์ JSON
+	jsonFile, err := os.Open("ProvincesData/thai_provinces.json")
+	if err != nil {
+		log.Fatalf("cannot open provinces JSON: %v", err)
+	}
+	defer jsonFile.Close()
+
+	// อ่านข้อมูล
+	byteValue, _ := io.ReadAll(jsonFile)
+
+	// แปลง JSON → struct
+	var provinces []entity.LandProvinces
+	if err := json.Unmarshal(byteValue, &provinces); err != nil {
+		log.Fatalf("cannot unmarshal provinces JSON: %v", err)
+	}
+
+	// Insert ลง DB
+	for _, province := range provinces {
+		if err := db.Create(&province).Error; err != nil {
+			fmt.Printf("❌ Failed to insert province %s: %v\n", province.NameTh, err)
+		}
+	}
+}
+
+func SeedAmphures(db *gorm.DB) {
+	// เปิดไฟล์ JSON
+	jsonFile, err := os.Open("ProvincesData/thai_amphures.json")
+	if err != nil {
+		log.Fatalf("cannot open amphures JSON: %v", err)
+	}
+	defer jsonFile.Close()
+
+	// อ่านข้อมูล
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+
+	// แปลง JSON → struct
+	var amphures []entity.LandAmphures
+	if err := json.Unmarshal(byteValue, &amphures); err != nil {
+		log.Fatalf("cannot unmarshal amphures JSON: %v", err)
+	}
+
+	// Insert ลง DB
+	for _, amphure := range amphures {
+		if err := db.Create(&amphure).Error; err != nil {
+			fmt.Printf("❌ Failed to insert amphure %s: %v\n", amphure.NameTh, err)
+		}
+	}
+}
+
+func SeedTambons(db *gorm.DB) {
+	// เปิดไฟล์ JSON
+	jsonFile, err := os.Open("ProvincesData/thai_tambons.json")
+	if err != nil {
+		log.Fatalf("cannot open tambons JSON: %v", err)
+	}
+	defer jsonFile.Close()
+
+	// อ่านข้อมูล
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+
+	// แปลง JSON → struct
+	var tambons []entity.LandTambons
+	if err := json.Unmarshal(byteValue, &tambons); err != nil {
+		log.Fatalf("cannot unmarshal tambons JSON: %v", err)
+	}
+
+	// Insert ลง DB
+	for _, tambon := range tambons {
+		if err := db.Create(&tambon).Error; err != nil {
+			fmt.Printf("❌ Failed to insert tambon %s: %v\n", tambon.NameTh, err)
+		}
+	}
 }
 
 // ✅ SetupDatabase: ทำ Drop Table, AutoMigrate, และ Seed ข้อมูล
@@ -70,12 +204,14 @@ func SetupDatabase() {
 	if err := db.AutoMigrate(
 		
 		&entity.Role{},
+		&entity.UserVerification{}, /////
 		&entity.Users{},
 		&entity.Time{},
 		&entity.Province{},
 		&entity.Branch{},
 		&entity.Booking{},
 		&entity.Typetransaction{},
+		&entity.LandVerification{},/////
 		&entity.Landtitle{},
 		&entity.Landsalepost{},
 		&entity.Transaction{},
@@ -83,15 +219,20 @@ func SetupDatabase() {
 		&entity.Roomchat{},
 		&entity.Message{},
 		&entity.Copyrequest{},
-		&entity.LandProvinces{},
-		&entity.ServiceType{},
 		&entity.Petition{},
 		&entity.State{},
 		&entity.Tag{},
 		&entity.District{},
 		&entity.Subdistrict{},
 		&entity.Location{},
-
+		&entity.LandGeographies{},
+		&entity.LandProvinces{},
+		&entity.ServiceType{},
+		&entity.LandAmphures{},
+		&entity.LandTambons{},
+		&entity.Landtitle{},
+		&entity.RequestBuy{},
+		&entity.RequestSell{},
 	); err != nil {
 		log.Fatal("❌ AutoMigrate failed:", err)
 	}
@@ -99,12 +240,13 @@ func SetupDatabase() {
 	// Seed Data
 	var count int64
 	db.Model(&entity.Users{}).Count(&count)
-	
+
 	// สร้าง ServiceType ก่อน
 	var serviceCount int64
 	db.Model(&entity.ServiceType{}).Count(&serviceCount)
 	if serviceCount == 0 {
 		db.Create(&entity.ServiceType{Service: "ขึ้นทะเบียนที่ดิน"})
+		db.Create(&entity.ServiceType{Service: "ลงทะเบียนชื่อผู้ใช้"})
 	}
 
 	if count == 0 {
@@ -113,7 +255,8 @@ func SetupDatabase() {
 		db.Create(&entity.Role{Role: "Admin"})
 
 		RefRole := uint(1)
-		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f469a", RoleID: RefRole})		// db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
+		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f469a", RoleID: RefRole}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
+		db.Create(&entity.Users{Firstname: "JoJo", Lastname: "Jo12345", Email: "Jpooo@gmail.com", Phonenumber: "255555", Metamaskaddress: "0xC3dCE9c6953f9D64527F80e7682078B3643D6B2E", RoleID: RefRole})
 		// db.Create(&entity.Users{Name: "Bam", Email: "@goods1", Phonenumber: "0912345677", Password: "1234564", Land: "ผหก5ป58ก", RoleID: RefRole})
 		// //RefServiceType := uint(1)
 		// db.Create(&entity.Users{Name: "Jo", Password: "jo123456", Land: "12กท85", RoleID: RefRole,})
@@ -124,9 +267,10 @@ func SetupDatabase() {
 		//db.Create(&entity.Province{Province: "อุบลราชธานี"})
 		//db.Create(&entity.Province{Province: "มหาสารคาม"})
 
-
 		RefProvince := uint(2)
+		RefProvince1 := uint(1)
 		db.Create(&entity.Branch{Branch: "น้ำยืน", ProvinceID: RefProvince})
+		db.Create(&entity.Branch{Branch: "เมืองนครราขสีมา", ProvinceID: RefProvince1})
 
 		// สร้าง Time slots
 		RefBranch := uint(1)
@@ -137,10 +281,27 @@ func SetupDatabase() {
 		db.Create(&entity.Time{Timework: "13:00 - 14:00", MaxCapacity: 5, BranchID: RefBranch})
 		db.Create(&entity.Time{Timework: "14:00 - 15:00", MaxCapacity: 5, BranchID: RefBranch})
 		db.Create(&entity.Time{Timework: "15:00 - 16:00", MaxCapacity: 5, BranchID: RefBranch})
-
-
-
 		
+		RefTimeID := uint(1)
+		RefTimeID1 := uint(6)
+		RefTypeID := uint(2)
+		startTime := time.Date(2025, time.August, 6, 9, 0, 0, 0, time.UTC)
+		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID, UserID: RefTimeID, BranchID: RefTimeID, ServiceTypeID: RefTypeID})
+		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID1, UserID: RefTypeID, BranchID: RefTypeID, ServiceTypeID: RefTypeID})
+
+		SeedGeographyExample(db)
+		SeedProvinces(db)
+		SeedAmphures(db)
+		SeedTambons(db)
+
+		db.Create(&entity.RequestSell{UserID: 2, LandID: 1})
+		db.Create(&entity.RequestSell{UserID: 3, LandID: 1})
+		db.Create(&entity.RequestSell{UserID: 2, LandID: 2})
+		db.Create(&entity.RequestSell{UserID: 3, LandID: 3})
+		db.Create(&entity.RequestBuy{UserID: 1, LandID: 5})
+		db.Create(&entity.RequestBuy{UserID: 1, LandID: 6})
+		db.Create(&entity.RequestBuy{UserID: 1, LandID: 7})
+		db.Create(&entity.RequestBuy{UserID: 1, LandID: 8})
 
 		// สร้าง LandProvinces
 		var provinces = []string{
@@ -260,43 +421,42 @@ func createRoomchatsAndMessages() {
 		}
 
 		// สร้าง Roomchat ใหม่
-		roomchat := entity.Roomchat{
-			LandsalepostID: post.ID,
-			UserID:         userID,
-		}
+		// 	roomchat := entity.Roomchat{
+		// 		LandsalepostID: post.ID,
+		// 		UserID:         userID,
+		// 	}
 
-		if err := db.Create(&roomchat).Error; err != nil {
-			log.Println("❌ Failed to create Roomchat for user", userID, ":", err)
-			continue
-		}
-		log.Println("✅ Created Roomchat for UserID:", userID, "RoomchatID:", roomchat.ID)
+		// 	if err := db.Create(&roomchat).Error; err != nil {
+		// 		log.Println("❌ Failed to create Roomchat for user", userID, ":", err)
+		// 		continue
+		// 	}
+		// 	log.Println("✅ Created Roomchat for UserID:", userID, "RoomchatID:", roomchat.ID)
 
-		// เพิ่มข้อความตัวอย่างในห้องแชท
-		messages := []entity.Message{
-			{
-				Message:    "สวัสดีครับ สนใจที่ดินแปลงนี้ไหม?",
-				Time:       time.Now(),
-				RoomchatID: roomchat.ID,
-			},
-			{
-				Message:    "สนใจครับ อยากทราบรายละเอียดเพิ่มเติม",
-				Time:       time.Now().Add(1 * time.Minute),
-				RoomchatID: roomchat.ID,
-			},
-			{
-				Message:    "ที่ดินขนาด 5 ไร่ ราคา 2 ล้านบาทครับ",
-				Time:       time.Now().Add(2 * time.Minute),
-				RoomchatID: roomchat.ID,
-			},
-		}
+		// 	// เพิ่มข้อความตัวอย่างในห้องแชท
+		// 	messages := []entity.Message{
+		// 		{
+		// 			Message:    "สวัสดีครับ สนใจที่ดินแปลงนี้ไหม?",
+		// 			Time:       time.Now(),
+		// 			RoomchatID: roomchat.ID,
+		// 		},
+		// 		{
+		// 			Message:    "สนใจครับ อยากทราบรายละเอียดเพิ่มเติม",
+		// 			Time:       time.Now().Add(1 * time.Minute),
+		// 			RoomchatID: roomchat.ID,
+		// 		},
+		// 		{
+		// 			Message:    "ที่ดินขนาด 5 ไร่ ราคา 2 ล้านบาทครับ",
+		// 			Time:       time.Now().Add(2 * time.Minute),
+		// 			RoomchatID: roomchat.ID,
+		// 		},
+		// 	}
 
-		if err := db.Create(&messages).Error; err != nil {
-			log.Println("❌ Failed to create messages for UserID:", userID, ":", err)
-		} else {
-			log.Println("✅ Created messages for UserID:", userID)
-		}
+		// 	if err := db.Create(&messages).Error; err != nil {
+		// 		log.Println("❌ Failed to create messages for UserID:", userID, ":", err)
+		// 	} else {
+		// 		log.Println("✅ Created messages for UserID:", userID)
+		// 	}
 	}
-	
 
 	log.Println("✅ Database Migrated & Seeded Successfully")*/
 //j
@@ -452,4 +612,5 @@ func ImportSubDistrictsCSV(db *gorm.DB, filePath string) {
 		db.FirstOrCreate(&subDistrict, entity.Subdistrict{NameTH: subDistrict.NameTH, DistrictID: subDistrict.DistrictID})
 	}
 	log.Println("✅ SubDistricts imported")
+	log.Println("✅ Database Migrated & Seeded Successfully")
 }

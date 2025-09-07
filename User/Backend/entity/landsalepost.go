@@ -37,3 +37,4 @@ type Landsalepost struct {
 	Photoland []Photoland  `gorm:"foreignKey:LandsalepostID"`
 	Location []Location `gorm:"foreignKey:LandsalepostID"` // One-to-One relationship with Location
 }
+

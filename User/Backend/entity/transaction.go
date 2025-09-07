@@ -2,19 +2,26 @@ package entity
 
 import (
 	"gorm.io/gorm"
-	"time"
 )
 
 type Transaction struct {
 	gorm.Model
-	time time.Time
+
+	Amount                 float64
+	BuyerAccepted          bool
+	SellerAccepted         bool
+	MoneyChecked           bool
+	LandDepartmentApproved bool
 
 	TypetransactionID uint            // 👈 FK ไปยัง role.id
 	Typetransaction   Typetransaction `gorm:"foreignKey:TypetransactionID"`
 
-	UserID uint  // 👈 FK ไปยัง role.id
-	Users  Users `gorm:"foreignKey:UserID"`
+	BuyerID  uint  `gorm:"type:size(20)"`
+	Buyer    Users `gorm:"foreignKey:BuyerID"`
+	SellerID uint  `gorm:"type:size(20)"`
+	Seller   Users `gorm:"foreignKey:SellerID"`
+	// 👈 FK ไปยัง role.id
 
-	LandsalepostID uint  // 👈 FK ไปยัง role.id
-	Landsalepost  Landsalepost `gorm:"foreignKey:LandsalepostID"`
+	LandID    uint      // 👈 FK ไปยัง role.id
+	Landtitle Landtitle `gorm:"foreignKey:LandID"`
 }
