@@ -16,8 +16,8 @@ type Users struct {
 	RoleID uint // :point_left: FK ไปยัง role.id
 	Role   Role `gorm:"foreignKey:RoleID"` // :point_left: optional: preload ได้
 
-	UserVerificationID uint // :point_left: FK ไปยัง role.id
-	UserVerification   UserVerification `gorm:"foreignKey:UserVerificationID"`
+	UserVerificationID *uint             // :point_left: FK ไปยัง user_verification.id (nullable)
+	UserVerification   *UserVerification `gorm:"foreignKey:UserVerificationID"`
 
 	Booking           []Booking     `gorm:"foreignKey:UserID"` // :point_left: One-to-Many relationship
 	Petition          []Petition    `gorm:"foreignKey:UserID"`
@@ -28,5 +28,4 @@ type Users struct {
 	TransactionSeller []Transaction `gorm:"foreignKey:SellerID"`
 	RequestBuy        []RequestBuy  `gorm:"foreignKey:UserID"`
 	RequestSell       []RequestSell `gorm:"foreignKey:UserID"`
-
 }
