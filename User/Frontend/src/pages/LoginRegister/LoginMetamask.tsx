@@ -30,12 +30,13 @@ const LoginMetamask = () => {
           const loginResp = await LoginWallet(address);
           console.log("LoginWallet API response:", loginResp);
           const { result } = loginResp || {};
-          const { wallet_address, message, token } = result || {};
+          const { wallet_address, message, token, user_id } = result || {};
 
           if (wallet_address) {
             // login สำเร็จ
             localStorage.setItem('isLogin', 'true');
             localStorage.setItem('walletAddress', wallet_address);
+            localStorage.setItem('user_id', user_id ? user_id.toString() : '');
             if (token) {
               localStorage.setItem('token', token);
             } else {
@@ -51,6 +52,7 @@ const LoginMetamask = () => {
             setWalletAddress(null);
             localStorage.removeItem('isLogin');
             localStorage.removeItem('walletAddress');
+            localStorage.removeItem('user_id');
             localStorage.removeItem('token');
           }
 

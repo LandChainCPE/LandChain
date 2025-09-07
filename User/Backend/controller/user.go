@@ -6,8 +6,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"landchain/services" // ใช้ service สำหรับการสร้าง JWT Token
+
+	"github.com/gin-gonic/gin"
 )
 
 // CreateAccount ฟังก์ชั่นสำหรับสร้างบัญชีผู้ใช้
@@ -54,6 +55,7 @@ func CreateAccount(c *gin.Context) {
 		"message":       "User created successfully",
 		"token_type":    "Bearer",
 		"token":         signedToken,
+		"user_id":       user.ID,
 		"FirstNameUser": user.Firstname,
 		"LastNameUser":  user.Lastname,
 	})

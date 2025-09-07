@@ -60,7 +60,7 @@ const ConnectMetamask = () => {
               localStorage.setItem("isLogin", "true");
               localStorage.setItem("firstnameuser", result.FirstNameUser);
               localStorage.setItem("lastnameuser", result.LastNameUser);
-              localStorage.setItem("user_id", result.UserID);
+              localStorage.setItem("user_id", result.user_id ? result.user_id.toString() : "");
               console.log(localStorage);
             // localStorage.clear();
 

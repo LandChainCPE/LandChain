@@ -53,6 +53,10 @@ const MainPage = (): JSX.Element => {
     const handleLogout = () => {
         // ลบข้อมูลการล็อกอินออกจาก localStorage
         localStorage.removeItem("isLogin");
+        localStorage.removeItem("user_id");
+        localStorage.removeItem("token");
+        localStorage.removeItem("token_type");
+        localStorage.removeItem("walletAddress");
         setIsLogin(false);
 
         // ล้างข้อมูลที่เกี่ยวกับ Metamask (ถ้ามี)

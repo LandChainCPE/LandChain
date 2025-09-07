@@ -50,8 +50,11 @@ func LoginUser(c *gin.Context) {
 		"message":        "User logged in successfully",
 		"token_type":     "Bearer",
 		"token":          signedToken,
+		"user_id":        existingUser.ID,
 		"first_name":     existingUser.Firstname,
 		"last_name":      existingUser.Lastname,
 		"wallet_address": existingUser.Metamaskaddress,
+		"success":        true,
+		"exists":         true,
 	})
 }
