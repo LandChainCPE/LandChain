@@ -21,6 +21,7 @@ function getJsonHeaders(): Record<string, string> {
 const api = axios.create({ baseURL: apiUrl });
 
 api.interceptors.request.use((config) => {
+  // merge headers แทนการเรียก config.headers?.set(...)
   Object.entries(getAuthHeaders()).forEach(([key, value]) => {
     config.headers?.set(key, value);
   });
@@ -74,34 +75,23 @@ async function RegisterLand(
   imageFile?: File
 ) {
   const formData = new FormData();
-
-  // append ฟิลด์ทั้งหมดเป็น string (FormData รองรับ string/Blob เท่านั้น)
   Object.entries(DataCreateLand).forEach(([key, value]) => {
     formData.append(key, value != null ? String(value) : "");
   });
+  if (imageFile) formData.append("deed_image", imageFile);
 
-  // แนบไฟล์ (ชื่อฟิลด์ต้องตรงกับ backend handler)
-  if (imageFile) {
-    formData.append("deed_image", imageFile);
-  }
+  // debug + ensure header แนบจริง
+  const headers = { ...getAuthHeaders() };
+  console.log("RegisterLand -> auth headers:", headers);
 
-  // ใช้ axios เพื่อให้จัดการ multipart headers อัตโนมัติ (ไม่ตั้ง Content-Type เอง)
   try {
-    const res = await api.post("/user/userregisland", formData, {
-      headers: { ...getAuthHeaders() }, // interceptor จะรวมให้ด้วย
-    });
-
-    // พยายามคืนค่า JSON ถ้า backend ส่งมา
+    // ส่ง explicit headers (axios จะไม่ override multipart Content-Type)
+    const res = await api.post("/user/userregisland", formData, { headers });
     return { result: res.data, response: res };
   } catch (err: any) {
-    // ถ้าข้อผิดพลาดจาก axios ให้พยายามอ่าน response text / data ปลอดภัย
     const resp = err?.response;
     let result: any = null;
-    try {
-      result = resp?.data ?? null;
-    } catch (e) {
-      result = null;
-    }
+    try { result = resp?.data ?? null } catch { result = null }
     return { result, response: resp ?? err };
   }
 }
@@ -116,14 +106,12 @@ async function GetAllProvinces(signal?: AbortSignal) {
 
 /** ดึงอำเภอตาม province id */
 async function GetDistrict(provinceId: number, signal?: AbortSignal) {
-  // ทดลองแบบ A
   try {
     const resA = await api.get(`/district/${provinceId}`, { signal });
     if (Array.isArray(resA.data) && resA.data.length) return resA.data;
     if (Array.isArray(resA.data?.result) && resA.data.result.length) return resA.data.result;
   } catch (_) {}
 
-  // ทดลองแบบ B
   const resB = await api.get(`/district`, { params: { province_id: provinceId }, signal });
   const dataB = resB.data;
   if (Array.isArray(dataB)) return dataB;
@@ -134,14 +122,12 @@ async function GetDistrict(provinceId: number, signal?: AbortSignal) {
 
 /** ดึงตำบลตาม district id */
 async function GetSubdistrict(districtId: number, signal?: AbortSignal) {
-  // ทดลองแบบ A
   try {
     const resA = await api.get(`/subdistrict/${districtId}`, { signal });
     if (Array.isArray(resA.data) && resA.data.length) return resA.data;
     if (Array.isArray(resA.data?.result) && resA.data.result.length) return resA.data.result;
   } catch (_) {}
 
-  // ทดลองแบบ B
   const resB = await api.get(`/subdistrict`, { params: { district_id: districtId }, signal });
   const dataB = resB.data;
   if (Array.isArray(dataB)) return dataB;

@@ -38,15 +38,6 @@ type Landtitle struct {
 	LandProvinceID uint
     LandProvince   LandProvinces `gorm:"foreignKey:LandProvinceID"`
 
-	// ===== Status (สถานะโฉนดในระบบแอป; แนะนำทำเป็นตาราง Status แยก หรือ enum string)
-	Status           string     `form:"status"` // เช่น PENDING/ACTIVE/ENCUMBERED/REVOKED
-	StatusUpdatedAt  *time.Time
-
-	// ===== Verification (ยืนยันกรรมสิทธิ์/ตรวจกับกรมที่ดิน)
-	Verifications                []Verification `gorm:"polymorphic:Subject;polymorphicValue:landtitle"`
-	OwnershipVerificationStatus  *string        `gorm:"type:varchar(20)"` // เช่น PENDING/APPROVED/REJECTED
-	OwnershipVerifiedAt          *time.Time
-
 	// ===== Blockchain Anchors (ผูกกับ NFT/Metadata)
 	TokenID     string `gorm:"type:varchar(100);index"`  // token id บนเชน (ถ้าออกแล้ว)
 
