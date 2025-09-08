@@ -8,6 +8,9 @@ const MainPageAfterLogin = Loadable(lazy(() => import("../pages/MainPage/MainPag
 const RegisterUser = Loadable(lazy(() => import("../pages/LoginRegister/Register")));
 const Regisland = Loadable(lazy(() => import("../pages/RegisLand/RegisLand")));
 
+const VerifyUser = Loadable(lazy(() => import("../pages/MainPage/verifyuser")));
+
+
 const Dashboard = Loadable(lazy(() => import("../pages/Petition/Dashboard")));
 const Petition = Loadable(lazy(() => import("../pages/Petition/Petition")));
 const State = Loadable(lazy(() => import("../pages/Petition/State")));
@@ -132,6 +135,14 @@ const UserRoutes = (): RouteObject[] => [
         element: (
           <ProtectedRoute>
             <DashboardUser />
+          </ProtectedRoute>
+        ) 
+      },
+      { 
+        path: "verifyusertoblockchain", 
+        element: (
+          <ProtectedRoute>
+            <VerifyUser />
           </ProtectedRoute>
         ) 
       },

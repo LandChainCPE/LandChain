@@ -44,7 +44,7 @@ func CreateAccount(c *gin.Context) {
 		ExpirationHours: 24,
 	}
 
-	signedToken, err := jwtWrapper.GenerateToken(user.Email)
+	signedToken, err := jwtWrapper.GenerateToken(user.Metamaskaddress)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error signing token"})
 		return

@@ -87,10 +87,24 @@ async function RegisterLand(DataCreateLand: any, imageFile?: File) {
 
   
 
+
+async function GetDataUserVerification(userid: string) {   ///แก้
+  const requestOptions = {
+    method: "GET",
+    headers: getAuthHeaders(),
+  };
+
+  const response = await fetch(`${apiUrl}/getdatauserverification/${userid}`, requestOptions);
+  const result = await response.json();
+  return { response, result };
+}
+
 export {
   getAuthHeaders,
   RegisterLand,
   CreateAccount,
   LoginWallet,
-  LogoutWallet
+  LogoutWallet,
+
+  GetDataUserVerification///
 };
