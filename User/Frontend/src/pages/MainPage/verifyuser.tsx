@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Row, Col, Card, Typography, Button, Space, Tag, message, Modal } from "antd";
 import { SafetyCertificateOutlined, CopyOutlined, SwapRightOutlined, KeyOutlined } from "@ant-design/icons";
 import "./MainPage.css";
 import { GetDataUserVerification, } from "../../service/https/garfield/http";
-const { Title, Text, Paragraph } = Typography;
+import Web3 from 'web3';
+import detectEthereumProvider from '@metamask/detect-provider';
+
+import contractABI from "./ContractABI.json";
+const contractAddress = "0xb671A410D1ea59631bB8F843B64d30688903CcF1";
+
+const { Text, Title, Paragraph } = Typography;
 
 function VerifyUser() {
-  const navigate = useNavigate();
-
-  // สร้าง state สำหรับเก็บข้อมูลจริง
   const [wallet, setWallet] = useState<string>("");
   const [signature, setSignature] = useState<string>("");
   const [nameHash, setNameHash] = useState<string>("");
@@ -31,12 +33,6 @@ function VerifyUser() {
     fetchData();
   }, []);
 
-  // จำลองข้อมูลสำหรับแสดงผล
-  const mockData = {
-    wallet: "0x742d35Cc662C610E4F216dC1E86C6B85b5f24B69",
-    signature: "0x1c2f5a8b3e4d7c9a6f8e2b1d4c7a9f3e6b8d1c4f7a2e5b8c1f4a7d9e2b5c8f1a4d7e9b2c5f8a1d4e7b9c2f5a8d1e4b7c9f2a5d8e1b4c7f9a2e5d8b1f4c7a9e2d5f8b1c4a7e9d2b5c8f1a4d7",
-    nameHash: "0x8f9e2b1d4c7a9f3e6b8d1c4f7a2e5b8c1f4a7d9e2c5f8a1e4b7c9f"
-  };
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -50,20 +46,55 @@ function VerifyUser() {
     }
   };
 
-  const onTransaction = () => {
-    if (!mockData.wallet || !mockData.signature) {
-      return message.error("ข้อมูลยังไม่ครบ");
+  const connectMetaMask = async () => {
+    const provider: any = await detectEthereumProvider();
+    if (provider) {
+      const web3 = new Web3(provider);
+      try {
+        const accounts = await web3.eth.requestAccounts();
+        if (accounts && accounts.length > 0) {
+          setWallet(accounts[0]);
+        } else {
+          message.error("ไม่พบบัญชีใน MetaMask");
+        }
+      } catch (error) {
+        message.error("เกิดข้อผิดพลาดในการเชื่อมต่อ MetaMask");
+      }
+    } else {
+      message.error("กรุณาติดตั้ง MetaMask");
     }
-    setModalOpen(true);
   };
 
-  const confirmTransaction = () => {
-    setModalOpen(false);
-    navigate("/user/transfer", { state: { wallet: mockData.wallet, signature: mockData.signature } });
+  const handleRegisterOwner = async () => {
+    try {
+      const provider: any = await detectEthereumProvider();
+      if (!provider) {
+        message.error("กรุณาติดตั้ง MetaMask");
+        return;
+      }
+      const web3 = new Web3(provider);
+      const contractInstance = new web3.eth.Contract(
+        contractABI as any,
+        contractAddress
+      );
+      await contractInstance.methods.registerOwner(wallet, nameHash, signature).send({ from: wallet });
+      alert('Owner registration successful!');
+    } catch (error: any) {
+      console.error('Error registering owner:', error);
+      alert('Error: ' + (error?.message || error));
+    }
   };
 
   return (
     <div className="main-container" style={{ minHeight: "100vh" }}>
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
+        <Button type="primary" onClick={connectMetaMask} style={{ fontFamily: "Kanit", fontSize: 18 }}>
+          เชื่อมต่อ MetaMask
+        </Button>
+        <span style={{ marginLeft: 24, fontFamily: "Kanit", fontSize: 18 }}>
+          My Wallet Address: {wallet}
+        </span>
+      </div>
       <div style={{ background: "#364049", padding: 40, minHeight: "100vh" }}>
         <Row justify="center">
           <Col span={20}>
@@ -147,17 +178,6 @@ function VerifyUser() {
                       {wallet}
                     </Paragraph>
                     
-                    <div style={{ textAlign: "center" }}>
-                      <Button 
-                        type="primary"
-                        size="large"
-                        onClick={() => copy(mockData.wallet)} 
-                        icon={<CopyOutlined />}
-                        style={{ fontFamily: "Kanit" }}
-                      >
-                        คัดลอก Wallet Address
-                      </Button>
-                    </div>
                   </Space>
                 </Card>
               </Col>
@@ -209,18 +229,6 @@ function VerifyUser() {
                     >
                       {signature}
                     </Paragraph>
-                    
-                    <div style={{ textAlign: "center" }}>
-                      <Button 
-                        type="primary"
-                        size="large"
-                        onClick={() => copy(mockData.signature)} 
-                        icon={<CopyOutlined />}
-                        style={{ fontFamily: "Kanit", background: "#fa8c16", border: "none" }}
-                      >
-                        คัดลอก Signature
-                      </Button>
-                    </div>
                   </Space>
                 </Card>
               </Col>
@@ -270,18 +278,6 @@ function VerifyUser() {
                     >
                       {nameHash}
                     </Paragraph>
-                    
-                    <div style={{ textAlign: "center" }}>
-                      <Button 
-                        type="primary"
-                        size="large"
-                        onClick={() => copy(mockData.nameHash)} 
-                        icon={<CopyOutlined />}
-                        style={{ fontFamily: "Kanit", background: "#52c41a", border: "none" }}
-                      >
-                        คัดลอก Name Hash
-                      </Button>
-                    </div>
                   </Space>
                 </Card>
               </Col>
@@ -311,7 +307,7 @@ function VerifyUser() {
                         type="primary" 
                         size="large" 
                         icon={<SwapRightOutlined />} 
-                        onClick={onTransaction}
+                        onClick={handleRegisterOwner}
                         style={{ 
                           fontFamily: "Kanit", 
                           fontSize: 20,
@@ -336,40 +332,6 @@ function VerifyUser() {
           </Col>
         </Row>
       </div>
-
-      {/* Transaction Confirmation Modal */}
-      <Modal
-        title={
-          <Text style={{ fontFamily: "Kanit", fontSize: 18 }}>
-            🔐 ยืนยันการทำรายการ
-          </Text>
-        }
-        visible={modalOpen}
-        onOk={confirmTransaction}
-        onCancel={() => setModalOpen(false)}
-        okText="ดำเนินการต่อ"
-        cancelText="ยกเลิก"
-        centered
-        width={500}
-      >
-        <Space direction="vertical" style={{ width: "100%" }} size="middle">
-          <Text style={{ fontFamily: "Kanit", fontSize: 16 }}>
-            คุณแน่ใจว่าจะดำเนินการทำธุรกรรมต่อหรือไม่?
-          </Text>
-          
-          <div style={{ background: "#f6f8ff", padding: 16, borderRadius: 8 }}>
-            <Text strong style={{ fontFamily: "Kanit" }}>Wallet Address: </Text>
-            <br />
-            <Text style={{ wordBreak: "break-all", fontFamily: "monospace", fontSize: 12 }}>
-              {mockData.wallet}
-            </Text>
-          </div>
-          
-          <Text style={{ color: "#52c41a", fontFamily: "Kanit" }}>
-            ✅ ข้อมูลของคุณได้รับการยืนยันและปลอดภัยแล้ว
-          </Text>
-        </Space>
-      </Modal>
     </div>
   );
 };
