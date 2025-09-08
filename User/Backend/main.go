@@ -32,9 +32,9 @@ func main() {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
 
-	r.POST("/login", controller.LoginUser)
-
 	r.POST("/createaccount", controller.CreateAccount)
+	r.POST("/check-wallet", controller.CheckWallet)
+	r.POST("/login", controller.LoginUser)
 
 	authorized := r.Group("")
 	authorized.Use(middlewares.Authorizes())
@@ -73,7 +73,7 @@ func main() {
 		r.GET("/user/sellpost", controller.GetAllPostLandData)
 
 		// CONTROLLER Chat
-		r.GET("/ws/roomchat/:roomID", controller.HandleWebSocket)
+		// r.GET("/ws/roomchat/:roomID", controller.HandleWebSocket)
 		r.GET("/user/chat/:id", controller.GetAllLandDatabyID)
 		// r.GET("/user/chat/roomchat/:id", controller.GetMessagesByLandPostID)
 		r.GET("/user/:id", controller.GetUserByID)
@@ -85,7 +85,7 @@ func main() {
 		authorized.GET("/user/lands/metadata", controller.GetLandMetadataByWallet)
 
 		// CONTROLLER RegisterLand
-		//r.POST("/user/regisland", controller.RegisterLand)
+		r.POST("/user/userregisland", controller.UserRegisLand)
 	}
 
 	// public := r.Group("")

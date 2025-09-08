@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"landchain/entity"
@@ -52,7 +53,6 @@ func ConnectDatabase() *gorm.DB {
 
 func SeedGeographiesFromJSON(db *gorm.DB, jsonPath string) error {
 	// เปิดไฟล์ JSON
-	file, err := os.Open(jsonPath)
 	if err != nil {
 		return fmt.Errorf("cannot open geography JSON: %w", err)
 	}
@@ -185,10 +185,12 @@ func SeedTambons(db *gorm.DB) {
 
 // ✅ SetupDatabase: ทำ Drop Table, AutoMigrate, และ Seed ข้อมูล
 // แก้ไขในส่วน SetupDatabase() - ย้ายการสร้าง Roomchat ไปหลัง Landsalepost
-func SetupDatabase() {
-	if db == nil {
-		log.Fatal("❌ Database connection not initialized. Please call ConnectDatabase() first.")
 	}
+
+	// Import CSV
+	ImportProvincesCSV(db, "./config/data/address/provinces.csv")
+	ImportDistrictsCSV(db, "./config/data/address/districts.csv")
+	ImportSubDistrictsCSV(db, "./config/data/address/subdistricts.csv")
 
 	// AutoMigrate
 	if err := db.AutoMigrate(
@@ -260,7 +262,6 @@ func SetupDatabase() {
 
 		// สร้าง Time slots
 		RefBranch := uint(1)
-
 		db.Create(&entity.Time{Timework: "09:00 - 10:00", MaxCapacity: 5, BranchID: RefBranch})
 		db.Create(&entity.Time{Timework: "10:00 - 11:00", MaxCapacity: 5, BranchID: RefBranch})
 		db.Create(&entity.Time{Timework: "11:00 - 12:00", MaxCapacity: 5, BranchID: RefBranch})
@@ -296,25 +297,34 @@ func SetupDatabase() {
 	}
 
 	log.Println("✅ Database Migrated & Seeded Successfully")
-}
+} // <<<<<<<<<<<<<< ปิดฟังก์ชัน SetupDatabase()
+// // แยกการสร้าง Roomchat และ Message ออกมาเป็น function แยก (ยังไม่ใช้ก็เว้นไว้ได้)
+// func createRoomchatsAndMessages() { ... }
+func ImportProvincesCSV(db *gorm.DB, filePath string) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatalf("❌ Open file error: %v", err)
+	}
+	defer file.Close()
 
-// แยกการสร้าง Roomchat และ Message ออกมาเป็น function แยก
-func createRoomchatsAndMessages() {
-	var post entity.Landsalepost
-	if err := db.Where("num_of_land_title = ?", "180").First(&post).Error; err != nil {
-		log.Println("❌ Cannot find Landsalepost with num_of_land_title = 180")
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		log.Fatalf("❌ Read CSV error: %v", err)
+	}
+
+	if len(records) <= 1 {
+		log.Println("⚠️ No data found")
 		return
 	}
 
-	// รายชื่อผู้ใช้ที่ต้องการสร้างห้องแชท
-	userIDs := []uint{2, 3}
-
-	for _, userID := range userIDs {
-		// เช็คว่ามี Roomchat นี้อยู่แล้วหรือยัง
-		var existingRoomchat entity.Roomchat
-		err := db.Where("landsalepost_id = ? AND user_id = ?", post.ID, userID).First(&existingRoomchat).Error
-		if err == nil {
-			log.Println("⚠️ Roomchat already exists for UserID:", userID)
+	for i, row := range records {
+		if i == 0 {
+			log.Printf("🔍 Header: %+v", row)
+			continue
+		}
+		if len(row) < 3 {
+			log.Printf("⚠️ Skipped row %d: %+v (too few columns)", i, row)
 			continue
 		}
 
@@ -356,7 +366,36 @@ func createRoomchatsAndMessages() {
 		// 	}
 	}
 
-	log.Println("✅ Database Migrated & Seeded Successfully")
+		ev := entity.VerificationEvent{
+			VerificationID:  v.ID,
+			FromStatus:      &from,
+			ToStatus:        to,
+			ChangedByUserID: changedBy,
+			Reason:          reason,
+		}
+		if err := tx.Create(&ev).Error; err != nil {
+			return err
+		}
+
+		// อัปเดตฟิลด์สรุปที่ Users/Landtitle (denormalized)
+		switch v.SubjectType {
+		case entity.SubjectUserIdentity:
+			updates := map[string]any{
+				"identity_verification_status": string(v.Status),
+			}
+			if v.Status == entity.StatusApproved {
+				updates["identity_verified_at"] = time.Now()
+			}
+			if err := tx.Model(&entity.Users{}).
+				Where("id = ?", v.SubjectID).
+				Updates(updates).Error; err != nil {
+				return err
+			}
+			// case entity.SubjectLandTitleOwnership: ... ทำคล้ายกัน
+		}
+		return nil
+	})
+}
 
 	// ✅ Seed State (แยกจาก Users)
 	var stateCount int64

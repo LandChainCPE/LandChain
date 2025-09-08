@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './LoginMetamask.css'; // นำเข้าไฟล์ CSS ที่สร้างขึ้นมา
 import Logo from '../../assets/LogoLandchain.png';
-import { LoginWallet, LogoutWallet } from '../../service/https/garfield/http';
+import { LoginWallet } from '../../service/https/garfield/http';
 import { useNavigate } from 'react-router-dom';
 
 const LoginMetamask = () => {
