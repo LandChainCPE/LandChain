@@ -43,6 +43,14 @@ const MainPage = (): JSX.Element => {
         }, 2000);
     };
 
+    const goToVerifyUserToBlockchain = () => {
+        setLoading(true);
+        localStorage.setItem("isLogin", "true");
+        setTimeout(() => {
+            navigate("/user/verifyusertoblockchain");
+        }, 2000);
+    };
+
     const goToLogin = () => {
         setLoading(true);
         setTimeout(() => {
@@ -106,6 +114,15 @@ const MainPage = (): JSX.Element => {
 
                     {isLogin ? (
                         <>
+
+                            <NavButton
+                                variant="primary"
+                                onClick={goToVerifyUserToBlockchain}
+                                icon={<UserOutlined />}
+                            >
+                                ลงทะเบียนผู้ใช้ Blockchain
+                            </NavButton>
+                            
                             <NavButton
                                 variant="secondary"
                                 icon={<UserOutlined />}
