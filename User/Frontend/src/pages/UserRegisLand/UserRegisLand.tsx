@@ -10,10 +10,12 @@ type SubdistrictDTO = { ID: number; name_th: string; district_id: number; name_e
 
 const UserRegisLand: React.FC = () => {
   const [formData, setFormData] = useState({
-    deed_number: "",
-    village_no: "",
-    soi: "",
-    road: "",
+    survey_number: "",
+    land_number: "",
+    survey_page: "",
+    title_deed_number: "",
+    volume: "",
+    page: "",
     rai: "",
     ngan: "",
     square_wa: "",
@@ -63,14 +65,18 @@ const UserRegisLand: React.FC = () => {
     setIsSubmitting(true);
     try {
       // ถ้าต้องการบังคับเป็นตัวเลขตอนส่ง ให้แปลงก่อน (แบ็กเอนด์บางที่รับ string ก็ได้)
+      const userid = localStorage.getItem("user_id");
       const payload = {
         ...formData,
         province_id: formData.province_id,
         district_id: formData.district_id,
         subdistrict_id: formData.subdistrict_id,
+        userid: userid,
       };
+      console.log("payload", payload);
 
-      const { result } = await RegisterLand(payload, image || undefined);
+      const { response, result } = await RegisterLand(payload/*, image || undefined*/);
+      console.log(response);
       console.log(result);
 
       if (result && (result.message || result.success)) {
@@ -89,10 +95,12 @@ const UserRegisLand: React.FC = () => {
 
   const handleCancel = () => {
     setFormData({
-      deed_number: "",
-      village_no: "",
-      soi: "",
-      road: "",
+      survey_number: "",
+      land_number: "",
+      survey_page: "",
+      title_deed_number: "",
+      volume: "",
+      page: "",
       rai: "",
       ngan: "",
       square_wa: "",
@@ -222,50 +230,74 @@ const UserRegisLand: React.FC = () => {
           <div className="formContent">
             <div className="grid">
               <div className="inputGroup">
-                <label className="label">เลขโฉนด</label>
+                <label className="label">ระวาง</label>
                 <input
                   type="text"
-                  name="deed_number"
-                  value={formData.deed_number}
+                  name="survey_number"
+                  value={formData.survey_number}
                   onChange={handleChange}
                   className="input"
-                  placeholder="เลขโฉนด"
+                  placeholder="ระวาง"
                 />
               </div>
 
               <div className="inputGroup">
-                <label className="label">หมู่ที่</label>
+                <label className="label">เลขที่ดิน</label>
                 <input
                   type="text"
-                  name="village_no"
-                  value={formData.village_no}
+                  name="land_number"
+                  value={formData.land_number}
                   onChange={handleChange}
                   className="input"
-                  placeholder="หมู่ที่"
+                  placeholder="เลขที่ดิน"
                 />
               </div>
 
               <div className="inputGroup">
-                <label className="label">ซอย</label>
+                <label className="label">หน้าสำรวจ</label>
                 <input
                   type="text"
-                  name="soi"
-                  value={formData.soi}
+                  name="survey_page"
+                  value={formData.survey_page}
                   onChange={handleChange}
                   className="input"
-                  placeholder="ซอย"
+                  placeholder="หน้าสำรวจ"
                 />
               </div>
 
               <div className="inputGroup">
-                <label className="label">ถนน</label>
+                <label className="label">เลขที่โฉนด</label>
                 <input
                   type="text"
-                  name="road"
-                  value={formData.road}
+                  name="title_deed_number"
+                  value={formData.title_deed_number}
                   onChange={handleChange}
                   className="input"
-                  placeholder="ถนน"
+                  placeholder="เลขที่โฉนด"
+                />
+              </div>
+
+              <div className="inputGroup">
+                <label className="label">เล่ม</label>
+                <input
+                  type="text"
+                  name="volume"
+                  value={formData.volume}
+                  onChange={handleChange}
+                  className="input"
+                  placeholder="เล่ม"
+                />
+              </div>
+
+              <div className="inputGroup">
+                <label className="label">หน้า</label>
+                <input
+                  type="text"
+                  name="page"
+                  value={formData.page}
+                  onChange={handleChange}
+                  className="input"
+                  placeholder="หน้า"
                 />
               </div>
 
@@ -372,7 +404,7 @@ const UserRegisLand: React.FC = () => {
             </div>
 
             {/* Image Upload */}
-            <div className="inputGroup">
+            {/* <div className="inputGroup">
               <label className="label">
                 <Camera size={16} /> รูปภาพที่ดิน
               </label>
@@ -396,7 +428,7 @@ const UserRegisLand: React.FC = () => {
                   <img src={imagePreview} alt="Preview" className="previewImage" />
                 </div>
               )}
-            </div>
+            </div> */}
           </div>
 
           {/* Actions */}

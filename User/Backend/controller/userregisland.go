@@ -1,165 +1,110 @@
 package controller
 
 import (
-    "fmt"
-    "net/http"
-    "os"
-    "path/filepath"
-    "time"
+	"log"
+	"net/http"
+	"strconv"
 
-    "landchain/config"
-    "landchain/entity"
+	"landchain/config"
+	"landchain/entity"
 
-    "github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 )
 
 // POST /user/userregisland
+// multipart/form-data fields must match the `form:"..."` tags below
 func UserRegisLand(c *gin.Context) {
-    // Bind form fields (multipart/form-data)
-    var input struct {
-        DeedNumber     string `form:"deed_number" binding:"required"`
-        VillageNo      string `form:"village_no"`
-        Soi            string `form:"soi"`
-        Road           string `form:"road"`
-        Rai            int    `form:"rai"`
-        Ngan           int    `form:"ngan"`
-        SquareWa       int    `form:"square_wa"`
-        ProvinceID     uint   `form:"province_id"`
-        DistrictID     uint   `form:"district_id"`
-        SubdistrictID  uint   `form:"subdistrict_id"`
-        LandProvinceID uint   `form:"land_province_id"`
-        Status         string `form:"status"`
-    }
+	// Define input as strings for all fields
+	var input struct {
+		SurveyNumber    string `json:"survey_number"`
+		LandNumber      string `json:"land_number"`
+		SurveyPage      string `json:"survey_page"`
+		TitleDeedNumber string `json:"title_deed_number"`
+		Volume          string `json:"volume"`
+		Page            string `json:"page"`
+		Rai             string `json:"rai"`
+		Ngan            string `json:"ngan"`
+		SquareWa        string `json:"square_wa"`
+		ProvinceID      string `json:"province_id"`
+		DistrictID      string `json:"district_id"`
+		SubdistrictID   string `json:"subdistrict_id"`
+		UserID          string `json:"userid"`
+	}
 
-    if err := c.ShouldBind(&input); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input", "detail": err.Error()})
-        return
-    }
+	if err := c.ShouldBind(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-    // get authenticated user id from context (middleware should set it)
-    var userID uint
-    if v, ok := c.Get("userID"); ok {
-        switch t := v.(type) {
-        case uint:
-            userID = t
-        case int:
-            userID = uint(t)
-        case int64:
-            userID = uint(t)
-        }
-    }
-    if userID == 0 {
-        // fallback: try PostForm user_id (not recommended), else reject
-        if s := c.PostForm("user_id"); s != "" {
-            // ignore parsing here for brevity; prefer authenticated request
-        } else {
-            c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthenticated"})
-            return
-        }
-    }
+	// Debug: Print the raw input data
+	log.Printf("Raw input received: %+v", input)
 
-    db := config.DB()
+	// Convert numeric fields from strings to integers
+	provinceID, _ := strconv.Atoi(input.ProvinceID)
+	districtID, _ := strconv.Atoi(input.DistrictID)
+	subdistrictID, _ := strconv.Atoi(input.SubdistrictID)
+	userID, _ := strconv.Atoi(input.UserID)
+	rai, _ := strconv.Atoi(input.Rai)
+	ngan, _ := strconv.Atoi(input.Ngan)
+	squareWa, _ := strconv.Atoi(input.SquareWa)
 
-    // start transaction
-    tx := db.Begin()
-    defer func() {
-        if r := recover(); r != nil {
-            tx.Rollback()
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
-        }
-    }()
+	// Debug: Print the converted values
+	log.Printf("Converted values: ProvinceID=%d, DistrictID=%d, SubdistrictID=%d, UserID=%d, Rai=%d, Ngan=%d, SquareWa=%d", provinceID, districtID, subdistrictID, userID, rai, ngan, squareWa)
 
-    // uniqueness check: deed_number (only non-deleted)
-    var exists entity.Landtitle
-    if err := tx.Unscoped().Where("deed_number = ? AND deleted_at IS NULL", input.DeedNumber).First(&exists).Error; err == nil {
-        tx.Rollback()
-        c.JSON(http.StatusBadRequest, gin.H{"error": "deed_number already exists"})
-        return
-    }
+	// Validate input data before creating the land title
+	if input.ProvinceID == "0" || input.DistrictID == "0" || input.SubdistrictID == "0" || input.UserID == "0" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input: ProvinceID, DistrictID, SubdistrictID, and UserID must be provided and greater than 0"})
+		return
+	}
 
-    // foreign key existence checks (optional, return 400 if invalid)
-    if input.ProvinceID != 0 {
-        var p entity.Province
-        if err := tx.First(&p, input.ProvinceID).Error; err != nil {
-            tx.Rollback()
-            c.JSON(http.StatusBadRequest, gin.H{"error": "invalid province_id"})
-            return
-        }
-    }
-    if input.DistrictID != 0 {
-        var d entity.District
-        if err := tx.First(&d, input.DistrictID).Error; err != nil {
-            tx.Rollback()
-            c.JSON(http.StatusBadRequest, gin.H{"error": "invalid district_id"})
-            return
-        }
-    }
-    if input.SubdistrictID != 0 {
-        var s entity.Subdistrict
-        if err := tx.First(&s, input.SubdistrictID).Error; err != nil {
-            tx.Rollback()
-            c.JSON(http.StatusBadRequest, gin.H{"error": "invalid subdistrict_id"})
-            return
-        }
-    }
-    if input.LandProvinceID != 0 {
-        var lp entity.LandProvinces
-        if err := tx.First(&lp, input.LandProvinceID).Error; err != nil {
-            tx.Rollback()
-            c.JSON(http.StatusBadRequest, gin.H{"error": "invalid land_province_id"})
-            return
-        }
-    }
+	// Check if the provided ProvinceID, DistrictID, SubdistrictID, and UserID exist in the database
+	var province entity.Province
+	if err := config.DB().First(&province, input.ProvinceID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ProvinceID"})
+		return
+	}
 
-    // handle uploaded deed image (optional)
-    deedImagePath := ""
-    file, err := c.FormFile("deed_image")
-    if err == nil && file != nil {
-        dstDir := filepath.Join("uploads", "landtitles")
-        if err := os.MkdirAll(dstDir, 0755); err != nil {
-            tx.Rollback()
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot create upload dir"})
-            return
-        }
-        filename := fmt.Sprintf("%d_%d_%s", time.Now().UnixNano(), userID, filepath.Base(file.Filename))
-        dst := filepath.Join(dstDir, filename)
-        if err := c.SaveUploadedFile(file, dst); err != nil {
-            tx.Rollback()
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot save uploaded file"})
-            return
-        }
-        deedImagePath = dst // store path relative or absolute as per your app
-    }
+	var district entity.District
+	if err := config.DB().First(&district, "id = ? AND province_id = ?", input.DistrictID, input.ProvinceID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid DistrictID or it does not belong to the specified ProvinceID"})
+		return
+	}
 
-    now := time.Now()
-    lt := entity.Landtitle{
-        DeedNumber:     input.DeedNumber,
-        VillageNo:      input.VillageNo,
-        Soi:            input.Soi,
-        Road:           input.Road,
-        Rai:            input.Rai,
-        Ngan:           input.Ngan,
-        SquareWa:       input.SquareWa,
-        DeedImagePath:  deedImagePath,
-        UserID:         userID,
-        ProvinceID:     input.ProvinceID,
-        DistrictID:     input.DistrictID,
-        SubdistrictID:  input.SubdistrictID,
-        LandProvinceID: input.LandProvinceID,
-        Status:         input.Status,
-        StatusUpdatedAt: &now,
-    }
+	var subdistrict entity.Subdistrict
+	if err := config.DB().First(&subdistrict, "id = ? AND district_id = ?", input.SubdistrictID, input.DistrictID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid SubdistrictID or it does not belong to the specified DistrictID"})
+		return
+	}
 
-    if err := tx.Create(&lt).Error; err != nil {
-        tx.Rollback()
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot create landtitle", "detail": err.Error()})
-        return
-    }
+	var user entity.Users
+	if err := config.DB().First(&user, input.UserID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UserID"})
+		return
+	}
 
-    if err := tx.Commit().Error; err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "commit failed", "detail": err.Error()})
-        return
-    }
+	// Create the land title entity
+	landtitle := entity.Landtitle{
+		SurveyNumber:       input.SurveyNumber,
+		LandNumber:         input.LandNumber,
+		SurveyPage:         input.SurveyPage,
+		TitleDeedNumber:    input.TitleDeedNumber,
+		Volume:             input.Volume,
+		Page:               input.Page,
+		Rai:                rai,
+		Ngan:               ngan,
+		SquareWa:           squareWa,
+		ProvinceID:         uint(provinceID),
+		DistrictID:         uint(districtID),
+		SubdistrictID:      uint(subdistrictID),
+		UserID:             uint(userID),
+		GeographyID:        nil, // Explicitly setting GeographyID to nil
+		LandVerificationID: nil, // Explicitly setting LandVerificationID to nil
+	}
 
-    c.JSON(http.StatusCreated, gin.H{"success": true, "landtitle": lt})
+	if err := config.DB().Create(&landtitle).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save land title"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Land title registered successfully", "landtitle_id": landtitle.ID})
 }

@@ -85,7 +85,10 @@ func main() {
 		authorized.GET("/user/lands/metadata", controller.GetLandMetadataByWallet)
 
 		// CONTROLLER RegisterLand
-		r.POST("/user/userregisland", controller.UserRegisLand)
+		authorized.POST("/user/userregisland", controller.UserRegisLand)
+		authorized.GET("/province", controller.GetAllProvinces)
+		authorized.GET("/district/:id", controller.GetDistrict)
+		authorized.GET("/subdistrict/:id", controller.GetSubdistrict)
 	}
 
 	// public := r.Group("")
