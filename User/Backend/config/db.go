@@ -219,6 +219,7 @@ func SetupDatabase() {
 		&entity.Landtitle{},
 		&entity.RequestBuy{},
 		&entity.RequestSell{},
+		&entity.Nonce{},
 	); err != nil {
 		log.Fatal("❌ AutoMigrate failed:", err)
 	}

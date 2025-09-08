@@ -35,7 +35,8 @@ func main() {
 	r.POST("/login", controller.LoginUser)
 
 	r.POST("/createaccount", controller.CreateAccount)
-
+	r.GET("/nonce/:address", controller.GetNonce)
+	r.POST("/nonce/validate", controller.ValidateNonce)
 	authorized := r.Group("")
 	authorized.Use(middlewares.Authorizes())
 	{
