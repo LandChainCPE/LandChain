@@ -229,6 +229,7 @@ func SetupDatabase() {
 		&entity.Tag{},
 		&entity.District{},
 		&entity.Subdistrict{},
+		&entity.Nonce{},
 	); err != nil {
 		log.Fatal("❌ AutoMigrate failed:", err)
 	}
@@ -378,6 +379,58 @@ func createRoomchatsAndMessages() {
 	}
 
 	log.Println("✅ Database Migrated & Seeded Successfully")
+
+	 //j
+ 	states := []entity.State{
+ 		{Name: "รอตรวจสอบ", Color: "orange"},
+ 		{Name: "กำลังดำเนินการ", Color: "blue"},
+ 		{Name: "เสร็จสิ้น", Color: "green"},
+ 	}
+
+ 	// สร้าง State
+ 	for _, state := range states {
+ 		if err := db.Create(&state).Error; err != nil {
+ 			log.Fatal("❌ Failed to create state:", err)
+ 		}
+ 	}
+
+ 	log.Println("✅ States have been created successfully")
+
+ 	// สร้าง Petition
+ 	petition := entity.Petition{
+ 		FirstName:   "มาลี",
+ 		LastName:    "มาดี",
+ 		Tel:         "0987654321",
+ 		Email:       "j@gmail.com",
+ 		Description: "โฉนดเก่าหาย",
+ 		Date:        "2025-07-31",
+ 		Topic:       "ขอคัดสำเนาโฉนด",
+ 		StateID:     1, // ตรวจสอบว่า StateID นี้มีอยู่ในตาราง State
+ 		UserID:      1, // ตรวจสอบว่า UserID นี้มีอยู่ในตาราง Users
+ 	}
+
+ 	if err := db.Create(&petition).Error; err != nil {
+ 		log.Fatal("❌ Failed to create petition:", err)
+ 	}
+
+ 	log.Println("✅ Petition created successfully")
+
+ 	tags := []entity.Tag{
+ 		{Tag: "ติดถนน"},
+ 		{Tag: "ติดทะเล"},
+ 		{Tag: "ติดแม่น้ำ"},
+ 		{Tag: "ใกล้BTS"},
+ 		{Tag: "ใกล้MRT"},
+ 		{Tag: "ติดภูเขา"},
+
+ 	}
+ 		// เพิ่ม tags ลงในฐานข้อมูล
+ 	if err := db.Create(&tags).Error; err != nil {
+ 		log.Fatal("Error inserting tags:", err)
+ 	}
+
+ 	// แสดงผลการบันทึกข้อมูล
+	fmt.Println("Tags have been inserted successfully")
 }
 
 // package config
@@ -996,3 +1049,4 @@ func ImportSubDistrictsCSV(db *gorm.DB, filePath string) {
 	log.Println("✅ SubDistricts imported")
 	log.Println("✅ Database Migrated & Seeded Successfully")
 }
+

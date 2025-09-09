@@ -37,14 +37,17 @@ func main() {
 	r.POST("/login", controller.LoginUser)
 
 	r.POST("/createaccount", controller.CreateAccount)
-
+	r.GET("/nonce/:address", controller.GetNonce)
+	r.POST("/nonce/validate", controller.ValidateNonce)
 	authorized := r.Group("")
 	authorized.Use(middlewares.Authorizes())
 	{
 		authorized.GET("/getbookingdata", controller.GetBookingData)
 		authorized.GET("/getdatauserforverify/:bookingID", controller.GetDataUserForVerify)
 		authorized.POST("/verifywalletid/:bookingID", controller.VerifyWalletID)
-		
+
+		authorized.GET("/getdatauserverification/:userid", controller.GetDataUserVerification)
+
 		authorized.POST("/userbookings", controller.CreateBooking) // สร้างการจอง
 		authorized.PUT("/bookings/:id", controller.UpdateBooking)  // อัปเดตการจอง
 		//r.PUT("/bookings/:id", controller.UpdateBooking) // อัปเดตการจอง

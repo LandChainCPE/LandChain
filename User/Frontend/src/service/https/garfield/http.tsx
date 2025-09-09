@@ -38,6 +38,7 @@ async function LoginWallet(walletAddress: string) {
     localStorage.setItem("token_type", "Bearer");
     localStorage.setItem("firstName", result.first_name || "");
     localStorage.setItem("lastName", result.last_name || "");
+    localStorage.setItem("user_id", result.user_id ? result.user_id.toString() : "");
     localStorage.setItem("isLogin", "true"); // ✅ ต้องมี
   }
 
@@ -53,6 +54,7 @@ function LogoutWallet() {
   localStorage.removeItem("token_type");
   localStorage.removeItem("firstName");
   localStorage.removeItem("lastName");
+  localStorage.removeItem("user_id");
   localStorage.removeItem("isLogin");
 }
 
@@ -85,10 +87,24 @@ async function RegisterLand(DataCreateLand: any, imageFile?: File) {
 
   
 
+
+async function GetDataUserVerification(userid: string) {   ///แก้
+  const requestOptions = {
+    method: "GET",
+    headers: getAuthHeaders(),
+  };
+
+  const response = await fetch(`${apiUrl}/getdatauserverification/${userid}`, requestOptions);
+  const result = await response.json();
+  return { response, result };
+}
+
 export {
   getAuthHeaders,
   RegisterLand,
   CreateAccount,
   LoginWallet,
-  LogoutWallet
+  LogoutWallet,
+
+  GetDataUserVerification///
 };

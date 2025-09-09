@@ -67,6 +67,14 @@ function Verify() {
     setLoading(false);
     setIsHolding(false);
     setHoldProgress(0);
+
+    // เพิ่มแจ้งเตือนสถานะที่ได้จาก backend
+    if (result && result.status) {
+      window.alert(`สถานะล่าสุด: ${result.status}\n${result.message || ""}`);
+      // หรือจะใช้ toast/notification component แทน window.alert ก็ได้
+    } else if (result && result.error) {
+      window.alert(`เกิดข้อผิดพลาด: ${result.error}`);
+    }
   };
 
   if (loading || !userData) {

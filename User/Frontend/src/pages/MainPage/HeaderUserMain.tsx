@@ -50,6 +50,13 @@ const MainPage = (): JSX.Element => {
             navigate("/user/sellpostmain");
         }, 2000);
     };
+    const goToVerifyUserToBlockchain = () => {
+        setLoading(true);
+        localStorage.setItem("isLogin", "true");
+        setTimeout(() => {
+            navigate("/user/verifyusertoblockchain");
+        }, 2000);
+    };
 
     const goToLogin = () => {
         setLoading(true);
@@ -61,6 +68,10 @@ const MainPage = (): JSX.Element => {
     const handleLogout = () => {
         // ลบข้อมูลการล็อกอินออกจาก localStorage
         localStorage.removeItem("isLogin");
+        localStorage.removeItem("user_id");
+        localStorage.removeItem("token");
+        localStorage.removeItem("token_type");
+        localStorage.removeItem("walletAddress");
         setIsLogin(false);
 
         // ล้างข้อมูลที่เกี่ยวกับ Metamask (ถ้ามี)
@@ -114,6 +125,15 @@ const MainPage = (): JSX.Element => {
 
                     {isLogin ? (
                         <>
+
+                            <NavButton
+                                variant="primary"
+                                onClick={goToVerifyUserToBlockchain}
+                                icon={<UserOutlined />}
+                            >
+                                ลงทะเบียนผู้ใช้ Blockchain
+                            </NavButton>
+                            
                             <NavButton
                                 variant="secondary"
                                 icon={<UserOutlined />}

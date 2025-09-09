@@ -26,11 +26,12 @@ const Sidebar: React.FC = () => {
   return (
     <div className="sidebar h-full bg-white shadow-lg border-r border-gray-200 flex flex-col">
       {/* Logo */}
-      <div className="logo p-6 border-b border-gray-200">
+      <div className="logo px-6 py-2 border-b border-gray-200 flex items-center justify-center">
         <img 
           src="/LogoLandchain.png" 
           alt="LandChain Logo" 
-          className="w-full h-auto max-w-[150px] mx-auto"
+          className="w-full h-auto object-contain"
+          style={{ width: "200px", height: "60px" }}
         />
       </div>
 
@@ -41,34 +42,29 @@ const Sidebar: React.FC = () => {
             <HomeOutlined className="text-white text-xl" />
           </div>
           <div className="user-details">
-            <h4 className="text-sm font-semibold text-gray-900">เจ้าหน้าที่กรมที่ดิน</h4>
-            <p className="text-xs text-gray-600">Department of Land</p>
+            <h4 className="text-base font-semibold text-gray-900">เจ้าหน้าที่กรมที่ดิน</h4>
+            <p className="text-sm text-gray-600">Department of Land</p>
           </div>
         </div>
       </div>
 
       {/* Navigation */}
       <nav className="navigation flex-1 p-4">
-        <div className="nav-section">
-          <h5 className="section-title text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 px-3">
-            เมนูหลัก
-          </h5>
-          <div className="space-y-1">
-            {menus.map((menu) => (
-              <button
-                key={menu.path}
-                onClick={() => navigate(menu.path)}
-                className={`nav-item w-full flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  location.pathname === menu.path
-                    ? "active bg-blue-600 text-white shadow-md"
-                    : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                }`}
-              >
-                <span className="nav-icon text-lg">{menu.icon}</span>
-                <span className="nav-label truncate">{menu.label}</span>
-              </button>
-            ))}
-          </div>
+        <div className="space-y-1">
+          {menus.map((menu) => (
+            <button
+              key={menu.path}
+              onClick={() => navigate(menu.path)}
+              className={`nav-item w-full flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                location.pathname === menu.path
+                  ? "active bg-blue-600 text-white shadow-md"
+                  : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+              }`}
+            >
+              <span className="nav-icon text-lg">{menu.icon}</span>
+              <span className="nav-label truncate">{menu.label}</span>
+            </button>
+          ))}
         </div>
       </nav>
 
