@@ -25,6 +25,8 @@ const ConnectMetamask = Loadable(lazy(() => import("../pages/CreateUser/ConnectM
 const LandMarkingMap = Loadable(lazy(() => import("../pages/mapbox_test/mapbox_test")));
 
 const UserRegisland = Loadable(lazy(() => import("../pages/UserRegisLand/UserRegisLand")));
+const UserDashboard = Loadable(lazy(() => import("../pages/UserDashboard/UserDashboard")));
+const VerifyLand = Loadable(lazy(() => import("../pages/VerifyLand/VerifyLand")));
 
 const DashboardUser = Loadable(lazy(() => import("../pages/RequestSell/ReausetSell")));
 // Component สำหรับป้องกันหน้าที่ต้อง login
@@ -143,6 +145,20 @@ const UserRoutes = (): RouteObject[] => [
         element: (
           <ProtectedRoute>
             <VerifyUser />
+          </ProtectedRoute>
+        )},
+      {
+        path: "userdashboard", 
+        element: (
+          <ProtectedRoute>
+            <UserDashboard />
+          </ProtectedRoute>
+        )},
+      { 
+        path: "verifyland", 
+        element: (
+          <ProtectedRoute>
+            <VerifyLand />
           </ProtectedRoute>
         ) 
       },
