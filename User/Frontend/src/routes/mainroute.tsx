@@ -8,7 +8,7 @@ const MainPageAfterLogin = Loadable(lazy(() => import("../pages/MainPage/MainPag
 const RegisterUser = Loadable(lazy(() => import("../pages/LoginRegister/Register")));
 const Regisland = Loadable(lazy(() => import("../pages/RegisLand/RegisLand")));
 
-const VerifyUser = Loadable(lazy(() => import("../pages/MainPage/verifyuser")));
+const VerifyUser = Loadable(lazy(() => import("../pages/VerifyUser/verifyuser")));
 
 
 const Dashboard = Loadable(lazy(() => import("../pages/Petition/Dashboard")));
