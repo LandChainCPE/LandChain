@@ -199,9 +199,11 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
       <Card>
         <CardHeader>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-            <CardTitle style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
-              <ShieldCheck className="icon-lg text-white" />
-              Kanya P.
+            <CardTitle>
+              <div style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
+                <ShieldCheck className="icon-lg text-white" />
+                Kanya P.
+              </div>
             </CardTitle>
           </div>
           <CardDescription>@kanya.land • kanya@example.com</CardDescription>
