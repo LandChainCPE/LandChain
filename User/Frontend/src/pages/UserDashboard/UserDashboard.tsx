@@ -6,62 +6,62 @@ import "./UserDashboard.css";
    ======================= */
 const Banknote = ({ className = "" }) => (
   <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="2" y="6" width="20" height="12" rx="2"/>
-    <circle cx="12" cy="12" r="2"/>
-    <path d="m6 16-2-2 2-2"/>
-    <path d="m16 8 2 2-2 2"/>
+    <rect x="2" y="6" width="20" height="12" rx="2" />
+    <circle cx="12" cy="12" r="2" />
+    <path d="m6 16-2-2 2-2" />
+    <path d="m16 8 2 2-2 2" />
   </svg>
 );
 const MessageSquare = ({ className = "" }) => (
   <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
 );
 const FileText = ({ className = "" }) => (
   <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-    <polyline points="14,2 14,8 20,8"/>
-    <line x1="16" y1="13" x2="8" y2="13"/>
-    <line x1="16" y1="17" x2="8" y2="17"/>
-    <polyline points="10,9 9,9 8,9"/>
+    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+    <polyline points="14,2 14,8 20,8" />
+    <line x1="16" y1="13" x2="8" y2="13" />
+    <line x1="16" y1="17" x2="8" y2="17" />
+    <polyline points="10,9 9,9 8,9" />
   </svg>
 );
 const ShieldCheck = ({ className = "" }) => (
   <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
-    <path d="m9 12 2 2 4-4"/>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+    <path d="m9 12 2 2 4-4" />
   </svg>
 );
 const Wallet = ({ className = "" }) => (
   <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
-    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
-    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
+    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
   </svg>
 );
 const BadgeCheck = ({ className = "" }) => (
   <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/>
-    <path d="m9 12 2 2 4-4"/>
+    <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+    <path d="m9 12 2 2 4-4" />
   </svg>
 );
 const CopyIcon = ({ className = "" }) => (
   <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+    <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
   </svg>
 );
 const ExternalLink = ({ className = "" }) => (
   <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M15 3h6v6"/>
-    <path d="m10 14 9-9"/>
-    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+    <path d="M15 3h6v6" />
+    <path d="m10 14 9-9" />
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
   </svg>
 );
 const MapPin = ({ className = "" }) => (
   <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-    <circle cx="12" cy="10" r="3"/>
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
   </svg>
 );
 
@@ -89,16 +89,19 @@ const Button = ({
   onClick,
   variant = "primary",
   className = "",
+  style,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
   variant?: "primary" | "outline" | "ghost" | "danger";
   className?: string;
+  style?: React.CSSProperties;
 }) => {
   return (
     <button
       onClick={onClick}
       className={`btn ${variant === "primary" ? "btn-primary" : variant === "outline" ? "btn-outline" : variant === "danger" ? "btn-danger" : "btn-ghost"} ${className}`}
+      style={style}
     >
       {children}
     </button>
@@ -127,7 +130,7 @@ const MOCK_TITLES: LandTitle[] = [
 const StatusPill = ({ status }: { status: TitleStatus }) => {
   const label =
     status === "active" ? "พร้อมใช้งาน" :
-    status === "encumbered" ? "มีภาระผูกพัน" : "รอตรวจสอบ";
+      status === "encumbered" ? "มีภาระผูกพัน" : "รอตรวจสอบ";
   return <span className={`badge ${status === "active" ? "badge-green" : status === "encumbered" ? "badge-amber" : "badge-slate"}`}>{label}</span>;
 };
 
@@ -192,24 +195,39 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
   return (
     <div className="container">
       {/* Header */}
+
       <Card>
         <CardHeader>
-          <CardTitle>
-            <ShieldCheck className="icon-lg text-white" />
-            Kanya P.
-          </CardTitle>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+            <CardTitle style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
+              <ShieldCheck className="icon-lg text-white" />
+              Kanya P.
+            </CardTitle>
+          </div>
           <CardDescription>@kanya.land • kanya@example.com</CardDescription>
 
-          <div className="chip-row">
-            <span className="chip chip-strong">
-              <BadgeCheck className="icon-sm mr-1" />
-              Verified
-            </span>
-            <span className="chip chip-soft">
-              <Wallet className="icon-sm mr-1" />
-              Wallet Linked
-            </span>
+          <div className="chip-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <span className="chip chip-strong">
+                <BadgeCheck className="icon-sm mr-1" />
+                Verified
+              </span>
+              <span className="chip chip-soft">
+                <Wallet className="icon-sm mr-1" />
+                Wallet Linked
+              </span>
+            </div>
+            <Button
+              variant="primary"
+              className="btn-lg"
+              style={{ fontSize: 16, padding: '10px 24px', boxShadow: '0 2px 12px 0 rgba(0,0,0,0.10)', background: 'linear-gradient(90deg,#2563eb 60%,#1e293b 100%)', color: '#fff', border: 'none', whiteSpace: 'nowrap' }}
+              onClick={() => navigate("/user/userregisland")}
+            >
+              <FileText className="icon mr-1" />
+              ลงทะเบียนโฉนดที่ดิน
+            </Button>
           </div>
+
         </CardHeader>
       </Card>
 
@@ -313,36 +331,6 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
           <CardContent>
             <Button className="w-full" onClick={() => navigate("/messages")}>
               ไปที่หน้า ข้อความ
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <FileText className="icon" />
-              เอกสาร
-            </CardTitle>
-            <CardDescription>เก็บเอกสารสำคัญทั้งหมดของคุณ</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button className="w-full" onClick={() => navigate("/documents")}>
-              ไปที่หน้า เอกสาร
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle >
-              <Banknote className="icon" />
-              ธนาคาร
-            </CardTitle>
-            <CardDescription>จัดการสิทธิ์เข้าถึงจากธนาคาร</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button className="w-full" onClick={() => navigate("/bank")}>
-              ไปที่หน้า ธนาคาร
             </Button>
           </CardContent>
         </Card>

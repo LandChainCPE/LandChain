@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Row, Col, Card, Typography, Button, Space, Tag, message, Modal } from "antd";
 import { SafetyCertificateOutlined, CopyOutlined, SwapRightOutlined, KeyOutlined } from "@ant-design/icons";
-import "./MainPage.css";
+import "../MainPage/MainPage.css";
 import { GetDataUserVerification, } from "../../service/https/garfield/http";
 import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';
