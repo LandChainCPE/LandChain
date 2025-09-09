@@ -1,12 +1,14 @@
 package config
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"landchain/entity"
@@ -52,6 +54,10 @@ func ConnectDatabase() *gorm.DB {
 
 func SeedGeographiesFromJSON(db *gorm.DB, jsonPath string) error {
 	// เปิดไฟล์ JSON
+	var err error
+	if err != nil {
+		return fmt.Errorf("cannot open geography JSON: %w", err)
+	}
 	file, err := os.Open(jsonPath)
 	if err != nil {
 		return fmt.Errorf("cannot open geography JSON: %w", err)
@@ -190,6 +196,8 @@ func SetupDatabase() {
 		log.Fatal("❌ Database connection not initialized. Please call ConnectDatabase() first.")
 	}
 
+	// Import CSV
+
 	// AutoMigrate
 	if err := db.AutoMigrate(
 		&entity.Role{},
@@ -200,7 +208,7 @@ func SetupDatabase() {
 		&entity.Branch{},
 		&entity.Booking{},
 		&entity.Typetransaction{},
-		&entity.LandVerification{},/////
+		&entity.LandVerification{}, /////
 		&entity.Landtitle{},
 		&entity.Landsalepost{},
 		&entity.Transaction{},
@@ -223,6 +231,10 @@ func SetupDatabase() {
 	); err != nil {
 		log.Fatal("❌ AutoMigrate failed:", err)
 	}
+
+	ImportProvincesCSV(db, "./config/data/address/provinces.csv")
+	ImportDistrictsCSV(db, "./config/data/address/districts.csv")
+	ImportSubDistrictsCSV(db, "./config/data/address/subdistricts.csv")
 
 	// Seed Data
 	var count int64
@@ -250,9 +262,11 @@ func SetupDatabase() {
 		// db.Create(&entity.Users{Name: "Aut", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
 
 		// สร้าง Province
-		db.Create(&entity.Province{Province: "นครราชสีมา"})
-		db.Create(&entity.Province{Province: "อุบลราชธานี"})
-		db.Create(&entity.Province{Province: "มหาสารคาม"})
+		// db.Create(&entity.Province{Province: "นครราชสีมา"})
+		// db.Create(&entity.Province{Province: "อุบลราชธานี"})
+		// db.Create(&entity.Province{Province: "มหาสารคาม"})
+
+		
 
 		RefProvince := uint(2)
 		RefProvince1 := uint(1)
@@ -261,14 +275,13 @@ func SetupDatabase() {
 
 		// สร้าง Time slots
 		RefBranch := uint(1)
-
 		db.Create(&entity.Time{Timework: "09:00 - 10:00", MaxCapacity: 5, BranchID: RefBranch})
 		db.Create(&entity.Time{Timework: "10:00 - 11:00", MaxCapacity: 5, BranchID: RefBranch})
 		db.Create(&entity.Time{Timework: "11:00 - 12:00", MaxCapacity: 5, BranchID: RefBranch})
 		db.Create(&entity.Time{Timework: "13:00 - 14:00", MaxCapacity: 5, BranchID: RefBranch})
 		db.Create(&entity.Time{Timework: "14:00 - 15:00", MaxCapacity: 5, BranchID: RefBranch})
 		db.Create(&entity.Time{Timework: "15:00 - 16:00", MaxCapacity: 5, BranchID: RefBranch})
-		
+
 		RefTimeID := uint(1)
 		RefTimeID1 := uint(6)
 		RefTypeID := uint(2)
@@ -292,13 +305,30 @@ func SetupDatabase() {
 
 		// สร้าง LandProvinces
 
+		db.Create(&entity.Landtitle{
+			SurveyNumber:       "5336 IV 8632",
+			LandNumber:         "๑๑",
+			SurveyPage:         "๙๔๖๑",
+			TitleDeedNumber:    "12345",
+			Volume:             "10",
+			Page:               "20",
+			Rai:                5,
+			Ngan:               2,
+			SquareWa:           50,
+			GeographyID:        nil, // Replace with actual GeographyID if available
+			ProvinceID:         1,   // Replace with actual ProvinceID
+			DistrictID:         1,   // Replace with actual DistrictID
+			SubdistrictID:      1,   // Replace with actual SubdistrictID
+			LandVerificationID: nil, // Replace with actual LandVerificationID if available
+			UserID:             1,   // Replace with actual UserID
+		})
+
 		// 🔸 สร้าง Roomchat หลังจากสร้าง Landsalepost แล้ว
 		createRoomchatsAndMessages()
 	}
 
 	log.Println("✅ Database Migrated & Seeded Successfully")
-}
-
+} // <<<<<<<<<<<<<< ปิดฟังก์ชัน SetupDatabase()
 // แยกการสร้าง Roomchat และ Message ออกมาเป็น function แยก
 func createRoomchatsAndMessages() {
 	var post entity.Landsalepost
@@ -369,4 +399,82 @@ func createRoomchatsAndMessages() {
 	}
 
 	log.Println("✅ Database Migrated & Seeded Successfully")
+}
+func ImportProvincesCSV(db *gorm.DB, filePath string) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatalf("❌ Open file error: %v", err)
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		log.Fatalf("❌ Read CSV error: %v", err)
+	}
+
+	if len(records) <= 1 {
+		log.Println("⚠️ No data found")
+		return
+	}
+
+	for i, row := range records {
+		if i == 0 {
+			log.Printf("🔍 Header: %+v", row)
+			continue
+		}
+		if len(row) < 3 {
+			log.Printf("⚠️ Skipped row %d: %+v (too few columns)", i, row)
+			continue
+		}
+
+		province := entity.Province{
+			NameTH: row[1],
+			NameEN: row[2],
+		}
+		db.Where("name_th = ?", province.NameTH).FirstOrCreate(&province)
+	}
+	log.Println("✅ Provinces imported")
+}
+
+func ImportDistrictsCSV(db *gorm.DB, filePath string) {
+	file, _ := os.Open(filePath)
+	defer file.Close()
+	reader := csv.NewReader(file)
+	records, _ := reader.ReadAll()
+
+	for i, row := range records {
+		if i == 0 {
+			continue
+		}
+		provinceID, _ := strconv.Atoi(row[1])
+		district := entity.District{
+			NameTH:     row[2],
+			NameEN:     row[3],
+			ProvinceID: uint(provinceID),
+		}
+		db.FirstOrCreate(&district, entity.District{NameTH: district.NameTH, ProvinceID: district.ProvinceID})
+	}
+	log.Println("✅ Districts imported")
+}
+
+func ImportSubDistrictsCSV(db *gorm.DB, filePath string) {
+	file, _ := os.Open(filePath)
+	defer file.Close()
+	reader := csv.NewReader(file)
+	records, _ := reader.ReadAll()
+
+	for i, row := range records {
+		if i == 0 {
+			continue
+		}
+		districtID, _ := strconv.Atoi(row[1])
+		subDistrict := entity.Subdistrict{
+			NameTH:     row[2],
+			NameEN:     row[3],
+			DistrictID: uint(districtID),
+		}
+		db.FirstOrCreate(&subDistrict, entity.Subdistrict{NameTH: subDistrict.NameTH, DistrictID: subDistrict.DistrictID})
+	}
+	log.Println("✅ SubDistricts imported")
 }

@@ -1,6 +1,8 @@
 package entity
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Users struct {
 	gorm.Model
@@ -28,4 +30,5 @@ type Users struct {
 	TransactionSeller []Transaction `gorm:"foreignKey:SellerID"`
 	RequestBuy        []RequestBuy  `gorm:"foreignKey:UserID"`
 	RequestSell       []RequestSell `gorm:"foreignKey:UserID"`
+	Landtitle         []Landtitle    `gorm:"foreignKey:UserID"`
 }
