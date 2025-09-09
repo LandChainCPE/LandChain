@@ -1,16 +1,20 @@
 package entity
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Message struct {
 	gorm.Model
-	Type string  `gorm:"type:varchar(45)"`
-	Message    string `gorm:"type:varchar(200)"`
-	Time time.Time
+	Type    string
+	Message string
+	Time    time.Time
 
-	RoomchatID uint  // 👈 FK ไปยัง role.id
-	Roomchat  Roomchat  `gorm:"foreignKey:RoomchatID"`
-}	
+	RoomchatID uint
+	Roomchat   Roomchat `gorm:"foreignKey:RoomchatID"`
+
+	SenderID uint
+	Sender   Users `gorm:"foreignKey:SenderID"` // <-- ฟิลด์นี้อาจเป็นปัญหา ถ้าไม่มีในฐานข้อมูล หรือไม่ได้ตั้งค่า
+}

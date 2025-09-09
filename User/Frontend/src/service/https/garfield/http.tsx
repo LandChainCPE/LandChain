@@ -24,34 +24,38 @@ async function CreateAccount(DataCreateAccount: any) {
 
 // ฟังก์ชัน Login ผ่าน Metamask
 async function LoginWallet(walletAddress: string) {
-  const requestOptions: RequestInit = {
+  const response = await fetch(`${apiUrl}/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ metamaskaddress: walletAddress}),
-  };
+    body: JSON.stringify({ metamaskaddress: walletAddress }),
+  });
 
-  const response = await fetch(`${apiUrl}/login`, requestOptions);
   const result = await response.json();
 
   if (result.success && result.exists) {
-    // เก็บข้อมูลลง localStorage
     localStorage.setItem("walletAddress", walletAddress);
     localStorage.setItem("token", result.token || "");
     localStorage.setItem("token_type", "Bearer");
     localStorage.setItem("firstName", result.first_name || "");
     localStorage.setItem("lastName", result.last_name || "");
+    localStorage.setItem("user_id", result.user_id ? result.user_id.toString() : "");
+    localStorage.setItem("isLogin", "true"); // ✅ ต้องมี
   }
 
   return { result, response };
 }
 
+
 // ฟังก์ชัน Logout
 function LogoutWallet() {
+  localStorage.clear();
   localStorage.removeItem("walletAddress");
   localStorage.removeItem("token");
   localStorage.removeItem("token_type");
   localStorage.removeItem("firstName");
   localStorage.removeItem("lastName");
+  localStorage.removeItem("user_id");
+  localStorage.removeItem("isLogin");
 }
 
 // ฟังก์ชันบันทึกข้อมูลที่ดิน
@@ -83,10 +87,24 @@ async function RegisterLand(DataCreateLand: any, imageFile?: File) {
 
   
 
+
+async function GetDataUserVerification(userid: string) {   ///แก้
+  const requestOptions = {
+    method: "GET",
+    headers: getAuthHeaders(),
+  };
+
+  const response = await fetch(`${apiUrl}/getdatauserverification/${userid}`, requestOptions);
+  const result = await response.json();
+  return { response, result };
+}
+
 export {
   getAuthHeaders,
   RegisterLand,
   CreateAccount,
   LoginWallet,
-  LogoutWallet
+  LogoutWallet,
+
+  GetDataUserVerification///
 };

@@ -8,6 +8,9 @@ const MainPageAfterLogin = Loadable(lazy(() => import("../pages/MainPage/MainPag
 const RegisterUser = Loadable(lazy(() => import("../pages/LoginRegister/Register")));
 const Regisland = Loadable(lazy(() => import("../pages/RegisLand/RegisLand")));
 
+const VerifyUser = Loadable(lazy(() => import("../pages/MainPage/verifyuser")));
+
+
 const Dashboard = Loadable(lazy(() => import("../pages/Petition/Dashboard")));
 const Petition = Loadable(lazy(() => import("../pages/Petition/Petition")));
 const State = Loadable(lazy(() => import("../pages/Petition/State")));
@@ -23,6 +26,7 @@ const LandMarkingMap = Loadable(lazy(() => import("../pages/mapbox_test/mapbox_t
 
 const UserRegisland = Loadable(lazy(() => import("../pages/UserRegisLand/UserRegisLand")));
 
+const DashboardUser = Loadable(lazy(() => import("../pages/RequestSell/ReausetSell")));
 // Component สำหรับป้องกันหน้าที่ต้อง login
 const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
   const navigate = useNavigate();
@@ -123,6 +127,22 @@ const UserRoutes = (): RouteObject[] => [
         element: (
           <ProtectedRoute>
             <UserRegisland />
+          </ProtectedRoute>
+        ) 
+      },
+      { 
+        path: "requestsell", 
+        element: (
+          <ProtectedRoute>
+            <DashboardUser />
+          </ProtectedRoute>
+        ) 
+      },
+      { 
+        path: "verifyusertoblockchain", 
+        element: (
+          <ProtectedRoute>
+            <VerifyUser />
           </ProtectedRoute>
         ) 
       },

@@ -14,13 +14,13 @@ type JwtWrapper struct {
 }
 
 type JwtClaim struct {
-	Email string
+	Wallet string `json:"wallet"`
 	jwt.StandardClaims
 }
 
-func (j *JwtWrapper) GenerateToken(email string) (signedToken string, err error) {
+func (j *JwtWrapper) GenerateToken(wallet string) (signedToken string, err error) {
 	claims := &JwtClaim{
-		Email: email,
+		Wallet: wallet,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(j.ExpirationHours)).Unix(),
 			Issuer:    j.Issuer,
@@ -34,7 +34,7 @@ func (j *JwtWrapper) GenerateToken(email string) (signedToken string, err error)
 		return
 	}
 
-	return 
+	return
 }
 
 func (j *JwtWrapper) ValidateToken(signedToken string) (claims *JwtClaim, err error) {
@@ -42,6 +42,10 @@ func (j *JwtWrapper) ValidateToken(signedToken string) (claims *JwtClaim, err er
 		signedToken,
 		&JwtClaim{},
 		func(token *jwt.Token) (interface{}, error) {
+			// ✅ ตรวจสอบว่าใช้ HMAC (HS256)
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, errors.New("Unexpected signing method")
+			}
 			return []byte(j.SecretKey), nil
 		},
 	)

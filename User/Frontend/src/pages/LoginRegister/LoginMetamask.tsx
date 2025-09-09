@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './LoginMetamask.css'; // นำเข้าไฟล์ CSS ที่สร้างขึ้นมา
 import Logo from '../../assets/LogoLandchain.png';
 import { LoginWallet } from '../../service/https/garfield/http';
+import { secureLogin } from '../../service/https/nonceService';
 import { useNavigate } from 'react-router-dom';
 
 const LoginMetamask = () => {
@@ -26,39 +27,44 @@ const LoginMetamask = () => {
           console.log("Wallet address from MetaMask:", address);
           setWalletAddress(address);
 
-          // เรียกใช้ service LoginWallet
-          const loginResp = await LoginWallet(address);
-          console.log("LoginWallet API response:", loginResp);
-          const { result } = loginResp || {};
-          const { wallet_address, message, token } = result || {};
+          // ใช้ secure login with nonce protection
+          const loginResult = await secureLogin(address);
+          console.log("Secure login successful:", loginResult);
 
-          if (wallet_address) {
+          if (loginResult.wallet_address) {
             // login สำเร็จ
             localStorage.setItem('isLogin', 'true');
-            localStorage.setItem('walletAddress', wallet_address);
-            if (token) {
-              localStorage.setItem('token', token);
+            localStorage.setItem('walletAddress', loginResult.wallet_address);
+            localStorage.setItem('user_id', loginResult.user_id ? loginResult.user_id.toString() : '');
+            if (loginResult.token) {
+              localStorage.setItem('token', loginResult.token);
             } else {
               localStorage.removeItem('token');
             }
 
             navigate('/user', { replace: true });
           } else {
-            // wallet ยังไม่ได้สมัคร
-            setErrorMessage(message || 'Wallet not registered. Please sign up first.');
-
+            // wallet ยังไม่ได้สมัคร หรือ login ไม่สำเร็จ
+            setErrorMessage('Login failed. Please try again or sign up first.');
+            
             // simulate disconnect
             setWalletAddress(null);
             localStorage.removeItem('isLogin');
             localStorage.removeItem('walletAddress');
+            localStorage.removeItem('user_id');
             localStorage.removeItem('token');
           }
-
         }
       } catch (error: any) {
-        console.error('Error connecting to MetaMask:', error);
+        console.error('Error during secure login:', error);
         if (error.code === 4001) {
           setErrorMessage('Connection rejected by user.');
+        } else if (error.message?.includes('User not found')) {
+          setErrorMessage('Wallet not registered. Please sign up first.');
+        } else if (error.message?.includes('Invalid signature')) {
+          setErrorMessage('Signature verification failed. Please try again.');
+        } else if (error.message?.includes('Invalid or expired nonce')) {
+          setErrorMessage('Session expired. Please try again.');
         } else {
           setErrorMessage('Error connecting to MetaMask. Please try again.');
         }

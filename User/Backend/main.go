@@ -20,9 +20,9 @@ func main() {
 	}
 
 	config.ConnectDatabase()
-
 	config.SetupDatabase()
 	r := gin.Default()
+	controller.InitContract()
 	r.Use(CORSMiddleware())
 
 	// เริ่มต้น Scheduler สำหรับลบการจองที่หมดอายุ
@@ -36,10 +36,17 @@ func main() {
 	r.POST("/check-wallet", controller.CheckWallet)
 	r.POST("/login", controller.LoginUser)
 
+	r.GET("/nonce/:address", controller.GetNonce)
+	r.POST("/nonce/validate", controller.ValidateNonce)
 	authorized := r.Group("")
 	authorized.Use(middlewares.Authorizes())
 	{
 		authorized.GET("/getbookingdata", controller.GetBookingData)
+		authorized.GET("/getdatauserforverify/:bookingID", controller.GetDataUserForVerify)
+		authorized.POST("/verifywalletid/:bookingID", controller.VerifyWalletID)
+
+		authorized.GET("/getdatauserverification/:userid", controller.GetDataUserVerification)
+
 		authorized.POST("/userbookings", controller.CreateBooking) // สร้างการจอง
 		authorized.PUT("/bookings/:id", controller.UpdateBooking)  // อัปเดตการจอง
 		//r.PUT("/bookings/:id", controller.UpdateBooking) // อัปเดตการจอง
@@ -56,18 +63,15 @@ func main() {
 		authorized.GET("/service-types", controller.GetServiceType)          // ดึงข้อมูลประเภทบริการ
 		authorized.GET("/bookings/checklim", controller.CheckAvailableSlots) // ดึงข้อมูลการจองตาม ID
 		authorized.GET("/bookings/status", controller.CheckBookingStatus)
-// 🎯 Routes สำหรับลบการจองที่หมดอายุ
+		// 🎯 Routes สำหรับลบการจองที่หมดอายุ
 		authorized.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
-		authorized.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)  
+		authorized.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)
 		authorized.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
 		authorized.GET("/bookings/:userID", controller.GetUserBookings) // ดึงข้อมูลการจองตาม ID
 		authorized.GET("/locations/:landsalepost_id", controller.GetLocationsByLandSalePostId)
 
-
-
-
 		//location
-		authorized.GET("/location", controller.GetLocations) // ดึงข้อมูลโฉนดที่ดิน
+		authorized.GET("/location", controller.GetLocations)    // ดึงข้อมูลโฉนดที่ดิน
 		authorized.POST("/location", controller.CreateLocation) // สร้างโฉนดที่ดิน
 		// CONTROLLER lANDSELLPOST
 		r.GET("/user/sellpost", controller.GetAllPostLandData)
@@ -75,8 +79,14 @@ func main() {
 		// CONTROLLER Chat
 		// r.GET("/ws/roomchat/:roomID", controller.HandleWebSocket)
 		r.GET("/user/chat/:id", controller.GetAllLandDatabyID)
-		r.GET("/user/chat/roomchat/:id", controller.GetMessagesByLandPostID)
+		// r.GET("/user/chat/roomchat/:id", controller.GetMessagesByLandPostID)
 		r.GET("/user/:id", controller.GetUserByID)
+
+		authorized.GET("/user/info/:id", controller.GetInfoUserByUserID)
+		authorized.GET("/user/landinfo/:id", controller.GetLandInfoByTokenID)
+		authorized.GET("/user/lands", controller.GetLandTitleInfoByWallet)
+		authorized.GET("/user/info", controller.GetInfoUserByToken)
+		authorized.GET("/user/lands/metadata", controller.GetLandMetadataByWallet)
 
 		// CONTROLLER RegisterLand
 		//r.POST("/user/regisland", controller.RegisterLand)

@@ -73,57 +73,57 @@ type MessageWithUser struct {
 	UserName     string    `json:"name"`  // สมมติ Users มีชื่อฟิลด์ Name
 }
 
-func GetMessagesByLandPostID(c *gin.Context) {
-	landPostID := c.Param("id") // <- ใช้ชื่อ param ให้สื่อความหมาย
+// func GetMessagesByLandPostID(c *gin.Context) {
+// 	landPostID := c.Param("id") // <- ใช้ชื่อ param ให้สื่อความหมาย
 
-	db := config.DB()
+// 	db := config.DB()
 
-	// ดึง Roomchat ทั้งหมดที่อ้างถึง LandsalepostID นี้
-	var roomchats []entity.Roomchat
-	if err := db.Preload("Users").Where("landsalepost_id = ?", landPostID).Find(&roomchats).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึง Roomchat ได้"})
-		return
-	}
+// 	// ดึง Roomchat ทั้งหมดที่อ้างถึง LandsalepostID นี้
+// 	var roomchats []entity.Roomchat
+// 	if err := db.Preload("Users").Where("landsalepost_id = ?", landPostID).Find(&roomchats).Error; err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึง Roomchat ได้"})
+// 		return
+// 	}
 
-	if len(roomchats) == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบห้องแชท"})
-		return
-	}
+// 	if len(roomchats) == 0 {
+// 		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบห้องแชท"})
+// 		return
+// 	}
 
-	// รวบรวม RoomchatID ทั้งหมด
-	var roomchatIDs []uint
-	for _, rc := range roomchats {
-		roomchatIDs = append(roomchatIDs, rc.ID)
-	}
+// 	// รวบรวม RoomchatID ทั้งหมด
+// 	var roomchatIDs []uint
+// 	for _, rc := range roomchats {
+// 		roomchatIDs = append(roomchatIDs, rc.ID)
+// 	}
 
-	// ดึงข้อความทั้งหมดในห้องเหล่านั้น
-	var messages []entity.Message
-	if err := db.Where("roomchat_id IN ?", roomchatIDs).Order("time asc").Find(&messages).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อความได้"})
-		return
-	}
+// 	// ดึงข้อความทั้งหมดในห้องเหล่านั้น
+// 	var messages []entity.Message
+// 	if err := db.Where("roomchat_id IN ?", roomchatIDs).Order("time asc").Find(&messages).Error; err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อความได้"})
+// 		return
+// 	}
 
-	// สร้าง map จาก RoomchatID => User info
-	userMap := make(map[uint]entity.Users)
-	for _, rc := range roomchats {
-		userMap[rc.ID] = rc.Users
-	}
+// 	// สร้าง map จาก RoomchatID => User info
+// 	userMap := make(map[uint]entity.Users)
+// 	for _, rc := range roomchats {
+// 		userMap[rc.ID] = rc.Users
+// 	}
 
-	// รวมข้อมูล Message + User ลง struct ใหม่
-	var result []MessageWithUser
-	for _, msg := range messages {
-		user := userMap[msg.RoomchatID]
-		result = append(result, MessageWithUser{
-			MessageID:  msg.ID,
-			Message:    msg.Message,
-			RoomchatID: msg.RoomchatID,
-			UserID:     user.ID,
-			UserName:   user.Firstname,  // สมมติฟิลด์ชื่อว่า Name
-		})
-	}
+// 	// รวมข้อมูล Message + User ลง struct ใหม่
+// 	var result []MessageWithUser
+// 	for _, msg := range messages {
+// 		user := userMap[msg.RoomchatID]
+// 		result = append(result, MessageWithUser{
+// 			MessageID:  msg.ID,
+// 			Message:    msg.Message,
+// 			RoomchatID: msg.RoomchatID,
+// 			UserID:     user.ID,
+// 			UserName:   user.Firstname,  // สมมติฟิลด์ชื่อว่า Name
+// 		})
+// 	}
 
-	c.JSON(http.StatusOK, result)
-}
+// 	c.JSON(http.StatusOK, result)
+// }
 
 func GetUserByID(c *gin.Context) {
 	UserID := c.Param("id")
