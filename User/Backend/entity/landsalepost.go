@@ -24,11 +24,14 @@ type Landsalepost struct {
 	TagID 	uint `json:"tag_id"`
 	Tag	Tag `gorm:"foreignKey:TagID"`
 
-	LandtitleID uint `json:"landtitle_id"`
-	Landtitle   Landtitle  `gorm:"foreignKey:LandtitleID"`
+	LandID    uint      // 👈 FK ไปยัง role.id
+	Landtitle Landtitle `gorm:"foreignKey:LandID"`
 
 	UserID uint  `json:"user_id"`
 	Users  Users `gorm:"foreignKey:UserID"`
+
+	StateID uint  `json:"state_id"`
+	States  State `gorm:"foreignKey:StateID"`
 
 	Booking []Booking  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
 

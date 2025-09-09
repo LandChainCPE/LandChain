@@ -72,41 +72,42 @@ func GetLandTitleInfoByWallet(c *gin.Context) {
 }
 
 func GetLandMetadataByWallet(c *gin.Context) {
-    walletAddr, exists := c.Get("wallet")
-    if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "Wallet not found in token"})
-        return
-    }
+	walletAddr, exists := c.Get("wallet")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Wallet not found in token"})
+		return
+	}
 
-    wallet := common.HexToAddress(walletAddr.(string))
+	wallet := common.HexToAddress(walletAddr.(string))
 
-    // 1️⃣ ดึง token IDs ของ user
-    tokenIDs, err := ContractInstance.GetLandTitleInfoByWallet(wallet)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot fetch token IDs", "detail": err.Error()})
-        return
-    }
+	// 1️⃣ ดึง token IDs ของ user
+	tokenIDs, err := ContractInstance.GetLandTitleInfoByWallet(wallet)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot fetch token IDs", "detail": err.Error()})
+		return
+	}
 
-    // 2️⃣ สำหรับแต่ละ token ID ดึง metadata
-    metadataList := []map[string]interface{}{}
-    for _, t := range tokenIDs {
-        meta, err := ContractInstance.GetLandMetadata(t)
-        if err != nil {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot fetch metadata", "detail": err.Error()})
-            return
-        }
+	// 2️⃣ สำหรับแต่ละ token ID ดึง metadata
+	metadataList := []map[string]interface{}{}
+	for _, t := range tokenIDs {
+		meta, err := ContractInstance.GetLandMetadata(t)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot fetch metadata", "detail": err.Error()})
+			return
+		}
 
-        metadataList = append(metadataList, map[string]interface{}{
-            "tokenID":   t.String(),
-            "metaFields": meta.MetaFields,
-            "price":      meta.Price.String(),
-            "buyer":      meta.Buyer.Hex(),
-        })
-    }
+		metadataList = append(metadataList, map[string]interface{}{
+			"tokenID":    t.String(),
+			"metaFields": meta.MetaFields,
+			"price":      meta.Price.String(),
+			"buyer":      meta.Buyer.Hex(),
+		})
+	}
 
-    // 3️⃣ Return ข้อมูลทั้งหมด
-    c.JSON(http.StatusOK, gin.H{
-        "wallet":   wallet.Hex(),
-        "metadata": metadataList,
-    })
+	// 3️⃣ Return ข้อมูลทั้งหมด
+	c.JSON(http.StatusOK, gin.H{
+		"wallet":   wallet.Hex(),
+		"metadata": metadataList,
+	})
 }
+

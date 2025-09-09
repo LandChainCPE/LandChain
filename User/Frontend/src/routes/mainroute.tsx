@@ -143,6 +143,10 @@ const UserRoutes = (): RouteObject[] => [
         element: (
           <ProtectedRoute>
             <LandDetail />
+          </ProtectedRoute>
+        )
+      },
+      { 
         path: "requestsell", 
         element: (
           <ProtectedRoute>

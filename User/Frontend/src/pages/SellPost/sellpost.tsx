@@ -4,23 +4,22 @@ import { UploadOutlined } from "@ant-design/icons";
 import { MapPin, Check, Phone, User, DollarSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GetTags, GetAllProvinces, CreateLandPost } from "../../service/https/jib/jib";
-import Web3 from "web3";
-import detectEthereumProvider from '@metamask/detect-provider';
+import { ethers } from "ethers";
+//import { BrowserProvider } from "ethers"; // ✅ ethers v6
+import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByWallet } from "../../service/https/bam/bam";
 
 type Tag = {
   Tag: string;
   icon: string;
 };
 
-type TokenRow = {
-  tokenId: number;
-  // ดึงเมตาดาทาเพิ่มได้ถ้าต้องการ
-  metaFields?: string;
-  price?: string;
-  buyer?: string;
-  owner?: string;
+type RawLandMeta = any;
+type LandMeta = {
+  tokenId: string;
+  buyer: string;
+  price: string | number;
+  metaFields: any[];
 };
-
 
 const SellPost = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -34,743 +33,16 @@ const SellPost = () => {
   const [image, setImage] = useState<string>("");
   const [form] = Form.useForm();
 
-  const [web3, setWeb3] = useState<Web3 | null>(null);
-  const [account, setAccount] = useState<string>("");
-  const [inputWallet, setInputWallet] = useState<string>("");
-  const [loading, setLoading] = useState(false);
-  const [balance, setBalance] = useState<number>(0);
-  const [tokenIds, setTokenIds] = useState<number[]>([]);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [tokenData, setTokenData] = useState<any | null>(null);
+  const [landTokens, setLandTokens] = useState<any[]>([]);
+  const [landMetadata, setLandMetadata] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
 
-  // optional: เก็บเมตาดาทาเบื้องต้นของแต่ละ token
-  const [rows, setRows] = useState<TokenRow[]>([]);
 
+  const ZERO_ADDR = "0xf55988edca178d5507454107945a0c96f3af628c";
 
-   const CONTRACT_ADDRESS = "0xf55988edca178d5507454107945a0c96f3af628c";
-    const contractABI = [
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			}
-		],
-		"name": "approve",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			}
-		],
-		"name": "buyLandTitle",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "signer",
-				"type": "address"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"inputs": [],
-		"name": "ECDSAInvalidSignature",
-		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "length",
-				"type": "uint256"
-			}
-		],
-		"name": "ECDSAInvalidSignatureLength",
-		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "s",
-				"type": "bytes32"
-			}
-		],
-		"name": "ECDSAInvalidSignatureS",
-		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "sender",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			}
-		],
-		"name": "ERC721IncorrectOwner",
-		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "operator",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			}
-		],
-		"name": "ERC721InsufficientApproval",
-		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "approver",
-				"type": "address"
-			}
-		],
-		"name": "ERC721InvalidApprover",
-		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "operator",
-				"type": "address"
-			}
-		],
-		"name": "ERC721InvalidOperator",
-		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			}
-		],
-		"name": "ERC721InvalidOwner",
-		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "receiver",
-				"type": "address"
-			}
-		],
-		"name": "ERC721InvalidReceiver",
-		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "sender",
-				"type": "address"
-			}
-		],
-		"name": "ERC721InvalidSender",
-		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			}
-		],
-		"name": "ERC721NonexistentToken",
-		"type": "error"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "approved",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			}
-		],
-		"name": "Approval",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "operator",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "bool",
-				"name": "approved",
-				"type": "bool"
-			}
-		],
-		"name": "ApprovalForAll",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "wallet",
-				"type": "address"
-			},
-			{
-				"internalType": "string",
-				"name": "metaFields",
-				"type": "string"
-			},
-			{
-				"internalType": "bytes",
-				"name": "signature",
-				"type": "bytes"
-			}
-		],
-		"name": "mintLandTitleNFT",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "wallet",
-				"type": "address"
-			},
-			{
-				"internalType": "bytes32",
-				"name": "nameHash",
-				"type": "bytes32"
-			},
-			{
-				"internalType": "bytes",
-				"name": "signature",
-				"type": "bytes"
-			}
-		],
-		"name": "registerOwner",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			}
-		],
-		"name": "safeTransferFrom",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bytes",
-				"name": "data",
-				"type": "bytes"
-			}
-		],
-		"name": "safeTransferFrom",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "operator",
-				"type": "address"
-			},
-			{
-				"internalType": "bool",
-				"name": "approved",
-				"type": "bool"
-			}
-		],
-		"name": "setApprovalForAll",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "buyer",
-				"type": "address"
-			},
-			{
-				"internalType": "bytes",
-				"name": "signature",
-				"type": "bytes"
-			}
-		],
-		"name": "setSaleInfo",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			}
-		],
-		"name": "Transfer",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			}
-		],
-		"name": "transferFrom",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			}
-		],
-		"name": "balanceOf",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			}
-		],
-		"name": "getApproved",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			}
-		],
-		"name": "getLandMetadata",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "metaFields",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "buyer",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "walletID",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "wallet",
-				"type": "address"
-			}
-		],
-		"name": "getLandTitleInfoByWallet",
-		"outputs": [
-			{
-				"internalType": "uint256[]",
-				"name": "",
-				"type": "uint256[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "wallet",
-				"type": "address"
-			}
-		],
-		"name": "getOwnerInfo",
-		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			}
-		],
-		"name": "getOwnershipHistory",
-		"outputs": [
-			{
-				"internalType": "address[]",
-				"name": "",
-				"type": "address[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "operator",
-				"type": "address"
-			}
-		],
-		"name": "isApprovedForAll",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "name",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			}
-		],
-		"name": "ownerOf",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "owners",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "wallet",
-				"type": "address"
-			},
-			{
-				"internalType": "bytes32",
-				"name": "nameHash",
-				"type": "bytes32"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "saleInfos",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "buyer",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bytes4",
-				"name": "interfaceId",
-				"type": "bytes4"
-			}
-		],
-		"name": "supportsInterface",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "symbol",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			}
-		],
-		"name": "tokenURI",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
-			}
-		],
-		"name": "usedNameHash",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	}
-]
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -784,318 +56,60 @@ const SellPost = () => {
     district: "",
     subdistrict: "",
     landtitle_id: 1,
-	user_id: 1,
+	  user_id: 1,
   });
 
-  // ======= 2) เตรียม web3 และเชื่อม MetaMask ถ้ามี =======
-  useEffect(() => {
-    (async () => {
-      const provider: any = await detectEthereumProvider();
-      if (provider) {
-        const w3 = new Web3(provider as any);
-        setWeb3(w3);
+    useEffect(() => {
+        const connectWalletAndFetchUser = async () => {
+            if (!(window as any).ethereum) {
+                setError("กรุณาติดตั้ง MetaMask ก่อนใช้งาน");
+                setLoading(false);
+                return;
+            }
 
-        // ถ้า MetaMask เคยอนุญาตแล้ว ดึงบัญชีมาโชว์
-        try {
-          const accounts = await (provider as any).request({
-            method: "eth_accounts",
-          });
-          if (accounts && accounts.length > 0) {
-            setAccount(accounts[0]);
-          }
-        } catch {}
-      } else {
-        setError("ไม่พบ MetaMask / Ethereum provider");
-      }
-    })();
-  }, []);
+            try {
+                // 🔗 เชื่อม MetaMask
+                const provider = new ethers.BrowserProvider((window as any).ethereum);
+                const accounts = await provider.send("eth_requestAccounts", []);
+                const address = accounts[0];
+                setWalletAddress(address);
+                console.log("✅ Connected wallet:", address);
 
-    const connectWallet = async () => {
-    try {
-      setError("");
-      const provider: any = await detectEthereumProvider();
-      if (!provider) {
-        setError("ไม่พบ MetaMask / Ethereum provider");
-        return;
-      }
-      const accounts = await provider.request({ method: "eth_requestAccounts" });
-      setAccount(accounts[0]);
-      if (!inputWallet) setInputWallet(accounts[0]); // autofill
-    } catch (e: any) {
-      setError(e?.message || "เชื่อมต่อกระเป๋าไม่สำเร็จ");
-    }
-  };
+                const userInfo = await GetInfoUserByToken();
+                if (userInfo.error) {
+                    console.error("❌ Error fetching user info:", userInfo.error);
+                    setError("ไม่สามารถดึงข้อมูลผู้ใช้ได้");
+                } else {
+                    setTokenData(userInfo);
+                }
 
-    // ======= 3) ฟังก์ชันอ่านข้อมูลจากสัญญา (read-only, ไม่เสียแก๊ส) =======
+                // จากนั้นดึง Land Token
+                const res = await GetLandTitleInfoByWallet();
+                console.log("User land tokens:", res.tokens);
+                setLandTokens(res.tokens || []);
+                
 
-const fetchTitles: () => Promise<void> = async (walletAddr?: string) => {
-  if (!web3) {
-    setError("web3 ยังไม่พร้อม");
-    return;
-  }
-  const wallet = (walletAddr || inputWallet || account || "").trim();
-  if (!wallet) {
-    setError("กรุณาระบุที่อยู่กระเป๋า (wallet address)");
-    return;
-  }
+                const metadata = await GetLandMetadataByWallet();
+                console.log("User land metadata:", metadata.metadata);
+                setLandMetadata(metadata.metadata || []);
+            } catch (err) {
+                console.error("❌ Error connecting MetaMask or fetching user:", err);
+                setError("เกิดข้อผิดพลาดในการเชื่อมต่อ MetaMask");
+            } finally {
+                setLoading(false);
+            }
+        };
 
-  setLoading(true);
-  setError("");
-  setRows([]);
-
-  try {
-    const contract = new web3.eth.Contract(
-      contractABI as any,
-      CONTRACT_ADDRESS
-    );
-
-    // 1) balanceOf – มักคืนค่าเป็น string (จำนวน)
-    const balRaw: unknown = await contract.methods.balanceOf(wallet).call();
-    const balNum = Number(
-      typeof balRaw === "string" || typeof balRaw === "number" ? balRaw : 0
-    );
-    setBalance(Number.isFinite(balNum) ? balNum : 0);
-
-    // 2) getLandTitleInfoByWallet – มักคืน array ของ tokenId (string[])
-    const rawIds: unknown = await contract.methods
-      .getLandTitleInfoByWallet(wallet)
-      .call();
-
-    const ids: string[] = Array.isArray(rawIds)
-      ? (rawIds as unknown[]).map((v) => String(v))
-      : [];
-
-    const numericIds: number[] = ids
-      .map((x) => Number(x))
-      .filter((n) => Number.isFinite(n) && n >= 0);
-
-    setTokenIds(numericIds);
-
-    // 3) ดึง metadata แบบขนาน (Promise.all) จะไวกว่า loop await ทีละตัว
-    type MetaTuple = [string, string, string, string]; // [metaFields, price, buyer, walletID(owner)]
-    const rowsData: TokenRow[] = await Promise.all(
-      numericIds.map(async (id) => {
-        try {
-          const info: unknown = await contract.methods.getLandMetadata(id).call();
-
-          // ป้องกันชนิดไม่ชัดเจนจาก web3: ต้องแน่ใจว่าเป็น array ยาว >= 4
-          let metaFields = "";
-          let priceWei = "0";
-          let buyer = "";
-          let owner = "";
-
-          if (Array.isArray(info) && info.length >= 4) {
-            const [m, p, b, o] = info as unknown as MetaTuple;
-            metaFields = String(m ?? "");
-            priceWei = String(p ?? "0");
-            buyer = String(b ?? "");
-            owner = String(o ?? "");
-          } else if (
-            typeof info === "object" &&
-            info !== null &&
-            "0" in (info as any) &&
-            "1" in (info as any) &&
-            "2" in (info as any) &&
-            "3" in (info as any)
-          ) {
-            // บาง network/provider จะคืนแบบ object ที่เข้าถึงด้วย index ได้
-            const obj = info as any;
-            metaFields = String(obj[0] ?? "");
-            priceWei = String(obj[1] ?? "0");
-            buyer = String(obj[2] ?? "");
-            owner = String(obj[3] ?? "");
-          }
-
-          const priceEth =
-            (web3.utils?.fromWei?.(priceWei, "ether") as string) ?? "0";
-
-          return {
-            tokenId: id,
-            metaFields,
-            price: `${priceEth} ETH`,
-            buyer,
-            owner,
-          } as TokenRow;
-        } catch {
-          return { tokenId: id } as TokenRow;
-        }
-      })
-    );
-
-    setRows(rowsData);
-  } catch (e: any) {
-    setError(e?.message || "อ่านข้อมูลจากสัญญาไม่สำเร็จ");
-  } finally {
-    setLoading(false);
-  }
-};
+        connectWalletAndFetchUser();
+    }, [navigate]);
 
 
-//     const connectMetaMask = async () => {
-//         if (web3 && contract) {
-//             const accounts = await web3.eth.requestAccounts();
-//             setAccounts(accounts);
-//             setWalletAddress(accounts[0]);
-//         }
-//     };
-
-// const handleRegisterOwner = async () => {
-//     if (!web3 || !contract || !walletAddress1 || !nameHash) {
-//         alert('Please connect MetaMask and fill in all required fields');
-//         return;
-//     }
-
-//     try {
-//         await contract.methods.registerOwner(walletAddress1, nameHash).send({ from: walletAddress });
-//         alert('Owner registration successful!');
-//         setTransactionStatus('Success');
-//     } catch (error) {
-//         if (error instanceof Error) {
-//             console.error(error.message);
-//         } else {
-//             console.error(String(error));
-//         }
-//     } 
-// }; 
-
-// const handleMintLandNFT = async () => {
-//     if (!web3 || !contract || !walletAddress2 || !landTitleHash) {
-//         alert('Please connect MetaMask and fill in all required fields');
-//         return;
-//     }
-
-//     try {
-//         await contract.methods.mintLandTitleNFT(walletAddress2, landTitleHash).send({ from: walletAddress });
-//         alert('NFT minting successful!');
-//         setTransactionStatus('Success');
-//     } catch (error) {
-//         if (error instanceof Error) {
-//             console.error(error.message);
-//         } else {
-//             console.error(String(error));
-//         }
-//     }
-// }; 
-
-
-// const getOwnerInfo = async () => {
-//     if (!web3 || !contract || !walletAddress3) {
-//         alert('Please connect MetaMask');
-//         return;
-//     }
-
-//     try {
-//         const ownerInfo = await contract.methods.getOwnerInfo(walletAddress3).call();
-//         alert(`Owner Info: ${ownerInfo}`);
-//     } catch (error) {
-//           if (error instanceof Error) {
-//             console.error(error.message);
-//           } else {
-//             console.error(String(error));
-//           }
-//         }
-//     };
-
-// const getLandTitleInfoByWallet = async () => {
-//     if (!web3 || !contract || !walletAddress4) {
-//         alert("Please connect MetaMask");
-//         return;
-//     }
-
-//     try {
-//         // ดึงข้อมูลโทเค็นทั้งหมดที่เป็นของ wallet
-//         const landTitleInfo = await contract.methods.getLandTitleInfoByWallet(walletAddress4).call();
-        
-//         // ตรวจสอบว่า wallet มีโทเค็นหรือไม่
-//         if (landTitleInfo.length === 0) {
-//             alert("This wallet has no land titles.");
-//             return;
-//         }
-
-//         let resultMessage = "Land Title Info:\n";
-//         for (let i = 0; i < landTitleInfo.length; i++) {
-//             const tokenId = landTitleInfo[i];
-//             const metaData = await contract.methods.getLandMetadata(tokenId).call();
-//             const ownershipHistory = await contract.methods.getOwnershipHistory(tokenId).call();
-
-//             // แสดงข้อมูลของแต่ละโทเค็น
-//             resultMessage += `
-//                 Token ID: ${tokenId}
-//                 Metadata: ${metaData.metaFields}
-//                 Price: ${metaData.price} ETH
-//                 Buyer: ${metaData.buyer}
-//                 Ownership History: ${ownershipHistory.join(" -> ")}
-//             `;
-//         }
-
-//         alert(resultMessage);
-//     } catch (error) {
-//         if (error instanceof Error) {
-//             console.error("Error:", error.message);
-//         } else {
-//             console.error("Unknown error:", error);
-//         }
-//     }
-// };
-
-
-// const transferOwnership = async () => {
-//     if (!web3 || !contract || !walletAddress5 || !tokenId) {
-//         alert('Please connect MetaMask and fill in all required fields');
-//         return;
-//     }
-
-//     try {
-//         await contract.methods.transferOwnership(walletAddress5, tokenId).send({ from: walletAddress });
-//         alert('Ownership transfer successful');
-//         setTransactionStatus('Success');
-//     } catch (error) {
-//           if (error instanceof Error) {
-//             console.error(error.message);
-//           } else {
-//             console.error(String(error));
-//           }
-//         }
-//     };
-
-//     const getOwnershipHistory = async () => {
-//         if (!web3 || !contract || !tokenId) {
-//             alert('Please connect MetaMask and fill in all required fields');
-//             return;
-//         }
-
-//         try {
-//             const history = await contract.methods.getOwnershipHistory(tokenId).call();
-//             alert(`Ownership History: ${history}`);
-//         } catch (error) {
-//           if (error instanceof Error) {
-//             console.error(error.message);
-//           } else {
-//             console.error(String(error));
-//           }
-//         }
-//     };
-
-//     const handleCheckLandTitles = async () => {
-//   if (!web3 || !contract || !walletAddress4) {
-//     alert("Please connect MetaMask and enter a wallet address");
-//     return;
-//   }
-
-//   try {
-//     setLoading(true);
-//     const landTitleInfo: string[] = await contract.methods
-//       .getLandTitleInfoByWallet(walletAddress4)
-//       .call();
-//     setLandTitles(landTitleInfo);
-//   } catch (error) {
-//     console.error(error);
-//     alert("เกิดข้อผิดพลาดในการดึงข้อมูลโฉนด");
-//   } finally {
-//     setLoading(false);
-//   }
-// };
-
+    const [selectedLand, setSelectedLand] = useState<string | null>(null);
+    const handleSelectLand = (tokenID: string) => {
+        setSelectedLand(tokenID);
+        console.log("Selected land token:", tokenID);
+        // TODO: ส่ง tokenID ไป backend หรือ smart contract ต่อ
+    };
 
   // ฟังก์ชันอัปโหลดรูป
 const handleUpload = (file: File) => {
@@ -1157,26 +171,24 @@ useEffect(() => {
 	  setLoading(false);
 	  return;
 	}
-  const userId = localStorage.getItem("id");
+  const userId = localStorage.getItem("user_id");
 	try {
-// ✅ 1) สร้าง payload ให้ส่งเป็นเลข id จริง
-const payload = {
-  first_name: formData.firstName,
-  last_name: formData.lastName,
-  phone_number: formData.phoneNumber,
-  name: formData.name,
-  image: formData.image,            // ควรเป็น URL จริง (ไม่ใช่ blob:)
-  price: parseFloat(formData.price),
+    const payload = {
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      phone_number: formData.phoneNumber,
+      name: formData.name,
+      image: formData.image,            // ควรเป็น URL จริง (ไม่ใช่ blob:)
+      price: parseFloat(formData.price),
 
-  province_id: Number(formData.province),
-  district_id: Number(formData.district),
-  subdistrict_id: Number(formData.subdistrict),
+      province_id: Number(formData.province),
+      district_id: Number(formData.district),
+      subdistrict_id: Number(formData.subdistrict),
 
-  tag_id: Number(formData.tag?.[0] || 0), // ถ้า tag เลือกตัวแรก ส่งเป็นเลข id
-  landtitle_id: Number(formData.landtitle_id),
-  user_id: Number(formData.user_id),
-};
-
+      tag_id: Number(formData.tag?.[0] || 0), // ถ้า tag เลือกตัวแรก ส่งเป็นเลข id
+      landtitle_id: Number(formData.landtitle_id),
+      user_id: Number(formData.user_id),
+    };
 
 	  await CreateLandPost(payload);
 	  
@@ -1204,35 +216,34 @@ const payload = {
   };
 
   // ฟังก์ชันเลือกจังหวัด-อำเภอ-ตำบล
-// ✅ 3) ฟังก์ชันเลือกจังหวัด-อำเภอ-ตำบล (ทำงานด้วย id ทั้งหมด)
-const handleProvinceChange = (provinceId: string) => {
-  form.setFieldsValue({ province: provinceId, district: undefined, subdistrict: undefined });
+  const handleProvinceChange = (provinceId: string) => {
+    form.setFieldsValue({ province: provinceId, district: undefined, subdistrict: undefined });
 
-  const p = rawProvinces.find((x: any) => String(x.id) === String(provinceId));
-  const newDistrictOptions =
-    (p?.District || []).map((d: any) => ({ label: d.name_th, value: String(d.id) })) || [];
+    const p = rawProvinces.find((x: any) => String(x.id) === String(provinceId));
+    const newDistrictOptions =
+      (p?.District || []).map((d: any) => ({ label: d.name_th, value: String(d.id) })) || [];
 
-  setDistrictOptions(newDistrictOptions);
-  setSubdistrictOptions([]);
-  setFormData((prev) => ({ ...prev, province: provinceId, district: "", subdistrict: "" }));
-};
+    setDistrictOptions(newDistrictOptions);
+    setSubdistrictOptions([]);
+    setFormData((prev) => ({ ...prev, province: provinceId, district: "", subdistrict: "" }));
+  };
 
-const handleDistrictChange = (districtId: string) => {
-  form.setFieldsValue({ district: districtId, subdistrict: undefined });
+  const handleDistrictChange = (districtId: string) => {
+    form.setFieldsValue({ district: districtId, subdistrict: undefined });
 
-  const p = rawProvinces.find((x: any) => String(x.id) === String(formData.province));
-  const d = p?.District?.find((x: any) => String(x.id) === String(districtId));
-  const newSubdistrictOptions =
-    (d?.Subdistrict || []).map((s: any) => ({ label: s.name_th, value: String(s.id) })) || [];
+    const p = rawProvinces.find((x: any) => String(x.id) === String(formData.province));
+    const d = p?.District?.find((x: any) => String(x.id) === String(districtId));
+    const newSubdistrictOptions =
+      (d?.Subdistrict || []).map((s: any) => ({ label: s.name_th, value: String(s.id) })) || [];
 
-  setSubdistrictOptions(newSubdistrictOptions);
-  setFormData((prev) => ({ ...prev, district: districtId, subdistrict: "" }));
-};
+    setSubdistrictOptions(newSubdistrictOptions);
+    setFormData((prev) => ({ ...prev, district: districtId, subdistrict: "" }));
+  };
 
-const handleSubdistrictChange = (subdistrictId: string) => {
-  form.setFieldsValue({ subdistrict: subdistrictId });
-  setFormData((prev) => ({ ...prev, subdistrict: subdistrictId }));
-};
+  const handleSubdistrictChange = (subdistrictId: string) => {
+    form.setFieldsValue({ subdistrict: subdistrictId });
+    setFormData((prev) => ({ ...prev, subdistrict: subdistrictId }));
+  };
 
 
   const steps = [
@@ -1305,79 +316,227 @@ const handleSubdistrictChange = (subdistrictId: string) => {
                 <p style={{ color: "#616161", marginBottom: "1.5rem" }}>
                   เลือกโฉนดที่ดินที่คุณต้องการประกาศขายจากรายการด้านล่างนี้:</p>
 
-    <div className="p-4 max-w-xl mx-auto space-y-4 border rounded-xl">
-      <h2 className="text-xl font-bold">ตรวจจำนวนโฉนด (LandTitle NFTs) ของกระเป๋า</h2>
+        <div className="request-sell-container">            
+            {/* Header Section */}
+            <div className="main-container">
 
-      <div className="space-y-2">
-        <div className="text-sm">
-          สถานะ: {web3 ? "พร้อมใช้งาน" : "ยังไม่พร้อม"} | บัญชีที่เชื่อม:{" "}
-          {account || "-"}
+                {/* Error Alert */}
+                {error && (
+                    <div className="error-alert">
+                        <svg className="error-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                        </svg>
+                        {error}
+                    </div>
+                )}
+
+                {/* Wallet Connection Card */}
+                {walletAddress && (
+                    <div className="info-card">
+                        <div className="card-header">
+                          <div className="card-icon success">
+                            <svg
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              style={{ width: "50px", height: "50px" }} // 👈 กำหนดขนาดเล็กลง
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                          </div>
+                            <h4 className="card-title">เชื่อมต่อ Wallet แล้ว</h4>
+                        </div>
+                        <div 
+                          className="wallet-display" 
+                          style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                        >
+                          <p className="wallet-label" style={{ margin: 0 }}>Wallet Address:</p>
+                          <p className="wallet-address" style={{ margin: 0 }}>{walletAddress}</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* User Info Card */}
+                <div className="grid-2">
+                    {tokenData ? (
+                        <div className="info-card">
+                            <div className="card-header">
+                              <div className="card-icon info">
+                                <svg
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  style={{ width: "50px", height: "50px" }} // 👈 ย่อขนาดลง
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                  />
+                                </svg>
+                              </div>
+                                <h4 className="card-title">ข้อมูลผู้ใช้</h4>
+                            </div>
+                            <div className="user-info">
+                              <div className="info-item" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <p className="info-label" style={{ margin: 0 }}>ชื่อ:</p>
+                                <p className="info-value" style={{ margin: 0 }}>{tokenData.first_name}</p>
+                              </div>
+                              <div className="info-item" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <p className="info-label" style={{ margin: 0 }}>นามสกุล:</p>
+                                <p className="info-value" style={{ margin: 0 }}>{tokenData.last_name}</p>
+                              </div>
+                              <div className="info-item" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <p className="info-label" style={{ margin: 0 }}>Wallet Address:</p>
+                                <p className="wallet-address" style={{ margin: 0 }}>{tokenData.wallet_address}</p>
+                              </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="info-card">
+                          <div className="user-error">
+                            <svg
+                              className="user-error-icon"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              style={{ width: "20px", height: "20px" }} // 👈 กำหนดขนาดที่ต้องการ
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                              />
+                            </svg>
+                            <p className="user-error-title">ไม่พบข้อมูลผู้ใช้</p>
+                            <p className="user-error-subtitle">กรุณาลองใหม่อีกครั้ง</p>
+                          </div>
+                        </div>
+
+                    )}
+
+                    {/* Land Tokens Summary */}
+                    <div className="info-card">
+                        <div className="card-header">
+                          <div className="card-icon land">
+                            <svg
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              style={{ width: "50px", height: "50px" }} // 👈 ย่อขนาดไอคอน
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                              />
+                            </svg>
+                          </div>
+                            <h4 className="card-title">ที่ดินของคุณ</h4>
+                        </div>
+                        <div className="land-summary">
+                            <div className="land-count">
+                               {/* Land Tokens Section */}
+                            {landMetadata.length > 0 && (
+                              <div className="land-tokens-section">
+                                <h3 className="section-title">เลือกที่ดินที่ต้องการจำหน่าย</h3>
+                                <div className="land-tokens-container">
+                                  {landMetadata.map((land, index) => {
+                                    const deedNo = land.metaFields?.[0] ?? "ไม่มีโฉนด";
+                                    const province = land.metaFields?.[8] ?? "-";
+                                    const isAvailable = (land.buyer || "").toLowerCase() === ZERO_ADDR.toLowerCase();
+                                    return (
+                                      <div
+                                        key={land.tokenId || index}
+                                        className={`land-token-card ${selectedLand === land.tokenId ? "selected" : ""}`}
+                                        onClick={() => handleSelectLand(land.tokenId)}
+                                      >
+                                        <div className="land-token-content">
+                                          <div className="token-header">
+                                            <h4 className="token-title">โฉนด #{deedNo}</h4>
+                                            {isAvailable ? (
+                                              <span className="status-badge available">พร้อมจำหน่าย</span>
+                                            ) : (
+                                              <span className="status-badge sold">ขายแล้ว</span>
+                                            )}
+                                          </div>
+                                          <div className="contract-info">
+                                            <p className="contract-label">จังหวัด</p>
+                                            <p className="contract-value">{province}</p>
+                                            <p className="contract-label">ราคา</p>
+                                            <p className="contract-value">{land.price}</p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Land Tokens Grid */}
+                {landTokens.length > 0 && (
+                    <div className="land-tokens-section">
+                        <h3 className="section-title">เลือกที่ดินที่ต้องการจำหน่าย</h3>
+                        <div className="grid-3">
+                            {landTokens.map((token, index) => (
+                                <div key={index} className="land-token-card">
+                                    <div className="land-token-content">
+                                        <div className="token-header">
+                                            <h4 className="token-title">Token #{token.id || index + 1}</h4>
+                                            <span className="status-badge">พร้อมจำหน่าย</span>
+                                        </div>
+                                        <div className="contract-info">
+                                            <p className="contract-label">Contract Address</p>
+                                            <p className="contract-address">
+                                                {token.contract_address || 'N/A'}
+                                            </p>
+                                        </div>
+                                        <button className="btn btn-primary">
+                                            เลือกจำหน่าย
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Empty State */}
+                {landTokens.length === 0 && !loading && (
+                    <div className="empty-state">
+                      <svg
+                        className="empty-icon"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        style={{ width: "50px", height: "50px" }} // 👈 ย่อขนาด
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                      />
+                      </svg>
+                        <h4 className="empty-title">ไม่พบที่ดิน</h4>
+                        <p className="empty-description">คุณยังไม่มีที่ดินในระบบ</p>
+                    </div>
+                )}
+            </div>
         </div>
-        <div className="flex gap-2">
-          <button
-            className="px-3 py-2 rounded bg-black text-white"
-            onClick={connectWallet}
-          >
-            เชื่อมต่อ MetaMask
-          </button>
-          <button
-            className="px-3 py-2 rounded border"
-            onClick={() => fetchTitles(account)}
-            disabled={!account || loading}
-            title="ใช้กระเป๋าที่เชื่อมอยู่"
-          >
-            ใช้กระเป๋าที่เชื่อม
-          </button>
-        </div>
-
-        <label className="block text-sm font-medium">Wallet Address อื่น (ถ้ามี):</label>
-        <input
-          className="w-full border rounded px-3 py-2"
-          placeholder="0x..."
-          value={inputWallet}
-          onChange={(e) => setInputWallet(e.target.value)}
-        />
-
-        <button
-          className="px-3 py-2 rounded bg-blue-600 text-white"
-          onClick={() => fetchTitles()}
-          disabled={loading}
-        >
-          {loading ? "กำลังดึงข้อมูล..." : "ดึงข้อมูล"}
-        </button>
-      </div>
-
-      {error && (
-        <div className="p-3 rounded bg-red-100 text-red-800 text-sm">
-          {error}
-        </div>
-      )}
-
-      <div className="space-y-1">
-        <div>ผลรวมจาก <code>balanceOf</code>: <b>{balance}</b> รายการ</div>
-        <div>ผลรวมจาก <code>getLandTitleInfoByWallet</code>: <b>{tokenIds.length}</b> รายการ</div>
-      </div>
-
-      {rows.length > 0 && (
-        <div className="mt-3">
-          <h3 className="font-semibold">รายการ tokenId</h3>
-          <ul className="list-disc pl-6">
-            {rows.map((r) => (
-              <li key={r.tokenId}>
-                <b>#{r.tokenId}</b>
-                {r.owner ? ` | owner: ${r.owner}` : ""}
-                {r.price ? ` | price: ${r.price}` : ""}
-                {r.metaFields ? ` | desc: ${r.metaFields.slice(0, 80)}...` : ""}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <p className="text-xs text-gray-500">
-        * การเรียกอ่าน (view) ไม่เสียแก๊ส แต่ต้องแน่ใจว่าเชื่อมกับเครือข่ายเดียวกับที่สัญญาถูก deploy
-      </p>
-    </div>
 
     {/*<div style={{ margin: "1rem 0" }}>
       <button
