@@ -87,9 +87,9 @@ export async function GetLandTitleInfoByWallet() {
   }
 }
 
-export async function GetLandMetadataByWallet() {
+export async function GetLandMetadataByToken(tokenID: string) {
   try {
-    const res = await api.get("/user/lands/metadata"); // axios จะใส่ JWT อัตโนมัติ
+    const res = await api.post("/user/lands/metadata", { tokenID });
     return res.data;
   } catch (e) {
     const err = e as any;

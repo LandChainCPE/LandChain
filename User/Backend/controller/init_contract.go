@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"math/big"
+
 	"landchain/smartcontract"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -71,50 +73,56 @@ func GetLandTitleInfoByWallet(c *gin.Context) {
 	})
 }
 
-func GetLandMetadataByWallet(c *gin.Context) {
-	walletAddr, exists := c.Get("wallet")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Wallet not found in token"})
+func GetLandMetadataByToken(c *gin.Context) {
+	if ContractInstance == nil {
+		c.JSON(503, gin.H{"error": "contract not initialized"})
 		return
 	}
 
-	wallet := common.HexToAddress(walletAddr.(string))
+	var req struct {
+		TokenID string `json:"tokenID"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request", "detail": err.Error()})
+		return
+	}
 
-	// 1️⃣ ดึง token IDs ของ user
-	tokenIDs, err := ContractInstance.GetLandTitleInfoByWallet(wallet)
+	if req.TokenID == "" {
+		c.JSON(400, gin.H{"error": "tokenID is required"})
+		return
+	}
+
+	tokenID := new(big.Int)
+	if _, ok := tokenID.SetString(req.TokenID, 10); !ok {
+		c.JSON(400, gin.H{"error": "invalid tokenID format"})
+		return
+	}
+
+	meta, err := ContractInstance.GetLandMetadata(tokenID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot fetch token IDs", "detail": err.Error()})
+		c.JSON(500, gin.H{"error": "cannot fetch metadata", "detail": err.Error()})
 		return
 	}
 
-	// 2️⃣ สำหรับแต่ละ token ID ดึง metadata
-	metadataList := []map[string]interface{}{}
-	for _, t := range tokenIDs {
-		meta, err := ContractInstance.GetLandMetadata(t)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot fetch metadata", "detail": err.Error()})
-			return
-		}
+	// รวม meta.MetaFields เป็น string เดียว (คั่นด้วย comma)
+	
+	log.Printf("metaFields: %s", meta.MetaFields)
+	log.Printf("price: %s", meta.Price.String())
+	log.Printf("buyer: %s", meta.Buyer.Hex())
+	log.Printf("walletID: %s", meta.WalletID.Hex())
 
-		metadataList = append(metadataList, map[string]interface{}{
-			"tokenID":    t.String(),
-			"metaFields": meta.MetaFields,
-			"price":      meta.Price.String(),
-			"buyer":      meta.Buyer.Hex(),
-		})
-	}
-
-	// 3️⃣ Return ข้อมูลทั้งหมด
-	c.JSON(http.StatusOK, gin.H{
-		"wallet":   wallet.Hex(),
-		"metadata": metadataList,
+	c.JSON(200, gin.H{
+		"metaFields": meta.MetaFields,
+		"price":      meta.Price.String(),
+		"buyer":      meta.Buyer.Hex(),
+		"walletID":   meta.WalletID.Hex(),
 	})
 }
-
 
 // package controller
 
 // import (
+// import "math/big"
 // 	"bytes"
 // 	"context"
 // 	"encoding/hex"
@@ -305,7 +313,6 @@ func GetLandMetadataByWallet(c *gin.Context) {
 // 		"metadata": metadataList,
 // 	})
 // }
-
 
 // package controller
 

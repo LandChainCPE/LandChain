@@ -94,7 +94,7 @@ func main() {
 		authorized.GET("/user/landinfo/:id", controller.GetLandInfoByTokenID)
 		authorized.GET("/user/lands", controller.GetLandTitleInfoByWallet)
 		authorized.GET("/user/info", controller.GetInfoUserByToken)
-		authorized.GET("/user/lands/metadata", controller.GetLandMetadataByWallet)
+		authorized.POST("/user/lands/metadata", controller.GetLandMetadataByToken)
 
 		// CONTROLLER RegisterLand
 		authorized.POST("/user/userregisland", controller.UserRegisLand)

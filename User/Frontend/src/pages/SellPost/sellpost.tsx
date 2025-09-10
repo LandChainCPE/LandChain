@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { GetTags, GetAllProvinces, CreateLandPost } from "../../service/https/jib/jib";
 import { ethers } from "ethers";
 //import { BrowserProvider } from "ethers"; // ✅ ethers v6
-import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByWallet } from "../../service/https/bam/bam";
+import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";
 
 type Tag = {
   Tag: string;
@@ -58,9 +58,9 @@ const SellPost = () => {
 
             try {
                 // 🔗 เชื่อม MetaMask
-                const provider = new ethers.BrowserProvider((window as any).ethereum);
-                const accounts = await provider.send("eth_requestAccounts", []);
-                const address = accounts[0];
+                //const provider = new ethers.BrowserProvider((window as any).ethereum);
+                //const accounts = await provider.send("eth_requestAccounts", []);
+                const address = "0xf55988edca178d5507454107945a0c96f3af628c";
                 setWalletAddress(address);
                 console.log("✅ Connected wallet:", address);
 
@@ -70,17 +70,35 @@ const SellPost = () => {
                     setError("ไม่สามารถดึงข้อมูลผู้ใช้ได้");
                 } else {
                     setTokenData(userInfo);
+                    console.log(userInfo);
                 }
 
                 // จากนั้นดึง Land Token
                 const res = await GetLandTitleInfoByWallet();
-                console.log("User land tokens:", res.tokens);
-                setLandTokens(res.tokens || []);
-                
+                console.log("User land tokens:", res);
+                const tokens = res.tokens || [];
+                setLandTokens(tokens);
 
-                const metadata = await GetLandMetadataByWallet();
-                console.log("User land metadata:", metadata.metadata);
-                setLandMetadata(metadata.metadata || []);
+                // ดึง metadata ของทุก token
+                const allMetadata = await Promise.all(
+                  tokens.map(async (tokenId: string) => {
+                  const metadata = await GetLandMetadataByToken(tokenId);
+                  return {
+                    tokenID: tokenId,
+                    ...metadata,
+                  };
+                  })
+                );
+                console.log("User land metadata:", allMetadata);
+                setLandMetadata(allMetadata);
+
+                // แสดงข้อมูล metadata ทั้งหมดใน console (สำหรับ debug)
+                allMetadata.forEach((meta, idx) => {
+                  console.log(`--- Metadata for Token #${meta.tokenID} ---`);
+                  Object.entries(meta.meta || {}).forEach(([key, value]) => {
+                  console.log(`${key}: ${value}`);
+                  });
+                });
             } catch (err) {
                 console.error("❌ Error connecting MetaMask or fetching user:", err);
                 setError("เกิดข้อผิดพลาดในการเชื่อมต่อ MetaMask");
