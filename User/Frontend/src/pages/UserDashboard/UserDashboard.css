@@ -1,3 +1,11 @@
+.card-header.user-header {
+  background: linear-gradient(135deg, #447AA9, #447AA9);
+}
+
+.card-header.land-header {
+  background: #2c3e50;
+}
+
 /* Row for two cards side by side */
 .card-row {
   display: grid;
@@ -352,8 +360,9 @@
 .usertoblockchain {
   font-size: 16px;
   padding: 10px 24px;
+  width: 200px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.10);
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, #eb7700, #eb7700);
   color: #fff;
   border: none;
   white-space: nowrap;
@@ -362,9 +371,24 @@
 .landtoblockchain {
   font-size: 16px;
   padding: 10px 24px;
+  width: 200px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.10);
-  background: linear-gradient(135deg, #447AA9, #059669);
+  background: linear-gradient(135deg, #eb7700, #eb7700);
   color: #fff;
   border: none;
   white-space: nowrap;
+}
+
+.user-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+
+.land-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
 }
