@@ -30,8 +30,8 @@ type Landsalepost struct {
 	UserID uint  `json:"user_id"`
 	Users  Users `gorm:"foreignKey:UserID"`
 
-	StateID uint  `json:"state_id"`
-	States  State `gorm:"foreignKey:StateID"`
+	// StateID uint  `json:"state_id"`
+	// States  State `gorm:"foreignKey:StateID"`
 
 	Booking []Booking  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
 

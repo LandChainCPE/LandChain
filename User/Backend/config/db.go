@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 	"time"
-
+	"errors"
 	"landchain/entity"
 
 	"github.com/joho/godotenv"
@@ -332,6 +332,88 @@ func SetupDatabase() {
 	}
 
 	log.Println("✅ Database Migrated & Seeded Successfully")
+
+		states := []entity.State{
+		{Name: "รอตรวจสอบ", Color: "orange"},
+		{Name: "กำลังดำเนินการ", Color: "blue"},
+		{Name: "เสร็จสิ้น", Color: "green"},
+	}
+
+	for _, s := range states {
+		var exist entity.State
+		if err := db.Where("name = ?", s.Name).First(&exist).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				// ✅ ถ้าไม่เจอค่อยสร้างใหม่
+				if err := db.Create(&s).Error; err != nil {
+					log.Fatal("❌ Failed to create state:", err)
+				}
+			} else {
+				log.Fatal("❌ Failed to query state:", err)
+			}
+		}
+	}
+
+	log.Println("✅ States have been seeded successfully")
+
+	// สร้าง Petition
+	petition := entity.Petition{
+		FirstName:   "มาลี",
+		LastName:    "มาดี",
+		Tel:         "0987654321",
+		Email:       "j@gmail.com",
+		Description: "โฉนดเก่าหาย",
+		Date:        "2025-07-31",
+		Topic:       "ขอคัดสำเนาโฉนด",
+		StateID:     1, 
+		UserID:      1, 
+	}
+
+	if err := db.Create(&petition).Error; err != nil {
+		log.Fatal("❌ Failed to create petition:", err)
+	}
+
+	log.Println("✅ Petition created successfully")
+
+	tags := []entity.Tag{
+		{Tag: "ติดถนน"},
+		{Tag: "ติดทะเล"},
+		{Tag: "ติดแม่น้ำ"},
+		{Tag: "ใกล้BTS"},
+		{Tag: "ใกล้MRT"},
+		{Tag: "ติดภูเขา"},
+
+	}
+		// เพิ่ม tags ลงในฐานข้อมูล
+	if err := db.Create(&tags).Error; err != nil {
+		log.Fatal("Error inserting tags:", err)
+	}
+
+	// แสดงผลการบันทึกข้อมูล
+	fmt.Println("Tags have been inserted successfully")	
+
+	//postlad
+	landpost := entity.Landsalepost{
+		FirstName:   "มาลี",
+		LastName:    "มาดี",
+		PhoneNumber:  "0987654321",
+		Image:       "j@gmail.com",
+		Name: 		"สวนคุณตา",
+		Price:        	120000,
+		TagID:       		1,
+		ProvinceID:     	20, 
+		DistrictID:      	1, 
+		SubdistrictID: 		1,
+		//Map: 		"aaa",
+		LandID:	1,
+		UserID: 1,
+	}
+
+	if err := db.Create(&landpost).Error; err != nil {
+		log.Fatal("❌ Failed to create petition:", err)
+	}
+
+	log.Println("✅ Landpost created successfully")
+
 } // <<<<<<<<<<<<<< ปิดฟังก์ชัน SetupDatabase()
 // แยกการสร้าง Roomchat และ Message ออกมาเป็น function แยก
 func createRoomchatsAndMessages() {
@@ -394,15 +476,17 @@ func createRoomchatsAndMessages() {
 	log.Println("✅ Database Migrated & Seeded Successfully")
 
 	// ✅ Seed State (แยกจาก Users)
-	var stateCount int64
-	db.Model(&entity.State{}).Count(&stateCount)
-	if stateCount == 0 {
-		db.Create(&entity.State{Name: "รอตรวจสอบ", Color: "orange"})
-		db.Create(&entity.State{Name: "กำลังดำเนินการ", Color: "blue"})
-		db.Create(&entity.State{Name: "เสร็จสิ้น", Color: "green"})
-	}
+	// var stateCount int64
+	// db.Model(&entity.State{}).Count(&stateCount)
+	// if stateCount == 0 {
+	// 	db.Create(&entity.State{Name: "รอตรวจสอบ", Color: "orange"})
+	// 	db.Create(&entity.State{Name: "กำลังดำเนินการ", Color: "blue"})
+	// 	db.Create(&entity.State{Name: "เสร็จสิ้น", Color: "green"})
+	// }
 
-	log.Println("✅ Database Migrated & Seeded Successfully")
+	// log.Println("✅ Database Migrated & Seeded Successfully")
+
+
 }
 func ImportProvincesCSV(db *gorm.DB, filePath string) {
 	file, err := os.Open(filePath)

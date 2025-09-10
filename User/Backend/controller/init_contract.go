@@ -111,52 +111,123 @@ func GetLandMetadataByWallet(c *gin.Context) {
 	})
 }
 
+
 // package controller
 
 // import (
+// 	"bytes"
+// 	"context"
+// 	"encoding/hex"
+// 	"fmt"
 // 	"log"
 // 	"net/http"
 // 	"os"
-// 	"landchain/smartcontract"
-//     "strings" // 👈 เพิ่ม
+// 	"time"
 
+// 	"landchain/smartcontract"
+
+// 	"github.com/ethereum/go-ethereum"
+// 	"github.com/ethereum/go-ethereum/accounts/abi"
 // 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 // 	"github.com/ethereum/go-ethereum/common"
 // 	"github.com/ethereum/go-ethereum/ethclient"
 // 	"github.com/gin-gonic/gin"
 // )
 
-// var ContractInstance *smartcontract.SmartcontractSession
+// var (
+// 	ContractInstance *smartcontract.SmartcontractSession
+// 	ethClient        *ethclient.Client
+// 	contractAddr     common.Address
+// )
 
-// // ฟังก์ชันเชื่อมต่อกับ Smart Contract
+// // ===== Helpers =====
+
+// func VerifyContract(client *ethclient.Client, addr common.Address) error {
+// 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+// 	defer cancel()
+
+// 	chainID, err := client.ChainID(ctx)
+// 	if err != nil {
+// 		return fmt.Errorf("get chain id: %w", err)
+// 	}
+// 	log.Println("ℹ️ ChainID:", chainID.String())
+
+// 	code, err := client.CodeAt(ctx, addr, nil)
+// 	if err != nil {
+// 		return fmt.Errorf("eth_getCode failed: %w", err)
+// 	}
+// 	if len(code) == 0 {
+// 		return fmt.Errorf("no contract code at %s (wrong network/address)", addr.Hex())
+// 	}
+// 	log.Printf("✅ Contract code len=%d at %s\n", len(code), addr.Hex())
+// 	return nil
+// }
+
+// // debug: เรียก eth_call แบบดิบ ๆ เพื่อดู raw return และตรวจ revert
+// func callRaw(ctx context.Context, client *ethclient.Client, to common.Address, data []byte) ([]byte, error) {
+// 	msg := ethereum.CallMsg{To: &to, Data: data}
+// 	out, err := client.CallContract(ctx, msg, nil)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	log.Printf("RAW RETURN: 0x%s\n", hex.EncodeToString(out))
+
+// 	// detect revert (Error(string) selector = 0x08c379a0)
+// 	if len(out) >= 4 && bytes.Equal(out[:4], []byte{0x08, 0xc3, 0x79, 0xa0}) {
+// 		if reason, err := abi.UnpackRevert(out); err == nil {
+// 			return nil, fmt.Errorf("EVM revert: %s", reason)
+// 		}
+// 		return nil, fmt.Errorf("EVM revert (unknown reason)")
+// 	}
+// 	return out, nil
+// }
+
+// func ctxTimeout() context.Context {
+// 	ctx, _ := context.WithTimeout(context.Background(), 12*time.Second)
+// 	return ctx
+// }
+
+// // ===== Init =====
+
 // func InitContract() {
 // 	rpcURL := os.Getenv("HOLESKY_RPC")
-// 	contractAddr := os.Getenv("CONTRACT_ADDRESS")
+// 	addr := os.Getenv("CONTRACT_ADDRESS")
 
-// 	client, err := ethclient.Dial(rpcURL)
+// 	var err error
+// 	ethClient, err = ethclient.Dial(rpcURL)
 // 	if err != nil {
 // 		log.Fatalf("เชื่อมต่อ Holesky RPC ไม่สำเร็จ: %v", err)
 // 	}
 
-// 	address := common.HexToAddress(contractAddr)
-// 	contract, err := smartcontract.NewSmartcontract(address, client)
+// 	contractAddr = common.HexToAddress(addr)
+// 	if err := VerifyContract(ethClient, contractAddr); err != nil {
+// 		log.Fatal("❌ Verify contract failed:", err)
+// 	}
+
+// 	contract, err := smartcontract.NewSmartcontract(contractAddr, ethClient)
 // 	if err != nil {
 // 		log.Fatalf("เชื่อมต่อ contract ไม่สำเร็จ: %v", err)
 // 	}
 
-// 	session := &smartcontract.SmartcontractSession{
+// 	ContractInstance = &smartcontract.SmartcontractSession{
 // 		Contract: contract,
 // 		CallOpts: bind.CallOpts{
-// 			Pending: true,
+// 			Context: ctxTimeout(),
+// 			Pending: false, // view call แนะนำ false
 // 		},
 // 	}
 
-// 	ContractInstance = session
 // 	log.Println("✅ สร้าง session contract สำเร็จ")
 // }
 
-// // ฟังก์ชันดึงข้อมูลที่ดินจาก wallet
+// // ===== Controllers =====
+
 // func GetLandTitleInfoByWallet(c *gin.Context) {
+// 	if ContractInstance == nil {
+// 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "contract not initialized"})
+// 		return
+// 	}
+
 // 	walletAddr, exists := c.Get("wallet")
 // 	if !exists {
 // 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Wallet not found in token"})
@@ -165,14 +236,13 @@ func GetLandMetadataByWallet(c *gin.Context) {
 
 // 	wallet := common.HexToAddress(walletAddr.(string))
 
-// 	// ดึงข้อมูล token จาก smart contract
 // 	tokenData, err := ContractInstance.GetLandTitleInfoByWallet(wallet)
 // 	if err != nil {
+// 		log.Printf("❌ GetLandTitleInfoByWallet error: %v", err)
 // 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot fetch data", "detail": err.Error()})
 // 		return
 // 	}
 
-// 	// แปลงข้อมูล token ให้เป็นรูปแบบที่เหมาะสม
 // 	result := make([]string, len(tokenData))
 // 	for i, v := range tokenData {
 // 		result[i] = v.String()
@@ -184,74 +254,58 @@ func GetLandMetadataByWallet(c *gin.Context) {
 // 	})
 // }
 
-// // ✅ ตัวช่วย: แปลง [9]string ที่เป็น "Key:Value" แต่ละช่องเป็น map[string]string
-// func parseMetaFieldsArray(arr [9]string) map[string]string {
-//     m := make(map[string]string, len(arr))
-//     for _, s := range arr {
-//         s = strings.TrimSpace(s)
-//         if s == "" {
-//             continue
-//         }
-//         kv := strings.SplitN(s, ":", 2)
-//         if len(kv) != 2 {
-//             // ถ้าไม่มี ":" ก็เก็บทั้งสตริงไว้ที่ key "Raw" (กันข้อมูลตกหล่น)
-//             // หรือจะข้ามก็ได้ตามต้องการ
-//             if _, exists := m["Raw"]; exists {
-//                 m["Raw"] = m["Raw"] + ", " + s
-//             } else {
-//                 m["Raw"] = s
-//             }
-//             continue
-//         }
-//         key := strings.TrimSpace(kv[0])
-//         val := strings.TrimSpace(kv[1])
-//         m[key] = val
-//     }
-//     return m
-// }
-
 // func GetLandMetadataByWallet(c *gin.Context) {
-//     walletAddr, exists := c.Get("wallet")
-//     if !exists {
-//         c.JSON(http.StatusUnauthorized, gin.H{"error": "Wallet not found in token"})
-//         return
-//     }
+// 	if ContractInstance == nil {
+// 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "contract not initialized"})
+// 		return
+// 	}
 
-//     wallet := common.HexToAddress(walletAddr.(string))
+// 	walletAddr, exists := c.Get("wallet")
+// 	if !exists {
+// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Wallet not found in token"})
+// 		return
+// 	}
 
-//     // 1) ดึง token IDs
-//     tokenIDs, err := ContractInstance.GetLandTitleInfoByWallet(wallet)
-//     if err != nil {
-//         c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot fetch token IDs", "detail": err.Error()})
-//         return
-//     }
+// 	wallet := common.HexToAddress(walletAddr.(string))
 
-//     // 2) ดึง metadata ของแต่ละ token (รวม tokenId = 0)
-//     metadataList := make([]map[string]interface{}, 0, len(tokenIDs))
-//     for _, t := range tokenIDs {
-//         meta, err := ContractInstance.GetLandMetadata(t)
-//         if err != nil {
-//             log.Printf("Cannot fetch metadata for tokenID %s: %v", t.String(), err)
-//             continue
-//         }
+// 	// 1) ดึง token IDs ของ user
+// 	tokenIDs, err := ContractInstance.GetLandTitleInfoByWallet(wallet)
+// 	if err != nil {
+// 		log.Printf("❌ GetLandTitleInfoByWallet error: %v", err)
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot fetch token IDs", "detail": err.Error()})
+// 		return
+// 	}
 
-//         metaObj := parseMetaFieldsArray(meta.MetaFields) // ✅ แปลงอาเรย์เป็น map
+// 	// 2) อ่าน metadata ต่อ token — ถ้าตัวไหนพลาด เก็บ error ในรายการแทนที่จะล้มทั้งหมด
+// 	metadataList := make([]map[string]interface{}, 0, len(tokenIDs))
 
-//         metadataList = append(metadataList, map[string]interface{}{
-//             "tokenID": t.String(),
-//             "price":   meta.Price.String(),
-//             "buyer":   meta.Buyer.Hex(),
-//             // "walletID": meta.WalletID.Hex(), // ❌ ลบออก: ไม่มีฟิลด์นี้ใน struct
-//             "meta":    metaObj,               // ✅ ส่งเป็น object ใช้ง่ายบน FE
-//         })
-//     }
+// 	for _, t := range tokenIDs {
+// 		meta, err := ContractInstance.GetLandMetadata(t)
+// 		if err != nil {
+// 			// เก็บรายละเอียดความผิดพลาดต่อ token
+// 			log.Printf("❌ GetLandMetadata token=%s error: %v", t.String(), err)
+// 			metadataList = append(metadataList, map[string]interface{}{
+// 				"tokenID": t.String(),
+// 				"error":   err.Error(),
+// 			})
+// 			continue
+// 		}
 
-//     // 3) ส่งกลับ
-//     c.JSON(http.StatusOK, gin.H{
-//         "wallet":   wallet.Hex(),
-//         "metadata": metadataList,
-//     })
+// 		metadataList = append(metadataList, map[string]interface{}{
+// 			"tokenID":    t.String(),
+// 			"metaFields": meta.MetaFields, // ตรวจชนิดให้ตรง ABI ของที่ deploy
+// 			"price":      meta.Price.String(),
+// 			"buyer":      meta.Buyer.Hex(),
+// 		})
+// 	}
+
+// 	// 3) ตอบกลับทั้งหมด (รวมตัวที่ error ต่อ token)
+// 	c.JSON(http.StatusOK, gin.H{
+// 		"wallet":   wallet.Hex(),
+// 		"metadata": metadataList,
+// 	})
 // }
+
 
 // package controller
 
