@@ -6,6 +6,10 @@ import (
 
 type Landtitle struct {
 	gorm.Model
+
+	TokenID  uint
+	IsLocked bool
+
 	SurveyNumber string `json:"survey_number" gorm:"type:varchar(50);not null"` // ระวาง เช่น "5336 IV 8632"
 	LandNumber   string `json:"land_number" gorm:"type:varchar(20);not null"`   // เลขที่ดิน เช่น "๑๑"
 	SurveyPage   string `json:"survey_page" gorm:"type:varchar(20);not null"`   // หน้าสำรวจ เช่น "๙๔๖๑"
@@ -49,8 +53,8 @@ type Landtitle struct {
 	// LandProvincesID uint
 	// LandProvinces   LandProvinces
 	//Booking []Booking  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
-	Landsalepost []Landsalepost `gorm:"foreignKey:LandID"`
-	Transaction  []Transaction  `gorm:"foreignKey:LandID"`
-	RequestSell  []RequestSell  `gorm:"foreignKey:LandID"`
-	RequestBuy   []RequestBuy   `gorm:"foreignKey:LandID"`
+	Landsalepost   []Landsalepost   `gorm:"foreignKey:LandID"`
+	Transaction    []Transaction    `gorm:"foreignKey:LandID"`
+	RequestBuySell []RequestBuySell `gorm:"foreignKey:LandID"`
+
 }

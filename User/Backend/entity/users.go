@@ -11,7 +11,7 @@ type Users struct {
 	// Name     string `gorm:"type:varchar(100)"`
 	Email           string `gorm:"type:varchar(100);uniqueIndex"`
 	Phonenumber     string `gorm:"type:varchar(15);uniqueIndex"`
-	Metamaskaddress string `gorm:"type:varchar(255)"`
+	Metamaskaddress string `gorm:"type:varchar(255);uniqueIndex"`
 	// Publickey string `gorm:"type:varchar(255)"`
 	// Password string `gorm:"type:varchar(255)"`
 	// Land     string `gorm:"type:varchar(100)"`
@@ -33,6 +33,5 @@ type Users struct {
 	// RoomchatUser2     []Roomchat    `gorm:"foreignKey:UserID2"`
 	TransactionBuyer  []Transaction `gorm:"foreignKey:BuyerID"`
 	TransactionSeller []Transaction `gorm:"foreignKey:SellerID"`
-	RequestBuy        []RequestBuy  `gorm:"foreignKey:UserID"`
-	RequestSell       []RequestSell `gorm:"foreignKey:UserID"`
+	RequestBuySell []RequestBuySell `gorm:"foreignKey:LandID"`
 }

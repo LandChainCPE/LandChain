@@ -1,5 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import "./UserDashboard.css";
+import { useNavigate } from "react-router-dom";
+import { GetDataUserVerification } from "../../service/https/garfield/http";
+
 
 /* =======================
    Icon Components (SVG)
@@ -80,8 +83,8 @@ const CardTitle = ({ children }: { children: React.ReactNode }) => (
 const CardDescription = ({ children }: { children: React.ReactNode }) => (
   <p className="card-description">{children}</p>
 );
-const CardContent = ({ children }: { children: React.ReactNode }) => (
-  <div className="card-content">{children}</div>
+const CardContent = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`card-content ${className}`}>{children}</div>
 );
 
 const Button = ({
@@ -163,7 +166,7 @@ const ExplorerLink = ({ txOrContract, label = "Explorer" }: { txOrContract: stri
   </a>
 );
 
-const StatCard = ({ title, value, sub }: { title: string; value: string | number; sub?: string }) => (
+const StatCard = ({ title, value, sub }: { title: React.ReactNode; value: React.ReactNode; sub?: React.ReactNode }) => (
   <div className="card stat-card">
     <div className="card-content">
       <div className="stat-title">{title}</div>
@@ -177,12 +180,41 @@ const StatCard = ({ title, value, sub }: { title: string; value: string | number
    UserProfilePage
    =================================================== */
 export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: LandTitle[] }) {
+  // State สำหรับ user info
+  const [userInfo, setUserInfo] = useState<{ firstName?: string; lastName?: string; email?: string; user_verification_id?: string | number }>({});
+
+  useEffect(() => {
+    // ดึงข้อมูลจาก localStorage ก่อน
+    const firstName = localStorage.getItem("firstName") || "";
+    const lastName = localStorage.getItem("lastName") || "";
+    const email = localStorage.getItem("email") || "";
+    let user_id = localStorage.getItem("user_id") || "";
+
+    // ถ้ามีข้อมูลใน localStorage ให้ set เลย
+    setUserInfo({ firstName, lastName, email });
+
+    // ถ้าไม่มี email ให้ลองดึงจาก API
+    if ((!email || email === "") && user_id) {
+      GetDataUserVerification(user_id).then(({ result }) => {
+        if (result && (result.email || result.first_name)) {
+          setUserInfo({
+            firstName: result.first_name || firstName,
+            lastName: result.last_name || lastName,
+            email: result.email || email,
+            user_verification_id: result.user_verification_id,
+          });
+        }
+      });
+    } else if (user_id) {
+      // ดึง user_verification_id ด้วยถ้ามี user_id
+      GetDataUserVerification(user_id).then(({ result }) => {
+        if (result && result.user_verification_id) {
+          setUserInfo((prev) => ({ ...prev, user_verification_id: result.user_verification_id }));
+        }
+      });
+    }
+  }, []);
   // ถ้าใช้ react-router-dom ให้แทน navigate นี้ด้วย useNavigate()
-  const navigate = (path: string) => {
-    // แค่เดโม: เปลี่ยนเป็น useNavigate().push(path) ตามโปรเจกต์จริง
-    console.log(`Would navigate to: ${path}`);
-    alert(`Navigation to: ${path}`);
-  };
 
   const { total, active, encumbered, reviewing } = useMemo(() => {
     const total = titles.length;
@@ -191,6 +223,15 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
     const reviewing = titles.filter((t) => t.status === "under_review").length;
     return { total, active, encumbered, reviewing };
   }, [titles]);
+
+  const navigate = useNavigate();
+
+  const handleRegisterLandClick = () => {
+    navigate('/user/userregisland');
+  };
+    useEffect(() => {
+    console.log("User info:", userInfo);
+  }, [userInfo]);
 
   return (
     <div className="container">
@@ -202,18 +243,27 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
             <CardTitle>
               <div style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
                 <ShieldCheck className="icon-lg text-white" />
-                Kanya P.
+                {userInfo.firstName || "User"} {userInfo.lastName || ""}
               </div>
             </CardTitle>
           </div>
-          <CardDescription>@kanya.land • kanya@example.com</CardDescription>
+          <CardDescription>
+            {userInfo.email ? userInfo.email : "-"}
+          </CardDescription>
 
           <div className="chip-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
             <div style={{ display: 'flex', gap: 8 }}>
-              <span className="chip chip-strong">
-                <BadgeCheck className="icon-sm mr-1" />
-                Verified
-              </span>
+              {userInfo.user_verification_id && userInfo.user_verification_id !== "undefined" ? (
+                <span className="chip chip-strong chip-green">
+                  <BadgeCheck className="icon-sm mr-1" />
+                  Verified
+                </span>
+              ) : (
+                <span className="chip chip-strong chip-red">
+                  <BadgeCheck className="icon-sm mr-1" />
+                  Unverified
+                </span>
+              )}
               <span className="chip chip-soft">
                 <Wallet className="icon-sm mr-1" />
                 Wallet Linked
@@ -221,9 +271,8 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
             </div>
             <Button
               variant="primary"
-              className="btn-lg"
-              style={{ fontSize: 16, padding: '10px 24px', boxShadow: '0 2px 12px 0 rgba(0,0,0,0.10)', background: 'linear-gradient(90deg,#2563eb 60%,#1e293b 100%)', color: '#fff', border: 'none', whiteSpace: 'nowrap' }}
-              onClick={() => navigate("/user/userregisland")}
+              className="button-registland"
+              onClick={handleRegisterLandClick}
             >
               <FileText className="icon mr-1" />
               ลงทะเบียนโฉนดที่ดิน
@@ -232,6 +281,39 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
 
         </CardHeader>
       </Card>
+
+      <div className="card-row">
+        {/* <Card>
+          <div className="card-header user-header">
+            <CardTitle>นำข้อมูลผู้ใช้ของคุณไปยัง Blockchain</CardTitle>
+            <CardDescription>ผู้ใช้</CardDescription>
+          </div>
+          <CardContent className="user-content">
+            <Button
+              className="usertoblockchain"
+              variant="primary"
+              onClick={() => navigate('/verifyusertoblockchain')}
+            >
+              ดำเนินการ
+            </Button>
+          </CardContent>
+        </Card> */}
+        <Card>
+          <div className="card-header land-header">
+            <CardTitle>นำข้อมูลที่ดินของคุณไปยัง Blockchain</CardTitle>
+            <CardDescription>ที่ดิน</CardDescription>
+          </div>
+          <CardContent className="land-content">
+            <Button
+              className="landtoblockchain"
+              variant="primary"
+              onClick={() => navigate('/verifyusertoblockchain')}
+            >
+              ดำเนินการ
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Land Titles Dashboard */}
       <div className="grid-4">
@@ -246,7 +328,7 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
           <CardTitle>รายการที่ดิน (บน Blockchain)</CardTitle>
           <CardDescription>ทรัพย์สินดิจิทัลที่ลงทะเบียนแล้ว</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="titles-content">
           <div className="table-wrap">
             <table className="table">
               <thead>
@@ -315,7 +397,7 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
             </CardTitle>
             <CardDescription>จัดการประกาศขายที่ดินของคุณ</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="quicklink-content">
             <Button className="w-full" onClick={() => navigate("/listings")}>
               ไปที่หน้า ประกาศขาย
             </Button>
@@ -330,7 +412,7 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
             </CardTitle>
             <CardDescription>ติดต่อผู้ซื้อ ผู้ขาย และเจ้าหน้าที่</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="quicklink-content">
             <Button className="w-full" onClick={() => navigate("/messages")}>
               ไปที่หน้า ข้อความ
             </Button>

@@ -1,0 +1,75 @@
+/* RequestBuyPage.css */
+
+.request-page {
+  padding: 1.5rem;
+}
+
+.request-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.request-card {
+  margin-bottom: 1rem;
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+  border-radius: 12px;
+}
+
+.request-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.request-col {
+  width: 33%;
+}
+
+.request-col h5, 
+.request-col h6 {
+  font-weight: 600;
+}
+
+.request-owner {
+  text-align: center;
+}
+
+.request-info {
+  text-align: right;
+}
+
+.request-info .price {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.request-info .date {
+  font-size: 0.85rem;
+  color: gray;
+}
+
+.request-page {
+  padding: 20px;
+}
+
+.request-title {
+  margin-bottom: 20px;
+}
+
+.request-card {
+  padding: 15px;
+}
+
+.land-info,
+.owner-info,
+.request-info {
+  flex: 1;
+}
+
+.land-info p,
+.owner-info p,
+.request-info p {
+  margin: 0 0 5px 0;
+}
+

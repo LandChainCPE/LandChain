@@ -44,7 +44,7 @@ func Authorizes() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
 			return
 		}
-
+		fmt.Println("🔑 JWT Claims Wallet:", claims.Wallet)
 		// ✅ เก็บ wallet ลง context
 		c.Set("wallet", claims.Wallet)
 

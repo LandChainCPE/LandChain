@@ -3,6 +3,7 @@ import { Upload, MapPin, Save, Camera } from "lucide-react";
 import "./UserRegisLand.css";
 import { RegisterLand } from "../../service/https/garfield/http";
 import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield/http";
+import { useNavigate } from "react-router-dom";
 
 type ProvinceDTO = { ID: number; name_th: string; name_en?: string };
 type DistrictDTO = { ID: number; name_th: string; province_id: number; name_en?: string };
@@ -38,6 +39,8 @@ const UserRegisLand: React.FC = () => {
   const [loadingS, setLoadingS] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const navigate = useNavigate();
 
   // ----- handlers -----
   // const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -112,6 +115,7 @@ const UserRegisLand: React.FC = () => {
     setImagePreview("");
     setDistricts([]);
     setSubdistricts([]);
+    navigate("/user/userdashboard");
   };
 
   // ----- effects: load cascading geo -----

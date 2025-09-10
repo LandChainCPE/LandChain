@@ -64,13 +64,12 @@ func GetMessagesByRoomID(c *gin.Context) {
 	c.JSON(http.StatusOK, messages)
 }
 
-
 type MessageWithUser struct {
-	MessageID    uint      `json:"message_id"`
-	Message      string    `json:"message"`
-	RoomchatID   uint      `json:"roomchat_id"`
-	UserID       uint      `json:id"`
-	UserName     string    `json:"name"`  // สมมติ Users มีชื่อฟิลด์ Name
+	MessageID  uint   `json:"message_id"`
+	Message    string `json:"message"`
+	RoomchatID uint   `json:"roomchat_id"`
+	UserID     uint   `json:id"`
+	UserName   string `json:"name"` // สมมติ Users มีชื่อฟิลด์ Name
 }
 
 // func GetMessagesByLandPostID(c *gin.Context) {

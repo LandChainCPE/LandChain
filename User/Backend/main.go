@@ -6,13 +6,12 @@ import (
 
 	"landchain/config"
 	"landchain/controller"
+	"landchain/websocket"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
 	"landchain/middlewares"
-
-
 )
 
 func main() {
@@ -24,6 +23,7 @@ func main() {
 	config.ConnectDatabase()
 	config.SetupDatabase()
 	r := gin.Default()
+	hub := websocket.NewHub()
 	controller.InitContract()
 	r.Use(CORSMiddleware())
 
@@ -34,9 +34,10 @@ func main() {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
 
-	r.POST("/createaccount", controller.CreateAccount)
+	r.POST("/createaccount", controller.CreateAccount) ///???
 	r.POST("/check-wallet", controller.CheckWallet)
 	r.POST("/login", controller.LoginUser)
+	r.POST("/register", controller.RegisterUser)
 
 	r.GET("/nonce/:address", controller.GetNonce)
 	r.POST("/nonce/validate", controller.ValidateNonce)
@@ -90,11 +91,27 @@ func main() {
 		// r.GET("/user/chat/roomchat/:id", controller.GetMessagesByLandPostID)
 		r.GET("/user/:id", controller.GetUserByID)
 
-		authorized.GET("/user/info/:id", controller.GetInfoUserByUserID)
+		authorized.GET("/user/info/", controller.GetInfoUserByWalletID)
 		authorized.GET("/user/landinfo/:id", controller.GetLandInfoByTokenID)
 		authorized.GET("/user/lands", controller.GetLandTitleInfoByWallet)
 		authorized.GET("/user/info", controller.GetInfoUserByToken)
+
+		authorized.GET("/user/lands/requestbuy/:id", controller.GetRequestBuybyLandID)
+		authorized.DELETE("/user/lands/delete/requestbuy", controller.DeleteRequestBuyByUserIDAndLandID)
+
+		authorized.GET("/user/lands/requestsell", controller.GetAllRequestSellByUserID)
+		authorized.POST("/user/lands/requestsell/metadata", controller.GetMultipleLandMetadataHandler)
+		authorized.DELETE("/user/lands/delete/requestsell", controller.DeleteRequestSellByUserIDAndLandID)
+		authorized.GET("/user/lands/requestsellbydelete", controller.GetAllRequestSellByUserIDAndDelete)
+		authorized.POST("/user/lands/requestsell/sign", controller.SetSellInfoHandler)
+
+		r.GET("/ws/transactions", controller.TransactionWS(hub))
+		authorized.POST("/user/lands/transation", controller.CreateTransaction)
+		authorized.GET("/user/lands/get/transation/:id", controller.GetTransationByUserID)
+		authorized.PUT("/user/lands/put/transation/buyerupdate", controller.UpdateTransactionBuyerAccept)
+
 		authorized.POST("/user/lands/metadata", controller.GetLandMetadataByToken)
+		authorized.POST("/user/lands/metadata/wallet", controller.GetLandMetadataByWallet)
 
 		// CONTROLLER RegisterLand
 		authorized.POST("/user/userregisland", controller.UserRegisLand)
@@ -110,7 +127,6 @@ func main() {
 	// 	public.POST("/signup", user.CreateUser)
 
 	// }
-
 
 	r.Run(":8080")
 	r.Run()

@@ -2,21 +2,22 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"landchain/entity"
 	"log"
 	"os"
 	"time"
-	"errors"
-	"landchain/entity"
+
+	"encoding/csv"
+	"strconv"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"strconv" 
-	"encoding/csv"
 )
 
 var db *gorm.DB
@@ -208,8 +209,17 @@ func SetupDatabase() {
 		&entity.Branch{},
 		&entity.Booking{},
 		&entity.Typetransaction{},
+
+		&entity.LandGeographies{},
+		&entity.LandProvinces{},
+		&entity.ServiceType{},
+		&entity.LandAmphures{},
+		&entity.LandTambons{},
+		&entity.Landtitle{}, // ✅ ต้องมาก่อน RequestBuy/Sell
+
 		&entity.LandVerification{}, /////
 		&entity.Landtitle{},
+
 		&entity.Landsalepost{},
 		&entity.Transaction{},
 		&entity.Photoland{},
@@ -219,14 +229,15 @@ func SetupDatabase() {
 		&entity.Petition{},
 		&entity.State{},
 		&entity.Location{},
+
 		&entity.LandGeographies{},
 		&entity.LandProvinces{},
 		&entity.ServiceType{},
 		&entity.LandAmphures{},
 		&entity.LandTambons{},
 		&entity.Landtitle{},
-		&entity.RequestBuy{},
-		&entity.RequestSell{},
+		&entity.RequestBuySellType{},
+		&entity.RequestBuySell{},
 		&entity.Tag{},
 		&entity.District{},
 		&entity.Subdistrict{},
@@ -257,9 +268,11 @@ func SetupDatabase() {
 		db.Create(&entity.Role{Role: "Admin"})
 
 		RefRole := uint(1)
-		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0x81C7a15aE0b72CADE82D428844cff477f6E364b5", RoleID: RefRole}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
-		db.Create(&entity.Users{Firstname: "JoJo", Lastname: "Jo12345", Email: "Jpooo@gmail.com", Phonenumber: "255555", Metamaskaddress: "0xC3dCE9c6953f9D64527F80e7682078B3643D6B2E", RoleID: RefRole})
-		// db.Create(&entity.Users{Name: "Bam", Email: "@goods1", Phonenumber: "0912345677", Password: "1234564", Land: "ผหก5ป58ก", RoleID: RefRole})
+
+		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f469a", RoleID: RefRole}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
+		db.Create(&entity.Users{Firstname: "Panachai", Lastname: "Potisuwan", Email: "Panachai@gmail.com", Phonenumber: "0555555554", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f4444", RoleID: RefRole})
+		db.Create(&entity.Users{Firstname: "Noth", Lastname: "Potisuwan", Email: "Noth@gmail.com", Phonenumber: "0555555556", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f6666", RoleID: RefRole})
+
 		// //RefServiceType := uint(1)
 		// db.Create(&entity.Users{Name: "Jo", Password: "jo123456", Land: "12กท85", RoleID: RefRole,})
 		// db.Create(&entity.Users{Name: "Aut", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
@@ -269,10 +282,8 @@ func SetupDatabase() {
 		// db.Create(&entity.Province{Province: "อุบลราชธานี"})
 		// db.Create(&entity.Province{Province: "มหาสารคาม"})
 
-		
-
-		RefProvince := uint(2)
-		RefProvince1 := uint(1)
+		RefProvince := uint(23)
+		RefProvince1 := uint(19)
 		db.Create(&entity.Branch{Branch: "น้ำยืน", ProvinceID: RefProvince})
 		db.Create(&entity.Branch{Branch: "เมืองนครราขสีมา", ProvinceID: RefProvince1})
 
@@ -297,18 +308,22 @@ func SetupDatabase() {
 		SeedAmphures(db)
 		SeedTambons(db)
 
-		db.Create(&entity.RequestSell{UserID: 2, LandID: 1})
-		db.Create(&entity.RequestSell{UserID: 3, LandID: 1})
-		db.Create(&entity.RequestSell{UserID: 2, LandID: 2})
-		db.Create(&entity.RequestSell{UserID: 3, LandID: 3})
-		db.Create(&entity.RequestBuy{UserID: 1, LandID: 5})
-		db.Create(&entity.RequestBuy{UserID: 1, LandID: 6})
-		db.Create(&entity.RequestBuy{UserID: 1, LandID: 7})
-		db.Create(&entity.RequestBuy{UserID: 1, LandID: 8})
+		db.Create(&entity.Typetransaction{StatusNameTh: "รอผู้ซื้อ/ผู้ขายตกลง", StatusNameEn: "in_progress"})
+		db.Create(&entity.Typetransaction{StatusNameTh: "เสร็จสิ้น", StatusNameEn: "completed"})
+		db.Create(&entity.Typetransaction{StatusNameTh: "ถูกยกเลิกโดยผู้ซื้อหรือผู้ขาย", StatusNameEn: "cancelled"})
+		db.Create(&entity.Typetransaction{StatusNameTh: "หมดอายุ", StatusNameEn: "expired"})
 
-		// สร้าง LandProvinces
+		db.Create(&entity.RequestBuySellType{StatusNameTh: "เจ้าของโฉลดสร้างคำขอขาย", StatusNameEn: "pending"})
+		db.Create(&entity.RequestBuySellType{StatusNameTh: "ตกลงซื้อขาย", StatusNameEn: "accepted"})
+		db.Create(&entity.RequestBuySellType{StatusNameTh: "ปฏิเสธคำขอ", StatusNameEn: "rejected"})
+		db.Create(&entity.RequestBuySellType{StatusNameTh: "ยกเลิก", StatusNameEn: "cancelled"})
+
+		// // สร้าง LandProvinces
+		db.Create(&entity.Transaction{LandID: 1, BuyerID: 2, SellerID: 4, TypetransactionID: 1})
 
 		db.Create(&entity.Landtitle{
+			TokenID:            0,
+			IsLocked:           false,
 			SurveyNumber:       "5336 IV 8632",
 			LandNumber:         "๑๑",
 			SurveyPage:         "๙๔๖๑",
@@ -318,7 +333,7 @@ func SetupDatabase() {
 			Rai:                5,
 			Ngan:               2,
 			SquareWa:           50,
-			Status:				"Process", 
+			Status:             "Process",
 			GeographyID:        nil, // Replace with actual GeographyID if available
 			ProvinceID:         1,   // Replace with actual ProvinceID
 			DistrictID:         1,   // Replace with actual DistrictID
@@ -327,13 +342,60 @@ func SetupDatabase() {
 			UserID:             1,   // Replace with actual UserID
 		})
 
+		db.Create(&entity.Landtitle{
+			TokenID:            1,
+			IsLocked:           false,
+			SurveyNumber:       "5336 IV 8632",
+			LandNumber:         "๑๑",
+			SurveyPage:         "๙๔๖๑",
+			TitleDeedNumber:    "12345",
+			Volume:             "10",
+			Page:               "20",
+			Rai:                5,
+			Ngan:               2,
+			SquareWa:           50,
+			Status:             "Process",
+			GeographyID:        nil, // Replace with actual GeographyID if available
+			ProvinceID:         2,   // Replace with actual ProvinceID
+			DistrictID:         1,   // Replace with actual DistrictID
+			SubdistrictID:      1,   // Replace with actual SubdistrictID
+			LandVerificationID: nil, // Replace with actual LandVerificationID if available
+			UserID:             1,   // Replace with actual UserID
+		})
+
+		db.Create(&entity.Landtitle{
+			TokenID:            2,
+			IsLocked:           false,
+			SurveyNumber:       "5336 IV 8632",
+			LandNumber:         "๑๑",
+			SurveyPage:         "๙๔๖๑",
+			TitleDeedNumber:    "12345",
+			Volume:             "10",
+			Page:               "20",
+			Rai:                5,
+			Ngan:               2,
+			SquareWa:           50,
+			Status:             "Process",
+			GeographyID:        nil, // Replace with actual GeographyID if available
+			ProvinceID:         3,   // Replace with actual ProvinceID
+			DistrictID:         1,   // Replace with actual DistrictID
+			SubdistrictID:      1,   // Replace with actual SubdistrictID
+			LandVerificationID: nil, // Replace with actual LandVerificationID if available
+			UserID:             1,   // Replace with actual UserID
+		})
+
+		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
+		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 3, SellerID: 4, RequestBuySellTypeID: 1})
+		db.Create(&entity.RequestBuySell{LandID: 2, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
+		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
+		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
 		// 🔸 สร้าง Roomchat หลังจากสร้าง Landsalepost แล้ว
 		createRoomchatsAndMessages()
 	}
 
 	log.Println("✅ Database Migrated & Seeded Successfully")
 
-		states := []entity.State{
+	states := []entity.State{
 		{Name: "รอตรวจสอบ", Color: "orange"},
 		{Name: "กำลังดำเนินการ", Color: "blue"},
 		{Name: "เสร็จสิ้น", Color: "green"},
@@ -364,8 +426,8 @@ func SetupDatabase() {
 		Description: "โฉนดเก่าหาย",
 		Date:        "2025-07-31",
 		Topic:       "ขอคัดสำเนาโฉนด",
-		StateID:     1, 
-		UserID:      1, 
+		StateID:     1,
+		UserID:      1,
 	}
 
 	if err := db.Create(&petition).Error; err != nil {
@@ -381,30 +443,29 @@ func SetupDatabase() {
 		{Tag: "ใกล้BTS"},
 		{Tag: "ใกล้MRT"},
 		{Tag: "ติดภูเขา"},
-
 	}
-		// เพิ่ม tags ลงในฐานข้อมูล
+	// เพิ่ม tags ลงในฐานข้อมูล
 	if err := db.Create(&tags).Error; err != nil {
 		log.Fatal("Error inserting tags:", err)
 	}
 
 	// แสดงผลการบันทึกข้อมูล
-	fmt.Println("Tags have been inserted successfully")	
+	fmt.Println("Tags have been inserted successfully")
 
 	//postlad
 	landpost := entity.Landsalepost{
-		FirstName:   "มาลี",
-		LastName:    "มาดี",
-		PhoneNumber:  "0987654321",
-		Image:       "j@gmail.com",
-		Name: 		"สวนคุณตา",
-		Price:        	120000,
-		TagID:       		1,
-		ProvinceID:     	20, 
-		DistrictID:      	1, 
-		SubdistrictID: 		1,
+		FirstName:     "มาลี",
+		LastName:      "มาดี",
+		PhoneNumber:   "0987654321",
+		Image:         "j@gmail.com",
+		Name:          "สวนคุณตา",
+		Price:         120000,
+		TagID:         1,
+		ProvinceID:    20,
+		DistrictID:    1,
+		SubdistrictID: 1,
 		//Map: 		"aaa",
-		LandID:	1,
+		LandID: 1,
 		UserID: 1,
 	}
 
@@ -485,7 +546,6 @@ func createRoomchatsAndMessages() {
 	// }
 
 	// log.Println("✅ Database Migrated & Seeded Successfully")
-
 
 }
 func ImportProvincesCSV(db *gorm.DB, filePath string) {

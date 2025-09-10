@@ -134,3 +134,80 @@ func LoginUser(c *gin.Context) {
 		"exists":         true,
 	})
 }
+
+func RegisterUser(c *gin.Context) {
+	// รับข้อมูลจาก frontend (Address, Nonce, Signature, Firstname, Lastname, Phonenumber, Email)
+	var req struct {
+		Address     string `json:"address" binding:"required"`
+		Nonce       string `json:"nonce" binding:"required"`
+		Signature   string `json:"signature" binding:"required"`
+		Firstname   string `json:"firstname"`
+		Lastname    string `json:"lastname"`
+		Phonenumber string `json:"phonenumber"`
+		Email       string `json:"email"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input", "details": err.Error()})
+		return
+	}
+
+	// ตรวจสอบและใช้ nonce
+	if !ValidateAndConsumeNonce(req.Address, req.Nonce) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired nonce"})
+		return
+	}
+
+	// ตรวจสอบ signature
+	if !verifySignature(req.Address, req.Nonce, req.Signature) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid signature"})
+		return
+	}
+
+	db := config.DB()
+
+	// เช็คว่า Metamask ไม่ซ้ำกับในฐานข้อมูล
+	var existingUser entity.Users
+	if err := db.Where("metamaskaddress = ?", req.Address).First(&existingUser).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Wallet address already exists"})
+		return
+	}
+
+	// สร้างข้อมูล User ใหม่
+	newUser := entity.Users{
+		Metamaskaddress: req.Address,
+		Firstname:       req.Firstname,
+		Lastname:        req.Lastname,
+		Phonenumber:     req.Phonenumber,
+		Email:           req.Email,
+		RoleID:          1, // ผู้ใช้ทั่วไป
+	}
+	if err := db.Create(&newUser).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating user"})
+		return
+	}
+
+	// สร้าง JWT Token สำหรับผู้ใช้
+	jwtWrapper := services.JwtWrapper{
+		SecretKey:       os.Getenv("JWT_SECRET"),
+		Issuer:          os.Getenv("JWT_ISSUER"),
+		ExpirationHours: 1,
+	}
+
+	signedToken, err := jwtWrapper.GenerateToken(newUser.Metamaskaddress)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error signing token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":        "User registered successfully",
+		"token_type":     "Bearer",
+		"token":          signedToken,
+		"user_id":        newUser.ID,
+		"first_name":     newUser.Firstname,
+		"last_name":      newUser.Lastname,
+		"wallet_address": newUser.Metamaskaddress,
+		"success":        true,
+		"exists":         true,
+	})
+}

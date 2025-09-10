@@ -17,3 +17,4 @@ npm install express ws pg cors dotenv
 npm install --save-dev typescript ts-node @types/node @types/ws @types/express
 npm install ws express pg
 go get github.com/gorilla/websocket
+.
