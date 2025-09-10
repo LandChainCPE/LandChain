@@ -1,6 +1,6 @@
 import React, { useState, useEffect, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuditOutlined, UserOutlined } from "@ant-design/icons";
+import { AuditOutlined, UserOutlined, HomeOutlined } from "@ant-design/icons";
 import { Col, Row } from "antd";
 import './HeaderUserMain.css';  // เพิ่มการอ้างอิงไฟล์ CSS
 import Logo from "../../assets/LogoLandchain.png";
@@ -43,6 +43,27 @@ const MainPage = (): JSX.Element => {
         }, 2000);
     };
 
+    const goToPostLand = () => {
+        setLoading(true);
+        localStorage.setItem("isLogin", "true");
+        setTimeout(() => {
+            navigate("/user/sellpostmain");
+        }, 2000);
+    };
+    const goToVerifyUserToBlockchain = () => {
+        setLoading(true);
+        localStorage.setItem("isLogin", "true");
+        setTimeout(() => {
+            navigate("/user/verifyusertoblockchain");
+        }, 2000);
+    };
+    const goToUserDashboard = () => {
+        setLoading(true);
+        setTimeout(() => {
+            navigate("/user/userdashboard");
+        }, 2000);
+    };
+
     const goToLogin = () => {
         setLoading(true);
         setTimeout(() => {
@@ -53,6 +74,10 @@ const MainPage = (): JSX.Element => {
     const handleLogout = () => {
         // ลบข้อมูลการล็อกอินออกจาก localStorage
         localStorage.removeItem("isLogin");
+        localStorage.removeItem("user_id");
+        localStorage.removeItem("token");
+        localStorage.removeItem("token_type");
+        localStorage.removeItem("walletAddress");
         setIsLogin(false);
 
         // ล้างข้อมูลที่เกี่ยวกับ Metamask (ถ้ามี)
@@ -96,14 +121,28 @@ const MainPage = (): JSX.Element => {
                         ลงทะเบียนโฉนดที่ดิน
                     </NavButton>
 
-                    <NavButton variant="secondary">
-                        ข่าวสาร
+                    <NavButton
+                        variant="primary"
+                        onClick={goToPostLand}
+                        icon={<HomeOutlined />}
+                    >
+                        ประกาศขายที่ดิน
                     </NavButton>
 
                     {isLogin ? (
                         <>
+
+                            <NavButton
+                                variant="primary"
+                                onClick={goToVerifyUserToBlockchain}
+                                icon={<UserOutlined />}
+                            >
+                                ลงทะเบียนผู้ใช้ Blockchain
+                            </NavButton>
+                            
                             <NavButton
                                 variant="secondary"
+                                onClick={goToUserDashboard}
                                 icon={<UserOutlined />}
                             >
                                 โปรไฟล์

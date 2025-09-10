@@ -8,13 +8,19 @@ const MainPageAfterLogin = Loadable(lazy(() => import("../pages/MainPage/MainPag
 const RegisterUser = Loadable(lazy(() => import("../pages/LoginRegister/Register")));
 const Regisland = Loadable(lazy(() => import("../pages/RegisLand/RegisLand")));
 
+const VerifyUser = Loadable(lazy(() => import("../pages/VerifyUser/verifyuser")));
+
+
 const Dashboard = Loadable(lazy(() => import("../pages/Petition/Dashboard")));
 const Petition = Loadable(lazy(() => import("../pages/Petition/Petition")));
 const State = Loadable(lazy(() => import("../pages/Petition/State")));
 
 const SellMainPage = Loadable(lazy(() => import("../pages/Sell-Buy/SellMainpage")));
 const Map = Loadable(lazy(() => import("../pages/Map/map")));
-const SellPost = Loadable(lazy(() => import("../pages/SellPost/sellpost")));
+const SellPost = Loadable(lazy(() => import("../pages/SellPost/sellpost.tsx")));
+const SellPostMain = Loadable(lazy(() => import("../pages/SellPost/sellpostmain.tsx")));
+const LandDetail = Loadable(lazy(() => import("../pages/SellPost/landdetail.tsx")));
+
 const Chat = Loadable(lazy(() => import("../pages/ChatPage/chat")));
 
 const CreateAccount = Loadable(lazy(() => import("../pages/CreateUser/CreateAccount")));
@@ -22,6 +28,8 @@ const ConnectMetamask = Loadable(lazy(() => import("../pages/CreateUser/ConnectM
 const LandMarkingMap = Loadable(lazy(() => import("../pages/mapbox_test/mapbox_test")));
 
 const UserRegisland = Loadable(lazy(() => import("../pages/UserRegisLand/UserRegisLand")));
+const UserDashboard = Loadable(lazy(() => import("../pages/UserDashboard/UserDashboard")));
+const VerifyLand = Loadable(lazy(() => import("../pages/VerifyLand/VerifyLand")));
 
 const RequestSell = Loadable(lazy(() => import("../pages/RequestSell/ReausetSell")));
 const RequestBuy = Loadable(lazy(() => import("../pages/RequestSell/RequsetBuy")));
@@ -131,6 +139,22 @@ const UserRoutes = (): RouteObject[] => [
         ) 
       },
       { 
+        path: "sellpostmain", 
+        element: (
+          <ProtectedRoute>
+            <SellPostMain />
+          </ProtectedRoute>
+        ) 
+      },
+      { 
+        path: "landdetail/:id", 
+        element: (
+          <ProtectedRoute>
+            <LandDetail />
+          </ProtectedRoute>
+        )
+      },
+      { 
         path: "requestsell", 
         element: (
           <ProtectedRoute>
@@ -151,6 +175,28 @@ const UserRoutes = (): RouteObject[] => [
         element: (
           <ProtectedRoute>
             <Transation />
+          </ProtectedRoute>
+        ) 
+      },
+      { 
+        path: "verifyusertoblockchain", 
+        element: (
+          <ProtectedRoute>
+            <VerifyUser />
+          </ProtectedRoute>
+        )},
+      {
+        path: "userdashboard", 
+        element: (
+          <ProtectedRoute>
+            <UserDashboard />
+          </ProtectedRoute>
+        )},
+      { 
+        path: "verifyland", 
+        element: (
+          <ProtectedRoute>
+            <VerifyLand />
           </ProtectedRoute>
         ) 
       },
@@ -200,3 +246,6 @@ function ConfigRoutes() {
 }
 
 export default ConfigRoutes;
+
+
+

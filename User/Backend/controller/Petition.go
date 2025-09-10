@@ -25,47 +25,61 @@ func GetAllPetition(c *gin.Context) {
 
 //r.POST("/petitions", controller.CreatePetition)
 func CreatePetition(c *gin.Context) {
-	var input entity.Petition
+    var input entity.Petition
 
-	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Println("Bind JSON Error:", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+    if err := c.ShouldBindJSON(&input); err != nil {
+        log.Println("Bind JSON Error:", err)
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
 
-	if err := config.DB().Create(&input).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+    // Check if the state_id exists
+    var state entity.State
+    if err := config.DB().First(&state, input.StateID).Error; err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid state_id"})
+        return
+    }
 
-	log.Println("✅ Received:", input)
-	c.JSON(http.StatusCreated, input)
+    if err := config.DB().Create(&input).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    log.Println("✅ Received:", input)
+    c.JSON(http.StatusCreated, input)
 }
 
 
 //อัพเดทเฉพาะสถานะ
 // PATCH /petitions/:id/state
 func UpdatePetitionState(c *gin.Context) {
-	id := c.Param("id")
-	var input struct {
-		StateID uint `json:"state_id"`
-	}
+    id := c.Param("id")
+    var input struct {
+        StateID uint `json:"state_id"`
+    }
 
-	// ✅ รับค่า StateID จาก Request
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+    // Receive the StateID from Request
+    if err := c.ShouldBindJSON(&input); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
 
-	// ✅ อัปเดตเฉพาะ StateID
-	if err := config.DB().Model(&entity.Petition{}).
-		Where("id = ?", id).
-		Update("state_id", input.StateID).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+    // Check if the state_id exists
+    var state entity.State
+    if err := config.DB().First(&state, input.StateID).Error; err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid state_id"})
+        return
+    }
 
-	c.JSON(http.StatusOK, gin.H{"message": "อัปเดตสถานะสำเร็จ"})
+    // Update the petition state
+    if err := config.DB().Model(&entity.Petition{}).
+        Where("id = ?", id).
+        Update("state_id", input.StateID).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "State updated successfully"})
 }
 
 //อัพเดทข้อมูลทั้งหมด

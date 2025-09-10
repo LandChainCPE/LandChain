@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Layout, Menu, Table, Tag, Card, Typography, Row, Col, Statistic, Avatar, Empty } from "antd";
-import { HomeOutlined, ProfileOutlined, FileTextOutlined, CalendarOutlined, UserOutlined, ClockCircleOutlined, CheckCircleOutlined, ExclamationCircleOutlined} from "@ant-design/icons";
-import { GetAllPetition } from "../../service/https/petition";  
-import { useNavigate } from "react-router-dom";  
+import { Layout, Menu, Table, Tag, Card, Row, Col, Statistic, Avatar, Empty } from "antd";
+import { HomeOutlined, ProfileOutlined, FileTextOutlined, CalendarOutlined, UserOutlined, ClockCircleOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { GetAllPetition } from "../../service/https/jib/jib";
+import { useNavigate } from "react-router-dom";
 
 const { Header, Sider, Content } = Layout;
-const { Title, Text } = Typography;
 
 interface State {
   id: number;
@@ -14,37 +13,41 @@ interface State {
 }
 
 interface Petition {
-  id: number;
+  ID: number;
   first_name: string;
   last_name: string;
   topic: string;
   date: string;
   description: string;
-  ID: number;
   State: State;
 }
 
 const StateComponent: React.FC = () => {
-  const navigate = useNavigate();   
-  const [petitions, setPetitions] = useState<Petition[]>([]);  
+  const navigate = useNavigate();
+  const [petitions, setPetitions] = useState<Petition[]>([]);
   const [filteredPetitions, setFilteredPetitions] = useState<Petition[]>(petitions);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {     
-    const fetchPetitions = async () => {       
-      try {         
-        const response = await GetAllPetition(); // ดึงข้อมูลคำร้องจาก API       
-        setPetitions(response); // เก็บข้อมูลที่ได้ใน petitions
-        setFilteredPetitions(response); // เก็บข้อมูลที่กรองแล้วใน filteredPetitions
-      } catch (error) {        
-        console.error("Error fetching petition data:", error);      
+  useEffect(() => {
+    const fetchPetitions = async () => {
+      try {
+        setLoading(true); // Set loading to true before fetching
+        const response = await GetAllPetition();
+        setPetitions(response);
+        setFilteredPetitions(response);
+      } catch (error) {
+        console.error("Error fetching petition data:", error);
       } finally {
         setLoading(false);
-      }    };      
-    fetchPetitions();   
+      }
+    };
+
+    fetchPetitions();
   }, []);
 
   const getStatusIcon = (state: State) => {
+    if (!state) return <ClockCircleOutlined />; // Handle the case where state is undefined
+
     switch (state.name) {
       case "รอตรวจสอบ":
         return <ClockCircleOutlined />;
@@ -59,16 +62,18 @@ const StateComponent: React.FC = () => {
 
   const getStatistics = () => {
     const total = petitions.length;
-    const pending = petitions.filter(p => p.State.name === "รอตรวจสอบ").length;
-    const approved = petitions.filter(p => p.State.name === "อนุมัติแล้ว").length;
-    const processing = petitions.filter(p => p.State.name === "กำลังดำเนินการ").length;
+
+    // Check for undefined state and ensure safety before accessing state.name
+    const pending = petitions.filter(p => p.State?.name === "รอตรวจสอบ").length;
+    const approved = petitions.filter(p => p.State?.name === "อนุมัติแล้ว").length;
+    const processing = petitions.filter(p => p.State?.name === "กำลังดำเนินการ").length;
 
     return { total, pending, approved, processing };
   };
 
   const stats = getStatistics();
 
-  const columns = [
+  const petitionColumns = [
     {
       title: "เลขคำร้อง",
       dataIndex: "ID",
@@ -130,10 +135,10 @@ const StateComponent: React.FC = () => {
         const color = state ? state.color : 'gray';
         const statusName = state ? state.name : 'ไม่ระบุสถานะ';
         return (
-          <Tag 
-            color={color} 
+          <Tag
+            color={color}
             icon={getStatusIcon(state)}
-            style={{ 
+            style={{
               borderRadius: 16,
               padding: "4px 12px",
               fontWeight: 600
@@ -148,9 +153,9 @@ const StateComponent: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: "100vh", background: "#f5f7fa" }}>
-      <Sider 
-        width={260} 
-        style={{ 
+      <Sider
+        width={260}
+        style={{
           background: "linear-gradient(180deg, #001529 0%, #002140 100%)",
           boxShadow: "4px 0 20px rgba(0,0,0,0.1)"
         }}
@@ -165,41 +170,41 @@ const StateComponent: React.FC = () => {
             ระบบยื่นคำร้อง
           </div>
         </div>
-        
+
         <Menu
           mode="inline"
           defaultSelectedKeys={["2"]}
-          style={{ background: "transparent",border: "none",fontSize: 15,paddingTop: 16}}
+          style={{ background: "transparent", border: "none", fontSize: 15, paddingTop: 16 }}
           theme="dark"
         >
-          <Menu.Item 
-            key="1" 
-            icon={<HomeOutlined />} 
+          <Menu.Item
+            key="1"
+            icon={<HomeOutlined />}
             onClick={() => navigate("/user/dashboard")}
-            style={{ borderRadius: "0 25px 25px 0",margin: "4px 0",marginRight: 12,height: 48,display: "flex",alignItems: "center"}}>
-              หน้าหลัก
+            style={{ borderRadius: "0 25px 25px 0", margin: "4px 0", marginRight: 12, height: 48, display: "flex", alignItems: "center" }}>
+            หน้าหลัก
           </Menu.Item>
-          <Menu.Item 
-            key="2" 
-            icon={<ProfileOutlined />} 
+          <Menu.Item
+            key="2"
+            icon={<ProfileOutlined />}
             onClick={() => navigate("/user/state")}
-            style={{ borderRadius: "0 25px 25px 0",margin: "4px 0",marginRight: 12,height: 48,display: "flex",alignItems: "center"}}>
-              ติดตามสถานะคำร้อง
+            style={{ borderRadius: "0 25px 25px 0", margin: "4px 0", marginRight: 12, height: 48, display: "flex", alignItems: "center" }}>
+            ติดตามสถานะคำร้อง
           </Menu.Item>
         </Menu>
       </Sider>
 
       <Layout>
-        <Header
-          style={{background: "#fff",padding: "40px",display: "flex",justifyContent: "space-between",alignItems: "center",boxShadow: "0 2px 8px rgba(0,0,0,0.06)",borderBottom: "none"}}>              
+        <Header style={{ background: "#fff", padding: "40px", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", borderBottom: "none" }}>
           <div>
-            <h1 style={{ margin: 0, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",WebkitBackgroundClip: "text",WebkitTextFillColor: "transparent",fontSize: 24, fontWeight: 700}}>
-               📋 ติดตามสถานะคำร้อง
+            <h1 style={{ margin: 0, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontSize: 24, fontWeight: 700 }}>
+              📋 ติดตามสถานะคำร้อง
             </h1>
           </div>
         </Header>
 
         <Content style={{ padding: "32px", background: "#f5f7fa" }}>
+          {/* Statistics Section */}
           <Row gutter={24} style={{ marginBottom: 24 }}>
             <Col xs={24} sm={6}>
               <Card style={{ borderRadius: 12, textAlign: "center" }}>
@@ -243,57 +248,26 @@ const StateComponent: React.FC = () => {
             </Col>
           </Row>
 
+          {/* Petition Table */}
+          <div style={{ margin: '24px 0', fontSize: '1.5rem', fontWeight: 600, color: '#4b5563', borderBottom: '2px solid #1890ff', paddingBottom: '8px' }}>
+            คำร้องขอดูเอกสาร
+          </div>
           <Card style={{ borderRadius: 12, overflow: "hidden" }}>
             <Table
-              columns={columns}
+              columns={petitionColumns}
               dataSource={filteredPetitions}
               rowKey="id"
               loading={loading}
-              pagination={{ 
+              pagination={{
                 pageSize: 10,
                 showSizeChanger: true,
                 showQuickJumper: true,
-                showTotal: (total, range) => 
-                  `${range[0]}-${range[1]} จาก ${total} รายการ`,
+                showTotal: (total, range) => `${range[0]}-${range[1]} จาก ${total} รายการ`,
               }}
               locale={{
-                emptyText: (
-                  <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description="ไม่พบข้อมูลคำร้อง"
-                  />
-                )
+                emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="ไม่พบข้อมูลคำร้อง" />,
               }}
-              style={{ 
-                background: "#fff",
-              }}
-              rowClassName={(record, index) => 
-                index % 2 === 0 ? "" : "table-row-light"
-              }
             />
-          </Card>
-
-          {/* Help Section */}
-          <Card style={{ 
-            marginTop: 24,
-            background: "linear-gradient(135deg, #e6f7ff 0%, #f6ffed 100%)",
-            border: "1px solid #d9f7be",
-            borderRadius: 12
-          }}>
-            <Row gutter={24} align="middle">
-              <Col flex="auto">
-                <Title level={4} style={{ margin: 0, color: "#389e0d" }}>
-                  💡 คำแนะนำ
-                </Title>
-                <Text style={{ color: "#666" }}>
-                  • คลิก "ดูรายละเอียด" เพื่อดูข้อมูลเพิ่มเติม<br/>
-                  • สถานะจะอัพเดทอัตโนมัติเมื่อมีการเปลี่ยนแปลง<br/>
-                  • หากมีปัญหาโปรดติดต่อเจ้าหน้าที่
-                </Text>
-              </Col>
-              <Col>
-              </Col>
-            </Row>
           </Card>
         </Content>
       </Layout>

@@ -12,6 +12,8 @@ import (
 	"github.com/joho/godotenv"
 
 	"landchain/middlewares"
+
+
 )
 
 func main() {
@@ -34,14 +36,22 @@ func main() {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
 
+	r.POST("/createaccount", controller.CreateAccount)///???
+	r.POST("/check-wallet", controller.CheckWallet)
 	r.POST("/login", controller.LoginUser)
+	r.POST("/register", controller.RegisterUser)
 
-	r.POST("/createaccount", controller.CreateAccount)
-
+	r.GET("/nonce/:address", controller.GetNonce)
+	r.POST("/nonce/validate", controller.ValidateNonce)
 	authorized := r.Group("")
 	authorized.Use(middlewares.Authorizes())
 	{
 		authorized.GET("/getbookingdata", controller.GetBookingData)
+		authorized.GET("/getdatauserforverify/:bookingID", controller.GetDataUserForVerify)
+		authorized.POST("/verifywalletid/:bookingID", controller.VerifyWalletID)
+
+		authorized.GET("/getdatauserverification/:userid", controller.GetDataUserVerification)
+
 		authorized.POST("/userbookings", controller.CreateBooking) // สร้างการจอง
 		authorized.PUT("/bookings/:id", controller.UpdateBooking)  // อัปเดตการจอง
 		//r.PUT("/bookings/:id", controller.UpdateBooking) // อัปเดตการจอง
@@ -50,6 +60,12 @@ func main() {
 		authorized.GET("/petitions", controller.GetAllPetition)
 		authorized.POST("/petitions", controller.CreatePetition)
 		authorized.GET("/states", controller.GetAllStates)
+		authorized.GET("/tags", controller.GetTags)
+		authorized.POST("/landpost", controller.CreateLandPost)
+		authorized.GET("/landposts", controller.GetAllPostLandData)
+		authorized.GET("/province", controller.GetAllProvinces)
+		authorized.GET("/district/:id", controller.GetDistrict)
+		authorized.GET("/subdistrict/:id", controller.GetSubdistrict)
 
 		authorized.GET("/provinces", controller.GetProvince) // ดึงข้อมูลจังหวัด
 		authorized.GET("/branches", controller.GetBranch)    // ดึงข้อมูลสาขา
@@ -69,10 +85,10 @@ func main() {
 		authorized.GET("/location", controller.GetLocations)    // ดึงข้อมูลโฉนดที่ดิน
 		authorized.POST("/location", controller.CreateLocation) // สร้างโฉนดที่ดิน
 		// CONTROLLER lANDSELLPOST
-		r.GET("/user/sellpost", controller.GetAllPostLandData)
+		//r.GET("/user/sellpost", controller.GetAllPostLandData)
 
 		// CONTROLLER Chat
-		r.GET("/ws/roomchat/:roomID", controller.HandleWebSocket)
+		// r.GET("/ws/roomchat/:roomID", controller.HandleWebSocket)
 		r.GET("/user/chat/:id", controller.GetAllLandDatabyID)
 		// r.GET("/user/chat/roomchat/:id", controller.GetMessagesByLandPostID)
 		r.GET("/user/:id", controller.GetUserByID)
@@ -81,7 +97,7 @@ func main() {
 		authorized.GET("/user/landinfo/:id", controller.GetLandInfoByTokenID)
 		authorized.GET("/user/lands", controller.GetLandTitleInfoByWallet)
 		authorized.GET("/user/info", controller.GetInfoUserByToken)
-		authorized.GET("/user/lands/metadata", controller.GetLandMetadataByWallet)
+
 		authorized.GET("/user/lands/requestbuy/:id", controller.GetRequestBuybyLandID)
 		authorized.DELETE("/user/lands/delete/requestbuy", controller.DeleteRequestBuyByUserIDAndLandID)
 
@@ -96,8 +112,14 @@ func main() {
 		authorized.GET("/user/lands/get/transation/:id", controller.GetTransationByUserID)
 		authorized.PUT("/user/lands/put/transation/buyerupdate", controller.UpdateTransactionBuyerAccept)
 
+		authorized.POST("/user/lands/metadata", controller.GetLandMetadataByToken)
+
+
 		// CONTROLLER RegisterLand
-		//r.POST("/user/regisland", controller.RegisterLand)
+		authorized.POST("/user/userregisland", controller.UserRegisLand)
+		//authorized.GET("/province", controller.GetAllProvinces)
+		//authorized.GET("/district/:id", controller.GetDistrict)
+		//authorized.GET("/subdistrict/:id", controller.GetSubdistrict)
 	}
 
 	// public := r.Group("")
@@ -107,6 +129,7 @@ func main() {
 	// 	public.POST("/signup", user.CreateUser)
 
 	// }
+
 
 	r.Run(":8080")
 	r.Run()

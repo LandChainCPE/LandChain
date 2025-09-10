@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, Form, Input, Button, Space, Typography, Row, Col, message, Steps, Divider } from "antd";
 import { FileTextOutlined, UserOutlined, PhoneOutlined, MailOutlined, CalendarOutlined, SendOutlined, ReloadOutlined, ArrowLeftOutlined } from "@ant-design/icons";
-import { CreatePetition } from "../../service/https/petition"; 
+import { CreatePetition } from "../../service/https/jib/jib"; 
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -37,6 +37,8 @@ const Petition: React.FC = () => {
       setLoading(false);
       return;
     }
+
+  //const userId = localStorage.getItem("id");
 
 //อย่าลืมแก้ตรงState,user_id
     try {
@@ -98,7 +100,7 @@ const Petition: React.FC = () => {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div>
               <Title level={2} style={{ margin: 0, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                📝 ยื่นคำร้องออนไลน์
+                📝 ยื่นคำร้องเรื่องเอกสาร
               </Title>
               <Text type="secondary">กรอกข้อมูลเพื่อยื่นคำร้องขอเอกสาร</Text>
             </div>
@@ -203,7 +205,7 @@ const Petition: React.FC = () => {
               </Col>
 
               <Col xs={24} md={12}>
-                <Form.Item label={<span><MailOutlined style={{ marginRight: 8, color: "#eb2f96" }} /> อีเมล (ไม่บังคับ)</span>}>
+                <Form.Item label={<span><MailOutlined style={{ marginRight: 8, color: "#eb2f96" }} /> อีเมล </span>}>
                   <Input
                     name="email"
                     value={formData.email}

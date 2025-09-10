@@ -4,76 +4,79 @@ import { useNavigate } from 'react-router-dom';  // นำเข้า useNaviga
 import Logo from "../../assets/LogoLandChainBLackVertical.png";
 import LogoMatamask from "../../assets/LogoMetamask.png";
 import Connect from "../../assets/Connect.png";
-import { CreateAccount, } from "../../service/https/garfield/http";
+import { secureRegis } from '../../service/https/nonceService';
+
 
 // Declare the ethereum property on the Window interface
-declare global {
-  interface Window {
-    ethereum?: any;
-  }
-}
 
 const ConnectMetamask = () => {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const navigate = useNavigate(); // ใช้ useNavigate สำหรับการนำทางไปยังหน้า MainPage
 
-  const handleLogin = async () => {
+  const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const connectMetamaskRegis = async () => {
     if (window.ethereum) {
       try {
-        // Request MetaMask account connection
+        setLoading(true);
+        setErrorMessage('');
+
         const accounts = await window.ethereum.request({
           method: 'eth_requestAccounts',
         });
 
         if (accounts.length > 0) {
           const address = accounts[0];
+          console.log("Wallet address from MetaMask:", address);
           setWalletAddress(address);
 
-          // เก็บที่อยู่กระเป๋าใน localStorage
-          localStorage.setItem('walletAddress', address);
+          // ใช้ secure login with nonce protection
+          const loginResult = await secureRegis(address);
+          console.log("Secure login successful:", loginResult);
 
-          // ดึงข้อมูลผู้ใช้จาก localStorage
-          const firstname = localStorage.getItem('firstname');
-          const lastname = localStorage.getItem('lastname');
-          const phonenumber = localStorage.getItem('phonenumber');
-          const email = localStorage.getItem('email');
-          const userID = localStorage.getItem('user_id');
-
-          if (firstname && lastname && phonenumber && email) {
-            // ส่งข้อมูลไปยัง backend
-            const userData = {
-              userID,
-              firstname,
-              lastname,
-              phonenumber,
-              email,
-              metamaskaddress: address,
-            };
-            console.log("userData:", userData);
-            let { response, result } = await CreateAccount(userData);
-            console.log("หลัง สร้างผู้ใช้", response);
-            console.log("หลัง สร้างผู้ใช้", result);
-
-            if (response.status === 200) {
-              localStorage.setItem("token", result.token);
-              localStorage.setItem("token_type", result.token_type);
-              localStorage.setItem("isLogin", "true");
-              localStorage.setItem("firstnameuser", result.FirstNameUser);
-              localStorage.setItem("lastnameuser", result.LastNameUser);
-              localStorage.setItem("user_id", result.UserID);
-              console.log(localStorage);
-            // localStorage.clear();
-
-              navigate("/user/main");
+          if (loginResult.wallet_address) {
+            // login สำเร็จ
+            localStorage.setItem('isLogin', 'true');
+            localStorage.setItem('walletAddress', loginResult.wallet_address);
+            localStorage.setItem('user_id', loginResult.user_id ? loginResult.user_id.toString() : '');
+            if (loginResult.token) {
+              localStorage.setItem('token', loginResult.token);
+            } else {
+              localStorage.removeItem('token');
             }
+
+            navigate('/user', { replace: true });
+          } else {
+            // wallet ยังไม่ได้สมัคร หรือ login ไม่สำเร็จ
+            setErrorMessage('Login failed. Please try again or sign up first.');
+
+            // simulate disconnect
+            setWalletAddress(null);
+            localStorage.removeItem('isLogin');
+            localStorage.removeItem('walletAddress');
+            localStorage.removeItem('user_id');
+            localStorage.removeItem('token');
           }
         }
-      } catch (error) {
-        console.error('Error connecting to MetaMask:', error);
-        alert('การเชื่อมต่อ MetaMask ล้มเหลว');
+      } catch (error: any) {
+        console.error('Error during secure login:', error);
+        if (error.code === 4001) {
+          setErrorMessage('Connection rejected by user.');
+        } else if (error.message?.includes('User not found')) {
+          setErrorMessage('Wallet not registered. Please sign up first.');
+        } else if (error.message?.includes('Invalid signature')) {
+          setErrorMessage('Signature verification failed. Please try again.');
+        } else if (error.message?.includes('Invalid or expired nonce')) {
+          setErrorMessage('Session expired. Please try again.');
+        } else {
+          setErrorMessage('Error connecting to MetaMask. Please try again.');
+        }
+      } finally {
+        setLoading(false);
       }
     } else {
-      alert('โปรดติดตั้ง MetaMask เพื่อเชื่อมต่อ');
+      setErrorMessage('MetaMask not installed. Please install MetaMask to continue.');
     }
   };
 
@@ -105,8 +108,8 @@ const ConnectMetamask = () => {
 
         {/* Button Section */}
         <div className="d-flex justify-content-center">
-          <button className="btn btn-warning w-auto" style={{ padding: '12px 70px' }} onClick={handleLogin}>
-            อนุญาต
+          <button className="btn btn-warning w-auto" style={{ padding: '12px 70px' }} onClick={connectMetamaskRegis}>
+            อนุญาต5555
           </button>
         </div>
 

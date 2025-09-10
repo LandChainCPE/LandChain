@@ -4,17 +4,40 @@ import "gorm.io/gorm"
 
 type Landsalepost struct {
 	gorm.Model
-	Name           string  `gorm:"type:varchar(100)"`
-	PhoneNumber    string  `gorm:"type:varchar(100)"`
-	NumOfLandTitle string  `gorm:"type:varchar(100)"`
-	AdressLandplot string  `gorm:"type:varchar(100)"`
-	Price          float64 `gorm:"type:numeric(15,2);not null"` // ราคาที่ดิน
+	FirstName     string `gorm:"type:varchar(100)" json:"first_name"`
+	LastName      string `gorm:"type:varchar(100)" json:"last_name"`
+	PhoneNumber   string `gorm:"type:varchar(100)" json:"phone_number"`
+	Name        string `gorm:"type:varchar(100)" json:"name"`
+	Image		  string `gorm:"type:varchar(100)" json:"image"`
+	Price 	      float64 `gorm:"type:numeric(15,2);not null" json:"price"`
+	//Map		      string `gorm:"type:varchar(100)" json:"map"`
 
-	LandtitleID uint
-	Landtitle   Landtitle `gorm:"foreignKey:LandtitleID"`
+	ProvinceID uint  `json:"province_id"`
+	Province   Province  `gorm:"foreignKey:ProvinceID"`
 
-	//Booking []Booking  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
-	Roomchat  []Roomchat  `gorm:"foreignKey:LandsalepostID"`
-	Photoland []Photoland `gorm:"foreignKey:LandsalepostID"`
-	Location  []Location  `gorm:"foreignKey:LandsalepostID"` // One-to-One relationship with Location
+	DistrictID uint `json:"district_id"`
+	District	District  `gorm:"foreignKey:DistrictID"`
+
+	SubdistrictID uint  `json:"subdistrict_id"`
+	Subdistrict	Subdistrict `gorm:"foreignKey:SubdistrictID"`
+	
+	TagID 	uint `json:"tag_id"`
+	Tag	Tag `gorm:"foreignKey:TagID"`
+
+	LandID    uint      // 👈 FK ไปยัง role.id
+	Landtitle Landtitle `gorm:"foreignKey:LandID"`
+
+	UserID uint  `json:"user_id"`
+	Users  Users `gorm:"foreignKey:UserID"`
+
+	// StateID uint  `json:"state_id"`
+	// States  State `gorm:"foreignKey:StateID"`
+
+	Booking []Booking  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
+
+	Roomchat []Roomchat  `gorm:"foreignKey:LandsalepostID"`
+	Transaction []Transaction  `gorm:"foreignKey:LandsalepostID"`
+	Photoland []Photoland  `gorm:"foreignKey:LandsalepostID"`
+	Location []Location `gorm:"foreignKey:LandsalepostID"` // One-to-One relationship with Location
 }
+
