@@ -403,7 +403,7 @@ const BookingCalendar = () => {
                     }}
                   >
                     {provinces.map((p) => (
-                      <Option key={p.ID} value={p.ID}>{p.Province}</Option>
+                      <Option key={p.ID} value={p.ID}>{p.name_th}</Option>
                     ))}
                   </Select>
                 </Col>

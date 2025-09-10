@@ -268,8 +268,8 @@ func SetupDatabase() {
 
 		
 
-		RefProvince := uint(2)
-		RefProvince1 := uint(1)
+		RefProvince := uint(23)
+		RefProvince1 := uint(19)
 		db.Create(&entity.Branch{Branch: "น้ำยืน", ProvinceID: RefProvince})
 		db.Create(&entity.Branch{Branch: "เมืองนครราขสีมา", ProvinceID: RefProvince1})
 

@@ -32,9 +32,10 @@ func main() {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
 
-	r.POST("/createaccount", controller.CreateAccount)
+	r.POST("/createaccount", controller.CreateAccount)///???
 	r.POST("/check-wallet", controller.CheckWallet)
 	r.POST("/login", controller.LoginUser)
+	r.POST("/register", controller.RegisterUser)
 
 	r.GET("/nonce/:address", controller.GetNonce)
 	r.POST("/nonce/validate", controller.ValidateNonce)
