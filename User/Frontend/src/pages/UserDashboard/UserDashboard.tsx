@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react";
 import "./UserDashboard.css";
+import { useNavigate } from "react-router-dom";
+
 
 /* =======================
    Icon Components (SVG)
@@ -163,7 +165,7 @@ const ExplorerLink = ({ txOrContract, label = "Explorer" }: { txOrContract: stri
   </a>
 );
 
-const StatCard = ({ title, value, sub }: { title: string; value: string | number; sub?: string }) => (
+const StatCard = ({ title, value, sub }: { title: React.ReactNode; value: React.ReactNode; sub?: React.ReactNode }) => (
   <div className="card stat-card">
     <div className="card-content">
       <div className="stat-title">{title}</div>
@@ -178,11 +180,6 @@ const StatCard = ({ title, value, sub }: { title: string; value: string | number
    =================================================== */
 export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: LandTitle[] }) {
   // ถ้าใช้ react-router-dom ให้แทน navigate นี้ด้วย useNavigate()
-  const navigate = (path: string) => {
-    // แค่เดโม: เปลี่ยนเป็น useNavigate().push(path) ตามโปรเจกต์จริง
-    console.log(`Would navigate to: ${path}`);
-    alert(`Navigation to: ${path}`);
-  };
 
   const { total, active, encumbered, reviewing } = useMemo(() => {
     const total = titles.length;
@@ -191,6 +188,12 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
     const reviewing = titles.filter((t) => t.status === "under_review").length;
     return { total, active, encumbered, reviewing };
   }, [titles]);
+
+  const navigate = useNavigate();
+
+  const handleRegisterLandClick = () => {
+    navigate('/user/userregisland');
+  };
 
   return (
     <div className="container">
@@ -221,9 +224,8 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
             </div>
             <Button
               variant="primary"
-              className="btn-lg"
-              style={{ fontSize: 16, padding: '10px 24px', boxShadow: '0 2px 12px 0 rgba(0,0,0,0.10)', background: 'linear-gradient(90deg,#2563eb 60%,#1e293b 100%)', color: '#fff', border: 'none', whiteSpace: 'nowrap' }}
-              onClick={() => navigate("/user/userregisland")}
+              className="button-registland"
+              onClick={handleRegisterLandClick}
             >
               <FileText className="icon mr-1" />
               ลงทะเบียนโฉนดที่ดิน
@@ -232,6 +234,39 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
 
         </CardHeader>
       </Card>
+
+      <div className="card-row">
+        <Card>
+          <CardHeader className="header-toblockchain">
+            <CardTitle>นำข้อมูลผู้ใช้ของคุณไปยัง Blockchain</CardTitle>
+            <CardDescription>ผู้ใช้</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              className="usertoblockchain"
+              variant="primary"
+              onClick={() => navigate('/verifyusertoblockchain')}
+            >
+              ดำเนินการ
+            </Button>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>นำข้อมูลที่ดินของคุณไปยัง Blockchain</CardTitle>
+            <CardDescription>ที่ดิน</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              className="landtoblockchain"
+              variant="primary"
+              onClick={() => navigate('/verifyusertoblockchain')}
+            >
+              ดำเนินการ
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Land Titles Dashboard */}
       <div className="grid-4">
