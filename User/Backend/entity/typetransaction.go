@@ -4,7 +4,8 @@ import "gorm.io/gorm"
 
 type Typetransaction struct {
 	gorm.Model
-	Name     string `gorm:"type:varchar(100)"`
+	StatusNameTh string
+	StatusNameEn string
 
-	Transaction []Transaction  `gorm:"foreignKey:TypetransactionID"`
+	Transaction []Transaction `gorm:"foreignKey:TypetransactionID"`
 }

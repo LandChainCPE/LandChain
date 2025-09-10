@@ -54,9 +54,9 @@ export async function GetInfoUserByToken() {
 }
 
 // ฟังก์ชันอื่น ๆ ก็ใช้ axios instance นี้ได้เช่นกัน
-export async function GetInfoUserByUserID(id: number) {
+export async function GetInfoUserByWalletID() {
   try {
-    const res = await api.get(`/user/info/${id}`);
+    const res = await api.get(`/user/info`);
     return res.data;
   } catch (e) {
     const err = e as any;
@@ -90,6 +90,173 @@ export async function GetLandTitleInfoByWallet() {
 export async function GetLandMetadataByToken(tokenID: string) {
   try {
     const res = await api.post("/user/lands/metadata", { tokenID });
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function GetRequestBuybyLandID(id: number | string) {
+  try {
+    const res = await api.get(`/user/lands/requestbuy/${id}`); // ✅ แทนค่า id จริง
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function DeleteRequestBuy(userID: number, landID: string | number) {
+  try {
+    const res = await api.delete(`/user/lands/delete/requestbuy`, {
+      params: { userID, landID },
+    });
+    return res.data;
+  } catch (e: any) {
+    if (e.response) return e.response.data;
+    return { error: "เกิดข้อผิดพลาดในการลบคำขอซื้อ" };
+  }
+}
+
+
+/**
+ * แปลงเงินบาทเป็น ETH
+ * @param thb ราคาบาท
+ * @returns จำนวน ETH
+ */
+
+interface CoinGeckoResponse {
+  ethereum: {
+    thb: number;
+  };
+}
+
+export async function convertTHBtoETH(thb: number): Promise<string> {
+  try {
+    const res = await axios.get<CoinGeckoResponse>(
+      "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=thb"
+    );
+
+    // TypeScript รู้แล้วว่า res.data เป็น CoinGeckoResponse
+    const ethPriceTHB = res.data.ethereum.thb;
+    const ethAmount = thb / ethPriceTHB;
+
+    return ethAmount.toString();
+  } catch (err) {
+    console.error("Failed to convert THB to ETH:", err);
+    throw new Error("ไม่สามารถแปลง THB เป็น ETH ได้");
+  }
+}
+
+export async function SetSellInfoHandler(tokenId: number, priceTHB: number, buyer: string) {
+  try {
+    const res = await api.post(`/user/lands/requestsell/sign`, {
+      tokenId,
+      priceTHB,
+      buyer,
+    });
+    return res.data;
+  } catch (e: any) {
+    if (e.response) return e.response.data;
+    return { error: "เกิดข้อผิดพลาดดำเนินการ" };
+  }
+}
+
+
+
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/// RequsetButSell
+export async function GetAllRequestSellByUserID() {
+  try {
+    const res = await api.get(`/user/lands/requestsell`); // ✅ แทนค่า id จริง
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function GetMultipleLandMetadataHandler(tokenIDs: number[]) {
+  try {
+    const res = await api.post("/user/lands/requestsell/metadata", { tokenIDs }); // ใช้ POST ส่ง array ไป backend
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function DeleteRequestSell(buyerID: number, sellerID: number, landID: string | number) {
+  try {
+    const res = await api.delete(`/user/lands/delete/requestsell`, {
+      params: { buyerID, sellerID, landID },
+    });
+    return res.data;
+  } catch (e: any) {
+    if (e.response) return e.response.data;
+    return { error: "เกิดข้อผิดพลาดในการลบคำขอซื้อ" };
+  }
+}
+
+export async function GetAllRequestSellByUserIDAndDelete() {
+  try {
+    const res = await api.get(`/user/lands/requestsellbydelete`); // ✅ แทนค่า id จริง
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+export async function CreateTransation(sellerID: number, buyerID: number, amount: number, landID: string | number) {
+  try {
+    const res = await api.post(`/user/lands/transation?landID=${landID}&sellerID=${sellerID}&buyerID=${buyerID}&amount=${amount}`, {
+    Amount: amount,
+    BuyerAccepted: true,
+    SellerAccepted: false,
+    MoneyChecked: true,
+    LandDepartmentApproved: false
+  });
+    return res.data;
+  } catch (e: any) {
+    if (e.response) return e.response.data;
+    return { error: "เกิดข้อผิดพลาดในการลบคำขอซื้อ" };
+  }
+}
+
+export async function GetTransationByUserID(userId: number | string) {
+  try {
+    const res = await api.get(`/user/lands/get/transation/${userId}`); // ✅ แทนค่า id จริง
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function UpdateTransactionBuyerAccept({ sellerID, buyerID, landID }: { sellerID: string | number, buyerID: string | number, landID: string | number }) {
+  try {
+    const res = await api.put(
+      `/user/lands/put/transation/buyerupdate?sellerID=${sellerID}&buyerID=${buyerID}&landID=${landID}`
+    );
     return res.data;
   } catch (e) {
     const err = e as any;

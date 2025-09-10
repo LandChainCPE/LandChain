@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -12,6 +14,7 @@ type Transaction struct {
 	SellerAccepted         bool
 	MoneyChecked           bool
 	LandDepartmentApproved bool
+	Expire                 time.Time
 
 	TypetransactionID uint            // 👈 FK ไปยัง role.id
 	Typetransaction   Typetransaction `gorm:"foreignKey:TypetransactionID"`
