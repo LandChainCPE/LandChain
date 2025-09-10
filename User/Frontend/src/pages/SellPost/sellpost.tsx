@@ -13,13 +13,6 @@ type Tag = {
   icon: string;
 };
 
-type RawLandMeta = any;
-type LandMeta = {
-  tokenId: string;
-  buyer: string;
-  price: string | number;
-  metaFields: any[];
-};
 
 const SellPost = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -39,10 +32,6 @@ const SellPost = () => {
   const [landMetadata, setLandMetadata] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
-
-
-  const ZERO_ADDR = "0xf55988edca178d5507454107945a0c96f3af628c";
-
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -122,7 +111,6 @@ const handleUpload = (file: File) => {
 };
 
   // โหลดจังหวัด
- // ✅ 2) โหลดจังหวัด: value = id (ไม่ใช่ชื่อ)
 useEffect(() => {
   const loadProvinces = async () => {
     try {
@@ -445,74 +433,93 @@ useEffect(() => {
                         <div className="land-summary">
                             <div className="land-count">
                                {/* Land Tokens Section */}
-                            {landMetadata.length > 0 && (
-                              <div className="land-tokens-section">
-                                <h3 className="section-title">เลือกที่ดินที่ต้องการจำหน่าย</h3>
-                                <div className="land-tokens-container">
-                                  {landMetadata.map((land, index) => {
-                                    const deedNo = land.metaFields?.[0] ?? "ไม่มีโฉนด";
-                                    const province = land.metaFields?.[8] ?? "-";
-                                    const isAvailable = (land.buyer || "").toLowerCase() === ZERO_ADDR.toLowerCase();
-                                    return (
-                                      <div
-                                        key={land.tokenId || index}
-                                        className={`land-token-card ${selectedLand === land.tokenId ? "selected" : ""}`}
-                                        onClick={() => handleSelectLand(land.tokenId)}
-                                      >
-                                        <div className="land-token-content">
-                                          <div className="token-header">
-                                            <h4 className="token-title">โฉนด #{deedNo}</h4>
-                                            {isAvailable ? (
-                                              <span className="status-badge available">พร้อมจำหน่าย</span>
-                                            ) : (
-                                              <span className="status-badge sold">ขายแล้ว</span>
-                                            )}
-                                          </div>
-                                          <div className="contract-info">
-                                            <p className="contract-label">จังหวัด</p>
-                                            <p className="contract-value">{province}</p>
-                                            <p className="contract-label">ราคา</p>
-                                            <p className="contract-value">{land.price}</p>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            )}
+{landMetadata.length > 0 && (
+  <div className="land-tokens-section">
+    <h3 className="section-title">เลือกที่ดินที่ต้องการจำหน่าย</h3>
+    <div className="land-tokens-container">
+      {landMetadata.map((land: any, index: number) => {
+        const deedNo = land.meta?.["Deed No"] || land.meta?.["DeedNo"] || "-";
+        const province = land.meta?.["Province"] || "-";
+        const price = land.price ?? "0";
+        const isAvailable = (land.buyer || "").toLowerCase() ===
+          "0x0000000000000000000000000000000000000000";
+
+        return (
+          <div
+            key={index}
+            className={`land-token-card ${selectedLand === land.tokenID ? "selected" : ""}`}
+            onClick={() => handleSelectLand(String(land.tokenID))}
+          >
+            <div className="land-token-content">
+              <div className="token-header">
+                <h4 className="token-title">โฉนด #{deedNo}</h4>
+                {isAvailable ? (
+                  <span className="status-badge available">พร้อมจำหน่าย</span>
+                ) : (
+                  <span className="status-badge sold">ขายแล้ว</span>
+                )}
+              </div>
+
+              <div className="contract-info">
+                <p className="contract-label">จังหวัด</p>
+                <p className="contract-value">{province}</p>
+
+                <p className="contract-label">ราคา (wei)</p>
+                <p className="contract-value">{price}</p>
+              </div>
+
+              <div className="contract-info">
+                <p className="contract-label">Token ID</p>
+                <p className="contract-value">{land.tokenID}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
+
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Land Tokens Grid */}
-                {landTokens.length > 0 && (
-                    <div className="land-tokens-section">
-                        <h3 className="section-title">เลือกที่ดินที่ต้องการจำหน่าย</h3>
-                        <div className="grid-3">
-                            {landTokens.map((token, index) => (
-                                <div key={index} className="land-token-card">
-                                    <div className="land-token-content">
-                                        <div className="token-header">
-                                            <h4 className="token-title">Token #{token.id || index + 1}</h4>
-                                            <span className="status-badge">พร้อมจำหน่าย</span>
-                                        </div>
-                                        <div className="contract-info">
-                                            <p className="contract-label">Contract Address</p>
-                                            <p className="contract-address">
-                                                {token.contract_address || 'N/A'}
-                                            </p>
-                                        </div>
-                                        <button className="btn btn-primary">
-                                            เลือกจำหน่าย
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
+{landTokens.length > 0 && (
+  <div className="land-tokens-section">
+    <h3 className="section-title">เลือกที่ดินที่ต้องการจำหน่าย</h3>
+    <div className="grid-3">
+      {landTokens.map((tokenId: string, index: number) => (
+        <div key={index} className="land-token-card">
+          <div className="land-token-content">
+            <div className="token-header">
+              <h4 className="token-title">Token #{tokenId}</h4>
+              <span className="status-badge">พร้อมจำหน่าย</span>
+            </div>
+
+            <div className="contract-info">
+              <p className="contract-label">Contract Address</p>
+              <p className="contract-address">
+                {import.meta?.env?.VITE_CONTRACT_ADDRESS
+                  || (import.meta as any)?.env?.REACT_APP_CONTRACT_ADDRESS
+                  || "N/A"}
+              </p>
+            </div>
+
+            <button
+              className="btn btn-primary"
+              onClick={() => handleSelectLand(String(tokenId))}
+            >
+              เลือกจำหน่าย
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
 
                 {/* Empty State */}
                 {landTokens.length === 0 && !loading && (
@@ -537,38 +544,6 @@ useEffect(() => {
                 )}
             </div>
         </div>
-
-    {/*<div style={{ margin: "1rem 0" }}>
-      <button
-        onClick={handleCheckLandTitles}
-        style={{
-          backgroundColor: "#ef4444",
-          color: "#fff",
-          border: "none",
-          borderRadius: "0.5rem",
-          padding: "0.75rem 1.5rem",
-          cursor: "pointer",
-          fontSize: "1rem",
-          fontWeight: "bold",
-        }}
-      >
-        🔍 ตรวจสอบจำนวนโฉนดที่ดิน
-      </button>
-
-      {loading && <p>กำลังโหลดข้อมูล...</p>}
-
-      {landTitles.length > 0 && (
-        <div style={{ marginTop: "1rem" }}>
-          <p>คุณมีโฉนดทั้งหมด: {landTitles.length} ใบ</p>
-          <ul>
-            {landTitles.map((title, index) => (
-              <li key={index}>{title}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>*/}
-
 
                 <div style={{ marginTop: "2rem", display: "flex", justifyContent: "flex-end" }}>
                   <button
