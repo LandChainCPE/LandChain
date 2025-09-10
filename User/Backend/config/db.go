@@ -315,6 +315,7 @@ func SetupDatabase() {
 			Rai:                5,
 			Ngan:               2,
 			SquareWa:           50,
+			Status:				"Process", 
 			GeographyID:        nil, // Replace with actual GeographyID if available
 			ProvinceID:         1,   // Replace with actual ProvinceID
 			DistrictID:         1,   // Replace with actual DistrictID

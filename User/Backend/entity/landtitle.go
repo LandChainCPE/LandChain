@@ -23,6 +23,8 @@ type Landtitle struct {
 	Rai           int `json:"rai" gorm:"default:0"`             // ไร่
 	Ngan          int `json:"ngan" gorm:"default:0"`            // งาน
 	SquareWa      int `json:"square_wa" gorm:"default:0"`       // ตารางวา
+
+	Status 	string `json:"ststus" gorm:"type:varchar(50);not null"`
 	
 	// FK ไปยัง Geography / Province / Amphure / District
 	GeographyID *uint
