@@ -13,5 +13,7 @@ type District struct {
 	Subdistrict []Subdistrict `gorm:"foreignKey:DistrictID"`
 
 	Landsalepost []Landsalepost  `gorm:"foreignKey:DistrictID"` // 👈 One-to-Many relationship
+	// Landsalepost []Landsalepost  `gorm:"foreignKey:DistrictID"` // 👈 One-to-Many relationship
+	Landtitles    []Landtitle    `gorm:"foreignKey:DistrictID"`
 }
 //อำเภอ

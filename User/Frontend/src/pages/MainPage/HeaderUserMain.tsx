@@ -57,6 +57,12 @@ const MainPage = (): JSX.Element => {
             navigate("/user/verifyusertoblockchain");
         }, 2000);
     };
+    const goToUserDashboard = () => {
+        setLoading(true);
+        setTimeout(() => {
+            navigate("/user/userdashboard");
+        }, 2000);
+    };
 
     const goToLogin = () => {
         setLoading(true);
@@ -136,6 +142,7 @@ const MainPage = (): JSX.Element => {
                             
                             <NavButton
                                 variant="secondary"
+                                onClick={goToUserDashboard}
                                 icon={<UserOutlined />}
                             >
                                 โปรไฟล์

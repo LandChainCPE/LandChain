@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Logo from "../../assets/LogoLandchainBlack.png";
 import { useNavigate } from 'react-router-dom';
-
-
-
+import './CreateAccount.css';
 
 const CreateAccount = () => {
   const [firstname, setFirstname] = useState('');
@@ -13,7 +11,6 @@ const CreateAccount = () => {
   const [email, setEmail] = useState('');
   const navigate = useNavigate();
 
-  // เมื่อโหลดหน้าแรกให้ดึงข้อมูลจาก localStorage (ถ้ามี)
   React.useEffect(() => {
     const storedFirstname = localStorage.getItem('firstname');
     const storedLastname = localStorage.getItem('lastname');
@@ -30,75 +27,71 @@ const CreateAccount = () => {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-
-    // เก็บข้อมูลใน localStorage
     localStorage.setItem('firstname', firstname);
     localStorage.setItem('lastname', lastname);
     localStorage.setItem('phonenumber', phonenumber);
     localStorage.setItem('email', email);
     localStorage.setItem('user_id', localStorage.getItem('user_id') || '');
 
-    // แสดงข้อมูลใน console
-    console.log('บัญชีผู้ใช้ถูกสร้าง!', {
-      firstname,
-      lastname,
-      phonenumber,
-      email,
-    });
+    console.log('Account created!', { firstname, lastname, phonenumber, email });
     navigate('/connectmetamask');
   };
 
   return (
     <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light">
-      <div className="bg-white p-4 shadow-sm rounded" style={{ maxWidth: '500px', width: '100%' }}>
-        <img src={Logo} alt="LandChain Logo" style={{ width: "100%",height: "auto",maxWidth: "500px" }} />
-        <h2 className="text-center mb-4">Create Account </h2>
+      <div className="card-container">
+        <img src={Logo} alt="LandChain Logo" className="logo" />
+        <h2>Create Account</h2>
         <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label htmlFor="firstname" className="form-label">ชื่อ</label>
-            <input
-              type="text"
-              id="firstname"
-              value={firstname}
-              onChange={(e) => setFirstname(e.target.value)}
-              required
-              className="form-control"
-            />
+          <div className="row">
+            <div className="col-md-6 mb-3">
+              <label htmlFor="firstname" className="form-label">First Name</label>
+              <input
+                type="text"
+                id="firstname"
+                value={firstname}
+                onChange={(e) => setFirstname(e.target.value)}
+                required
+                className="form-control"
+              />
+            </div>
+            <div className="col-md-6 mb-3">
+              <label htmlFor="lastname" className="form-label">Last Name</label>
+              <input
+                type="text"
+                id="lastname"
+                value={lastname}
+                onChange={(e) => setLastname(e.target.value)}
+                required
+                className="form-control"
+              />
+            </div>
           </div>
-          <div className="mb-3">
-            <label htmlFor="lastname" className="form-label">นามสกุล</label>
-            <input
-              type="text"
-              id="lastname"
-              value={lastname}
-              onChange={(e) => setLastname(e.target.value)}
-              required
-              className="form-control"
-            />
+          <div className="row">
+            <div className="col-md-6 mb-3">
+              <label htmlFor="phonenumber" className="form-label">Phone Number</label>
+              <input
+                type="text"
+                id="phonenumber"
+                value={phonenumber}
+                onChange={(e) => setPhonenumber(e.target.value)}
+                required
+                className="form-control"
+              />
+            </div>
+            <div className="col-md-6 mb-3">
+              <label htmlFor="email" className="form-label">Email</label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="form-control"
+              />
+            </div>
           </div>
-          <div className="mb-3">
-            <label htmlFor="phonenumber" className="form-label">เบอร์โทรศัพท์</label>
-            <input
-              type="text"
-              id="phonenumber"
-              value={phonenumber}
-              onChange={(e) => setPhonenumber(e.target.value)}
-              required
-              className="form-control"
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="email" className="form-label">อีเมล</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="form-control"
-            />
-          </div>
-          <button type="submit" className="btn btn-primary w-100">ยืนยัน</button>
+          <button type="submit" className="btn btn-primary w-100">Confirm</button>
         </form>
       </div>
     </div>

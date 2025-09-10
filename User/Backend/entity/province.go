@@ -13,5 +13,7 @@ type Province struct {
 	
 	Branch []Branch  `gorm:"foreignKey:ProvinceID"` // 👈 One-to-Many relationship
 	Landsalepost []Landsalepost  `gorm:"foreignKey:ProvinceID"` // 👈 One-to-Many relationship
+	// Landsalepost []Landsalepost  `gorm:"foreignKey:ProvinceID"` // 👈 One-to-Many relationship
+	Landtitles    []Landtitle    `gorm:"foreignKey:ProvinceID"`
 
 }

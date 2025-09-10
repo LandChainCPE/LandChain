@@ -10,14 +10,14 @@ import (
 
 // ฟังก์ชันดึงข้อมูลอำเภอ
 func GetDistrict(c *gin.Context) {
-	provinceID := c.Query("province") // ใช้ Query แทน Param
+    provinceID := c.Param("id") // ใช้ Param แทน Query
 
-	var districts []entity.District
-	if err := config.DB().Where("province_id = ?", provinceID).Find(&districts).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลอำเภอได้"})
-		return
-	}
-	c.JSON(http.StatusOK, districts)
+    var districts []entity.District
+    if err := config.DB().Where("province_id = ?", provinceID).Find(&districts).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลอำเภอได้"})
+        return
+    }
+    c.JSON(http.StatusOK, districts)
 }
 func GetAllProvinces(c *gin.Context) {
 	var provinces []entity.Province
