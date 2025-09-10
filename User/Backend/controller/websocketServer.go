@@ -6,7 +6,6 @@ import (
 	"landchain/config"
 	"landchain/entity"
 	"log"
-	"net/http"
 	"sync"
 	"time"
 
@@ -14,12 +13,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// Upgrade HTTP connection to websocket
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true // ปรับตาม policy คุณ
-	},
-}
+
 
 // client represents a websocket client connection
 type client struct {

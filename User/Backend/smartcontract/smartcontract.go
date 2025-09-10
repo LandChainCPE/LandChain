@@ -31,7 +31,7 @@ var (
 
 // SmartcontractMetaData contains all meta data concerning the Smartcontract contract.
 var SmartcontractMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"buyLandTitle\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"signer\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"ECDSAInvalidSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"name\":\"ECDSAInvalidSignatureLength\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"ECDSAInvalidSignatureS\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ERC721IncorrectOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ERC721InsufficientApproval\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"approver\",\"type\":\"address\"}],\"name\":\"ERC721InvalidApprover\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"ERC721InvalidOperator\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ERC721InvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"receiver\",\"type\":\"address\"}],\"name\":\"ERC721InvalidReceiver\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"ERC721InvalidSender\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ERC721NonexistentToken\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"approved\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"ApprovalForAll\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"hashMetadata\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"dataHash\",\"type\":\"bytes32\"},{\"internalType\":\"string[9]\",\"name\":\"metaFields\",\"type\":\"string[9]\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"mintLandTitleNFT\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"nameHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"registerOwner\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"safeTransferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"safeTransferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"setApprovalForAll\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"setSaleInfo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"signer\",\"type\":\"address\"}],\"name\":\"setTrustedSigner\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"dataHashes\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getApproved\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getDataHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getHashMetadata\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getLandMetadata\",\"outputs\":[{\"internalType\":\"string[9]\",\"name\":\"metaFields\",\"type\":\"string[9]\"},{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"}],\"name\":\"getLandTitleInfoByWallet\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"}],\"name\":\"getOwnerInfo\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getOwnershipHistory\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"hashMetadatas\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"isApprovedForAll\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ownerOf\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"owners\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"nameHash\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"saleInfos\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"tokenURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"usedNameHash\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"buyLandTitle\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"signer\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"ECDSAInvalidSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"name\":\"ECDSAInvalidSignatureLength\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"ECDSAInvalidSignatureS\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ERC721IncorrectOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ERC721InsufficientApproval\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"approver\",\"type\":\"address\"}],\"name\":\"ERC721InvalidApprover\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"ERC721InvalidOperator\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ERC721InvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"receiver\",\"type\":\"address\"}],\"name\":\"ERC721InvalidReceiver\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"ERC721InvalidSender\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ERC721NonexistentToken\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"approved\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"ApprovalForAll\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"metaFields\",\"type\":\"string\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"mintLandTitleNFT\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"nameHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"registerOwner\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"safeTransferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"safeTransferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"setApprovalForAll\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"setSaleInfo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getApproved\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getLandMetadata\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"metaFields\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"walletID\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"}],\"name\":\"getLandTitleInfoByWallet\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"}],\"name\":\"getOwnerInfo\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getOwnershipHistory\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"isApprovedForAll\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ownerOf\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"owners\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"nameHash\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"saleInfos\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"tokenURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"usedNameHash\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // SmartcontractABI is the input ABI used to generate the binding from.
@@ -211,37 +211,6 @@ func (_Smartcontract *SmartcontractCallerSession) BalanceOf(owner common.Address
 	return _Smartcontract.Contract.BalanceOf(&_Smartcontract.CallOpts, owner)
 }
 
-// DataHashes is a free data retrieval call binding the contract method 0x6da67f7a.
-//
-// Solidity: function dataHashes(uint256 ) view returns(bytes32)
-func (_Smartcontract *SmartcontractCaller) DataHashes(opts *bind.CallOpts, arg0 *big.Int) ([32]byte, error) {
-	var out []interface{}
-	err := _Smartcontract.contract.Call(opts, &out, "dataHashes", arg0)
-
-	if err != nil {
-		return *new([32]byte), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
-
-	return out0, err
-
-}
-
-// DataHashes is a free data retrieval call binding the contract method 0x6da67f7a.
-//
-// Solidity: function dataHashes(uint256 ) view returns(bytes32)
-func (_Smartcontract *SmartcontractSession) DataHashes(arg0 *big.Int) ([32]byte, error) {
-	return _Smartcontract.Contract.DataHashes(&_Smartcontract.CallOpts, arg0)
-}
-
-// DataHashes is a free data retrieval call binding the contract method 0x6da67f7a.
-//
-// Solidity: function dataHashes(uint256 ) view returns(bytes32)
-func (_Smartcontract *SmartcontractCallerSession) DataHashes(arg0 *big.Int) ([32]byte, error) {
-	return _Smartcontract.Contract.DataHashes(&_Smartcontract.CallOpts, arg0)
-}
-
 // GetApproved is a free data retrieval call binding the contract method 0x081812fc.
 //
 // Solidity: function getApproved(uint256 tokenId) view returns(address)
@@ -273,91 +242,32 @@ func (_Smartcontract *SmartcontractCallerSession) GetApproved(tokenId *big.Int) 
 	return _Smartcontract.Contract.GetApproved(&_Smartcontract.CallOpts, tokenId)
 }
 
-// GetDataHash is a free data retrieval call binding the contract method 0xa595d8fc.
-//
-// Solidity: function getDataHash(uint256 tokenId) view returns(bytes32)
-func (_Smartcontract *SmartcontractCaller) GetDataHash(opts *bind.CallOpts, tokenId *big.Int) ([32]byte, error) {
-	var out []interface{}
-	err := _Smartcontract.contract.Call(opts, &out, "getDataHash", tokenId)
-
-	if err != nil {
-		return *new([32]byte), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
-
-	return out0, err
-
-}
-
-// GetDataHash is a free data retrieval call binding the contract method 0xa595d8fc.
-//
-// Solidity: function getDataHash(uint256 tokenId) view returns(bytes32)
-func (_Smartcontract *SmartcontractSession) GetDataHash(tokenId *big.Int) ([32]byte, error) {
-	return _Smartcontract.Contract.GetDataHash(&_Smartcontract.CallOpts, tokenId)
-}
-
-// GetDataHash is a free data retrieval call binding the contract method 0xa595d8fc.
-//
-// Solidity: function getDataHash(uint256 tokenId) view returns(bytes32)
-func (_Smartcontract *SmartcontractCallerSession) GetDataHash(tokenId *big.Int) ([32]byte, error) {
-	return _Smartcontract.Contract.GetDataHash(&_Smartcontract.CallOpts, tokenId)
-}
-
-// GetHashMetadata is a free data retrieval call binding the contract method 0x53f22b3b.
-//
-// Solidity: function getHashMetadata(uint256 tokenId) view returns(bytes32)
-func (_Smartcontract *SmartcontractCaller) GetHashMetadata(opts *bind.CallOpts, tokenId *big.Int) ([32]byte, error) {
-	var out []interface{}
-	err := _Smartcontract.contract.Call(opts, &out, "getHashMetadata", tokenId)
-
-	if err != nil {
-		return *new([32]byte), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
-
-	return out0, err
-
-}
-
-// GetHashMetadata is a free data retrieval call binding the contract method 0x53f22b3b.
-//
-// Solidity: function getHashMetadata(uint256 tokenId) view returns(bytes32)
-func (_Smartcontract *SmartcontractSession) GetHashMetadata(tokenId *big.Int) ([32]byte, error) {
-	return _Smartcontract.Contract.GetHashMetadata(&_Smartcontract.CallOpts, tokenId)
-}
-
-// GetHashMetadata is a free data retrieval call binding the contract method 0x53f22b3b.
-//
-// Solidity: function getHashMetadata(uint256 tokenId) view returns(bytes32)
-func (_Smartcontract *SmartcontractCallerSession) GetHashMetadata(tokenId *big.Int) ([32]byte, error) {
-	return _Smartcontract.Contract.GetHashMetadata(&_Smartcontract.CallOpts, tokenId)
-}
-
 // GetLandMetadata is a free data retrieval call binding the contract method 0x6c2a4ed2.
 //
-// Solidity: function getLandMetadata(uint256 tokenId) view returns(string[9] metaFields, uint256 price, address buyer)
+// Solidity: function getLandMetadata(uint256 tokenId) view returns(string metaFields, uint256 price, address buyer, address walletID)
 func (_Smartcontract *SmartcontractCaller) GetLandMetadata(opts *bind.CallOpts, tokenId *big.Int) (struct {
-	MetaFields [9]string
+	MetaFields string
 	Price      *big.Int
 	Buyer      common.Address
+	WalletID   common.Address
 }, error) {
 	var out []interface{}
 	err := _Smartcontract.contract.Call(opts, &out, "getLandMetadata", tokenId)
 
 	outstruct := new(struct {
-		MetaFields [9]string
+		MetaFields string
 		Price      *big.Int
 		Buyer      common.Address
+		WalletID   common.Address
 	})
 	if err != nil {
 		return *outstruct, err
 	}
 
-	outstruct.MetaFields = *abi.ConvertType(out[0], new([9]string)).(*[9]string)
+	outstruct.MetaFields = *abi.ConvertType(out[0], new(string)).(*string)
 	outstruct.Price = *abi.ConvertType(out[1], new(*big.Int)).(**big.Int)
 	outstruct.Buyer = *abi.ConvertType(out[2], new(common.Address)).(*common.Address)
+	outstruct.WalletID = *abi.ConvertType(out[3], new(common.Address)).(*common.Address)
 
 	return *outstruct, err
 
@@ -365,22 +275,24 @@ func (_Smartcontract *SmartcontractCaller) GetLandMetadata(opts *bind.CallOpts, 
 
 // GetLandMetadata is a free data retrieval call binding the contract method 0x6c2a4ed2.
 //
-// Solidity: function getLandMetadata(uint256 tokenId) view returns(string[9] metaFields, uint256 price, address buyer)
+// Solidity: function getLandMetadata(uint256 tokenId) view returns(string metaFields, uint256 price, address buyer, address walletID)
 func (_Smartcontract *SmartcontractSession) GetLandMetadata(tokenId *big.Int) (struct {
-	MetaFields [9]string
+	MetaFields string
 	Price      *big.Int
 	Buyer      common.Address
+	WalletID   common.Address
 }, error) {
 	return _Smartcontract.Contract.GetLandMetadata(&_Smartcontract.CallOpts, tokenId)
 }
 
 // GetLandMetadata is a free data retrieval call binding the contract method 0x6c2a4ed2.
 //
-// Solidity: function getLandMetadata(uint256 tokenId) view returns(string[9] metaFields, uint256 price, address buyer)
+// Solidity: function getLandMetadata(uint256 tokenId) view returns(string metaFields, uint256 price, address buyer, address walletID)
 func (_Smartcontract *SmartcontractCallerSession) GetLandMetadata(tokenId *big.Int) (struct {
-	MetaFields [9]string
+	MetaFields string
 	Price      *big.Int
 	Buyer      common.Address
+	WalletID   common.Address
 }, error) {
 	return _Smartcontract.Contract.GetLandMetadata(&_Smartcontract.CallOpts, tokenId)
 }
@@ -399,6 +311,7 @@ func (_Smartcontract *SmartcontractCaller) GetLandTitleInfoByWallet(opts *bind.C
 	out0 := *abi.ConvertType(out[0], new([]*big.Int)).(*[]*big.Int)
 
 	return out0, err
+
 }
 
 // GetLandTitleInfoByWallet is a free data retrieval call binding the contract method 0x49ba16a2.
@@ -477,37 +390,6 @@ func (_Smartcontract *SmartcontractCallerSession) GetOwnershipHistory(tokenId *b
 	return _Smartcontract.Contract.GetOwnershipHistory(&_Smartcontract.CallOpts, tokenId)
 }
 
-// HashMetadatas is a free data retrieval call binding the contract method 0x5b2aede2.
-//
-// Solidity: function hashMetadatas(uint256 ) view returns(bytes32)
-func (_Smartcontract *SmartcontractCaller) HashMetadatas(opts *bind.CallOpts, arg0 *big.Int) ([32]byte, error) {
-	var out []interface{}
-	err := _Smartcontract.contract.Call(opts, &out, "hashMetadatas", arg0)
-
-	if err != nil {
-		return *new([32]byte), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
-
-	return out0, err
-
-}
-
-// HashMetadatas is a free data retrieval call binding the contract method 0x5b2aede2.
-//
-// Solidity: function hashMetadatas(uint256 ) view returns(bytes32)
-func (_Smartcontract *SmartcontractSession) HashMetadatas(arg0 *big.Int) ([32]byte, error) {
-	return _Smartcontract.Contract.HashMetadatas(&_Smartcontract.CallOpts, arg0)
-}
-
-// HashMetadatas is a free data retrieval call binding the contract method 0x5b2aede2.
-//
-// Solidity: function hashMetadatas(uint256 ) view returns(bytes32)
-func (_Smartcontract *SmartcontractCallerSession) HashMetadatas(arg0 *big.Int) ([32]byte, error) {
-	return _Smartcontract.Contract.HashMetadatas(&_Smartcontract.CallOpts, arg0)
-}
-
 // IsApprovedForAll is a free data retrieval call binding the contract method 0xe985e9c5.
 //
 // Solidity: function isApprovedForAll(address owner, address operator) view returns(bool)
@@ -568,37 +450,6 @@ func (_Smartcontract *SmartcontractSession) Name() (string, error) {
 // Solidity: function name() view returns(string)
 func (_Smartcontract *SmartcontractCallerSession) Name() (string, error) {
 	return _Smartcontract.Contract.Name(&_Smartcontract.CallOpts)
-}
-
-// Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
-//
-// Solidity: function owner() view returns(address)
-func (_Smartcontract *SmartcontractCaller) Owner(opts *bind.CallOpts) (common.Address, error) {
-	var out []interface{}
-	err := _Smartcontract.contract.Call(opts, &out, "owner")
-
-	if err != nil {
-		return *new(common.Address), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
-
-	return out0, err
-
-}
-
-// Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
-//
-// Solidity: function owner() view returns(address)
-func (_Smartcontract *SmartcontractSession) Owner() (common.Address, error) {
-	return _Smartcontract.Contract.Owner(&_Smartcontract.CallOpts)
-}
-
-// Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
-//
-// Solidity: function owner() view returns(address)
-func (_Smartcontract *SmartcontractCallerSession) Owner() (common.Address, error) {
-	return _Smartcontract.Contract.Owner(&_Smartcontract.CallOpts)
 }
 
 // OwnerOf is a free data retrieval call binding the contract method 0x6352211e.
@@ -675,37 +526,6 @@ func (_Smartcontract *SmartcontractCallerSession) Owners(arg0 common.Address) (s
 	NameHash [32]byte
 }, error) {
 	return _Smartcontract.Contract.Owners(&_Smartcontract.CallOpts, arg0)
-}
-
-// Paused is a free data retrieval call binding the contract method 0x5c975abb.
-//
-// Solidity: function paused() view returns(bool)
-func (_Smartcontract *SmartcontractCaller) Paused(opts *bind.CallOpts) (bool, error) {
-	var out []interface{}
-	err := _Smartcontract.contract.Call(opts, &out, "paused")
-
-	if err != nil {
-		return *new(bool), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
-
-	return out0, err
-
-}
-
-// Paused is a free data retrieval call binding the contract method 0x5c975abb.
-//
-// Solidity: function paused() view returns(bool)
-func (_Smartcontract *SmartcontractSession) Paused() (bool, error) {
-	return _Smartcontract.Contract.Paused(&_Smartcontract.CallOpts)
-}
-
-// Paused is a free data retrieval call binding the contract method 0x5c975abb.
-//
-// Solidity: function paused() view returns(bool)
-func (_Smartcontract *SmartcontractCallerSession) Paused() (bool, error) {
-	return _Smartcontract.Contract.Paused(&_Smartcontract.CallOpts)
 }
 
 // SaleInfos is a free data retrieval call binding the contract method 0x9b36c56c.
@@ -919,46 +739,25 @@ func (_Smartcontract *SmartcontractTransactorSession) BuyLandTitle(tokenId *big.
 	return _Smartcontract.Contract.BuyLandTitle(&_Smartcontract.TransactOpts, tokenId)
 }
 
-// MintLandTitleNFT is a paid mutator transaction binding the contract method 0x5aabdd30.
+// MintLandTitleNFT is a paid mutator transaction binding the contract method 0x1f4fec36.
 //
-// Solidity: function mintLandTitleNFT(address wallet, bytes32 hashMetadata, bytes32 dataHash, string[9] metaFields, bytes signature) returns(uint256)
-func (_Smartcontract *SmartcontractTransactor) MintLandTitleNFT(opts *bind.TransactOpts, wallet common.Address, hashMetadata [32]byte, dataHash [32]byte, metaFields [9]string, signature []byte) (*types.Transaction, error) {
-	return _Smartcontract.contract.Transact(opts, "mintLandTitleNFT", wallet, hashMetadata, dataHash, metaFields, signature)
+// Solidity: function mintLandTitleNFT(address wallet, string metaFields, bytes signature) returns(uint256)
+func (_Smartcontract *SmartcontractTransactor) MintLandTitleNFT(opts *bind.TransactOpts, wallet common.Address, metaFields string, signature []byte) (*types.Transaction, error) {
+	return _Smartcontract.contract.Transact(opts, "mintLandTitleNFT", wallet, metaFields, signature)
 }
 
-// MintLandTitleNFT is a paid mutator transaction binding the contract method 0x5aabdd30.
+// MintLandTitleNFT is a paid mutator transaction binding the contract method 0x1f4fec36.
 //
-// Solidity: function mintLandTitleNFT(address wallet, bytes32 hashMetadata, bytes32 dataHash, string[9] metaFields, bytes signature) returns(uint256)
-func (_Smartcontract *SmartcontractSession) MintLandTitleNFT(wallet common.Address, hashMetadata [32]byte, dataHash [32]byte, metaFields [9]string, signature []byte) (*types.Transaction, error) {
-	return _Smartcontract.Contract.MintLandTitleNFT(&_Smartcontract.TransactOpts, wallet, hashMetadata, dataHash, metaFields, signature)
+// Solidity: function mintLandTitleNFT(address wallet, string metaFields, bytes signature) returns(uint256)
+func (_Smartcontract *SmartcontractSession) MintLandTitleNFT(wallet common.Address, metaFields string, signature []byte) (*types.Transaction, error) {
+	return _Smartcontract.Contract.MintLandTitleNFT(&_Smartcontract.TransactOpts, wallet, metaFields, signature)
 }
 
-// MintLandTitleNFT is a paid mutator transaction binding the contract method 0x5aabdd30.
+// MintLandTitleNFT is a paid mutator transaction binding the contract method 0x1f4fec36.
 //
-// Solidity: function mintLandTitleNFT(address wallet, bytes32 hashMetadata, bytes32 dataHash, string[9] metaFields, bytes signature) returns(uint256)
-func (_Smartcontract *SmartcontractTransactorSession) MintLandTitleNFT(wallet common.Address, hashMetadata [32]byte, dataHash [32]byte, metaFields [9]string, signature []byte) (*types.Transaction, error) {
-	return _Smartcontract.Contract.MintLandTitleNFT(&_Smartcontract.TransactOpts, wallet, hashMetadata, dataHash, metaFields, signature)
-}
-
-// Pause is a paid mutator transaction binding the contract method 0x8456cb59.
-//
-// Solidity: function pause() returns()
-func (_Smartcontract *SmartcontractTransactor) Pause(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Smartcontract.contract.Transact(opts, "pause")
-}
-
-// Pause is a paid mutator transaction binding the contract method 0x8456cb59.
-//
-// Solidity: function pause() returns()
-func (_Smartcontract *SmartcontractSession) Pause() (*types.Transaction, error) {
-	return _Smartcontract.Contract.Pause(&_Smartcontract.TransactOpts)
-}
-
-// Pause is a paid mutator transaction binding the contract method 0x8456cb59.
-//
-// Solidity: function pause() returns()
-func (_Smartcontract *SmartcontractTransactorSession) Pause() (*types.Transaction, error) {
-	return _Smartcontract.Contract.Pause(&_Smartcontract.TransactOpts)
+// Solidity: function mintLandTitleNFT(address wallet, string metaFields, bytes signature) returns(uint256)
+func (_Smartcontract *SmartcontractTransactorSession) MintLandTitleNFT(wallet common.Address, metaFields string, signature []byte) (*types.Transaction, error) {
+	return _Smartcontract.Contract.MintLandTitleNFT(&_Smartcontract.TransactOpts, wallet, metaFields, signature)
 }
 
 // RegisterOwner is a paid mutator transaction binding the contract method 0x694ac98d.
@@ -980,27 +779,6 @@ func (_Smartcontract *SmartcontractSession) RegisterOwner(wallet common.Address,
 // Solidity: function registerOwner(address wallet, bytes32 nameHash, bytes signature) returns()
 func (_Smartcontract *SmartcontractTransactorSession) RegisterOwner(wallet common.Address, nameHash [32]byte, signature []byte) (*types.Transaction, error) {
 	return _Smartcontract.Contract.RegisterOwner(&_Smartcontract.TransactOpts, wallet, nameHash, signature)
-}
-
-// RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
-//
-// Solidity: function renounceOwnership() returns()
-func (_Smartcontract *SmartcontractTransactor) RenounceOwnership(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Smartcontract.contract.Transact(opts, "renounceOwnership")
-}
-
-// RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
-//
-// Solidity: function renounceOwnership() returns()
-func (_Smartcontract *SmartcontractSession) RenounceOwnership() (*types.Transaction, error) {
-	return _Smartcontract.Contract.RenounceOwnership(&_Smartcontract.TransactOpts)
-}
-
-// RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
-//
-// Solidity: function renounceOwnership() returns()
-func (_Smartcontract *SmartcontractTransactorSession) RenounceOwnership() (*types.Transaction, error) {
-	return _Smartcontract.Contract.RenounceOwnership(&_Smartcontract.TransactOpts)
 }
 
 // SafeTransferFrom is a paid mutator transaction binding the contract method 0x42842e0e.
@@ -1087,27 +865,6 @@ func (_Smartcontract *SmartcontractTransactorSession) SetSaleInfo(tokenId *big.I
 	return _Smartcontract.Contract.SetSaleInfo(&_Smartcontract.TransactOpts, tokenId, price, buyer, signature)
 }
 
-// SetTrustedSigner is a paid mutator transaction binding the contract method 0x56a1c701.
-//
-// Solidity: function setTrustedSigner(address signer) returns()
-func (_Smartcontract *SmartcontractTransactor) SetTrustedSigner(opts *bind.TransactOpts, signer common.Address) (*types.Transaction, error) {
-	return _Smartcontract.contract.Transact(opts, "setTrustedSigner", signer)
-}
-
-// SetTrustedSigner is a paid mutator transaction binding the contract method 0x56a1c701.
-//
-// Solidity: function setTrustedSigner(address signer) returns()
-func (_Smartcontract *SmartcontractSession) SetTrustedSigner(signer common.Address) (*types.Transaction, error) {
-	return _Smartcontract.Contract.SetTrustedSigner(&_Smartcontract.TransactOpts, signer)
-}
-
-// SetTrustedSigner is a paid mutator transaction binding the contract method 0x56a1c701.
-//
-// Solidity: function setTrustedSigner(address signer) returns()
-func (_Smartcontract *SmartcontractTransactorSession) SetTrustedSigner(signer common.Address) (*types.Transaction, error) {
-	return _Smartcontract.Contract.SetTrustedSigner(&_Smartcontract.TransactOpts, signer)
-}
-
 // TransferFrom is a paid mutator transaction binding the contract method 0x23b872dd.
 //
 // Solidity: function transferFrom(address from, address to, uint256 tokenId) returns()
@@ -1127,69 +884,6 @@ func (_Smartcontract *SmartcontractSession) TransferFrom(from common.Address, to
 // Solidity: function transferFrom(address from, address to, uint256 tokenId) returns()
 func (_Smartcontract *SmartcontractTransactorSession) TransferFrom(from common.Address, to common.Address, tokenId *big.Int) (*types.Transaction, error) {
 	return _Smartcontract.Contract.TransferFrom(&_Smartcontract.TransactOpts, from, to, tokenId)
-}
-
-// TransferOwnership is a paid mutator transaction binding the contract method 0x0a276680.
-//
-// Solidity: function transferOwnership(address to, uint256 tokenId) returns()
-func (_Smartcontract *SmartcontractTransactor) TransferOwnership(opts *bind.TransactOpts, to common.Address, tokenId *big.Int) (*types.Transaction, error) {
-	return _Smartcontract.contract.Transact(opts, "transferOwnership", to, tokenId)
-}
-
-// TransferOwnership is a paid mutator transaction binding the contract method 0x0a276680.
-//
-// Solidity: function transferOwnership(address to, uint256 tokenId) returns()
-func (_Smartcontract *SmartcontractSession) TransferOwnership(to common.Address, tokenId *big.Int) (*types.Transaction, error) {
-	return _Smartcontract.Contract.TransferOwnership(&_Smartcontract.TransactOpts, to, tokenId)
-}
-
-// TransferOwnership is a paid mutator transaction binding the contract method 0x0a276680.
-//
-// Solidity: function transferOwnership(address to, uint256 tokenId) returns()
-func (_Smartcontract *SmartcontractTransactorSession) TransferOwnership(to common.Address, tokenId *big.Int) (*types.Transaction, error) {
-	return _Smartcontract.Contract.TransferOwnership(&_Smartcontract.TransactOpts, to, tokenId)
-}
-
-// TransferOwnership0 is a paid mutator transaction binding the contract method 0xf2fde38b.
-//
-// Solidity: function transferOwnership(address newOwner) returns()
-func (_Smartcontract *SmartcontractTransactor) TransferOwnership0(opts *bind.TransactOpts, newOwner common.Address) (*types.Transaction, error) {
-	return _Smartcontract.contract.Transact(opts, "transferOwnership0", newOwner)
-}
-
-// TransferOwnership0 is a paid mutator transaction binding the contract method 0xf2fde38b.
-//
-// Solidity: function transferOwnership(address newOwner) returns()
-func (_Smartcontract *SmartcontractSession) TransferOwnership0(newOwner common.Address) (*types.Transaction, error) {
-	return _Smartcontract.Contract.TransferOwnership0(&_Smartcontract.TransactOpts, newOwner)
-}
-
-// TransferOwnership0 is a paid mutator transaction binding the contract method 0xf2fde38b.
-//
-// Solidity: function transferOwnership(address newOwner) returns()
-func (_Smartcontract *SmartcontractTransactorSession) TransferOwnership0(newOwner common.Address) (*types.Transaction, error) {
-	return _Smartcontract.Contract.TransferOwnership0(&_Smartcontract.TransactOpts, newOwner)
-}
-
-// Unpause is a paid mutator transaction binding the contract method 0x3f4ba83a.
-//
-// Solidity: function unpause() returns()
-func (_Smartcontract *SmartcontractTransactor) Unpause(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Smartcontract.contract.Transact(opts, "unpause")
-}
-
-// Unpause is a paid mutator transaction binding the contract method 0x3f4ba83a.
-//
-// Solidity: function unpause() returns()
-func (_Smartcontract *SmartcontractSession) Unpause() (*types.Transaction, error) {
-	return _Smartcontract.Contract.Unpause(&_Smartcontract.TransactOpts)
-}
-
-// Unpause is a paid mutator transaction binding the contract method 0x3f4ba83a.
-//
-// Solidity: function unpause() returns()
-func (_Smartcontract *SmartcontractTransactorSession) Unpause() (*types.Transaction, error) {
-	return _Smartcontract.Contract.Unpause(&_Smartcontract.TransactOpts)
 }
 
 // SmartcontractApprovalIterator is returned from FilterApproval and is used to iterate over the raw logs and unpacked data for Approval events raised by the Smartcontract contract.
@@ -1508,293 +1202,6 @@ func (_Smartcontract *SmartcontractFilterer) ParseApprovalForAll(log types.Log) 
 	return event, nil
 }
 
-// SmartcontractOwnershipTransferredIterator is returned from FilterOwnershipTransferred and is used to iterate over the raw logs and unpacked data for OwnershipTransferred events raised by the Smartcontract contract.
-type SmartcontractOwnershipTransferredIterator struct {
-	Event *SmartcontractOwnershipTransferred // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *SmartcontractOwnershipTransferredIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(SmartcontractOwnershipTransferred)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(SmartcontractOwnershipTransferred)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *SmartcontractOwnershipTransferredIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *SmartcontractOwnershipTransferredIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// SmartcontractOwnershipTransferred represents a OwnershipTransferred event raised by the Smartcontract contract.
-type SmartcontractOwnershipTransferred struct {
-	PreviousOwner common.Address
-	NewOwner      common.Address
-	Raw           types.Log // Blockchain specific contextual infos
-}
-
-// FilterOwnershipTransferred is a free log retrieval operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
-//
-// Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
-func (_Smartcontract *SmartcontractFilterer) FilterOwnershipTransferred(opts *bind.FilterOpts, previousOwner []common.Address, newOwner []common.Address) (*SmartcontractOwnershipTransferredIterator, error) {
-
-	var previousOwnerRule []interface{}
-	for _, previousOwnerItem := range previousOwner {
-		previousOwnerRule = append(previousOwnerRule, previousOwnerItem)
-	}
-	var newOwnerRule []interface{}
-	for _, newOwnerItem := range newOwner {
-		newOwnerRule = append(newOwnerRule, newOwnerItem)
-	}
-
-	logs, sub, err := _Smartcontract.contract.FilterLogs(opts, "OwnershipTransferred", previousOwnerRule, newOwnerRule)
-	if err != nil {
-		return nil, err
-	}
-	return &SmartcontractOwnershipTransferredIterator{contract: _Smartcontract.contract, event: "OwnershipTransferred", logs: logs, sub: sub}, nil
-}
-
-// WatchOwnershipTransferred is a free log subscription operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
-//
-// Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
-func (_Smartcontract *SmartcontractFilterer) WatchOwnershipTransferred(opts *bind.WatchOpts, sink chan<- *SmartcontractOwnershipTransferred, previousOwner []common.Address, newOwner []common.Address) (event.Subscription, error) {
-
-	var previousOwnerRule []interface{}
-	for _, previousOwnerItem := range previousOwner {
-		previousOwnerRule = append(previousOwnerRule, previousOwnerItem)
-	}
-	var newOwnerRule []interface{}
-	for _, newOwnerItem := range newOwner {
-		newOwnerRule = append(newOwnerRule, newOwnerItem)
-	}
-
-	logs, sub, err := _Smartcontract.contract.WatchLogs(opts, "OwnershipTransferred", previousOwnerRule, newOwnerRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(SmartcontractOwnershipTransferred)
-				if err := _Smartcontract.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseOwnershipTransferred is a log parse operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
-//
-// Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
-func (_Smartcontract *SmartcontractFilterer) ParseOwnershipTransferred(log types.Log) (*SmartcontractOwnershipTransferred, error) {
-	event := new(SmartcontractOwnershipTransferred)
-	if err := _Smartcontract.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// SmartcontractPausedIterator is returned from FilterPaused and is used to iterate over the raw logs and unpacked data for Paused events raised by the Smartcontract contract.
-type SmartcontractPausedIterator struct {
-	Event *SmartcontractPaused // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *SmartcontractPausedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(SmartcontractPaused)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(SmartcontractPaused)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *SmartcontractPausedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *SmartcontractPausedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// SmartcontractPaused represents a Paused event raised by the Smartcontract contract.
-type SmartcontractPaused struct {
-	Account common.Address
-	Raw     types.Log // Blockchain specific contextual infos
-}
-
-// FilterPaused is a free log retrieval operation binding the contract event 0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258.
-//
-// Solidity: event Paused(address account)
-func (_Smartcontract *SmartcontractFilterer) FilterPaused(opts *bind.FilterOpts) (*SmartcontractPausedIterator, error) {
-
-	logs, sub, err := _Smartcontract.contract.FilterLogs(opts, "Paused")
-	if err != nil {
-		return nil, err
-	}
-	return &SmartcontractPausedIterator{contract: _Smartcontract.contract, event: "Paused", logs: logs, sub: sub}, nil
-}
-
-// WatchPaused is a free log subscription operation binding the contract event 0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258.
-//
-// Solidity: event Paused(address account)
-func (_Smartcontract *SmartcontractFilterer) WatchPaused(opts *bind.WatchOpts, sink chan<- *SmartcontractPaused) (event.Subscription, error) {
-
-	logs, sub, err := _Smartcontract.contract.WatchLogs(opts, "Paused")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(SmartcontractPaused)
-				if err := _Smartcontract.contract.UnpackLog(event, "Paused", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParsePaused is a log parse operation binding the contract event 0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258.
-//
-// Solidity: event Paused(address account)
-func (_Smartcontract *SmartcontractFilterer) ParsePaused(log types.Log) (*SmartcontractPaused, error) {
-	event := new(SmartcontractPaused)
-	if err := _Smartcontract.contract.UnpackLog(event, "Paused", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
 // SmartcontractTransferIterator is returned from FilterTransfer and is used to iterate over the raw logs and unpacked data for Transfer events raised by the Smartcontract contract.
 type SmartcontractTransferIterator struct {
 	Event *SmartcontractTransfer // Event containing the contract specifics and raw log
@@ -1951,140 +1358,6 @@ func (_Smartcontract *SmartcontractFilterer) WatchTransfer(opts *bind.WatchOpts,
 func (_Smartcontract *SmartcontractFilterer) ParseTransfer(log types.Log) (*SmartcontractTransfer, error) {
 	event := new(SmartcontractTransfer)
 	if err := _Smartcontract.contract.UnpackLog(event, "Transfer", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// SmartcontractUnpausedIterator is returned from FilterUnpaused and is used to iterate over the raw logs and unpacked data for Unpaused events raised by the Smartcontract contract.
-type SmartcontractUnpausedIterator struct {
-	Event *SmartcontractUnpaused // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *SmartcontractUnpausedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(SmartcontractUnpaused)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(SmartcontractUnpaused)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *SmartcontractUnpausedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *SmartcontractUnpausedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// SmartcontractUnpaused represents a Unpaused event raised by the Smartcontract contract.
-type SmartcontractUnpaused struct {
-	Account common.Address
-	Raw     types.Log // Blockchain specific contextual infos
-}
-
-// FilterUnpaused is a free log retrieval operation binding the contract event 0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa.
-//
-// Solidity: event Unpaused(address account)
-func (_Smartcontract *SmartcontractFilterer) FilterUnpaused(opts *bind.FilterOpts) (*SmartcontractUnpausedIterator, error) {
-
-	logs, sub, err := _Smartcontract.contract.FilterLogs(opts, "Unpaused")
-	if err != nil {
-		return nil, err
-	}
-	return &SmartcontractUnpausedIterator{contract: _Smartcontract.contract, event: "Unpaused", logs: logs, sub: sub}, nil
-}
-
-// WatchUnpaused is a free log subscription operation binding the contract event 0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa.
-//
-// Solidity: event Unpaused(address account)
-func (_Smartcontract *SmartcontractFilterer) WatchUnpaused(opts *bind.WatchOpts, sink chan<- *SmartcontractUnpaused) (event.Subscription, error) {
-
-	logs, sub, err := _Smartcontract.contract.WatchLogs(opts, "Unpaused")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(SmartcontractUnpaused)
-				if err := _Smartcontract.contract.UnpackLog(event, "Unpaused", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseUnpaused is a log parse operation binding the contract event 0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa.
-//
-// Solidity: event Unpaused(address account)
-func (_Smartcontract *SmartcontractFilterer) ParseUnpaused(log types.Log) (*SmartcontractUnpaused, error) {
-	event := new(SmartcontractUnpaused)
-	if err := _Smartcontract.contract.UnpackLog(event, "Unpaused", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

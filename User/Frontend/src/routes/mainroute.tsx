@@ -23,7 +23,10 @@ const LandMarkingMap = Loadable(lazy(() => import("../pages/mapbox_test/mapbox_t
 
 const UserRegisland = Loadable(lazy(() => import("../pages/UserRegisLand/UserRegisLand")));
 
-const DashboardUser = Loadable(lazy(() => import("../pages/RequestSell/ReausetSell")));
+const RequestSell = Loadable(lazy(() => import("../pages/RequestSell/ReausetSell")));
+const RequestBuy = Loadable(lazy(() => import("../pages/RequestSell/RequsetBuy")));
+const Transation = Loadable(lazy(() => import("../pages/RequestSell/TransationTimeline")));
+
 // Component สำหรับป้องกันหน้าที่ต้อง login
 const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
   const navigate = useNavigate();
@@ -131,7 +134,23 @@ const UserRoutes = (): RouteObject[] => [
         path: "requestsell", 
         element: (
           <ProtectedRoute>
-            <DashboardUser />
+            <RequestSell />
+          </ProtectedRoute>
+        ) 
+      },
+      { 
+        path: "requestbuy", 
+        element: (
+          <ProtectedRoute>
+            <RequestBuy />
+          </ProtectedRoute>
+        ) 
+      },
+      { 
+        path: "transation", 
+        element: (
+          <ProtectedRoute>
+            <Transation />
           </ProtectedRoute>
         ) 
       },

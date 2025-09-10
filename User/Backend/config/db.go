@@ -213,8 +213,8 @@ func SetupDatabase() {
 		&entity.Petition{},
 		&entity.State{},
 		&entity.Location{},
-		&entity.RequestBuy{},
-		&entity.RequestSell{},
+		&entity.RequestBuySellType{},
+		&entity.RequestBuySell{},
 	); err != nil {
 		log.Fatal("❌ AutoMigrate failed:", err)
 	}
@@ -239,7 +239,7 @@ func SetupDatabase() {
 		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f469a", RoleID: RefRole}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
 		db.Create(&entity.Users{Firstname: "Panachai", Lastname: "Potisuwan", Email: "Panachai@gmail.com", Phonenumber: "0555555554", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f4444", RoleID: RefRole})
 		db.Create(&entity.Users{Firstname: "Noth", Lastname: "Potisuwan", Email: "Noth@gmail.com", Phonenumber: "0555555556", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f6666", RoleID: RefRole})
-		// db.Create(&entity.Users{Name: "Bam", Email: "@goods1", Phonenumber: "0912345677", Password: "1234564", Land: "ผหก5ป58ก", RoleID: RefRole})
+
 		// //RefServiceType := uint(1)
 		// db.Create(&entity.Users{Name: "Jo", Password: "jo123456", Land: "12กท85", RoleID: RefRole,})
 		// db.Create(&entity.Users{Name: "Aut", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
@@ -267,15 +267,27 @@ func SetupDatabase() {
 		SeedAmphures(db)
 		SeedTambons(db)
 
-		db.Create(&entity.Landtitle{TokenID: 1, GeographyID: 1, ProvinceID: 1, AmphureID: 1001, TambonID: 100101})
-		db.Create(&entity.Landtitle{TokenID: 2, GeographyID: 1, ProvinceID: 1, AmphureID: 1001, TambonID: 100101})
-		db.Create(&entity.Landtitle{TokenID: 3, GeographyID: 1, ProvinceID: 1, AmphureID: 1001, TambonID: 100101})
+		db.Create(&entity.Typetransaction{StatusNameTh: "รอผู้ซื้อ/ผู้ขายตกลง", StatusNameEn: "in_progress"})
+		db.Create(&entity.Typetransaction{StatusNameTh: "เสร็จสิ้น", StatusNameEn: "completed"})
+		db.Create(&entity.Typetransaction{StatusNameTh: "ถูกยกเลิกโดยผู้ซื้อหรือผู้ขาย", StatusNameEn: "cancelled"})
+		db.Create(&entity.Typetransaction{StatusNameTh: "หมดอายุ", StatusNameEn: "expired"})
 
-		db.Create(&entity.RequestBuy{LandID: 1, UserID: 1})
-		db.Create(&entity.RequestBuy{LandID: 1, UserID: 3})
-		db.Create(&entity.RequestBuy{LandID: 2, UserID: 1})
-		db.Create(&entity.RequestBuy{LandID: 3, UserID: 1})
+		db.Create(&entity.Landtitle{TokenID: 1, GeographyID: 1, ProvinceID: 1, AmphureID: 1001, TambonID: 100101, IsLocked: false})
+		db.Create(&entity.Landtitle{TokenID: 2, GeographyID: 1, ProvinceID: 1, AmphureID: 1001, TambonID: 100101, IsLocked: false})
+		db.Create(&entity.Landtitle{TokenID: 3, GeographyID: 1, ProvinceID: 1, AmphureID: 1001, TambonID: 100101, IsLocked: false})
+
+		db.Create(&entity.RequestBuySellType{StatusNameTh: "เจ้าของโฉลดสร้างคำขอขาย", StatusNameEn: "pending"})
+		db.Create(&entity.RequestBuySellType{StatusNameTh: "ตกลงซื้อขาย", StatusNameEn: "accepted"})
+		db.Create(&entity.RequestBuySellType{StatusNameTh: "ปฏิเสธคำขอ", StatusNameEn: "rejected"})
+		db.Create(&entity.RequestBuySellType{StatusNameTh: "ยกเลิก", StatusNameEn: "cancelled"})
+
+		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
+		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 3, SellerID: 4, RequestBuySellTypeID: 1})
+		db.Create(&entity.RequestBuySell{LandID: 2, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
+		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
+		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
 		// // สร้าง LandProvinces
+		db.Create(&entity.Transaction{LandID: 1, BuyerID: 2, SellerID: 4, TypetransactionID: 1})
 
 		// 🔸 สร้าง Roomchat หลังจากสร้าง Landsalepost แล้ว
 		createRoomchatsAndMessages()

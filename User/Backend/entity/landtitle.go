@@ -4,7 +4,8 @@ import "gorm.io/gorm"
 
 type Landtitle struct {
 	gorm.Model
-	TokenID uint
+	TokenID  uint
+	IsLocked bool
 	// FK ไปยัง Geography / Province / Amphure / District
 	GeographyID uint
 	Geography   LandGeographies `gorm:"foreignKey:GeographyID"`
@@ -20,8 +21,7 @@ type Landtitle struct {
 	// LandProvincesID uint
 	// LandProvinces   LandProvinces
 	//Booking []Booking  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
-	Landsalepost []Landsalepost `gorm:"foreignKey:LandtitleID"`
-	Transaction  []Transaction  `gorm:"foreignKey:LandID"`
-	RequestSell  []RequestSell  `gorm:"foreignKey:LandID"`
-	RequestBuy   []RequestBuy   `gorm:"foreignKey:LandID"`
+	Landsalepost   []Landsalepost   `gorm:"foreignKey:LandtitleID"`
+	Transaction    []Transaction    `gorm:"foreignKey:LandID"`
+	RequestBuySell []RequestBuySell `gorm:"foreignKey:LandID"`
 }

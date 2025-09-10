@@ -3,6 +3,8 @@ package controller
 import (
 	"landchain/config" // เปลี่ยนเป็น path ที่ถูกต้องของ Go bindings ที่คุณสร้าง เช่น "contract" หรือชื่อที่ตรงกับไฟล์ go ที่ได้จาก abigen
 	"landchain/entity" // แก้ชื่อ module ให้ตรงกับโปรเจกต์คุณ
+	"landchain/services"
+	"time"
 
 	"log"
 	"net/http"
@@ -49,7 +51,6 @@ func GetAllLandTitleByUserID(c *gin.Context) {
 }
 
 func CreateTransaction(c *gin.Context) {
-	// สร้างตัวแปรธุรกรรม
 	var transaction entity.Transaction
 
 	// รับข้อมูลจาก request body
@@ -58,53 +59,77 @@ func CreateTransaction(c *gin.Context) {
 		return
 	}
 
-	// เซ็ตค่าเริ่มต้นให้เป็น false
-	transaction.Amount = 0
+	db := config.DB()
+
+	// แปลง query params เป็นตัวเลข
+	landIDStr := c.Query("landID")
+	landID, err := strconv.ParseUint(landIDStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "LandID ไม่ถูกต้อง"})
+		return
+	}
+	transaction.LandID = uint(landID)
+
+	sellerIDStr := c.Query("sellerID")
+	sellerID, err := strconv.ParseUint(sellerIDStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "SellerID ไม่ถูกต้อง"})
+		return
+	}
+	transaction.SellerID = uint(sellerID)
+
+	buyerIDStr := c.Query("buyerID")
+	buyerID, err := strconv.ParseUint(buyerIDStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "BuyerID ไม่ถูกต้อง"})
+		return
+	}
+	transaction.BuyerID = uint(buyerID)
+
+	amountStr := c.Query("amount")
+	amount, err := strconv.ParseFloat(amountStr, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Amount ไม่ถูกต้อง"})
+		return
+	}
+	transaction.Amount = amount
+
+	// เช็คว่า Landtitle ถูกล็อกหรือไม่
+	var land entity.Landtitle
+	if err := db.First(&land, transaction.LandID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ไม่พบโฉนด"})
+		return
+	}
+	if land.IsLocked {
+		c.JSON(http.StatusForbidden, gin.H{"error": "โฉนดนี้มี Transaction อยู่แล้ว"})
+		return
+	}
+
+	// เซ็ตค่าเริ่มต้น
 	transaction.TypetransactionID = 1
 	transaction.BuyerAccepted = true
 	transaction.SellerAccepted = false
-	transaction.MoneyChecked = true
+	transaction.MoneyChecked = false
 	transaction.LandDepartmentApproved = false
+	transaction.Expire = time.Now().Add(72 * time.Hour) // 3 วัน
 
-	// เชื่อมต่อกับฐานข้อมูล
-	db := config.DB()
-
-	// สร้างธุรกรรมใหม่ในฐานข้อมูล
+	// สร้าง Transaction
 	if err := db.Create(&transaction).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถสร้างธุรกรรมได้"})
 		return
 	}
 
-	// ส่งคืนข้อมูลธุรกรรมที่สร้างแล้ว
-	c.JSON(http.StatusOK, gin.H{"transaction": transaction})
-}
-
-func UpdateTransactionSellerAccept(c *gin.Context) {
-	// รับ ID ของธุรกรรมจาก URL parameter
-	transactionID := c.Param("id")
-
-	// เชื่อมต่อกับฐานข้อมูล
-	db := config.DB()
-
-	// ค้นหาธุรกรรมที่ต้องการอัปเดต
-	var existingTransaction entity.Transaction
-	if err := db.First(&existingTransaction, "id = ?", transactionID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบธุรกรรมที่ต้องการอัปเดต"})
+	// 🔹 อัพเดท Landtitle เป็นล็อก
+	land.IsLocked = true
+	if err := db.Save(&land).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "สร้าง Transaction สำเร็จ แต่ไม่สามารถล็อกโฉนดได้"})
 		return
 	}
 
-	// ตั้งค่า SellerAccepted เป็น true โดยตรง
-	existingTransaction.SellerAccepted = true
-
-	// บันทึกการอัปเดตในฐานข้อมูล
-	if err := db.Save(&existingTransaction).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถอัปเดตธุรกรรมได้"})
-		return
-	}
-
-	// ส่งคืนข้อมูลธุรกรรมที่อัปเดตแล้ว
-	c.JSON(http.StatusOK, gin.H{"transaction": existingTransaction})
+	c.JSON(http.StatusOK, gin.H{"transaction": transaction, "land": land})
 }
+
+
 
 func UpdateTransactionLandDepartmentAccept(c *gin.Context) {
 	// รับ ID ของธุรกรรมจาก URL parameter
@@ -131,21 +156,6 @@ func UpdateTransactionLandDepartmentAccept(c *gin.Context) {
 
 	// ส่งคืนข้อมูลธุรกรรมที่อัปเดตแล้ว
 	c.JSON(http.StatusOK, gin.H{"transaction": existingTransaction})
-}
-
-func GetTransationByUserID(c *gin.Context) {
-	UserID := c.Param("id")
-
-	var Transaction []entity.Transaction
-	db := config.DB()
-
-	// ดึงข้อความห้องแชทพร้อมเรียงเวลาข้อความ
-	if err := db.Preload("Landtitle").Preload("Buyer").Preload("Seller").Preload("Typetransaction").Where("seller_id = ?", UserID).Find(&Transaction).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลข้อความได้"})
-		return
-	}
-
-	c.JSON(http.StatusOK, Transaction)
 }
 
 func CheckTransactionStatusAndTriggerContract() {
@@ -187,13 +197,23 @@ func GetAllTransation(c *gin.Context) {
 	c.JSON(http.StatusOK, Transaction)
 }
 
-func GetInfoUserByUserID(c *gin.Context) {
+func GetInfoUserByWalletID(c *gin.Context) {
 	var User []entity.Users
-	UserID := c.Param("id")
+	walletValue, exists := c.Get("wallet")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "wallet not found"})
+		return
+	}
+
+	walletAddr, ok := walletValue.(string)
+	if !ok || walletAddr == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "wallet invalid"})
+		return
+	}
 	db := config.DB()
 
 	// ดึงข้อความห้องแชทพร้อมเรียงเวลาข้อความ
-	if err := db.First(&User).Where("id = ?", UserID).Error; err != nil {
+	if err := db.First(&User).Where("metamaskaddress = ?", walletAddr).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลผู้ใช้ได้"})
 		return
 	}
@@ -244,12 +264,12 @@ func GetInfoUserByToken(c *gin.Context) {
 }
 
 func GetRequestBuybyLandID(c *gin.Context) {
-	var request []entity.RequestBuy
+	var request []entity.RequestBuySell
 	landID := c.Param("id")
 	db := config.DB()
 
 	// ดึงข้อความห้องแชทพร้อมเรียงเวลาข้อความ
-	if err := db.Where("land_id = ?", landID).Preload("Users").Find(&request).Error; err != nil {
+	if err := db.Where("land_id = ?", landID).Preload("Seller").Preload("Buyer").Preload("RequestBuySellType").Find(&request).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลผู้ใช้ได้"})
 		return
 	}
@@ -257,4 +277,80 @@ func GetRequestBuybyLandID(c *gin.Context) {
 	c.JSON(http.StatusOK, request)
 }
 
+func DeleteRequestBuyByUserIDAndLandID(c *gin.Context) {
+	landIDStr := c.Query("landID")
+	userIDStr := c.Query("userID")
+
+	if landIDStr == "" || userIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ต้องระบุ landID และ userID"})
+		return
+	}
+
+	landID, err1 := strconv.Atoi(landIDStr)
+	userID, err2 := strconv.Atoi(userIDStr)
+	if err1 != nil || err2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "landID และ userID ต้องเป็นตัวเลข"})
+		return
+	}
+
+	db := config.DB()
+
+	if err := db.Where("land_id = ? AND buyer_id = ?", landID, userID).Delete(&entity.RequestBuySell{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถลบข้อมูลได้", "detail": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ลบคำขอซื้อเรียบร้อย"})
+}
+
 // สมมติ contractInstance ถูก init แล้วเป็น global
+
+func SetSellInfoHandler(c *gin.Context) {
+	var req struct {
+		TokenID  int     `json:"tokenId"`
+		PriceTHB float64 `json:"priceTHB"`
+		Buyer    string  `json:"buyer"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request: " + err.Error()})
+		return
+	}
+
+	signature, wei, err := services.SignLandSalePacked(req.TokenID, req.PriceTHB, req.Buyer)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"tokenId":   req.TokenID,
+		"wei":       wei, // ✅ wei แล้ว
+		"buyer":     req.Buyer,
+		"signature": signature,
+	})
+}
+
+func DeleteAllRequestBuy(c *gin.Context) {
+	landIDStr := c.Query("landID")
+
+	if landIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ต้องระบุ landID และ userID"})
+		return
+	}
+
+	landID, err1 := strconv.Atoi(landIDStr)
+	if err1 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "landID และ userID ต้องเป็นตัวเลข"})
+		return
+	}
+
+	db := config.DB()
+
+	if err := db.Where("land_id = ? ", landID).Delete(&entity.RequestBuySell{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถลบข้อมูลได้", "detail": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ลบคำขอทั้งหมด"})
+}
