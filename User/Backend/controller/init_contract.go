@@ -12,8 +12,6 @@ import (
 	"landchain/config"
 	"landchain/entity"
 
-	"math/big"
-
 	"landchain/smartcontract"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -108,7 +106,6 @@ func GetLandTitleInfoByWallet(c *gin.Context) {
 		"tokens": result,
 	})
 }
-
 
 func GetLandMetadataByWallet(c *gin.Context) {
 	walletAddr, exists := c.Get("wallet")
@@ -234,6 +231,7 @@ func GetMultipleLandMetadataHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, data)
+}
 
 func GetLandMetadataByToken(c *gin.Context) {
 	if ContractInstance == nil {
@@ -267,7 +265,7 @@ func GetLandMetadataByToken(c *gin.Context) {
 	}
 
 	// รวม meta.MetaFields เป็น string เดียว (คั่นด้วย comma)
-	
+
 	log.Printf("metaFields: %s", meta.MetaFields)
 	log.Printf("price: %s", meta.Price.String())
 	log.Printf("buyer: %s", meta.Buyer.Hex())

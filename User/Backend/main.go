@@ -12,8 +12,6 @@ import (
 	"github.com/joho/godotenv"
 
 	"landchain/middlewares"
-
-
 )
 
 func main() {
@@ -36,7 +34,7 @@ func main() {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
 
-	r.POST("/createaccount", controller.CreateAccount)///???
+	r.POST("/createaccount", controller.CreateAccount) ///???
 	r.POST("/check-wallet", controller.CheckWallet)
 	r.POST("/login", controller.LoginUser)
 	r.POST("/register", controller.RegisterUser)
@@ -113,7 +111,7 @@ func main() {
 		authorized.PUT("/user/lands/put/transation/buyerupdate", controller.UpdateTransactionBuyerAccept)
 
 		authorized.POST("/user/lands/metadata", controller.GetLandMetadataByToken)
-
+		authorized.POST("/user/lands/metadata/wallet", controller.GetLandMetadataByWallet)
 
 		// CONTROLLER RegisterLand
 		authorized.POST("/user/userregisland", controller.UserRegisLand)
@@ -129,7 +127,6 @@ func main() {
 	// 	public.POST("/signup", user.CreateUser)
 
 	// }
-
 
 	r.Run(":8080")
 	r.Run()

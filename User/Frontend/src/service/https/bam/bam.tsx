@@ -264,3 +264,14 @@ export async function UpdateTransactionBuyerAccept({ sellerID, buyerID, landID }
     else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
   }
 }
+
+export async function GetLandMetadataByWallet() {
+  try {
+    const res = await api.post("/user/lands/metadata/wallet");
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
