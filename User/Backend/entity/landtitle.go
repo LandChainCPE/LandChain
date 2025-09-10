@@ -11,6 +11,7 @@ type Landtitle struct {
 	SurveyPage   string `json:"survey_page" gorm:"type:varchar(20);not null"`   // หน้าสำรวจ เช่น "๙๔๖๑"
 	//Tambo_n   string `json:"tambon" gorm:"type:varchar(100);not null"`   // ตำบล
 
+	Number string `gorm:"type:varchar(100)"`
 
 	// ข้อมูลโฉนด
 	TitleDeedNumber string `json:"title_deed_number" gorm:"type:varchar(50);not null"` // เลขที่โฉนด
@@ -48,7 +49,7 @@ type Landtitle struct {
 	// LandProvincesID uint
 	// LandProvinces   LandProvinces
 	//Booking []Booking  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
-	Landsalepost []Landsalepost `gorm:"foreignKey:LandtitleID"`
+	Landsalepost []Landsalepost `gorm:"foreignKey:LandID"`
 	Transaction  []Transaction  `gorm:"foreignKey:LandID"`
 	RequestSell  []RequestSell  `gorm:"foreignKey:LandID"`
 	RequestBuy   []RequestBuy   `gorm:"foreignKey:LandID"`

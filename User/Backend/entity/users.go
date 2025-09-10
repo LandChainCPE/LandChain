@@ -18,17 +18,21 @@ type Users struct {
 	RoleID uint // :point_left: FK ไปยัง role.id
 	Role   Role `gorm:"foreignKey:RoleID"` // :point_left: optional: preload ได้
 
-	UserVerificationID *uint             // :point_left: FK ไปยัง user_verification.id (nullable)
-	UserVerification   *UserVerification `gorm:"foreignKey:UserVerificationID"`
+	Landtitle []Landtitle  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
+	Roomchat []Roomchat  `gorm:"foreignKey:UserID"`
+	Transaction []Transaction  `gorm:"foreignKey:UserID"`
+    Landsalepost []Landsalepost  `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
+
+	UserVerificationID *uint // :point_left: FK ไปยัง role.id
+	UserVerification   UserVerification `gorm:"foreignKey:UserVerificationID"`
 
 	Booking           []Booking     `gorm:"foreignKey:UserID"` // :point_left: One-to-Many relationship
 	Petition          []Petition    `gorm:"foreignKey:UserID"`
-	State             []State       `gorm:"foreignKey:UserID"`
-	RoomchatUser1     []Roomchat    `gorm:"foreignKey:UserID1"`
-	RoomchatUser2     []Roomchat    `gorm:"foreignKey:UserID2"`
+	//State             []State       `gorm:"foreignKey:UserID"`
+	// RoomchatUser1     []Roomchat    `gorm:"foreignKey:UserID1"`
+	// RoomchatUser2     []Roomchat    `gorm:"foreignKey:UserID2"`
 	TransactionBuyer  []Transaction `gorm:"foreignKey:BuyerID"`
 	TransactionSeller []Transaction `gorm:"foreignKey:SellerID"`
 	RequestBuy        []RequestBuy  `gorm:"foreignKey:UserID"`
 	RequestSell       []RequestSell `gorm:"foreignKey:UserID"`
-	Landtitle         []Landtitle    `gorm:"foreignKey:UserID"`
 }

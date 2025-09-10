@@ -1,8 +1,8 @@
-const { ethers } = require("ethers");
+import { ethers } from "ethers";
 
-const walletID = "0x81C7a15aE0b72CADE82D428844cff477f6E364b5";
-const name = "Rattapon Phonthaisong";
-const salt = "uWUWYvo2kOrKa8t55E";
+const walletID = "0xf55988edca178d5507454107945a0c96f3af628c";
+const name = "Jib";
+const salt = "1234";
 const nameHash = ethers.keccak256(ethers.toUtf8Bytes(name + salt));
 
 const messageHash = ethers.keccak256(

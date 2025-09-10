@@ -1,6 +1,6 @@
 import React, { useState, useEffect, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuditOutlined, UserOutlined } from "@ant-design/icons";
+import { AuditOutlined, UserOutlined, HomeOutlined } from "@ant-design/icons";
 import { Col, Row } from "antd";
 import './HeaderUserMain.css';  // เพิ่มการอ้างอิงไฟล์ CSS
 import Logo from "../../assets/LogoLandchain.png";
@@ -43,6 +43,13 @@ const MainPage = (): JSX.Element => {
         }, 2000);
     };
 
+    const goToPostLand = () => {
+        setLoading(true);
+        localStorage.setItem("isLogin", "true");
+        setTimeout(() => {
+            navigate("/user/sellpostmain");
+        }, 2000);
+    };
     const goToVerifyUserToBlockchain = () => {
         setLoading(true);
         localStorage.setItem("isLogin", "true");
@@ -114,8 +121,12 @@ const MainPage = (): JSX.Element => {
                         ลงทะเบียนโฉนดที่ดิน
                     </NavButton>
 
-                    <NavButton variant="secondary">
-                        ข่าวสาร
+                    <NavButton
+                        variant="primary"
+                        onClick={goToPostLand}
+                        icon={<HomeOutlined />}
+                    >
+                        ประกาศขายที่ดิน
                     </NavButton>
 
                     {isLogin ? (

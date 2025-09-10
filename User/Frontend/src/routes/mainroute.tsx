@@ -17,7 +17,10 @@ const State = Loadable(lazy(() => import("../pages/Petition/State")));
 
 const SellMainPage = Loadable(lazy(() => import("../pages/Sell-Buy/SellMainpage")));
 const Map = Loadable(lazy(() => import("../pages/Map/map")));
-const SellPost = Loadable(lazy(() => import("../pages/SellPost/sellpost")));
+const SellPost = Loadable(lazy(() => import("../pages/SellPost/sellpost.tsx")));
+const SellPostMain = Loadable(lazy(() => import("../pages/SellPost/sellpostmain.tsx")));
+const LandDetail = Loadable(lazy(() => import("../pages/SellPost/landdetail.tsx")));
+
 const Chat = Loadable(lazy(() => import("../pages/ChatPage/chat")));
 
 const CreateAccount = Loadable(lazy(() => import("../pages/CreateUser/CreateAccount")));
@@ -133,6 +136,22 @@ const UserRoutes = (): RouteObject[] => [
         ) 
       },
       { 
+        path: "sellpostmain", 
+        element: (
+          <ProtectedRoute>
+            <SellPostMain />
+          </ProtectedRoute>
+        ) 
+      },
+      { 
+        path: "landdetail/:id", 
+        element: (
+          <ProtectedRoute>
+            <LandDetail />
+          </ProtectedRoute>
+        )
+      },
+      { 
         path: "requestsell", 
         element: (
           <ProtectedRoute>
@@ -208,3 +227,6 @@ function ConfigRoutes() {
 }
 
 export default ConfigRoutes;
+
+
+

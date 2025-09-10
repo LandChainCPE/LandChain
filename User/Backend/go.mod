@@ -4,6 +4,8 @@ go 1.23.0
 
 toolchain go1.23.3
 
+require github.com/dgrijalva/jwt-go v3.2.0+incompatible
+
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/ethereum/go-ethereum v1.16.3

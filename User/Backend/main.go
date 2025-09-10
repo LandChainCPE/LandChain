@@ -11,6 +11,8 @@ import (
 	"github.com/joho/godotenv"
 
 	"landchain/middlewares"
+
+
 )
 
 func main() {
@@ -56,6 +58,12 @@ func main() {
 		authorized.GET("/petitions", controller.GetAllPetition)
 		authorized.POST("/petitions", controller.CreatePetition)
 		authorized.GET("/states", controller.GetAllStates)
+		authorized.GET("/tags", controller.GetTags)
+		authorized.POST("/landpost", controller.CreateLandPost)
+		authorized.GET("/landposts", controller.GetAllPostLandData)
+		authorized.GET("/province", controller.GetAllProvinces)
+		authorized.GET("/district/:id", controller.GetDistrict)
+		authorized.GET("/subdistrict/:id", controller.GetSubdistrict)
 
 		authorized.GET("/provinces", controller.GetProvince) // ดึงข้อมูลจังหวัด
 		authorized.GET("/branches", controller.GetBranch)    // ดึงข้อมูลสาขา
@@ -75,7 +83,7 @@ func main() {
 		authorized.GET("/location", controller.GetLocations)    // ดึงข้อมูลโฉนดที่ดิน
 		authorized.POST("/location", controller.CreateLocation) // สร้างโฉนดที่ดิน
 		// CONTROLLER lANDSELLPOST
-		r.GET("/user/sellpost", controller.GetAllPostLandData)
+		//r.GET("/user/sellpost", controller.GetAllPostLandData)
 
 		// CONTROLLER Chat
 		// r.GET("/ws/roomchat/:roomID", controller.HandleWebSocket)
@@ -87,13 +95,13 @@ func main() {
 		authorized.GET("/user/landinfo/:id", controller.GetLandInfoByTokenID)
 		authorized.GET("/user/lands", controller.GetLandTitleInfoByWallet)
 		authorized.GET("/user/info", controller.GetInfoUserByToken)
-		authorized.GET("/user/lands/metadata", controller.GetLandMetadataByWallet)
+		authorized.POST("/user/lands/metadata", controller.GetLandMetadataByToken)
 
 		// CONTROLLER RegisterLand
 		authorized.POST("/user/userregisland", controller.UserRegisLand)
-		authorized.GET("/province", controller.GetAllProvinces)
-		authorized.GET("/district/:id", controller.GetDistrict)
-		authorized.GET("/subdistrict/:id", controller.GetSubdistrict)
+		//authorized.GET("/province", controller.GetAllProvinces)
+		//authorized.GET("/district/:id", controller.GetDistrict)
+		//authorized.GET("/subdistrict/:id", controller.GetSubdistrict)
 	}
 
 	// public := r.Group("")
@@ -103,6 +111,7 @@ func main() {
 	// 	public.POST("/signup", user.CreateUser)
 
 	// }
+
 
 	r.Run(":8080")
 	r.Run()

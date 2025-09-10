@@ -24,4 +24,10 @@ type Transaction struct {
 
 	LandID    uint      // 👈 FK ไปยัง role.id
 	Landtitle Landtitle `gorm:"foreignKey:LandID"`
+
+	LandsalepostID uint
+	Landsalepost   Landsalepost  `gorm:"foreignKey:LandsalepostID"`
+
+	UserID uint  `json:"user_id"`
+	Users  Users `gorm:"foreignKey:UserID"`
 }
