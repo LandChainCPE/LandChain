@@ -13,6 +13,33 @@ type Tag = {
   icon: string;
 };
 
+const ZERO_ADDR = "0xf55988edca178d5507454107945a0c96f3af628c";
+
+function normalizeMetaFields(raw: string = ""): string {
+  return raw.trim().replace(/^"/, "").replace(/";?$/, "").trim();
+}
+
+// "Key:Value, Key:Value" -> { Key: Value, ... }
+function parseMetaFields(raw: string = ""): Record<string, string> {
+  const meta: Record<string, string> = {};
+  const clean = normalizeMetaFields(raw);
+  if (!clean) return meta;
+  for (const part of clean.split(",")) {
+    const [k, ...rest] = part.split(":");
+    if (!k || rest.length === 0) continue;
+    meta[k.trim()] = rest.join(":").trim();
+  }
+  return meta;
+}
+
+function toEth(weiStr?: string): string {
+  try {
+    const v = BigInt(weiStr ?? "0");
+    return ethers.formatEther(v);
+  } catch {
+    return "0";
+  }
+}
 
 const SellPost = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -58,9 +85,9 @@ const SellPost = () => {
 
             try {
                 // 🔗 เชื่อม MetaMask
-                //const provider = new ethers.BrowserProvider((window as any).ethereum);
-                //const accounts = await provider.send("eth_requestAccounts", []);
-                const address = "0xf55988edca178d5507454107945a0c96f3af628c";
+                const provider = new ethers.BrowserProvider((window as any).ethereum);
+                const accounts = await provider.send("eth_requestAccounts", []);
+                const address = accounts[0];
                 setWalletAddress(address);
                 console.log("✅ Connected wallet:", address);
 
@@ -73,43 +100,49 @@ const SellPost = () => {
                     console.log(userInfo);
                 }
 
-                // จากนั้นดึง Land Token
-                const res = await GetLandTitleInfoByWallet();
-                console.log("User land tokens:", res);
-                const tokens = res.tokens || [];
-                setLandTokens(tokens);
+               // ดึง token IDs
+      const resTokens = await GetLandTitleInfoByWallet();
+      const tokens: string[] = resTokens?.tokens || [];
+      setLandTokens(tokens);
 
-                // ดึง metadata ของทุก token
-                const allMetadata = await Promise.all(
-                  tokens.map(async (tokenId: string) => {
-                  const metadata = await GetLandMetadataByToken(tokenId);
-                  return {
-                    tokenID: tokenId,
-                    ...metadata,
-                  };
-                  })
-                );
-                console.log("User land metadata:", allMetadata);
-                setLandMetadata(allMetadata);
+      // ดึง metadata ราย token แล้ว "แปลง" ให้พร้อมใช้
+      const allMetadata = await Promise.all(
+        tokens.map(async (tokenId: string) => {
+          const md = await GetLandMetadataByToken(tokenId);
+          // รูปแบบที่คาดหวังคือ { buyer, metaFields, price, tokenID?, walletID? }
+          const buyer = (md?.buyer || "").toLowerCase();
+          const metaFields = md?.metaFields || md?.meta || ""; // กันหลายชื่อ
+          const meta = parseMetaFields(metaFields);
 
-                // แสดงข้อมูล metadata ทั้งหมดใน console (สำหรับ debug)
-                allMetadata.forEach((meta, idx) => {
-                  console.log(`--- Metadata for Token #${meta.tokenID} ---`);
-                  Object.entries(meta.meta || {}).forEach(([key, value]) => {
-                  console.log(`${key}: ${value}`);
-                  });
-                });
-            } catch (err) {
-                console.error("❌ Error connecting MetaMask or fetching user:", err);
-                setError("เกิดข้อผิดพลาดในการเชื่อมต่อ MetaMask");
-            } finally {
-                setLoading(false);
-            }
-        };
+          return {
+            tokenID: String(md?.tokenID ?? tokenId),
+            meta,
+            buyer: buyer,
+            price: String(md?.price ?? "0"),   // wei
+            priceEth: toEth(String(md?.price ?? "0")),
+          };
+        })
+      );
 
-        connectWalletAndFetchUser();
-    }, [navigate]);
+      console.log("User land metadata (mapped):", allMetadata);
+      setLandMetadata(allMetadata);
 
+      // debug: log ค่าภายใน meta
+      allMetadata.forEach((x) => {
+        console.log(`--- Metadata for Token #${x.tokenID} ---`);
+        Object.entries(x.meta || {}).forEach(([k, v]) => console.log(`${k}: ${v}`));
+      });
+
+    } catch (err) {
+      console.error("❌ Error connecting MetaMask or fetching user:", err);
+      setError("เกิดข้อผิดพลาดในการเชื่อมต่อหรือดึงข้อมูล");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  connectWalletAndFetchUser();
+}, [navigate]);
 
     const [selectedLand, setSelectedLand] = useState<string | null>(null);
     const handleSelectLand = (tokenID: string) => {
@@ -457,11 +490,22 @@ useEffect(() => {
     <div className="land-tokens-container">
       {landMetadata.map((land: any, index: number) => {
         const deedNo = land.meta?.["Deed No"] || land.meta?.["DeedNo"] || "-";
-        const province = land.meta?.["Province"] || "-";
-        const price = land.price ?? "0";
-        const isAvailable = (land.buyer || "").toLowerCase() ===
-          "0x0000000000000000000000000000000000000000";
-
+        //const province = land.meta?.["Province"] || "-";
+        const priceWei = land.price ?? "0";
+        const priceEth = land.priceEth ?? toEth(priceWei);
+        const isAvailable = (land.buyer || "") === ZERO_ADDR;
+    const m = land.meta || {};
+    const map = m["Map"] ?? "-";
+    const landNo = m["Land No"] ?? "-";
+    const surveyPage = m["Survey Page"] ?? "-";
+    const subdistrict = m["Subdistrict"] ?? "-";
+    const district = m["District"] ?? "-";
+    const province = m["Province"] ?? "-";
+    const rai = m["Rai"] ?? "-";
+    const ngan = m["Ngan"] ?? "-";
+    const sqwa = m["SqWa"] ?? "-";
+    const book = m["Book"] ?? "-";
+    const page = m["Page"] ?? "-";
         return (
           <div
             key={index}
@@ -469,27 +513,36 @@ useEffect(() => {
             onClick={() => handleSelectLand(String(land.tokenID))}
           >
             <div className="land-token-content">
-              <div className="token-header">
-                <h4 className="token-title">โฉนด #{deedNo}</h4>
-                {isAvailable ? (
-                  <span className="status-badge available">พร้อมจำหน่าย</span>
-                ) : (
-                  <span className="status-badge sold">ขายแล้ว</span>
-                )}
-              </div>
+      <div className="meta-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", marginTop: "8px" }}>
+        <p className="contract-label">แผนที่ระวาง (Map)</p>
+        <p className="contract-value">{map}</p>
 
-              <div className="contract-info">
-                <p className="contract-label">จังหวัด</p>
-                <p className="contract-value">{province}</p>
+        <p className="contract-label">เลขที่ดิน (Land No)</p>
+        <p className="contract-value">{landNo}</p>
 
-                <p className="contract-label">ราคา (wei)</p>
-                <p className="contract-value">{price}</p>
-              </div>
+        <p className="contract-label">เลขหน้าสำรวจ (Survey Page)</p>
+        <p className="contract-value">{surveyPage}</p>
 
-              <div className="contract-info">
-                <p className="contract-label">Token ID</p>
-                <p className="contract-value">{land.tokenID}</p>
-              </div>
+        <p className="contract-label">ตำบล</p>
+        <p className="contract-value">{subdistrict}</p>
+
+        <p className="contract-label">อำเภอ</p>
+        <p className="contract-value">{district}</p>
+
+        <p className="contract-label">จังหวัด</p>
+        <p className="contract-value">{province}</p>
+
+        <p className="contract-label">พื้นที่</p>
+        <p className="contract-value">
+          {rai} ไร่ {ngan} งาน {sqwa} ตร.วา
+        </p>
+
+        <p className="contract-label">เล่ม (Book)</p>
+        <p className="contract-value">{book}</p>
+
+        <p className="contract-label">หน้า (Page)</p>
+        <p className="contract-value">{page}</p>
+      </div>
             </div>
           </div>
         );
@@ -584,6 +637,7 @@ useEffect(() => {
           </div>
         </div>
       </div>
+
       {/* Continue from Step 2: Personal Information */}
       {currentStep === 2 && (
         <div style={{ backgroundColor: "#ffffff", borderRadius: "1rem", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)", padding: "2rem" }}>
