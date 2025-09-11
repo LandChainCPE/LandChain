@@ -357,7 +357,7 @@ useEffect(() => {
 
         <div className="request-sell-container">            
             {/* Header Section */}
-            <div className="main-container">
+            <div className="main-container1">
 
                 {/* Error Alert */}
                 {error && (
@@ -487,13 +487,13 @@ useEffect(() => {
 {landMetadata.length > 0 && (
   <div className="land-tokens-section">
     <h3 className="section-title">เลือกที่ดินที่ต้องการจำหน่าย</h3>
-    <div className="land-tokens-container">
-      {landMetadata.map((land: any, index: number) => {
-        const deedNo = land.meta?.["Deed No"] || land.meta?.["DeedNo"] || "-";
-        //const province = land.meta?.["Province"] || "-";
-        const priceWei = land.price ?? "0";
-        const priceEth = land.priceEth ?? toEth(priceWei);
-        const isAvailable = (land.buyer || "") === ZERO_ADDR;
+<div className="land-tokens-container">
+  {landMetadata.map((land: any, index: number) => {
+    const deedNo = land.meta?.["Deed No"] || land.meta?.["DeedNo"] || "-";
+    const priceWei = land.price ?? "0";
+    const priceEth = land.priceEth ?? toEth(priceWei);
+    const isAvailable = (land.buyer || "") === ZERO_ADDR;
+
     const m = land.meta || {};
     const map = m["Map"] ?? "-";
     const landNo = m["Land No"] ?? "-";
@@ -506,48 +506,70 @@ useEffect(() => {
     const sqwa = m["SqWa"] ?? "-";
     const book = m["Book"] ?? "-";
     const page = m["Page"] ?? "-";
-        return (
-          <div
-            key={index}
-            className={`land-token-card ${selectedLand === land.tokenID ? "selected" : ""}`}
-            onClick={() => handleSelectLand(String(land.tokenID))}
-          >
-            <div className="land-token-content">
-      <div className="meta-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", marginTop: "8px" }}>
-        <p className="contract-label">แผนที่ระวาง (Map)</p>
-        <p className="contract-value">{map}</p>
 
-        <p className="contract-label">เลขที่ดิน (Land No)</p>
-        <p className="contract-value">{landNo}</p>
+    return (
+      <div
+        key={index}
+        className={`land-token-card ${selectedLand === land.tokenID ? "selected" : ""}`}
+        onClick={() => handleSelectLand(String(land.tokenID))}
+        style={{
+          border: selectedLand === land.tokenID ? "2px solid #007bff" : "1px solid #e0e0e0",
+          borderRadius: "12px",
+          padding: "16px",
+          background: "#fff",
+          cursor: "pointer",
+          boxShadow: selectedLand === land.tokenID ? "0 4px 12px rgba(0, 123, 255, 0.2)" : "0 2px 6px rgba(0,0,0,0.1)",
+          transition: "all 0.2s ease-in-out",
+          marginBottom: "16px"
+        }}
+      >
+        {/* Header */}
+        <div className="token-header" style={{ marginBottom: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h4 className="token-title" style={{ margin: 0, fontWeight: "bold" }}>โฉนด #{deedNo}</h4>
+        </div>
 
-        <p className="contract-label">เลขหน้าสำรวจ (Survey Page)</p>
-        <p className="contract-value">{surveyPage}</p>
+        {/* Body */}
+        <div className="meta-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
+          <p className="contract-label">จังหวัด</p>
+          <p className="contract-value">{province}</p>
 
-        <p className="contract-label">ตำบล</p>
-        <p className="contract-value">{subdistrict}</p>
+          <p className="contract-label">ราคา</p>
+          <p className="contract-value">{priceWei} wei ({priceEth} ETH)</p>
 
-        <p className="contract-label">อำเภอ</p>
-        <p className="contract-value">{district}</p>
+          <p className="contract-label">Token ID</p>
+          <p className="contract-value">{land.tokenID}</p>
 
-        <p className="contract-label">จังหวัด</p>
-        <p className="contract-value">{province}</p>
+          <p className="contract-label">แผนที่ระวาง</p>
+          <p className="contract-value">{map}</p>
 
-        <p className="contract-label">พื้นที่</p>
-        <p className="contract-value">
-          {rai} ไร่ {ngan} งาน {sqwa} ตร.วา
-        </p>
+          <p className="contract-label">เลขที่ดิน</p>
+          <p className="contract-value">{landNo}</p>
 
-        <p className="contract-label">เล่ม (Book)</p>
-        <p className="contract-value">{book}</p>
+          <p className="contract-label">เลขหน้าสำรวจ</p>
+          <p className="contract-value">{surveyPage}</p>
 
-        <p className="contract-label">หน้า (Page)</p>
-        <p className="contract-value">{page}</p>
+          <p className="contract-label">ตำบล</p>
+          <p className="contract-value">{subdistrict}</p>
+
+          <p className="contract-label">อำเภอ</p>
+          <p className="contract-value">{district}</p>
+
+          <p className="contract-label">พื้นที่</p>
+          <p className="contract-value">
+            {rai} ไร่ {ngan} งาน {sqwa} ตร.วา
+          </p>
+
+          <p className="contract-label">เล่ม</p>
+          <p className="contract-value">{book}</p>
+
+          <p className="contract-label">หน้า</p>
+          <p className="contract-value">{page}</p>
+        </div>
       </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
+    );
+  })}
+</div>
+
   </div>
 )}
 
@@ -571,11 +593,6 @@ useEffect(() => {
 
             <div className="contract-info">
               <p className="contract-label">Contract Address</p>
-              <p className="contract-address">
-                {import.meta?.env?.VITE_CONTRACT_ADDRESS
-                  || (import.meta as any)?.env?.REACT_APP_CONTRACT_ADDRESS
-                  || "N/A"}
-              </p>
             </div>
 
             <button
