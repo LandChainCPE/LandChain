@@ -112,6 +112,13 @@ func main() {
 
 		authorized.POST("/user/lands/metadata", controller.GetLandMetadataByToken)
 		authorized.POST("/user/lands/metadata/wallet", controller.GetLandMetadataByWallet)
+		authorized.GET("/user/lands/get/history/:id", controller.GetLandHistory)
+		authorized.POST("/user/lands/get/history/infousers", controller.GetInfoUsersByWallets)
+		authorized.DELETE("/user/lands/delete/transaction/:id", controller.DeleteTransaction)
+		authorized.GET("/user/get/saleinfo/:id", controller.GetSaleInfoHandler)
+		authorized.GET("/user/get/metamaskaddress/:id", controller.GetUserAddressLand)
+		authorized.POST("/user/post/tranferland", controller.BuyLandHandler)
+		authorized.DELETE("/user/lands/delete/allrequset/:id", controller.DeleteAllRequestBuyByLandID)
 
 		// CONTROLLER RegisterLand
 		authorized.POST("/user/userregisland", controller.UserRegisLand)

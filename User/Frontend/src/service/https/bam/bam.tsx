@@ -275,3 +275,84 @@ export async function GetLandMetadataByWallet() {
     else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
   }
 }
+
+export async function GetLandHistory(id: number | string) {
+  try {
+    const res = await api.get(`/user/lands/get/history/${id}`); // ✅ แทนค่า id จริง
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function GetInfoUsersByWallets(wallets: string[]) {
+  try {
+    const res = await api.post(`/user/lands/get/history/infousers`, wallets); // ส่ง wallets เป็น body
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function DeleteTransaction(id: number | string) {
+  try {
+    const res = await api.delete(`/user/lands/delete/transaction/${id}`); // ✅ แทนค่า id จริง
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function GetSaleInfoHandler(id: number | string) {
+  try {
+    const res = await api.get(`/user/get/saleinfo/${id}`); // ✅ แทนค่า id จริง
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function GetUserAddressLand(id: number | string) {
+  try {
+    const res = await api.get(`/user/get/metamaskaddress/${id}`); // ✅ แทนค่า id จริง
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function BuyLandHandler(tokenId: string, txHash: string) {
+  try {
+    const res = await api.post("/user/post/tranferland", {
+      tokenId,  // จาก frontend
+      txHash,   // เพิ่ม txHash
+    });
+    return res.data; // { txHash: "0x123..." }
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function DeleteAllRequestBuyByLandID(landID: string | number) {
+  try {
+    const res = await api.delete(`/user/lands/delete/allrequset/`, {
+      params: { landID },
+    });
+    return res.data;
+  } catch (e: any) {
+    if (e.response) return e.response.data;
+    return { error: "เกิดข้อผิดพลาดในการลบคำขอซื้อ" };
+  }
+}

@@ -34,6 +34,7 @@ const VerifyLand = Loadable(lazy(() => import("../pages/VerifyLand/VerifyLand"))
 const RequestSell = Loadable(lazy(() => import("../pages/RequestSell/ReausetSell")));
 const RequestBuy = Loadable(lazy(() => import("../pages/RequestSell/RequsetBuy")));
 const Transation = Loadable(lazy(() => import("../pages/RequestSell/TransationTimeline")));
+const History = Loadable(lazy(() => import("../pages/Landhistory/landhistory.tsx")));
 
 // Component สำหรับป้องกันหน้าที่ต้อง login
 const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
@@ -197,6 +198,14 @@ const UserRoutes = (): RouteObject[] => [
         element: (
           <ProtectedRoute>
             <VerifyLand />
+          </ProtectedRoute>
+        ) 
+      },
+      { 
+        path: "landhistory", 
+        element: (
+          <ProtectedRoute>
+            <History />
           </ProtectedRoute>
         ) 
       },

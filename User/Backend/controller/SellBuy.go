@@ -4,6 +4,7 @@ import (
 	"landchain/config" // เปลี่ยนเป็น path ที่ถูกต้องของ Go bindings ที่คุณสร้าง เช่น "contract" หรือชื่อที่ตรงกับไฟล์ go ที่ได้จาก abigen
 	"landchain/entity" // แก้ชื่อ module ให้ตรงกับโปรเจกต์คุณ
 	"landchain/services"
+	"strings"
 	"time"
 
 	"log"
@@ -128,8 +129,6 @@ func CreateTransaction(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"transaction": transaction, "land": land})
 }
-
-
 
 func UpdateTransactionLandDepartmentAccept(c *gin.Context) {
 	// รับ ID ของธุรกรรมจาก URL parameter
@@ -353,4 +352,59 @@ func DeleteAllRequestBuy(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "ลบคำขอทั้งหมด"})
+}
+
+func GetInfoUsersByWallets(c *gin.Context) {
+	var wallets []string
+	if err := c.BindJSON(&wallets); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "กรุณาส่ง wallet เป็น array"})
+		return
+	}
+
+	// แปลง wallets ทั้งหมดเป็น lowercase
+	for i := range wallets {
+		wallets[i] = strings.ToLower(wallets[i])
+	}
+
+	var users []entity.Users
+	db := config.DB()
+
+	// ใช้ LOWER ใน query เพื่อให้ match case-insensitive
+	if err := db.Where("LOWER(metamaskaddress) IN ?", wallets).Find(&users).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลผู้ใช้ได้"})
+		return
+	}
+
+	if len(users) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบผู้ใช้"})
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
+}
+
+func DeleteAllRequestBuyByLandID(c *gin.Context) {
+	landIDStr := c.Query("landID")
+
+
+	if landIDStr == ""{
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ต้องระบุ landID และ userID"})
+		return
+	}
+
+	landID, err1 := strconv.Atoi(landIDStr)
+
+	if err1 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "landID และ userID ต้องเป็นตัวเลข"})
+		return
+	}
+
+	db := config.DB()
+
+	if err := db.Where("land_id = ?", landID).Delete(&entity.RequestBuySell{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถลบข้อมูลได้", "detail": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ลบคำขอซื้อเรียบร้อย"})
 }

@@ -265,8 +265,8 @@ function RequestSell() {
                                                 <span>{land.parsedFields["Province"] || '-'}</span>
                                             </div>
                                             <div className="detail-item">
-                                                <label>ราคา</label>
-                                                <span>{land.price || '-'}</span>
+                                                <label>TokenID</label>
+                                                <span>{land.tokenid || '-'}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -300,7 +300,7 @@ function RequestSell() {
                                     <div className="selected-land-info">
                                         <h3>โฉนด #{selectedLandData.parsedFields["Land No"]}</h3>
                                         <div className="land-meta">
-                                            <span>ราคา: {selectedLandData.price}</span>
+                                            <span>TokenID: {selectedLandData.price}</span>
                                             <span className={`status ${selectedLandData.buyer === "0x0000000000000000000000000000000000000000" ? 'available' : 'sold'}`}>
                                                 {selectedLandData.buyer === "0x0000000000000000000000000000000000000000" ? 'พร้อมจำหน่าย' : 'ขายแล้ว'}
                                             </span>
