@@ -162,11 +162,11 @@ func VerifyWalletID(c *gin.Context) {
 
 	// สร้าง UserVerification แต่ยังไม่ commit นอก transaction
 	uv := entity.UserVerification{
-		Wallet:       walletID,
-		NameHashSalt: "0x" + hex.EncodeToString(nameHash),
-		Signature:    sigHex,
-		Status: 	  "pending",	
-		RandomSalt:   salt,
+		Wallet:         walletID,
+		NameHashSalt:   "0x" + hex.EncodeToString(nameHash),
+		Signature:      sigHex,
+		Status_onchain: false,
+		RandomSalt:     salt,
 	}
 	if err := tx.Create(&uv).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user_verification: " + err.Error()})
@@ -193,4 +193,53 @@ func VerifyWalletID(c *gin.Context) {
 		"salt":                salt,
 		"user_verificationID": uv.ID,
 	})
+}
+
+func GetAllLandData(c *gin.Context) {
+	db := config.DB()
+
+	var lands []entity.Landtitle
+	// Preload User, Province, District, Subdistrict relations
+	if err := db.Preload("User").Preload("Province").Preload("District").Preload("Subdistrict").Find(&lands).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Prepare result for frontend
+	var result []gin.H
+	for _, l := range lands {
+		provinceName := ""
+		districtName := ""
+		subdistrictName := ""
+		if l.Province.ID != 0 {
+			provinceName = l.Province.NameTh
+		}
+		if l.District.ID != 0 {
+			districtName = l.District.NameTH
+		}
+		if l.Subdistrict.ID != 0 {
+			subdistrictName = l.Subdistrict.NameTH
+		}
+		result = append(result, gin.H{
+			"survey_number":     l.SurveyNumber,
+			"land_number":       l.LandNumber,
+			"survey_page":       l.SurveyPage,
+			"number":            l.Number,
+			"title_deed_number": l.TitleDeedNumber,
+			"volume":            l.Volume,
+			"page":              l.Page,
+			"rai":               l.Rai,
+			"ngan":              l.Ngan,
+			"square_wa":         l.SquareWa,
+			"status_verify":     l.Status_verify,
+			"province":          provinceName,
+			"district":          districtName,
+			"subdistrict":       subdistrictName,
+			"firstname":         l.User.Firstname,
+			"lastname":          l.User.Lastname,
+			"metamaskaddress":   l.User.Metamaskaddress,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": result})
 }

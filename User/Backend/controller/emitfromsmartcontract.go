@@ -102,7 +102,7 @@ func ListenSmartContractEvents() {
 					log.Println("user_verification not found for wallet:", walletLower)
 					break
 				}
-				userVerif.Status = "on-chain"
+				userVerif.Status_onchain = true
 				if err := db.Save(&userVerif).Error; err != nil {
 					log.Println("failed to update user_verification status:", err)
 				} else {

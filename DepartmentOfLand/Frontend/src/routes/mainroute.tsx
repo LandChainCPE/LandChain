@@ -4,8 +4,11 @@ import Loadable from "../component/third-patry/Loadable";
 import Layout from "../component/Layout";
 
 const Main = Loadable(lazy(() => import("../pages/Main")));
-const Verify = Loadable(lazy(() => import("../pages/Verify")));
-const RegisLand = Loadable(lazy(() => import("../pages/regisland/RegisLand")));
+const Operations = Loadable(lazy(() => import("../pages/Operations")));
+const VerifyUser = Loadable(lazy(() => import("../pages/VerifyUser")));
+const VerifyLand = Loadable(lazy(() => import("../pages/VerifyLand")));
+
+// const RegisLand = Loadable(lazy(() => import("../pages/regisland/RegisLand")));
 const Transfer = Loadable(lazy(() => import("../pages/Transfer")));
 const Settings = Loadable(lazy(() => import("../pages/Settings")));
 
@@ -15,9 +18,11 @@ const UserRoutes = (): RouteObject[] => [
     element: <Layout />,
     children: [
       { index: true, element: <Main /> },
-      { path: "operations", element: <Main /> },
-      { path: "verify", element: <Verify /> },
-      { path: "regisland", element: <RegisLand /> },
+      { path: "main", element: <Main /> },
+      { path: "operations", element: <Operations /> },
+      { path: "verifyuser", element: <VerifyUser /> },
+      { path: "verifyland", element: <VerifyLand /> },
+      // { path: "regisland", element: <RegisLand /> },
       { path: "transfer", element: <Transfer /> },
       { path: "settings", element: <Settings /> },
       { path: "*", element: <Main /> },

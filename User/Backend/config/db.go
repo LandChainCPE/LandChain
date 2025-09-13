@@ -333,7 +333,7 @@ func SetupDatabase() {
 			Rai:                5,
 			Ngan:               2,
 			SquareWa:           50,
-			Status:             "Process",
+			Status_verify:      false,
 			GeographyID:        nil, // Replace with actual GeographyID if available
 			ProvinceID:         1,   // Replace with actual ProvinceID
 			DistrictID:         1,   // Replace with actual DistrictID
@@ -354,7 +354,7 @@ func SetupDatabase() {
 			Rai:                5,
 			Ngan:               2,
 			SquareWa:           50,
-			Status:             "Process",
+			Status_verify:      false,
 			GeographyID:        nil, // Replace with actual GeographyID if available
 			ProvinceID:         2,   // Replace with actual ProvinceID
 			DistrictID:         1,   // Replace with actual DistrictID
@@ -375,7 +375,7 @@ func SetupDatabase() {
 			Rai:                5,
 			Ngan:               2,
 			SquareWa:           50,
-			Status:             "Process",
+			Status_verify:      false,
 			GeographyID:        nil, // Replace with actual GeographyID if available
 			ProvinceID:         3,   // Replace with actual ProvinceID
 			DistrictID:         1,   // Replace with actual DistrictID

@@ -50,7 +50,7 @@ func main() {
 		authorized.GET("/getbookingdata", controller.GetBookingData)
 		authorized.GET("/getdatauserforverify/:bookingID", controller.GetDataUserForVerify)
 		authorized.POST("/verifywalletid/:bookingID", controller.VerifyWalletID)
-
+		authorized.GET("/getalllanddata", controller.GetAllLandData)
 		authorized.GET("/getdatauserverification/:userid", controller.GetDataUserVerification)
 
 		authorized.POST("/userbookings", controller.CreateBooking) // สร้างการจอง

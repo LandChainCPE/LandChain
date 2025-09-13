@@ -51,8 +51,22 @@ async function VerifyWalletID(bookingID: any) {
 };
 
 
+
+async function getAllLandData() {
+    const requestOptions = {
+        method: "GET",
+        headers: getAuthHeaders(),
+    };
+
+    let response = await fetch(`${apiUrl}/getalllanddata`, requestOptions)
+    const result = await response.json();
+    return { response, result };
+};
+
+
 export {
     getQueueByDate,
     getDataUserForVerify,
-    VerifyWalletID
+    VerifyWalletID,
+    getAllLandData
 }
