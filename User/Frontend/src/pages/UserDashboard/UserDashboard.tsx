@@ -1,7 +1,8 @@
 import React, { useMemo, useState, useEffect } from "react";
 import "./UserDashboard.css";
 import { useNavigate } from "react-router-dom";
-import { GetDataUserVerification } from "../../service/https/garfield/http";
+import { GetUserinfoByID } from "../../service/https/garfield/http";
+import { UserCheck, CheckSquare } from "react-feather"; // Assuming 'react-feather' contains the User and Home icons
 
 
 /* =======================
@@ -182,35 +183,24 @@ const StatCard = ({ title, value, sub }: { title: React.ReactNode; value: React.
 export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: LandTitle[] }) {
   // State สำหรับ user info
   const [userInfo, setUserInfo] = useState<{ firstName?: string; lastName?: string; email?: string; user_verification_id?: number }>({});
-
   useEffect(() => {
-    // ดึงข้อมูลจาก localStorage ก่อน
-    const firstName = localStorage.getItem("firstName") || "";
-    const lastName = localStorage.getItem("lastName") || "";
-    const email = localStorage.getItem("email") || "";
-    const user_verification_id = localStorage.getItem("user_verification_id") || "";
-    let user_id = localStorage.getItem("user_id") || "";
-
-    // ถ้ามีข้อมูลใน localStorage ให้ set เลย
-    setUserInfo({ firstName, lastName, email, user_verification_id: Number(user_verification_id) });
-
-    // ถ้าไม่มี email ให้ลองดึงจาก API
-    if ((!email || email === "") && user_id) {
-      GetDataUserVerification(user_id).then(({ result }) => {
-        if (result && (result.email || result.first_name)) {
+    const user_id = localStorage.getItem("user_id") || "";
+    console.log("User id:", user_id);
+    if (user_id) {
+      GetUserinfoByID(user_id).then(({ result }) => {
+        console.log("API result:", result);
+        if (result && (result.firstName || result.lastName)) {
           setUserInfo({
-            firstName: result.first_name || firstName,
-            lastName: result.last_name || lastName,
-            email: result.email || email,
+            firstName: result.firstName,
+            lastName: result.lastName,
+            email: result.email,
             user_verification_id: result.user_verification_id,
           });
-        }
-      });
-    } else if (user_id) {
-      // ดึง user_verification_id ด้วยถ้ามี user_id
-      GetDataUserVerification(user_id).then(({ result }) => {
-        if (result && result.user_verification_id) {
-          setUserInfo((prev) => ({ ...prev, user_verification_id: result.user_verification_id }));
+          // อัปเดต localStorage ให้ตรงกับ backend
+          localStorage.setItem("firstName", result.firstName || "");
+          localStorage.setItem("lastName", result.lastName || "");
+          localStorage.setItem("email", result.email || "");
+          localStorage.setItem("user_verification_id", result.user_verification_id || "");
         }
       });
     }
@@ -230,7 +220,7 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
   const handleRegisterLandClick = () => {
     navigate('/user/userregisland');
   };
-    useEffect(() => {
+  useEffect(() => {
     console.log("User info:", userInfo);
   }, [userInfo]);
 
@@ -243,7 +233,9 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
             <CardTitle>
               <div style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
-                <ShieldCheck className="icon-lg text-white" />
+                {(userInfo.user_verification_id !== 0 && userInfo.user_verification_id !== null && userInfo.user_verification_id !== undefined) && (
+                  <ShieldCheck className="icon-lg text-white" />
+                )}
                 {userInfo.firstName || "User"} {userInfo.lastName || ""}
               </div>
             </CardTitle>
@@ -284,34 +276,46 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
       </Card>
 
       <div className="card-row">
-        {/* <Card>
+        <Card>
           <div className="card-header user-header">
-            <CardTitle>นำข้อมูลผู้ใช้ของคุณไปยัง Blockchain</CardTitle>
-            <CardDescription>ผู้ใช้</CardDescription>
+            <CardTitle>ยืนยันตัวตนบน Blockchain</CardTitle>
+            <CardDescription>นำข้อมูลผู้ใช้ของคุณขึ้น Blockchain เพื่อความปลอดภัย</CardDescription>
           </div>
           <CardContent className="user-content">
-            <Button
-              className="usertoblockchain"
-              variant="primary"
-              onClick={() => navigate('/verifyusertoblockchain')}
-            >
-              ดำเนินการ
-            </Button>
+            <div className="col" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div className="action-icon">
+                <UserCheck className="icon-xxl" />
+              </div>
+              <Button
+                className="usertoblockchain"
+                variant="primary"
+                style={{ marginTop: '1rem' }}
+                onClick={() => navigate('/user/verifyusertoblockchain')}
+              >
+                ยืนยันตัวตน
+              </Button>
+            </div>
           </CardContent>
-        </Card> */}
+        </Card>
         <Card>
           <div className="card-header land-header">
-            <CardTitle>นำข้อมูลที่ดินของคุณไปยัง Blockchain</CardTitle>
-            <CardDescription>ที่ดิน</CardDescription>
+            <CardTitle>ลงทะเบียนที่ดินบน Blockchain</CardTitle>
+            <CardDescription>นำข้อมูลที่ดินของคุณขึ้น Blockchain สร้างความโปร่งใส</CardDescription>
           </div>
           <CardContent className="land-content">
-            <Button
-              className="landtoblockchain"
-              variant="primary"
-              onClick={() => navigate('/verifyusertoblockchain')}
-            >
-              ดำเนินการ
-            </Button>
+            <div className="col" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div className="action-icon">
+                <CheckSquare className="icon-xxl" />
+              </div>
+              <Button
+                className="landtoblockchain"
+                variant="primary"
+                style={{ marginTop: '1rem' }}
+                onClick={() => navigate('/verifyusertoblockchain')}
+              >
+                ลงทะเบียนที่ดิน
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
