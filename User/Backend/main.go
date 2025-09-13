@@ -30,6 +30,9 @@ func main() {
 	// เริ่มต้น Scheduler สำหรับลบการจองที่หมดอายุ
 	controller.StartBookingCleanupScheduler()
 
+	//อ่านค่าการตอบกลับจาก Smartcontract (ควรใช้ go routine)
+	go controller.ListenSmartContractEvents()
+
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})

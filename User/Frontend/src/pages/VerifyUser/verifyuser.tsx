@@ -5,7 +5,7 @@ import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';
 
 import contractABI from "./ContractABI.json";
-const contractAddress = "0xb671A410D1ea59631bB8F843B64d30688903CcF1";
+const contractAddress = "0x0daa740036f34Fa1Bbec555F2cec2172E62FB070";
 
 /* =======================
    Icon Components (SVG)

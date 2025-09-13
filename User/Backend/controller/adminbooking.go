@@ -165,6 +165,7 @@ func VerifyWalletID(c *gin.Context) {
 		Wallet:       walletID,
 		NameHashSalt: "0x" + hex.EncodeToString(nameHash),
 		Signature:    sigHex,
+		Status: 	  "pending",	
 		RandomSalt:   salt,
 	}
 	if err := tx.Create(&uv).Error; err != nil {
