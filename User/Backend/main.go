@@ -115,9 +115,12 @@ func main() {
 
 		// CONTROLLER RegisterLand
 		authorized.POST("/user/userregisland", controller.UserRegisLand)
-		//authorized.GET("/province", controller.GetAllProvinces)
-		//authorized.GET("/district/:id", controller.GetDistrict)
-		//authorized.GET("/subdistrict/:id", controller.GetSubdistrict)
+		// authorized.GET("/province", controller.GetAllProvinces)
+		// authorized.GET("/district/:id", controller.GetDistrict)
+		// authorized.GET("/subdistrict/:id", controller.GetSubdistrict)
+
+		// CONTROLLER User
+		authorized.GET("/userinfo/:userId", controller.GetUserinfoByID)
 	}
 
 	// public := r.Group("")

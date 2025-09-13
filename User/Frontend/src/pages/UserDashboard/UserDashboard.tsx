@@ -181,17 +181,18 @@ const StatCard = ({ title, value, sub }: { title: React.ReactNode; value: React.
    =================================================== */
 export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: LandTitle[] }) {
   // State สำหรับ user info
-  const [userInfo, setUserInfo] = useState<{ firstName?: string; lastName?: string; email?: string; user_verification_id?: string | number }>({});
+  const [userInfo, setUserInfo] = useState<{ firstName?: string; lastName?: string; email?: string; user_verification_id?: number }>({});
 
   useEffect(() => {
     // ดึงข้อมูลจาก localStorage ก่อน
     const firstName = localStorage.getItem("firstName") || "";
     const lastName = localStorage.getItem("lastName") || "";
     const email = localStorage.getItem("email") || "";
+    const user_verification_id = localStorage.getItem("user_verification_id") || "";
     let user_id = localStorage.getItem("user_id") || "";
 
     // ถ้ามีข้อมูลใน localStorage ให้ set เลย
-    setUserInfo({ firstName, lastName, email });
+    setUserInfo({ firstName, lastName, email, user_verification_id: Number(user_verification_id) });
 
     // ถ้าไม่มี email ให้ลองดึงจาก API
     if ((!email || email === "") && user_id) {
@@ -253,7 +254,7 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
 
           <div className="chip-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
             <div style={{ display: 'flex', gap: 8 }}>
-              {userInfo.user_verification_id && userInfo.user_verification_id !== "undefined" ? (
+              {userInfo.user_verification_id ? (
                 <span className="chip chip-strong chip-green">
                   <BadgeCheck className="icon-sm mr-1" />
                   Verified

@@ -82,6 +82,27 @@ func CheckWallet(c *gin.Context) {
 	}
 }
 
+// GetUserByID ดึงข้อมูล User ตาม id
+func GetUserinfoByID(c *gin.Context) {
+	id := c.Param("id")
+	db := config.DB()
+	var user entity.Users
+	// preload UserVerification เพื่อให้แน่ใจว่า UserVerificationID ถูกดึงมาด้วย
+	if err := db.Preload("UserVerification").First(&user, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"id": user.ID,
+		"firstName": user.Firstname,
+		"lastName": user.Lastname,
+		"email": user.Email,
+		"user_verification_id": user.UserVerificationID,
+		"wallet_address": user.Metamaskaddress,
+		// เพิ่ม field อื่นๆ ตามต้องการ
+	})
+}
+
 // // LoginUser ฟังก์ชั่นสำหรับการ Login โดยใช้ Metamask Wallet Address
 // func LoginUser(c *gin.Context) {
 // 	var user entity.Users
