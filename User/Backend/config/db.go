@@ -436,28 +436,38 @@ func SetupDatabase() {
 
 	log.Println("✅ Petition created successfully")
 
-	tags := []entity.Tag{
-		{Tag: "ติดถนน"},
-		{Tag: "ติดทะเล"},
-		{Tag: "ติดแม่น้ำ"},
-		{Tag: "ใกล้BTS"},
-		{Tag: "ใกล้MRT"},
-		{Tag: "ติดภูเขา"},
-	}
-	// เพิ่ม tags ลงในฐานข้อมูล
-	if err := db.Create(&tags).Error; err != nil {
-		log.Fatal("Error inserting tags:", err)
-	}
 
-	// แสดงผลการบันทึกข้อมูล
-	fmt.Println("Tags have been inserted successfully")
+tags := []entity.Tag{
+    {Tag: "ติดถนน"},
+    {Tag: "ติดทะเล"},
+    {Tag: "ติดแม่น้ำ"},
+    {Tag: "ใกล้BTS"},
+    {Tag: "ใกล้MRT"},
+    {Tag: "ติดภูเขา"},
+}
+
+// ป้องกันการซ้ำด้วย Where + FirstOrCreate
+for _, tag := range tags {
+    var exist entity.Tag
+    if err := db.Where("tag = ?", tag.Tag).First(&exist).Error; err != nil {
+        if err == gorm.ErrRecordNotFound {
+            if err := db.Create(&tag).Error; err != nil {
+                log.Fatal("Error inserting tag:", err)
+            }
+        } else {
+            log.Fatal("Error checking tag:", err)
+        }
+    }
+}
+
+fmt.Println("Tags have been inserted successfully")
 
 	//postlad
 	landpost := entity.Landsalepost{
 		FirstName:     "มาลี",
 		LastName:      "มาดี",
 		PhoneNumber:   "0987654321",
-		Image:         "j@gmail.com",
+		Image:         "https://www.google.com/imgres?q=%E0%B8%A3%E0%B8%B9%E0%B8%9B%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%94%E0%B8%B4%E0%B8%99&imgurl=https%3A%2F%2Fbackside.legardy.com%2Fuploads%2F1_3bf04b6ebb.png&imgrefurl=https%3A%2F%2Fwww.legardy.com%2Fblogs%2Fland-title-deed-in-thailand-what-is-it&docid=eYyACuqqpde3-M&tbnid=OxwsXsIftkJiHM&vet=12ahUKEwjytYK5-dePAxXoTGwGHSIEM-oQM3oECBcQAA..i&w=1920&h=1080&hcb=2&ved=2ahUKEwjytYK5-dePAxXoTGwGHSIEM-oQM3oECBcQAA",
 		Name:          "สวนคุณตา",
 		Price:         120000,
 		TagID:         1,

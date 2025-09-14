@@ -38,9 +38,8 @@ const Petition: React.FC = () => {
       return;
     }
 
-  //const userId = localStorage.getItem("id");
+  const userId = localStorage.getItem("user_id");
 
-//อย่าลืมแก้ตรงState,user_id
     try {
       const payload = {
         first_name: formData.firstName,
@@ -50,11 +49,9 @@ const Petition: React.FC = () => {
         description: formData.content,
         date: formData.date,
         topic: formData.title,
-        state_id: 1,
-        user_id: 1,
+        user_id: Number(userId),
       };
 
-      // Call CreatePetition to create the petition
       await CreatePetition(payload);
       
       message.success("✅ ส่งคำร้องสำเร็จ!");

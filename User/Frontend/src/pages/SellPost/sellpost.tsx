@@ -1,19 +1,40 @@
 import React, { useEffect, useState } from "react";
-import { Checkbox, Upload, message, Form, Button, Card, Input } from "antd";
+import { Select, Upload, message, Form, Button, Card, Row, Col, Typography } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { MapPin, Check, Phone, User, DollarSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { GetTags, GetAllProvinces, CreateLandPost } from "../../service/https/jib/jib";
+import { GetTags,CreateLandPost, getLandtitleIdByTokenId } from "../../service/https/jib/jib";
 import { ethers } from "ethers";
-//import { BrowserProvider } from "ethers"; // ✅ ethers v6
 import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";
+import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield/http";
+
+const { Text } = Typography;
+
+type ProvinceDTO = { ID: number; name_th: string; name_en?: string };
+type DistrictDTO = { ID: number; name_th: string; province_id: number; name_en?: string };
+type SubdistrictDTO = { ID: number; name_th: string; district_id: number; name_en?: string };
 
 type Tag = {
+  id: number;
   Tag: string;
   icon: string;
 };
 
-const ZERO_ADDR = "0xf55988edca178d5507454107945a0c96f3af628c";
+// แปลงเป็น checksum (ถ้าไม่ถูกต้องจะคืน "")
+const toChecksum = (addr?: string) => {
+  try { return ethers.getAddress(addr ?? ""); } catch { return ""; }
+};
+
+// ย่อ address สำหรับแสดงผล
+const truncate = (addr?: string, head = 6, tail = 4) =>
+  addr ? `${addr.slice(0, head)}…${addr.slice(-tail)}` : "";
+
+// เช็ค zero address โดยไม่ hard-code
+const isZeroAddress = (addr?: string) => {
+  try { return ethers.getAddress(addr ?? "") === ethers.ZeroAddress; } catch { return false; }
+};
+
+//const ZERO_ADDR = "0xf55988edca178d5507454107945a0c96f3af628c";
 
 function normalizeMetaFields(raw: string = ""): string {
   return raw.trim().replace(/^"/, "").replace(/";?$/, "").trim();
@@ -46,19 +67,22 @@ const SellPost = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [tags, setTags] = useState<Tag[]>([]);
   const navigate = useNavigate();
-  const [provinceOptions, setProvinceOptions] = useState<any[]>([]);
-  const [districtOptions, setDistrictOptions] = useState<any[]>([]);
-  const [subdistrictOptions, setSubdistrictOptions] = useState<any[]>([]);
-  const [rawProvinces, setRawProvinces] = useState<any[]>([]);
+  const [provinces, setProvinces] = useState<ProvinceDTO[]>([]);
+  const [districts, setDistricts] = useState<DistrictDTO[]>([]);
+  const [subdistricts, setSubdistricts] = useState<SubdistrictDTO[]>([]);
   const [image, setImage] = useState<string>("");
   const [form] = Form.useForm();
-
+  const [messageApi, contextHolder] = message.useMessage();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [tokenData, setTokenData] = useState<any | null>(null);
   const [landTokens, setLandTokens] = useState<any[]>([]);
   const [landMetadata, setLandMetadata] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
+  const [selectedLand, setSelectedLand] = useState<string | null>(null);
+  const [loadingP, setLoadingP] = useState(false);
+  const [loadingD, setLoadingD] = useState(false);
+  const [loadingS, setLoadingS] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -66,224 +90,295 @@ const SellPost = () => {
     phoneNumber: "",
     name: "",
     price: "",
-    tag: [] as string[],
+    tag_id: "",
     image: "",
-    province: "",
-    district: "",
-    subdistrict: "",
-    landtitle_id: 1,
-	  user_id: 1,
+    province_id: "",
+    district_id: "",
+    subdistrict_id: "",
+    landtitle_id: "",
+	  user_id: "",
   });
 
     useEffect(() => {
-        const connectWalletAndFetchUser = async () => {
-            if (!(window as any).ethereum) {
-                setError("กรุณาติดตั้ง MetaMask ก่อนใช้งาน");
-                setLoading(false);
-                return;
-            }
+      const connectWalletAndFetchUser = async () => {
+        if (!(window as any).ethereum) {
+          setError("กรุณาติดตั้ง MetaMask ก่อนใช้งาน");
+          setLoading(false);
+          return;
+        }
 
-            try {
-                // 🔗 เชื่อม MetaMask
-                const provider = new ethers.BrowserProvider((window as any).ethereum);
-                const accounts = await provider.send("eth_requestAccounts", []);
-                const address = accounts[0];
-                setWalletAddress(address);
-                console.log("✅ Connected wallet:", address);
+        try {
+          // 🔗 เชื่อม MetaMask
+          const provider = new ethers.BrowserProvider((window as any).ethereum);
+          const accounts = await provider.send("eth_requestAccounts", []);
+          const address = accounts[0];
+          setWalletAddress(address);
+          console.log("✅ Connected wallet:", address);
 
-                const userInfo = await GetInfoUserByToken();
-                if (userInfo.error) {
-                    console.error("❌ Error fetching user info:", userInfo.error);
-                    setError("ไม่สามารถดึงข้อมูลผู้ใช้ได้");
-                } else {
-                    setTokenData(userInfo);
-                    console.log(userInfo);
-                }
+          // ดึงข้อมูลผู้ใช้
+          const userInfo = await GetInfoUserByToken();
+          if (userInfo.error) {
+            console.error("❌ Error fetching user info:", userInfo.error);
+            setError("ไม่สามารถดึงข้อมูลผู้ใช้ได้");
+          } else {
+            setTokenData(userInfo);
+            console.log(userInfo);
+          }
 
-               // ดึง token IDs
-      const resTokens = await GetLandTitleInfoByWallet();
-      const tokens: string[] = resTokens?.tokens || [];
-      setLandTokens(tokens);
+          // ดึง token IDs
+          const resTokens = await GetLandTitleInfoByWallet();
+          const tokens: string[] = resTokens?.tokens || [];
+          setLandTokens(tokens);
 
-      // ดึง metadata ราย token แล้ว "แปลง" ให้พร้อมใช้
-      const allMetadata = await Promise.all(
-        tokens.map(async (tokenId: string) => {
-          const md = await GetLandMetadataByToken(tokenId);
-          // รูปแบบที่คาดหวังคือ { buyer, metaFields, price, tokenID?, walletID? }
-          const buyer = (md?.buyer || "").toLowerCase();
-          const metaFields = md?.metaFields || md?.meta || ""; // กันหลายชื่อ
-          const meta = parseMetaFields(metaFields);
+          // ดึง metadata ราย token แล้ว "แปลง" ให้พร้อมใช้
+          const allMetadata = await Promise.all(
+            tokens.map(async (tokenId: string) => {
+              const md = await GetLandMetadataByToken(tokenId);
 
-          return {
-            tokenID: String(md?.tokenID ?? tokenId),
-            meta,
-            buyer: buyer,
-            price: String(md?.price ?? "0"),   // wei
-            priceEth: toEth(String(md?.price ?? "0")),
-          };
-        })
-      );
+              // รูปแบบที่คาดหวังคือ { buyer, metaFields, price, tokenID?, walletID? }
+              const buyer = (md?.buyer || "").toLowerCase();
+              const metaFields = md?.metaFields || md?.meta || ""; // กันหลายชื่อ
+              const meta = parseMetaFields(metaFields);
 
-      console.log("User land metadata (mapped):", allMetadata);
-      setLandMetadata(allMetadata);
+              return {
+                tokenID: String(md?.tokenID ?? tokenId),
+                meta,
+                buyer: buyer,
+                price: String(md?.price ?? "0"), // wei
+                priceEth: toEth(String(md?.price ?? "0")),
+              };
+            })
+          );
 
-      // debug: log ค่าภายใน meta
-      allMetadata.forEach((x) => {
-        console.log(`--- Metadata for Token #${x.tokenID} ---`);
-        Object.entries(x.meta || {}).forEach(([k, v]) => console.log(`${k}: ${v}`));
-      });
+          console.log("User land metadata (mapped):", allMetadata);
+          setLandMetadata(allMetadata);
 
-    } catch (err) {
-      console.error("❌ Error connecting MetaMask or fetching user:", err);
-      setError("เกิดข้อผิดพลาดในการเชื่อมต่อหรือดึงข้อมูล");
-    } finally {
-      setLoading(false);
-    }
-  };
+          // debug: log ค่าภายใน meta
+          allMetadata.forEach((x) => {
+            console.log(`--- Metadata for Token #${x.tokenID} ---`);
+            Object.entries(x.meta || {}).forEach(([k, v]) =>
+              console.log(`${k}: ${v}`)
+            );
+          });
+        } catch (err) {
+          console.error("❌ Error connecting MetaMask or fetching user:", err);
+          setError("เกิดข้อผิดพลาดในการเชื่อมต่อหรือดึงข้อมูล");
+        } finally {
+          setLoading(false);
+        }
+      };
 
-  connectWalletAndFetchUser();
-}, [navigate]);
+      connectWalletAndFetchUser();
+    }, [navigate]);
 
-    const [selectedLand, setSelectedLand] = useState<string | null>(null);
-    const handleSelectLand = (tokenID: string) => {
-        setSelectedLand(tokenID);
-        console.log("Selected land token:", tokenID);
-        // TODO: ส่ง tokenID ไป backend หรือ smart contract ต่อ
-    };
+const handleSelectLand = async (tokenID: string) => {
+  setSelectedLand(tokenID);
 
-  // ฟังก์ชันอัปโหลดรูป
-const handleUpload = (file: File) => {
-    const imagePath = URL.createObjectURL(file); // แปลงเป็น URL string
-    setFormData(prev => ({
-        ...prev,
-        image: imagePath // ✅ image เป็น string
+  // ดึง landtitle_id ที่แท้จริงจาก backend
+  try {
+    const res = await getLandtitleIdByTokenId(tokenID);
+    const landtitleId = res?.landtitle_id ? String(res.landtitle_id) : tokenID; // fallback เป็น tokenID ถ้าไม่เจอ
+
+    setFormData((prev) => ({
+      ...prev,
+      landtitle_id: landtitleId
     }));
-    return false; // ถ้าใช้กับ Ant Design Upload
+    console.log("Selected land token:", tokenID, "Mapped landtitle_id:", landtitleId);
+  } catch (err) {
+    setFormData((prev) => ({
+      ...prev,
+      landtitle_id: tokenID // fallback
+    }));
+    console.error("Error mapping landtitle_id:", err);
+  }
 };
 
-  // โหลดจังหวัด
-useEffect(() => {
-  const loadProvinces = async () => {
-    try {
-      const res = await GetAllProvinces();
-      const data = res.data || res;
-      setRawProvinces(data);
-      setProvinceOptions(
-        data.map((p: any) => ({
-          label: p.name_th,
-          value: String(p.id), // <-- ใช้ id เป็นค่า
-        }))
-      );
-    } catch (error) {
-      console.error("โหลดจังหวัดล้มเหลว:", error);
-    }
+    // ฟังก์ชันอัปโหลดรูป
+const handleUpload = (file: File) => {
+  const isImage = file.type.startsWith("image/");
+  if (!isImage) {
+    messageApi.error("กรุณาอัปโหลดเฉพาะไฟล์รูปภาพเท่านั้น");
+    return false;
+  }
+
+  // ใช้ FileReader แปลงเป็น Data URL
+  const reader = new FileReader();
+  reader.onload = () => {
+    // เซต state เมื่ออ่านไฟล์เสร็จแล้ว
+    setFormData((prev) => ({
+      ...prev,
+      image: reader.result as string, // ใช้ Data URL ที่ได้จาก FileReader
+    }));
   };
-  loadProvinces();
-}, []);
+  reader.readAsDataURL(file); // อ่านไฟล์เป็น Data URL
+
+  return false; // ถ้าใช้กับ Ant Design Upload
+};
+
+
+
+    // โหลดจังหวัด
+  useEffect(() => {
+    const ctrl = new AbortController();
+    (async () => {
+      setLoadingP(true);
+      try {
+        const data = await GetAllProvinces(ctrl.signal);
+        // เผื่อ backend บางตัวส่ง { result: [] } มา
+        const list: ProvinceDTO[] = Array.isArray(data) ? data : data?.result ?? [];
+        setProvinces(list);
+      } catch (e) {
+        if ((e as any).name !== "AbortError") console.error(e);
+      } finally {
+        setLoadingP(false);
+      }
+    })();
+    return () => ctrl.abort();
+  }, []);
+
+
+  // when province changes -> load districts & reset district/subdistrict
+  useEffect(() => {
+    const pidStr = formData.province_id;
+    const ctrl = new AbortController();
+
+    const pidNum = Number(pidStr);
+    
+    console.log("province_id (ID):", pidNum);
+
+    if (!Number.isFinite(pidNum) || pidNum <= 0) {
+      setDistricts([]);
+      setSubdistricts([]);
+      setFormData((p) => ({ ...p, district_id: "", subdistrict_id: "" }));
+      return;
+    }
+
+    (async () => {
+      setLoadingD(true);
+      try {
+        const data = await GetDistrict(pidNum, ctrl.signal);
+
+        console.log("Received districts data:", data);
+
+        const list: DistrictDTO[] = Array.isArray(data) ? data : data?.result ?? [];
+        setDistricts(list);
+
+        console.log("Districts after setting:", list);
+        
+        setSubdistricts([]);
+        setFormData((p) => ({ ...p, district_id: "", subdistrict_id: "" }));
+      } catch (e) {
+        if ((e as any).name !== "AbortError") console.error(e);
+      } finally {
+        setLoadingD(false);
+      }
+    })();
+
+    return () => ctrl.abort();
+  }, [formData.province_id]);
+
+
+
+  // when district changes -> load subdistricts & reset subdistrict
+  useEffect(() => {
+    const didStr = formData.district_id;
+    const ctrl = new AbortController();
+
+    const didNum = Number(didStr);
+    if (!Number.isFinite(didNum) || didNum <= 0) {
+      setSubdistricts([]);
+      setFormData((p) => ({ ...p, subdistrict_id: "" }));
+      return;
+    }
+
+    (async () => {
+      setLoadingS(true);
+      try {
+        const data = await GetSubdistrict(didNum, ctrl.signal);
+        const list: SubdistrictDTO[] = Array.isArray(data) ? data : data?.result ?? [];
+        setSubdistricts(list);
+        setFormData((p) => ({ ...p, subdistrict_id: "" }));
+      } catch (e) {
+        if ((e as any).name !== "AbortError") console.error(e);
+      } finally {
+        setLoadingS(false);
+      }
+    })();
+
+    return () => ctrl.abort();
+  }, [formData.district_id]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const { name, value } = e.target;
+  if (name === "province_id") {
+    console.log("Selected province_id (value):", value, typeof value); // ควรเป็นเลข string เช่น "1"
+  }
+  setFormData((prev) => ({ ...prev, [name]: value }));
+};
 
 
   // โหลดแท็ก
-  useEffect(() => {
-    const fetchTags = async () => {
-      try {
-        const tagsData = await GetTags();
-        setTags(tagsData);
-      } catch (error) {
-        console.error("Error fetching tags:", error);
-      }
-    };
-    fetchTags();
-  }, []);
-
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+useEffect(() => {
+  const fetchTags = async () => {
+    try {
+      const tagsData = await GetTags();
+      // Map ให้เป็น { id, Tag, icon }
+      const mappedTags = (tagsData || []).map((tag: any) => ({
+        id: tag.ID,         // ✅ ใช้ ID จาก backend
+        Tag: tag.Tag,
+        icon: tag.icon || "", // ถ้าไม่มี icon ให้เป็น ""
+      }));
+      setTags(mappedTags);
+    } catch (error) {
+      console.error("Error fetching tags:", error);
+    }
   };
+  fetchTags();
+}, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-	e.preventDefault();
-	setLoading(true);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
 
-	if (!formData.firstName || !formData.lastName || !formData.phoneNumber) {
-	  message.error("กรุณากรอกข้อมูลให้ครบถ้วน");
-	  setLoading(false);
-	  return;
-	}
+  // ตรวจสอบข้อมูลจังหวัด/อำเภอ/ตำบล
+  if (!formData.province_id || !formData.district_id || !formData.subdistrict_id) {
+    message.error("กรุณาเลือกจังหวัด อำเภอ และตำบลให้ครบถ้วน");
+    setLoading(false);
+    return;
+  }
+
   const userId = localStorage.getItem("user_id");
-	try {
-    const payload = {
-      first_name: formData.firstName,
-      last_name: formData.lastName,
-      phone_number: formData.phoneNumber,
-      name: formData.name,
-      image: formData.image,            // ควรเป็น URL จริง (ไม่ใช่ blob:)
-      price: parseFloat(formData.price),
 
-      province_id: Number(formData.province),
-      district_id: Number(formData.district),
-      subdistrict_id: Number(formData.subdistrict),
+  try {
+const payload = {
+  first_name: formData.firstName,
+  last_name: formData.lastName,
+  phone_number: formData.phoneNumber,
+  name: formData.name,
+  image: formData.image,
+  price: Number(formData.price),
+  province_id: Number(formData.province_id),
+  district_id: Number(formData.district_id),
+  subdistrict_id: Number(formData.subdistrict_id),
+  tag_id: Number(formData.tag_id),
+  landtitle_id: Number(formData.landtitle_id),
+  user_id: Number(userId),
+};
 
-      tag_id: Number(formData.tag?.[0] || 0), // ถ้า tag เลือกตัวแรก ส่งเป็นเลข id
-      landtitle_id: Number(formData.landtitle_id),
-      user_id: Number(formData.user_id),
-    };
+    await CreateLandPost(payload);
 
-	  await CreateLandPost(payload);
-	  
-	  message.success("✅ โพสต์ขายที่ดินสำเร็จ!");
-	  setCurrentStep(2);
+    message.success("✅ โพสต์ขายที่ดินสำเร็จ!");
+    setCurrentStep(2);
 
-	  setTimeout(() => {
-		navigate("/user/sellpostmain");
-	  }, 2000);
-	} catch (error) {
-	  message.error("❌ เกิดข้อผิดพลาด: " + (error || "ไม่ทราบสาเหตุ"));
-	} finally {
-	  setLoading(false);
-	}
-  };
-
-  // แก้ handleTagChange
-  const handleTagChange = (value: string) => {
-    setFormData(prevState => {
-      const newTags = prevState.tag.includes(value)
-        ? prevState.tag.filter(tag => tag !== value)
-        : [...prevState.tag, value];
-      return { ...prevState, tag: newTags };
-    });
-  };
-
-  // ฟังก์ชันเลือกจังหวัด-อำเภอ-ตำบล
-  const handleProvinceChange = (provinceId: string) => {
-    form.setFieldsValue({ province: provinceId, district: undefined, subdistrict: undefined });
-
-    const p = rawProvinces.find((x: any) => String(x.id) === String(provinceId));
-    const newDistrictOptions =
-      (p?.District || []).map((d: any) => ({ label: d.name_th, value: String(d.id) })) || [];
-
-    setDistrictOptions(newDistrictOptions);
-    setSubdistrictOptions([]);
-    setFormData((prev) => ({ ...prev, province: provinceId, district: "", subdistrict: "" }));
-  };
-
-  const handleDistrictChange = (districtId: string) => {
-    form.setFieldsValue({ district: districtId, subdistrict: undefined });
-
-    const p = rawProvinces.find((x: any) => String(x.id) === String(formData.province));
-    const d = p?.District?.find((x: any) => String(x.id) === String(districtId));
-    const newSubdistrictOptions =
-      (d?.Subdistrict || []).map((s: any) => ({ label: s.name_th, value: String(s.id) })) || [];
-
-    setSubdistrictOptions(newSubdistrictOptions);
-    setFormData((prev) => ({ ...prev, district: districtId, subdistrict: "" }));
-  };
-
-  const handleSubdistrictChange = (subdistrictId: string) => {
-    form.setFieldsValue({ subdistrict: subdistrictId });
-    setFormData((prev) => ({ ...prev, subdistrict: subdistrictId }));
-  };
-
+    setTimeout(() => {
+      navigate("/user/sellpostmain");
+    }, 2000);
+  } catch (error) {
+    message.error("❌ เกิดข้อผิดพลาด: " + (error || "ไม่ทราบสาเหตุ"));
+  } finally {
+    setLoading(false);
+  }
+};
 
   const steps = [
     { number: 1, title: "เลือกโฉนดที่ดิน", icon: "📋" },
@@ -484,94 +579,89 @@ useEffect(() => {
                         <div className="land-summary">
                             <div className="land-count">
                                {/* Land Tokens Section */}
-{landMetadata.length > 0 && (
-  <div className="land-tokens-section">
-    <h3 className="section-title">เลือกที่ดินที่ต้องการจำหน่าย</h3>
-<div className="land-tokens-container">
-  {landMetadata.map((land: any, index: number) => {
-    const deedNo = land.meta?.["Deed No"] || land.meta?.["DeedNo"] || "-";
-    const priceWei = land.price ?? "0";
-    const priceEth = land.priceEth ?? toEth(priceWei);
-    const isAvailable = (land.buyer || "") === ZERO_ADDR;
+                              {landMetadata.length > 0 && (
+                                <div className="land-tokens-section">
+                                  <h4 className="section-title" style={{ fontSize: 15, marginBottom: 8 }}>
+                                    เลือกที่ดินที่ต้องการจำหน่าย
+                                  </h4>
 
-    const m = land.meta || {};
-    const map = m["Map"] ?? "-";
-    const landNo = m["Land No"] ?? "-";
-    const surveyPage = m["Survey Page"] ?? "-";
-    const subdistrict = m["Subdistrict"] ?? "-";
-    const district = m["District"] ?? "-";
-    const province = m["Province"] ?? "-";
-    const rai = m["Rai"] ?? "-";
-    const ngan = m["Ngan"] ?? "-";
-    const sqwa = m["SqWa"] ?? "-";
-    const book = m["Book"] ?? "-";
-    const page = m["Page"] ?? "-";
+                                  <div className="land-tokens-container">
+                                    {landMetadata.map((land: any, index: number) => {
+                                      const deedNo = land.meta?.["Deed No"] || land.meta?.["DeedNo"] || "-";
+                                      const m = land.meta || {};
+                                      const map = m["Map"] ?? "-";
+                                      const landNo = m["Land No"] ?? "-";
+                                      const surveyPage = m["Survey Page"] ?? "-";
+                                      const subdistrict = m["Subdistrict"] ?? "-";
+                                      const district = m["District"] ?? "-";
+                                      const province = m["Province"] ?? "-";
+                                      const rai = m["Rai"] ?? "-";
+                                      const ngan = m["Ngan"] ?? "-";
+                                      const sqwa = m["SqWa"] ?? "-";
+                                      const book = m["Book"] ?? "-";
+                                      const page = m["Page"] ?? "-";
 
-    return (
-      <div
-        key={index}
-        className={`land-token-card ${selectedLand === land.tokenID ? "selected" : ""}`}
-        onClick={() => handleSelectLand(String(land.tokenID))}
-        style={{
-          border: selectedLand === land.tokenID ? "2px solid #007bff" : "1px solid #e0e0e0",
-          borderRadius: "12px",
-          padding: "16px",
-          background: "#fff",
-          cursor: "pointer",
-          boxShadow: selectedLand === land.tokenID ? "0 4px 12px rgba(0, 123, 255, 0.2)" : "0 2px 6px rgba(0,0,0,0.1)",
-          transition: "all 0.2s ease-in-out",
-          marginBottom: "16px"
-        }}
-      >
-        {/* Header */}
-        <div className="token-header" style={{ marginBottom: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h4 className="token-title" style={{ margin: 0, fontWeight: "bold" }}>โฉนด #{deedNo}</h4>
-        </div>
+                                      const available = isZeroAddress(land.buyer); // true = ว่างขาย
+                                      const isSelected = selectedLand === land.tokenID;
 
-        {/* Body */}
-        <div className="meta-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
-          <p className="contract-label">จังหวัด</p>
-          <p className="contract-value">{province}</p>
+                                      return (
+                                        <Card
+                                          key={land.tokenID ?? index}
+                                          title={<span style={{ fontSize: 13, fontWeight: 700 }}>โฉนด #{deedNo}</span>}
+                                          size="small"
+                                          hoverable
+                                          bordered
+                                          onClick={() => handleSelectLand(String(land.tokenID))}
+                                          className="cursor-pointer transition-all"
+                                          style={{
+                                            marginBottom: 8,
+                                            borderColor: isSelected ? "#1677ff" : undefined,
+                                            boxShadow: isSelected ? "0 4px 12px rgba(22,119,255,.2)" : undefined,
+                                            borderRadius: 6,
+                                            opacity: available ? 1 : 0.7,
+                                          }}
+                                          headStyle={{ padding: "8px 10px", minHeight: 0 }}
+                                          bodyStyle={{ padding: "8px 10px" }}
+                                        >
+                                          <Row gutter={[12, 6]} style={{ fontSize: 12, lineHeight: 1.4 }}>
+                                            <Col span={12}><Text strong type="secondary">Token ID</Text></Col>
+                                            <Col span={12}>{land.tokenID}</Col>
 
-          <p className="contract-label">ราคา</p>
-          <p className="contract-value">{priceWei} wei ({priceEth} ETH)</p>
+                                            <Col span={12}><Text strong type="secondary">แผนที่ระวาง</Text></Col>
+                                            <Col span={12}>{map}</Col>
 
-          <p className="contract-label">Token ID</p>
-          <p className="contract-value">{land.tokenID}</p>
+                                            <Col span={12}><Text strong type="secondary">เลขที่ดิน</Text></Col>
+                                            <Col span={12}>{landNo}</Col>
 
-          <p className="contract-label">แผนที่ระวาง</p>
-          <p className="contract-value">{map}</p>
+                                            <Col span={12}><Text strong type="secondary">เลขหน้าสำรวจ</Text></Col>
+                                            <Col span={12}>{surveyPage}</Col>
 
-          <p className="contract-label">เลขที่ดิน</p>
-          <p className="contract-value">{landNo}</p>
+                                            <Col span={12}><Text strong type="secondary">เล่ม</Text></Col>
+                                            <Col span={12}>{book}</Col>
 
-          <p className="contract-label">เลขหน้าสำรวจ</p>
-          <p className="contract-value">{surveyPage}</p>
+                                            <Col span={12}><Text strong type="secondary">หน้า</Text></Col>
+                                            <Col span={12}>{page}</Col>
 
-          <p className="contract-label">ตำบล</p>
-          <p className="contract-value">{subdistrict}</p>
+                                            <Col span={12}><Text strong type="secondary">พื้นที่</Text></Col>
+                                            <Col span={12}>{rai} ไร่ {ngan} งาน {sqwa} ตร.วา</Col>
 
-          <p className="contract-label">อำเภอ</p>
-          <p className="contract-value">{district}</p>
+                                            <Col span={12}><Text strong type="secondary">จังหวัด</Text></Col>
+                                            <Col span={12}>{province}</Col>
 
-          <p className="contract-label">พื้นที่</p>
-          <p className="contract-value">
-            {rai} ไร่ {ngan} งาน {sqwa} ตร.วา
-          </p>
+                                            <Col span={12}><Text strong type="secondary">อำเภอ</Text></Col>
+                                            <Col span={12}>{district}</Col>
 
-          <p className="contract-label">เล่ม</p>
-          <p className="contract-value">{book}</p>
+                                            <Col span={12}><Text strong type="secondary">ตำบล</Text></Col>
+                                            <Col span={12}>{subdistrict}</Col>
+                                          </Row>
 
-          <p className="contract-label">หน้า</p>
-          <p className="contract-value">{page}</p>
-        </div>
-      </div>
-    );
-  })}
-</div>
 
-  </div>
-)}
+                                        </Card>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
 
                             </div>
                         </div>
@@ -579,34 +669,34 @@ useEffect(() => {
                 </div>
 
                 {/* Land Tokens Grid */}
-{landTokens.length > 0 && (
-  <div className="land-tokens-section">
-    <h3 className="section-title">เลือกที่ดินที่ต้องการจำหน่าย</h3>
-    <div className="grid-3">
-      {landTokens.map((tokenId: string, index: number) => (
-        <div key={index} className="land-token-card">
-          <div className="land-token-content">
-            <div className="token-header">
-              <h4 className="token-title">Token #{tokenId}</h4>
-              <span className="status-badge">พร้อมจำหน่าย</span>
-            </div>
-
-            <div className="contract-info">
-              <p className="contract-label">Contract Address</p>
-            </div>
-
-            <button
-              className="btn btn-primary"
-              onClick={() => handleSelectLand(String(tokenId))}
-            >
-              เลือกจำหน่าย
-            </button>
+<div className="land-tokens-section">
+  <div className="grid-3">
+    {landTokens.map((tokenId: string) => {
+      const isSelected = selectedLand === String(tokenId);
+      return (
+        <div
+          key={tokenId}
+          className={`land-token-card${isSelected ? " selected" : ""}`}
+          onClick={() => handleSelectLand(String(tokenId))}
+          style={{
+            cursor: "pointer",
+            border: isSelected ? "2px solid #1677ff" : "1px solid #e0e0e0",
+            borderRadius: 8,
+            boxShadow: isSelected ? "0 4px 12px rgba(22,119,255,.2)" : "0 1px 4px rgba(0,0,0,.06)",
+            background: "#fff",
+            marginBottom: "1rem"
+          }}
+        >
+          <div style={{ padding: 12 }}>
+            {/*<h4 style={{ margin: 0, fontSize: "15px" }}>โฉนด Token #{tokenId}</h4>*/}
+            {isSelected && <span style={{ color: "#1677ff" }}>คุณเลือกโฉนดนี้</span>}
           </div>
         </div>
-      ))}
-    </div>
+      );
+    })}
   </div>
-)}
+</div>
+
 
 
                 {/* Empty State */}
@@ -795,12 +885,11 @@ useEffect(() => {
             <Button icon={<UploadOutlined />}>อัปโหลดรูปภาพ</Button>
           </Upload>
 
-{formData.image && (
-  <div style={{ marginTop: "1rem", textAlign: "center" }}>
-    <img src={formData.image} alt="Preview" style={{ maxWidth: "100%", borderRadius: "1rem", maxHeight: 300, objectFit: "cover" }}/>
-  </div>
-)}
-
+          {formData.image && (
+            <div style={{ marginTop: "1rem", textAlign: "center" }}>
+              <img src={formData.image} alt="Preview" style={{ maxWidth: "100%", borderRadius: "1rem", maxHeight: 300, objectFit: "cover" }}/>
+            </div>
+          )}
         </div>
 
             <div>
@@ -837,6 +926,7 @@ useEffect(() => {
                 <input
                   type="number"
                   name="price"
+                  step="1" // ✅ ไม่ให้กรอกทศนิยม
                   value={formData.price}
                   onChange={handleChange}
                   style={{
@@ -858,35 +948,23 @@ useEffect(() => {
             </div>
 
             <label style={{ fontSize: "0.875rem", fontWeight: "500", color: "#616161", marginBottom: "0.5rem" }}>คุณสมบัติที่ดิน</label>
-            <Checkbox.Group
-              value={formData.tag}
-              onChange={(checkedValues) =>
-                setFormData({ ...formData, tag: checkedValues })
-              }
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, 1fr)",
-                gap: "1.5rem",
-              }}
-            >
-              {tags.map((tag) => (
-                <Checkbox
-                  key={tag.Tag}
-                  value={tag.Tag}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "1rem",
-                    borderRadius: "1rem",
-                  }}
-                >
-                  <span style={{ fontSize: "1.25rem", marginRight: "0.75rem" }}>
-                    {tag.icon}
-                  </span>
-                  <span style={{ fontWeight: "600" }}>{tag.Tag}</span>
-                </Checkbox>
-              ))}
-            </Checkbox.Group>
+<Select
+  value={formData.tag_id || undefined}
+  onChange={value => setFormData({ ...formData, tag_id: value })}
+  style={{ width: "100%", borderRadius: "1rem", marginBottom: "1rem" }}
+  placeholder="เลือกคุณสมบัติที่ดิน"
+>
+  <Select.Option value="" disabled>
+    -- เลือกคุณสมบัติที่ดิน --
+  </Select.Option>
+  {tags.map(tag => (
+    <Select.Option key={tag.id} value={tag.id}>
+      {tag.Tag}
+    </Select.Option>
+  ))}
+</Select>
+
+
 
           <div style={{ marginTop: "2rem", display: "flex", justifyContent: "space-between" }}>
             <button
@@ -928,66 +1006,75 @@ useEffect(() => {
             📍 ตำแหน่งที่ตั้ง
           </h2>
 
-<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1.5rem" }}>
-  <div>
-    <label style={{ fontSize: "0.875rem", fontWeight: 500, color: "#616161", marginBottom: "0.5rem" }}>
-      จังหวัด
-    </label>
-    <select
-      name="province"
-      value={formData.province}
-      onChange={(e) => handleProvinceChange(e.target.value)} // ส่งเป็น id
-    >
-      <option value="">เลือกจังหวัด</option>
-      {provinceOptions.map((province) => (
-        <option key={province.value} value={province.value}>
-          {province.label}
-        </option>
-      ))}
-    </select>
-  </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1.5rem" }}>
+            <div>
+              <label style={{ fontSize: "0.875rem", fontWeight: 500, color: "#616161", marginBottom: "0.5rem" }}>
+                จังหวัด
+              </label>
+                <select
+                  name="province_id"
+                  value={formData.province_id}
+                  onChange={handleChange}
+                  className="input"
+                >
+                  <option value="">
+                    {loadingP ? "กำลังโหลด..." : "-- เลือกจังหวัด --"}
+                  </option>
+                  {provinces.map((p) => (
+                    <option key={p.ID} value={String(p.ID)}> {/* ใช้ province.ID แทนชื่อจังหวัด */}
+                      {p.name_th}
+                    </option>
+                  ))}
+                </select>
+            </div>
 
-  <div>
-    <label style={{ fontSize: "0.875rem", fontWeight: 500, color: "#616161", marginBottom: "0.5rem" }}>
-      อำเภอ
-    </label>
-    <select
-      name="district"
-      value={formData.district}
-      onChange={(e) => handleDistrictChange(e.target.value)} // ส่งเป็น id
-      disabled={!formData.province}
-    >
-      <option value="">เลือกอำเภอ</option>
-      {districtOptions.map((district) => (
-        <option key={district.value} value={district.value}>
-          {district.label}
-        </option>
-      ))}
-    </select>
-  </div>
+            <div>
+              <label style={{ fontSize: "0.875rem", fontWeight: 500, color: "#616161", marginBottom: "0.5rem" }}>
+                อำเภอ
+              </label>
+                <select
+                  name="district_id"
+                  value={formData.district_id}
+                  onChange={handleChange}
+                  className="input"
+                  disabled={!formData.province_id || loadingD}
+                >
+                  <option value="">
+                    {loadingD ? "กำลังโหลด..." : "-- เลือกอำเภอ --"}
+                  </option>
+                  {districts.map((d) => (
+                    <option key={d.ID} value={String(d.ID)}>
+                      {d.name_th}
+                    </option>
+                  ))}
+                </select>
+            </div>
 
-  <div>
-    <label style={{ fontSize: "0.875rem", fontWeight: 500, color: "#616161", marginBottom: "0.5rem" }}>
-      ตำบล
-    </label>
-    <select
-      name="subdistrict"
-      value={formData.subdistrict}
-      onChange={(e) => handleSubdistrictChange(e.target.value)} // ส่งเป็น id
-      disabled={!formData.district}
-    >
-      <option value="">เลือกตำบล</option>
-      {subdistrictOptions.map((subdistrict) => (
-        <option key={subdistrict.value} value={subdistrict.value}>
-          {subdistrict.label}
-        </option>
-      ))}
-    </select>
-  </div>
-</div>
+            <div>
+              <label style={{ fontSize: "0.875rem", fontWeight: 500, color: "#616161", marginBottom: "0.5rem" }}>
+                ตำบล
+              </label>
+                <select
+                  name="subdistrict_id"
+                  value={formData.subdistrict_id}
+                  onChange={handleChange}
+                  className="input"
+                  disabled={!formData.district_id || loadingS}
+                >
+                  <option value="">
+                    {loadingS ? "กำลังโหลด..." : "-- เลือกตำบล --"}
+                  </option>
+                  {subdistricts.map((s) => (
+                    <option key={s.ID} value={String(s.ID)}>
+                      {s.name_th}
+                    </option>
+                  ))}
+                </select>
+            </div>
+          </div>
 
 
-          {/* <div style={{ marginTop: "1.5rem" }}>
+          <div style={{ marginTop: "1.5rem" }}>
             <label style={{ fontSize: "0.875rem", fontWeight: "500", color: "#616161", marginBottom: "0.5rem" }}>แผนที่ตำแหน่ง</label>
             <div
               style={{
@@ -1000,9 +1087,10 @@ useEffect(() => {
               }}
             >
               <MapPin style={{ width: "3rem", height: "3rem", color: "#9e9e9e" }} />
-              <p style={{ color: "#616161", textAlign: "center" }}>คลิกเพื่อเลือกตำแหน่งบนแผนที่</p>
+              <p style={{ color: "#616161", textAlign: "center" }}>
+                คลิกเพื่อเลือกตำแหน่งบนแผนที่</p>
             </div>
-          </div>  */}
+          </div>  
 
           <div style={{ marginTop: "2rem", display: "flex", justifyContent: "space-between" }}>
             <button

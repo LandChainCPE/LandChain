@@ -108,3 +108,21 @@ func UserRegisLand(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Land title registered successfully", "landtitle_id": landtitle.ID})
 }
+
+// GET /landtitle/by-token/:token_id
+func GetLandtitleIdByTokenId(c *gin.Context) {
+    tokenID := c.Param("token_id")
+    var landtitle entity.Landtitle
+
+    // ตรวจสอบว่า field ชื่อว่า ID หรือที่ใช้ใน struct ของคุณ
+	if err := config.DB().Where("token_id = ?", tokenID).First(&landtitle).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Landtitle not found"})
+		return
+	}
+
+    c.JSON(http.StatusOK, gin.H{
+        "landtitle_id": landtitle.ID, // แก้ให้ตรงกับชื่อที่มีใน struct
+        "token_id":     landtitle.TokenID,
+    })
+}
+

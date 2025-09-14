@@ -64,6 +64,7 @@ func main() {
 		authorized.GET("/province", controller.GetAllProvinces)
 		authorized.GET("/district/:id", controller.GetDistrict)
 		authorized.GET("/subdistrict/:id", controller.GetSubdistrict)
+		authorized.GET("/landtitle/by-token/:token_id", controller.GetLandtitleIdByTokenId)
 
 		authorized.GET("/provinces", controller.GetProvince) // ดึงข้อมูลจังหวัด
 		authorized.GET("/branches", controller.GetBranch)    // ดึงข้อมูลสาขา

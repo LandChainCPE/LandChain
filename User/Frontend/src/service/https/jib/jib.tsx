@@ -94,6 +94,13 @@ async function CreateLandPost(data: any) {
     .catch((e) => e.response);
 }
 
+// ดึง landtitle_id จาก token_id
+async function getLandtitleIdByTokenId(tokenId: string) {
+  return await axios
+    .get(`${apiUrl}/landtitle/by-token/${tokenId}`, requestOptions)
+    .then((res) => res.data)
+    .catch((e) => e.response);
+}
 
 export { 
   GetAllPetition, 
@@ -107,5 +114,5 @@ export {
   GetDistrict, 
   GetSubdistrict,
   CreateLandPost,
-  
+  getLandtitleIdByTokenId,
 };

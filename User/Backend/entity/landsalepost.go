@@ -4,13 +4,16 @@ import "gorm.io/gorm"
 
 type Landsalepost struct {
 	gorm.Model
-	FirstName     string `gorm:"type:varchar(100)" json:"first_name"`
-	LastName      string `gorm:"type:varchar(100)" json:"last_name"`
-	PhoneNumber   string `gorm:"type:varchar(100)" json:"phone_number"`
-	Name        string `gorm:"type:varchar(100)" json:"name"`
-	Image		  string `gorm:"type:varchar(100)" json:"image"`
-	Price 	      float64 `gorm:"type:numeric(15,2);not null" json:"price"`
-	//Map		      string `gorm:"type:varchar(100)" json:"map"`
+	FirstName     string `json:"first_name"`
+	LastName      string `json:"last_name"`
+	PhoneNumber   string `json:"phone_number"`
+	Name          string `json:"name"`
+	Image         string `json:"image"`
+	Price         int `json:"price"`
+// //แผนที่
+//     Sequence      int     `gorm:"not null"`                    // ลำดับของพิกัด
+//     Latitude      float64 `gorm:"type:decimal(10,6);not null"`
+//     Longitude     float64 `gorm:"type:decimal(10,6);not null"`
 
 	ProvinceID uint  `json:"province_id"`
 	Province   Province  `gorm:"foreignKey:ProvinceID"`
@@ -24,7 +27,7 @@ type Landsalepost struct {
 	TagID 	uint `json:"tag_id"`
 	Tag	Tag `gorm:"foreignKey:TagID"`
 
-	LandID    uint      // 👈 FK ไปยัง role.id
+	LandID    uint     `json:"landtitle_id"`
 	Landtitle Landtitle `gorm:"foreignKey:LandID"`
 
 	UserID uint  `json:"user_id"`

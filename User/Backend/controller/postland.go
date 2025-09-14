@@ -5,6 +5,7 @@ import (
 	"landchain/entity"
 	"net/http"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // CreateLandPost สร้างข้อมูลโพสต์การขายที่ดิน
@@ -29,19 +30,30 @@ func CreateLandPost(c *gin.Context) {
 
 // GetAllPostLandData ดึงข้อมูลการขายที่ดินทั้งหมด พร้อมข้อมูลโฉนดที่ดิน (Landtitle)
 func GetAllPostLandData(c *gin.Context) {
-	// Get DB connection
 	db := config.DB()
-
-	// Declare a variable to hold the fetched data
 	var postlands []entity.Landsalepost
 
-	// Fetch all postlands, optionally preload related data
-	if err := db.Preload("Province").Preload("District").Preload("Subdistrict").Preload("Tag").Preload("Roomchat").Preload("Transaction").Preload("Photoland").Find(&postlands).Error; err != nil {
-		// If there is an error fetching data, return a 500 response
+	err := db.
+		Preload("Province", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id", "name_th") // เร็วและเล็กลง
+		}).
+		Preload("District", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id", "name_th", "province_id")
+		}).
+		Preload("Subdistrict", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id", "name_th", "district_id")
+		}).
+		Preload("Tag").
+		Preload("Landtitle"). // << ถ้าต้องใช้โฉนด
+		Preload("Roomchat").
+		Preload("Transaction").
+		Preload("Photoland").
+		Find(&postlands).Error
+
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลโพสต์ขายที่ดินได้"})
 		return
 	}
-
-	// Send the data as a JSON response
 	c.JSON(http.StatusOK, postlands)
 }
+

@@ -33,6 +33,11 @@ func CreatePetition(c *gin.Context) {
         return
     }
 
+    // ถ้าไม่ได้ส่ง state_id หรือเป็น 0 ให้ default เป็น 1
+    if input.StateID == 0 {
+        input.StateID = 1
+    }
+
     // Check if the state_id exists
     var state entity.State
     if err := config.DB().First(&state, input.StateID).Error; err != nil {
@@ -48,7 +53,6 @@ func CreatePetition(c *gin.Context) {
     log.Println("✅ Received:", input)
     c.JSON(http.StatusCreated, input)
 }
-
 
 //อัพเดทเฉพาะสถานะ
 // PATCH /petitions/:id/state
