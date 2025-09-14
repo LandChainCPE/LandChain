@@ -42,9 +42,11 @@ const ConnectMetamask = () => {
             localStorage.setItem('user_id', loginResult.user_id ? loginResult.user_id.toString() : '');
             if (loginResult.token) {
               localStorage.setItem('token', loginResult.token);
+              localStorage.setItem('token_type', loginResult.token_type)
             } else {
               localStorage.removeItem('token');
             }
+
 
             navigate('/user', { replace: true });
           } else {

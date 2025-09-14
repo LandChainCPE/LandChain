@@ -25,6 +25,7 @@ const LoginMetamask = () => {
         if (accounts.length > 0) {
           const address = accounts[0];
           console.log("Wallet address from MetaMask:", address);
+          console.log("Wallet", address);
           setWalletAddress(address);
 
           // ใช้ secure login with nonce protection
@@ -38,6 +39,7 @@ const LoginMetamask = () => {
             localStorage.setItem('user_id', loginResult.user_id ? loginResult.user_id.toString() : '');
             if (loginResult.token) {
               localStorage.setItem('token', loginResult.token);
+              localStorage.setItem('token_type', loginResult.token_type)
             } else {
               localStorage.removeItem('token');
             }
