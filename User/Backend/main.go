@@ -6,6 +6,7 @@ import (
 
 	"landchain/config"
 	"landchain/controller"
+	"landchain/entity"
 	"landchain/websocket"
 
 	"github.com/gin-gonic/gin"
@@ -41,19 +42,74 @@ func main() {
 
 	r.GET("/nonce/:address", controller.GetNonce)
 	r.POST("/nonce/validate", controller.ValidateNonce)
+
+	// 🔧 Debug API เพื่อตรวจสอบข้อมูล user (ชั่วคราว)
+	debugAuth := r.Group("")
+	debugAuth.Use(middlewares.Authorizes())
+	{
+		debugAuth.GET("/debug/myinfo", func(c *gin.Context) {
+			currentWallet, _ := c.Get("wallet")
+			db := config.DB()
+			var currentUser entity.Users
+			if err := db.Preload("Role").Where("metamaskaddress = ?", currentWallet).First(&currentUser).Error; err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "User not found", "wallet": currentWallet})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{
+				"user_id":   currentUser.ID,
+				"wallet":    currentUser.Metamaskaddress,
+				"role_id":   currentUser.RoleID,
+				"role_name": currentUser.Role.Role,
+				"role_obj":  currentUser.Role,
+			})
+		})
+	}
+
+	// 🔐 Admin-only routes - ต้องมี admin role เท่านั้น
+	admin := r.Group("")
+	admin.Use(middlewares.Authorizes())
+	admin.Use(middlewares.CheckAdminRole())
+	{
+		admin.GET("/getbookingdata", controller.GetBookingData)
+		admin.GET("/getdatauserforverify/:bookingID", controller.GetDataUserForVerify)
+		admin.POST("/verifywalletid/:bookingID", controller.VerifyWalletID)
+		admin.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
+		admin.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)
+		admin.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
+		admin.POST("/location", controller.CreateLocation) // สร้างโฉนดที่ดิน
+	}
+
+	// 👤 User routes with ownership validation - ต้องเป็นเจ้าของข้อมูลหรือ admin
+	userOwnership := r.Group("")
+	userOwnership.Use(middlewares.Authorizes())
+	userOwnership.Use(middlewares.CheckOwnershipOrAdmin())
+	{
+		userOwnership.POST("/userbookings", controller.CreateBooking)      // สร้างการจอง
+		userOwnership.PUT("/bookings/:id", controller.UpdateBooking)       // อัปเดตการจอง
+		userOwnership.GET("/bookings/:userID", controller.GetUserBookings) // ดึงข้อมูลการจองตาม ID
+		userOwnership.GET("/user/lands/get/transation/:id", controller.GetTransationByUserID)
+		userOwnership.DELETE("/user/lands/delete/requestbuy", controller.DeleteRequestBuyByUserIDAndLandID)
+		userOwnership.DELETE("/user/lands/delete/requestsell", controller.DeleteRequestSellByUserIDAndLandID)
+		userOwnership.PUT("/user/lands/put/transation/buyerupdate", controller.UpdateTransactionBuyerAccept)
+	}
+
+	// 🔑 User routes with token-based access - ใช้ข้อมูลจาก JWT token
+	userToken := r.Group("")
+	userToken.Use(middlewares.Authorizes())
+	userToken.Use(middlewares.CheckTokenOwnership())
+	{
+		userToken.GET("/getdatauserverification/:userid", controller.GetDataUserVerification)
+		userToken.GET("/user/info/", controller.GetInfoUserByWalletID)
+		userToken.GET("/user/lands", controller.GetLandTitleInfoByWallet)
+		userToken.GET("/user/info", controller.GetInfoUserByToken)
+		userToken.GET("/user/lands/requestsell", controller.GetAllRequestSellByUserID)
+		userToken.GET("/user/lands/requestsellbydelete", controller.GetAllRequestSellByUserIDAndDelete)
+	}
+
+	// 🌐 General authorized routes - ต้อง login แต่ไม่ต้องเช็ค ownership
 	authorized := r.Group("")
 	authorized.Use(middlewares.Authorizes())
 	{
-		authorized.GET("/getbookingdata", controller.GetBookingData)
-		authorized.GET("/getdatauserforverify/:bookingID", controller.GetDataUserForVerify)
-		authorized.POST("/verifywalletid/:bookingID", controller.VerifyWalletID)
-
-		authorized.GET("/getdatauserverification/:userid", controller.GetDataUserVerification)
-
-		authorized.POST("/userbookings", controller.CreateBooking) // สร้างการจอง
-		authorized.PUT("/bookings/:id", controller.UpdateBooking)  // อัปเดตการจอง
-		//r.PUT("/bookings/:id", controller.UpdateBooking) // อัปเดตการจอง
-
 		//J
 		authorized.GET("/petitions", controller.GetAllPetition)
 		authorized.POST("/petitions", controller.CreatePetition)
@@ -72,60 +128,33 @@ func main() {
 		authorized.GET("/service-types", controller.GetServiceType)          // ดึงข้อมูลประเภทบริการ
 		authorized.GET("/bookings/checklim", controller.CheckAvailableSlots) // ดึงข้อมูลการจองตาม ID
 		authorized.GET("/bookings/status", controller.CheckBookingStatus)
-		// 🎯 Routes สำหรับลบการจองที่หมดอายุ
-		authorized.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
-		authorized.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)
-		authorized.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
-		authorized.GET("/bookings/:userID", controller.GetUserBookings) // ดึงข้อมูลการจองตาม ID
 		authorized.GET("/locations/:landsalepost_id", controller.GetLocationsByLandSalePostId)
 
-		//location
-		authorized.GET("/location", controller.GetLocations)    // ดึงข้อมูลโฉนดที่ดิน
-		authorized.POST("/location", controller.CreateLocation) // สร้างโฉนดที่ดิน
-		// CONTROLLER lANDSELLPOST
-		//r.GET("/user/sellpost", controller.GetAllPostLandData)
+		authorized.GET("/location", controller.GetLocations) // ดึงข้อมูลโฉนดที่ดิน
 
-		// CONTROLLER Chat
-		// r.GET("/ws/roomchat/:roomID", controller.HandleWebSocket)
-		r.GET("/user/chat/:id", controller.GetAllLandDatabyID)
-		// r.GET("/user/chat/roomchat/:id", controller.GetMessagesByLandPostID)
-		r.GET("/user/:id", controller.GetUserByID)
-
-		authorized.GET("/user/info/", controller.GetInfoUserByWalletID)
+		// CONTROLLER Public Land Data
 		authorized.GET("/user/landinfo/:id", controller.GetLandInfoByTokenID)
-		authorized.GET("/user/lands", controller.GetLandTitleInfoByWallet)
-		authorized.GET("/user/info", controller.GetInfoUserByToken)
-
 		authorized.GET("/user/lands/requestbuy/:id", controller.GetRequestBuybyLandID)
-		authorized.DELETE("/user/lands/delete/requestbuy", controller.DeleteRequestBuyByUserIDAndLandID)
-
-		authorized.GET("/user/lands/requestsell", controller.GetAllRequestSellByUserID)
 		authorized.POST("/user/lands/requestsell/metadata", controller.GetMultipleLandMetadataHandler)
-		authorized.DELETE("/user/lands/delete/requestsell", controller.DeleteRequestSellByUserIDAndLandID)
-		authorized.GET("/user/lands/requestsellbydelete", controller.GetAllRequestSellByUserIDAndDelete)
 		authorized.POST("/user/lands/requestsell/sign", controller.SetSellInfoHandler)
-
-		r.GET("/ws/transactions", controller.TransactionWS(hub))
 		authorized.POST("/user/lands/transation", controller.CreateTransaction)
-		authorized.GET("/user/lands/get/transation/:id", controller.GetTransationByUserID)
-		authorized.PUT("/user/lands/put/transation/buyerupdate", controller.UpdateTransactionBuyerAccept)
-
 		authorized.POST("/user/lands/metadata", controller.GetLandMetadataByToken)
 		authorized.POST("/user/lands/metadata/wallet", controller.GetLandMetadataByWallet)
 
 		// CONTROLLER RegisterLand
 		authorized.POST("/user/userregisland", controller.UserRegisLand)
-		//authorized.GET("/province", controller.GetAllProvinces)
-		//authorized.GET("/district/:id", controller.GetDistrict)
-		//authorized.GET("/subdistrict/:id", controller.GetSubdistrict)
 	}
+
+	// 🌐 Public routes (outside authorized groups)
+	r.GET("/user/chat/:id", controller.GetAllLandDatabyID)
+	r.GET("/user/:id", controller.GetUserByID)
+	r.GET("/ws/transactions", controller.TransactionWS(hub))
 
 	// public := r.Group("")
 	// {
 	// 	public.GET("/uploads/*filename", animal.ServeImage)
 	// 	public.GET("/genders", user.ListGenders)
 	// 	public.POST("/signup", user.CreateUser)
-
 	// }
 
 	r.Run(":8080")

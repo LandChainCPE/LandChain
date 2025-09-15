@@ -259,7 +259,7 @@ func SetupDatabase() {
 	db.Model(&entity.ServiceType{}).Count(&serviceCount)
 	if serviceCount == 0 {
 		db.Create(&entity.ServiceType{Service: "ขึ้นทะเบียนที่ดิน"})
-		db.Create(&entity.ServiceType{Service: "ลงทะเบียนชื่อผู้ใช้"})
+		db.Create(&entity.ServiceType{Service: "ขอคัดสำเนาโฉนด"})
 	}
 
 	if count == 0 {
