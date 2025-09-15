@@ -1,0 +1,294 @@
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Icons */
+.icon {
+    width: 24px;
+    height: 24px;
+}
+
+.icon-lg {
+    width: 32px;
+    height: 32px;
+}
+
+.icon-sm {
+    width: 16px;
+    height: 16px;
+}
+
+.icon-xs {
+    width: 14px;
+    height: 14px;
+}
+
+.text-white {
+    color: #fff;
+}
+
+.text-muted {
+    color: #6b7280;
+}
+
+.mr-1 {
+    margin-right: 4px;
+}
+
+.w-full {
+    width: 100%;
+}
+
+/* Card */
+.card {
+    border-radius: 16px;
+    background-color: rgb(249, 249, 249);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    margin-bottom: 24px;
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card-header {
+    padding: 24px;
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, #2c3e50 30%);
+    color: white;
+}
+
+/* Specific header styles */
+.main-header {
+    background: #2c3e50;
+}
+
+.wallet-header {
+    background: #2c3e50;
+}
+
+.signature-header {
+    background: #2c3e50;
+}
+
+.hash-header {
+    background: #2c3e50;
+}
+
+.transaction-header {
+    background: #2c3e50;
+}
+
+.card-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.card-description {
+    font-size: 16px;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.card-content {
+    padding: 24px;
+}
+
+/* Chips in header */
+.chip-row {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    color: white;
+}
+
+.chip-strong {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.chip-soft {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Buttons */
+.btn {
+    border-radius: 12px;
+    padding: 12px 16px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background-color: #000;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #1a1a1a;
+}
+
+.btn-outline {
+    background-color: transparent;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.btn-outline:hover {
+    background-color: #f8fafc;
+}
+
+.btn-ghost {
+    background-color: transparent;
+    color: #374151;
+}
+
+.btn-ghost:hover {
+    background-color: #f1f5f9;
+}
+
+.btn-danger {
+    background-color: #dc2626;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+.btn-sm {
+    padding: 8px 12px;
+    font-size: 13px;
+    height: 36px;
+}
+
+.btn-xs {
+    padding: 4px 8px;
+    font-size: 12px;
+    height: 32px;
+}
+
+/* Custom button for MetaMask connection */
+.button-connect-metamask {
+    font-size: 16px;
+    padding: 10px 24px;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.10);
+    background: linear-gradient(135deg, #f7931e, #eb7700);
+    color: #fff;
+    border: none;
+    white-space: nowrap;
+}
+
+/* Verification Cards Grid */
+.verification-cards {
+    display: grid;
+    gap: 24px;
+    margin-bottom: 32px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* Data Display */
+.data-display {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.wallet-address,
+.signature-text,
+.hash-text {
+    font-size: 12px;
+    background-color: #f1f5f9;
+    padding: 12px;
+    border-radius: 8px;
+    word-break: break-all;
+    font-family: monospace;
+    border: 2px solid #e2e8f0;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.signature-text {
+    background-color: #fff7e6;
+    border-color: #fde68a;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.hash-text {
+    background-color: #f0f9ff;
+    border-color: #bfdbfe;
+}
+
+/* Transaction Card */
+.transaction-card {
+    text-align: center;
+}
+
+.transaction-card .card-header {
+    background: #2c3e50;
+}
+
+.btn-transaction {
+    font-size: 16px;
+    padding: 25px 16px;
+    width: 250px;
+    height: auto;
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, #f7931e, #f7931e);
+    margin-bottom: 16px;
+}
+
+.btn-transaction:hover {
+    background: linear-gradient(135deg, #f7931e, #f7931e);
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .verification-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .chip-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .button-connect-metamask {
+        width: 100%;
+        margin-top: 8px;
+    }
+}

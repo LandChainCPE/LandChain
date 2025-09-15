@@ -1,12 +1,14 @@
 package entity
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type LandVerification struct {
 	gorm.Model
-	Wallet     string `json:"wallet"`
-	Metafields string `json:"metafields"`
-	Signature  string `json:"signature"`
+	Wallet       string    `json:"wallet" gorm:"type:varchar(255);not null"`
+	Metafields   string    `json:"metafields" gorm:"type:text;not null"`
+	Signature    string    `json:"signature" gorm:"type:text;not null"`
 
-	Landtitle       []Landtitle `gorm:"foreignKey:LandVerificationID"`
+	Landtitles       []Landtitle `gorm:"foreignKey:LandVerificationID"`
 }

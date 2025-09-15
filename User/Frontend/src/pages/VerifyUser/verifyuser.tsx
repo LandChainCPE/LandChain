@@ -1,15 +1,82 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Card, Typography, Button, Space, Tag, message, Modal } from "antd";
-import { SafetyCertificateOutlined, CopyOutlined, SwapRightOutlined, KeyOutlined } from "@ant-design/icons";
-import "../MainPage/MainPage.css";
-import { GetDataUserVerification, } from "../../service/https/garfield/http";
+import "./verifyuser.css";
+import { GetDataUserVerification } from "../../service/https/garfield/http";
 import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';
 
 import contractABI from "./ContractABI.json";
 const contractAddress = "0xb671A410D1ea59631bB8F843B64d30688903CcF1";
 
-const { Text, Title, Paragraph } = Typography;
+/* =======================
+   Icon Components (SVG)
+   ======================= */
+const SafetyCertificateOutlined = ({ className = "", style }: { className?: string; style?: React.CSSProperties }) => (
+  <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={style}>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+    <path d="m9 12 2 2 4-4" />
+  </svg>
+);
+const KeyOutlined = ({ className = "" }) => (
+  <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4l-2.3-2.3a1 1 0 0 0-1.4 0l-2.1 2.1a1 1 0 0 0 0 1.4Z" />
+    <path d="m6.5 17.5-5-5a1 1 0 0 1 0-1.4l8.5-8.5a1 1 0 0 1 1.4 0l5 5" />
+    <path d="m10 16 2 2" />
+  </svg>
+);
+const SwapRightOutlined = ({ className = "" }) => (
+  <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M8 3 4 7l4 4" />
+    <path d="M4 7h16" />
+    <path d="m16 21 4-4-4-4" />
+    <path d="M20 17H4" />
+  </svg>
+);
+const CopyIcon = ({ className = "" }) => (
+  <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+  </svg>
+);
+
+/* =======================
+   Lightweight Primitives
+   ======================= */
+const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`card ${className}`}>{children}</div>
+);
+const CardTitle = ({ children }: { children: React.ReactNode }) => (
+  <h2 className="card-title">{children}</h2>
+);
+const CardDescription = ({ children }: { children: React.ReactNode }) => (
+  <p className="card-description">{children}</p>
+);
+const CardContent = ({ children }: { children: React.ReactNode }) => (
+  <div className="card-content">{children}</div>
+);
+
+const Button = ({
+  children,
+  onClick,
+  variant = "primary",
+  className = "",
+  style,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: "primary" | "outline" | "ghost" | "danger";
+  className?: string;
+  style?: React.CSSProperties;
+}) => {
+  return (
+    <button
+      onClick={onClick}
+      className={`btn ${variant === "primary" ? "btn-primary" : variant === "outline" ? "btn-outline" : variant === "danger" ? "btn-danger" : "btn-ghost"} ${className}`}
+      style={style}
+    >
+      {children}
+    </button>
+  );
+};
 
 function VerifyUser() {
   const [wallet, setWallet] = useState<string>("");
@@ -33,16 +100,13 @@ function VerifyUser() {
     fetchData();
   }, []);
 
-
-  const [modalOpen, setModalOpen] = useState(false);
-
   const copy = async (text?: string) => {
-    if (!text) return message.warning("ไม่มีข้อมูลให้คัดลอก");
+    if (!text) return alert("ไม่มีข้อมูลให้คัดลอก");
     try {
       await navigator.clipboard.writeText(text);
-      message.success("คัดลอกเรียบร้อย");
+      alert("คัดลอกเรียบร้อย");
     } catch (e) {
-      message.error("คัดลอกไม่สำเร็จ");
+      alert("คัดลอกไม่สำเร็จ");
     }
   };
 
@@ -55,13 +119,13 @@ function VerifyUser() {
         if (accounts && accounts.length > 0) {
           setWallet(accounts[0]);
         } else {
-          message.error("ไม่พบบัญชีใน MetaMask");
+          alert("ไม่พบบัญชีใน MetaMask");
         }
       } catch (error) {
-        message.error("เกิดข้อผิดพลาดในการเชื่อมต่อ MetaMask");
+        alert("เกิดข้อผิดพลาดในการเชื่อมต่อ MetaMask");
       }
     } else {
-      message.error("กรุณาติดตั้ง MetaMask");
+      alert("กรุณาติดตั้ง MetaMask");
     }
   };
 
@@ -69,7 +133,7 @@ function VerifyUser() {
     try {
       const provider: any = await detectEthereumProvider();
       if (!provider) {
-        message.error("กรุณาติดตั้ง MetaMask");
+        alert("กรุณาติดตั้ง MetaMask");
         return;
       }
       const web3 = new Web3(provider);
@@ -85,253 +149,148 @@ function VerifyUser() {
     }
   };
 
+  const Copyable = ({ text }: { text: string }) => {
+    const [copied, setCopied] = useState(false);
+    return (
+      <Button
+        variant="ghost"
+        className="btn-xs"
+        onClick={() => {
+          copy(text);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 900);
+        }}
+      >
+        <CopyIcon className="icon-sm mr-1" />
+        {copied ? "คัดลอกแล้ว" : "คัดลอก"}
+      </Button>
+    );
+  };
+
   return (
-    <div className="main-container" style={{ minHeight: "100vh" }}>
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
-        <Button type="primary" onClick={connectMetaMask} style={{ fontFamily: "Kanit", fontSize: 18 }}>
-          เชื่อมต่อ MetaMask
-        </Button>
-        <span style={{ marginLeft: 24, fontFamily: "Kanit", fontSize: 18 }}>
-          My Wallet Address: {wallet}
-        </span>
-      </div>
-      <div style={{ background: "#364049", padding: 40, minHeight: "100vh" }}>
-        <Row justify="center">
-          <Col span={20}>
-            {/* Header Section */}
-            <Card 
-              style={{ 
-                borderRadius: 16, 
-                marginBottom: 24,
-                background: "linear-gradient(135deg, #1890ff 0%, #722ed1 100%)",
-                border: "none"
-              }}
+    <div className="container">
+      {/* MetaMask Connection Section */}
+      <Card>
+        <div className="card-header main-header">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+            <CardTitle>
+              <div style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
+                <SafetyCertificateOutlined className="icon-lg text-white" />
+                ยืนยันผู้ใช้ (User Verification)
+              </div>
+            </CardTitle>
+          </div>
+          <CardDescription>ตรวจสอบข้อมูล Wallet และ Digital Signature ที่เซ็นโดยระบบ</CardDescription>
+
+          <div className="chip-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <span className="chip chip-strong">
+                🔐 Secure
+              </span>
+              <span className="chip chip-soft">
+                Blockchain Verified
+              </span>
+            </div>
+            <Button
+              variant="primary"
+              className="button-connect-metamask"
+              onClick={connectMetaMask}
             >
-              <Row align="middle" justify="center" style={{ textAlign: "center" }}>
-                <Col>
-                  <Space direction="vertical" size="middle">
-                    <div style={{ fontSize: 64, color: "white" }}>
-                      <SafetyCertificateOutlined />
-                    </div>
-                    <Title level={1} style={{ margin: 0, color: "white", fontFamily: "Kanit" }}>
-                      ยืนยันผู้ใช้ (User Verification)
-                    </Title>
-                    <Text style={{ color: "rgba(255,255,255,0.9)", fontFamily: "Kanit", fontSize: 18 }}>
-                      ตรวจสอบข้อมูล Wallet และ Digital Signature ที่เซ็นโดยระบบ
-                    </Text>
-                    <Tag color="green" style={{ fontFamily: "Kanit", fontSize: 14, padding: "4px 12px" }}>
-                      🔐 Secure • Blockchain Verified
-                    </Tag>
-                  </Space>
-                </Col>
-              </Row>
-            </Card>
+              เชื่อมต่อ MetaMask
+            </Button>
+          </div>
 
-            <Row gutter={[24, 24]}>
-              {/* 1. Metamask Wallet Section */}
-              <Col xs={24} lg={8}>
-                <Card
-                  title={
-                    <Space size="middle">
-                      <img 
-                        src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" 
-                        alt="MetaMask" 
-                        style={{ width: 48, height: 48 }}
-                      />
-                      <Text style={{ fontFamily: "Kanit", fontSize: 22, fontWeight: 600 }}>Metamask Wallet Address</Text>
-                    </Space>
-                  }
-                  bordered={false}
-                  style={{ 
-                    borderRadius: 16, 
-                    background: "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)",
-                    minHeight: 300
-                  }}
-                >
-                  <Space direction="vertical" style={{ width: "100%" }} size="large">
-                    <div 
-                      style={{ 
-                        background: "#1890ff",
-                        borderRadius: 12,
-                        padding: 16,
-                        textAlign: "center"
-                      }}
-                    >
-                      <Text style={{ color: "white", fontFamily: "Kanit", fontSize: 18 }}>
-                        กระเป๋าเงินดิจิทัลของคุณ
-                      </Text>
-                    </div>
-                    
-                    <Paragraph 
-                      style={{ 
-                        wordBreak: "break-all", 
-                        fontFamily: "monospace", 
-                        fontSize: 16,
-                        background: "#e6f7ff",
-                        padding: 16,
-                        borderRadius: 8,
-                        border: "2px solid #91d5ff",
-                        textAlign: "center",
-                        margin: 0
-                      }}
-                    >
-                      {wallet}
-                    </Paragraph>
-                    
-                  </Space>
-                </Card>
-              </Col>
+          {wallet && (
+            <div style={{ marginTop: 16, padding: 12, background: 'rgba(255,255,255,0.1)', borderRadius: 8 }}>
+              <p style={{ color: 'white', margin: 0, fontSize: 14 }}>
+                My Wallet Address: {wallet}
+              </p>
+            </div>
+          )}
+        </div>
+      </Card>
 
-              {/* 2. Digital Signature Section */}
-              <Col xs={24} lg={8}>
-                <Card
-                  title={
-                    <Space size="middle">
-                      <KeyOutlined style={{ fontSize: 48, color: "#fa8c16" }} />
-                      <Text style={{ fontFamily: "Kanit", fontSize: 22, fontWeight: 600 }}>Digital Signature</Text>
-                    </Space>
-                  }
-                  bordered={false}
-                  style={{ 
-                    borderRadius: 16, 
-                    background: "linear-gradient(135deg, #fff7e6 0%, #ffecc7 100%)",
-                    minHeight: 300
-                  }}
-                >
-                  <Space direction="vertical" style={{ width: "100%" }} size="large">
-                    <div 
-                      style={{ 
-                        background: "#fa8c16",
-                        borderRadius: 12,
-                        padding: 16,
-                        textAlign: "center"
-                      }}
-                    >
-                      <Text style={{ color: "white", fontFamily: "Kanit", fontSize: 18 }}>
-                        ลายเซ็นดิจิทัลจากระบบ
-                      </Text>
-                    </div>
-                    
-                    <Paragraph 
-                      style={{ 
-                        wordBreak: "break-all", 
-                        fontFamily: "monospace", 
-                        fontSize: 14,
-                        background: "#ffecc7",
-                        padding: 16,
-                        borderRadius: 8,
-                        border: "2px solid #ffec8c",
-                        maxHeight: 120,
-                        overflow: "auto",
-                        textAlign: "center",
-                        margin: 0
-                      }}
-                    >
-                      {signature}
-                    </Paragraph>
-                  </Space>
-                </Card>
-              </Col>
+      {/* Verification Data Cards */}
+      <div className="verification-cards">
+        {/* Wallet Address Card */}
+        <Card>
+          <div className="card-header wallet-header">
+            <CardTitle>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg"
+                  alt="MetaMask"
+                  style={{ width: 32, height: 32 }}
+                />
+                Wallet Address
+              </div>
+            </CardTitle>
+            <CardDescription>กระเป๋าเงินดิจิทัลของคุณ</CardDescription>
+          </div>
+          <CardContent>
+            <div className="data-display">
+              <code className="wallet-address">{wallet || "ยังไม่ได้เชื่อมต่อ"}</code>
+              {wallet && <Copyable text={wallet} />}
+            </div>
+          </CardContent>
+        </Card>
 
-              {/* 3. Name Hash Section */}
-              <Col xs={24} lg={8}>
-                <Card
-                  title={
-                    <Space size="middle">
-                      <SafetyCertificateOutlined style={{ fontSize: 48, color: "#52c41a" }} />
-                      <Text style={{ fontFamily: "Kanit", fontSize: 22, fontWeight: 600 }}>Name Hash</Text>
-                    </Space>
-                  }
-                  bordered={false}
-                  style={{ 
-                    borderRadius: 16, 
-                    background: "linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)",
-                    minHeight: 300
-                  }}
-                >
-                  <Space direction="vertical" style={{ width: "100%" }} size="large">
-                    <div 
-                      style={{ 
-                        background: "#52c41a",
-                        borderRadius: 12,
-                        padding: 16,
-                        textAlign: "center"
-                      }}
-                    >
-                      <Text style={{ color: "white", fontFamily: "Kanit", fontSize: 18 }}>
-                        แฮชของชื่อผู้ใช้
-                      </Text>
-                    </div>
-                    
-                    <Paragraph 
-                      style={{ 
-                        wordBreak: "break-all", 
-                        fontFamily: "monospace", 
-                        fontSize: 16,
-                        background: "#f0f9ff",
-                        padding: 16,
-                        borderRadius: 8,
-                        border: "2px solid #b7eb8f",
-                        textAlign: "center",
-                        margin: 0
-                      }}
-                    >
-                      {nameHash}
-                    </Paragraph>
-                  </Space>
-                </Card>
-              </Col>
-            </Row>
+        {/* Digital Signature Card */}
+        <Card>
+          <div className="card-header signature-header">
+            <CardTitle>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <KeyOutlined className="icon-lg text-orange-500" />
+                Digital Signature
+              </div>
+            </CardTitle>
+            <CardDescription>ลายเซ็นดิจิทัลจากระบบ</CardDescription>
+          </div>
+          <CardContent>
+            <div className="data-display">
+              <code className="signature-text">{signature || "ไม่มีข้อมูล"}</code>
+              {signature && <Copyable text={signature} />}
+            </div>
+          </CardContent>
+        </Card>
 
-            {/* Transaction Button Section */}
-            <Row justify="center" style={{ marginTop: 40 }}>
-              <Col span={24}>
-                <Card 
-                  style={{ 
-                    borderRadius: 20, 
-                    background: "linear-gradient(135deg, #52c41a 0%, #389e0d 100%)",
-                    border: "none",
-                    textAlign: "center",
-                    padding: "20px 0"
-                  }}
-                >
-                  <Space direction="vertical" size="large" style={{ width: "100%" }}>
-                    <Title level={2} style={{ color: "white", fontFamily: "Kanit", margin: 0 }}>
-                      🚀 พร้อมทำธุรกรรมแล้วหรือยัง?
-                    </Title>
-                    <Text style={{ color: "rgba(255,255,255,0.9)", fontFamily: "Kanit", fontSize: 18 }}>
-                      ข้อมูลของคุณได้รับการตรวจสอบแล้ว • พร้อมสำหรับการทำธุรกรรมบน Blockchain
-                    </Text>
-                    <div>
-                      <Button 
-                        type="primary" 
-                        size="large" 
-                        icon={<SwapRightOutlined />} 
-                        onClick={handleRegisterOwner}
-                        style={{ 
-                          fontFamily: "Kanit", 
-                          fontSize: 20,
-                          height: 60,
-                          padding: "0 40px",
-                          background: "#1890ff",
-                          border: "3px solid white",
-                          borderRadius: 30,
-                          boxShadow: "0 6px 20px rgba(0,0,0,0.2)"
-                        }}
-                      >
-                        เริ่มทำธุรกรรม (Transaction)
-                      </Button>
-                    </div>
-                    <Text style={{ color: "rgba(255,255,255,0.8)", fontFamily: "Kanit", fontSize: 14 }}>
-                      ✅ ปลอดภัย • เข้ารหัส • ตรวจสอบได้
-                    </Text>
-                  </Space>
-                </Card>
-              </Col>
-            </Row>
-          </Col>
-        </Row>
+        {/* Name Hash Card */}
+        <Card>
+          <div className="card-header hash-header">
+            <CardTitle>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <SafetyCertificateOutlined className="icon-lg" style={{ color: "#52c41a" }} />
+                Name Hash
+              </div>
+            </CardTitle>
+            <CardDescription>แฮชของชื่อผู้ใช้</CardDescription>
+          </div>
+          <CardContent>
+            <div className="data-display">
+              <code className="hash-text">{nameHash || "ไม่มีข้อมูล"}</code>
+              {nameHash && <Copyable text={nameHash} />}
+            </div>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Transaction Button Section */}
+      <Card className="transaction-card">
+        <div className="card-header transaction-header">
+          <CardTitle>🚀 ข้อมูลของคุณได้รับการตรวจสอบแล้ว • พร้อมสำหรับการทำธุรกรรมบน Blockchain</CardTitle>
+        </div>
+        <CardContent>
+          <Button
+            variant="primary"
+            className="btn-transaction w-full"
+            onClick={handleRegisterOwner}
+          >
+            <SwapRightOutlined className="icon mr-1" />
+            เริ่มทำธุรกรรม (Transaction)
+          </Button>
+
+        </CardContent>
+      </Card>
     </div>
   );
 };
