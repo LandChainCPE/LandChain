@@ -134,12 +134,28 @@ func main() {
 
 		// CONTROLLER Public Land Data
 		authorized.GET("/user/landinfo/:id", controller.GetLandInfoByTokenID)
+		authorized.GET("/user/lands", controller.GetLandTitleInfoByWallet)
+		authorized.GET("/user/info", controller.GetInfoUserByToken)
+
 		authorized.GET("/user/lands/requestbuy/:id", controller.GetRequestBuybyLandID)
+		authorized.DELETE("/user/lands/delete/requestbuy", controller.DeleteRequestBuyByUserIDAndLandID)
+
+		authorized.GET("/user/lands/requestsell", controller.GetAllRequestSellByUserID)
 		authorized.POST("/user/lands/requestsell/metadata", controller.GetMultipleLandMetadataHandler)
 		authorized.POST("/user/lands/requestsell/sign", controller.SetSellInfoHandler)
 		authorized.POST("/user/lands/transation", controller.CreateTransaction)
 		authorized.POST("/user/lands/metadata", controller.GetLandMetadataByToken)
 		authorized.POST("/user/lands/metadata/wallet", controller.GetLandMetadataByWallet)
+		authorized.GET("/user/lands/get/history/:id", controller.GetLandHistory)
+		authorized.POST("/user/lands/get/history/infousers", controller.GetInfoUsersByWallets)
+		authorized.DELETE("/user/lands/delete/transaction/:id", controller.DeleteTransaction)
+		authorized.GET("/user/get/saleinfo/:id", controller.GetSaleInfoHandler)
+		authorized.GET("/user/get/metamaskaddress/:id", controller.GetUserAddressLand)
+		authorized.POST("/user/post/tranferland", controller.BuyLandHandler)
+		authorized.DELETE("/user/lands/delete/allrequset/:id", controller.DeleteAllRequestBuyByLandID)
+		authorized.DELETE("/user/lands/delete/transactionallrequest/:id", controller.DeleteTransactionandAllrequest)
+		// ส่ง ContractInstance.Contract เข้าไป
+		authorized.GET("/lands/check-owner", controller.CheckOwnerHandler)
 
 		// CONTROLLER RegisterLand
 		authorized.POST("/user/userregisland", controller.UserRegisLand)

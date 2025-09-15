@@ -4,6 +4,7 @@ import (
 	"landchain/config" // เปลี่ยนเป็น path ที่ถูกต้องของ Go bindings ที่คุณสร้าง เช่น "contract" หรือชื่อที่ตรงกับไฟล์ go ที่ได้จาก abigen
 	"landchain/entity" // แก้ชื่อ module ให้ตรงกับโปรเจกต์คุณ
 	"landchain/services"
+	"strings"
 	"time"
 
 	"log"
@@ -61,15 +62,30 @@ func CreateTransaction(c *gin.Context) {
 
 	db := config.DB()
 
-	// แปลง query params เป็นตัวเลข
-	landIDStr := c.Query("landID")
-	landID, err := strconv.ParseUint(landIDStr, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "LandID ไม่ถูกต้อง"})
+	// รับ tokenID จาก query params
+	tokenID := c.Query("landID")
+	if tokenID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "TokenID ไม่ถูกต้อง"})
 		return
 	}
-	transaction.LandID = uint(landID)
 
+	// ดึง Landtitle จาก tokenID
+	var land entity.Landtitle
+	if err := db.Where("token_id = ?", tokenID).First(&land).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ไม่พบโฉนด"})
+		return
+	}
+
+	// เช็คว่าโฉนดถูกล็อกหรือไม่
+	if land.IsLocked {
+		c.JSON(http.StatusForbidden, gin.H{"error": "โฉนดนี้มี Transaction อยู่แล้ว"})
+		return
+	}
+
+	// เอา land.ID ไปเขียนใน Transaction เลย
+	transaction.LandID = land.ID
+
+	// รับ sellerID, buyerID, amount จาก query params
 	sellerIDStr := c.Query("sellerID")
 	sellerID, err := strconv.ParseUint(sellerIDStr, 10, 64)
 	if err != nil {
@@ -94,18 +110,7 @@ func CreateTransaction(c *gin.Context) {
 	}
 	transaction.Amount = amount
 
-	// เช็คว่า Landtitle ถูกล็อกหรือไม่
-	var land entity.Landtitle
-	if err := db.First(&land, transaction.LandID).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ไม่พบโฉนด"})
-		return
-	}
-	if land.IsLocked {
-		c.JSON(http.StatusForbidden, gin.H{"error": "โฉนดนี้มี Transaction อยู่แล้ว"})
-		return
-	}
-
-	// เซ็ตค่าเริ่มต้น
+	// เซ็ตค่าเริ่มต้น Transaction
 	transaction.TypetransactionID = 1
 	transaction.BuyerAccepted = true
 	transaction.SellerAccepted = false
@@ -119,7 +124,7 @@ func CreateTransaction(c *gin.Context) {
 		return
 	}
 
-	// 🔹 อัพเดท Landtitle เป็นล็อก
+	// อัพเดท Landtitle เป็นล็อก
 	land.IsLocked = true
 	if err := db.Save(&land).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "สร้าง Transaction สำเร็จ แต่ไม่สามารถล็อกโฉนดได้"})
@@ -128,8 +133,6 @@ func CreateTransaction(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"transaction": transaction, "land": land})
 }
-
-
 
 func UpdateTransactionLandDepartmentAccept(c *gin.Context) {
 	// รับ ID ของธุรกรรมจาก URL parameter
@@ -263,18 +266,39 @@ func GetInfoUserByToken(c *gin.Context) {
 	})
 }
 
-func GetRequestBuybyLandID(c *gin.Context) {
-	var request []entity.RequestBuySell
-	landID := c.Param("id")
-	db := config.DB()
+func GetRequestBuyByTokenID(c *gin.Context) {
+	tokenIDParam := c.Param("id")
 
-	// ดึงข้อความห้องแชทพร้อมเรียงเวลาข้อความ
-	if err := db.Where("land_id = ?", landID).Preload("Seller").Preload("Buyer").Preload("RequestBuySellType").Find(&request).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลผู้ใช้ได้"})
+	// แปลง tokenID เป็น uint
+	tokenID, err := strconv.ParseUint(tokenIDParam, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "tokenID ต้องเป็นตัวเลข"})
 		return
 	}
 
-	c.JSON(http.StatusOK, request)
+	db := config.DB()
+
+	var requests []entity.RequestBuySell
+
+	// Preload Landtitle แบบ filter token_id, และ preload relation อื่น ๆ
+	if err := db.Preload("Landtitle", "token_id = ?", tokenID).
+		Preload("Seller").
+		Preload("Buyer").
+		Preload("RequestBuySellType").
+		Find(&requests).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลคำขอซื้อได้"})
+		return
+	}
+
+	// กรองเอาเฉพาะ request ที่ Landtitle ไม่เป็น nil (tokenID ตรง)
+	filteredRequests := []entity.RequestBuySell{}
+	for _, r := range requests {
+		if r.Landtitle.ID != 0 {
+			filteredRequests = append(filteredRequests, r)
+		}
+	}
+
+	c.JSON(http.StatusOK, filteredRequests)
 }
 
 func DeleteRequestBuyByUserIDAndLandID(c *gin.Context) {
@@ -353,4 +377,58 @@ func DeleteAllRequestBuy(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "ลบคำขอทั้งหมด"})
+}
+
+func GetInfoUsersByWallets(c *gin.Context) {
+	var wallets []string
+	if err := c.BindJSON(&wallets); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "กรุณาส่ง wallet เป็น array"})
+		return
+	}
+
+	// แปลง wallets ทั้งหมดเป็น lowercase
+	for i := range wallets {
+		wallets[i] = strings.ToLower(wallets[i])
+	}
+
+	var users []entity.Users
+	db := config.DB()
+
+	// ใช้ LOWER ใน query เพื่อให้ match case-insensitive
+	if err := db.Where("LOWER(metamaskaddress) IN ?", wallets).Find(&users).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลผู้ใช้ได้"})
+		return
+	}
+
+	if len(users) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบผู้ใช้"})
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
+}
+
+func DeleteAllRequestBuyByLandID(c *gin.Context) {
+	landIDStr := c.Query("landID")
+
+	if landIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ต้องระบุ landID และ userID"})
+		return
+	}
+
+	landID, err1 := strconv.Atoi(landIDStr)
+
+	if err1 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "landID และ userID ต้องเป็นตัวเลข"})
+		return
+	}
+
+	db := config.DB()
+
+	if err := db.Where("land_id = ?", landID).Delete(&entity.RequestBuySell{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถลบข้อมูลได้", "detail": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ลบคำขอซื้อเรียบร้อย"})
 }
