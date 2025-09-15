@@ -21,7 +21,7 @@
     "@tailwindcss/vite": "^4.1.12",
     "@types/styled-components": "^5.1.34",
     "antd": "^5.26.5",
-    "axios": "^1.12.1",
+    "axios": "1.7",
     "bootstrap": "^5.3.7",
     "ethers": "^6.15.0",
     "file-saver": "^2.0.5",

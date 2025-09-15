@@ -1,55 +1,141 @@
-/* Header.css */
-
+/* Apple Store Minimal Header */
 .header-container {
     position: sticky;
     top: 0;
     z-index: 1000;
-    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-    overflow: hidden;
+    background: rgba(54, 64, 73, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .nav-container {
     position: relative;
     z-index: 2;
-    padding: 15px 30px;
+    padding: 12px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .navbar img {
-    width: 100%;
-    height: auto;
-    max-width: 200px;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    height: 40px;
+    width: auto;
+    max-width: 180px;
+    filter: brightness(1.1) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    transition: transform 0.2s ease;
+}
+
+.navbar img:hover {
+    transform: scale(1.02);
 }
 
 .navbar-col {
-    text-align: right;
     display: flex;
     align-items: center;
+    gap: 4px;
 }
 
 .nav-button {
-    font-family: Kanit;
-    font-size: 18px;
-    font-weight: 500;
-    padding: 8px 20px;
-    border-radius: 25px;
+    font-family: 'Kanit', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    padding: 8px 16px;
+    border-radius: 8px;
     border: none;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     text-decoration: none;
-    margin: 0 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.92);
+    position: relative;
+    white-space: nowrap;
 }
 
 .nav-button:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.nav-button:active {
+    transform: translateY(0);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Responsive Navigation */
+@media (max-width: 768px) {
+    .nav-container {
+        padding: 12px 16px;
+    }
+    
+    .navbar img {
+        height: 36px;
+        max-width: 150px;
+    }
+    
+    .navbar-col {
+        gap: 2px;
+    }
+    
+    .nav-button {
+        font-size: 14px;
+        padding: 6px 12px;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar-col {
+        display: none;
+    }
+    
+    .navbar {
+        justify-content: center;
+    }
+    
+    .navbar img {
+        height: 32px;
+    }
+}
+
+/* Mobile Menu Toggle (if needed) */
+.mobile-menu-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 20px;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.mobile-menu-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 576px) {
+    .mobile-menu-toggle {
+        display: block;
+    }
+}
+
+/* Focus states for accessibility */
+.nav-button:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+}
+
+/* Smooth scroll padding for sticky header */
+html {
+    scroll-padding-top: 80px;
 }
