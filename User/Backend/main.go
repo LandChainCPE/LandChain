@@ -99,10 +99,10 @@ func main() {
 	userToken.Use(middlewares.CheckTokenOwnership())
 	{
 		userToken.GET("/getdatauserverification/:userid", controller.GetDataUserVerification)
-		userToken.GET("/user/info/", controller.GetInfoUserByWalletID)
-		userToken.GET("/user/lands", controller.GetLandTitleInfoByWallet)
-		userToken.GET("/user/info", controller.GetInfoUserByToken)
-		userToken.GET("/user/lands/requestsell", controller.GetAllRequestSellByUserID)
+		//555userToken.GET("/user/info/", controller.GetInfoUserByWalletID)
+		//555userToken.GET("/user/lands", controller.GetLandTitleInfoByWallet)
+		//555userToken.GET("/user/info", controller.GetInfoUserByToken)
+		//555userToken.GET("/user/lands/requestsell", controller.GetAllRequestSellByUserID)
 		userToken.GET("/user/lands/requestsellbydelete", controller.GetAllRequestSellByUserIDAndDelete)
 	}
 
@@ -137,8 +137,8 @@ func main() {
 		authorized.GET("/user/lands", controller.GetLandTitleInfoByWallet)
 		authorized.GET("/user/info", controller.GetInfoUserByToken)
 
-		// authorized.GET("/user/lands/requestbuy/:id", controller.GetRequestBuybyLandID)
-		authorized.DELETE("/user/lands/delete/requestbuy", controller.DeleteRequestBuyByUserIDAndLandID)
+		//555authorized.GET("/user/lands/requestbuy/:id", controller.GetRequestBuybyLandID)
+		//555authorized.DELETE("/user/lands/delete/requestbuy", controller.DeleteRequestBuyByUserIDAndLandID)
 
 		authorized.GET("/user/lands/requestsell", controller.GetAllRequestSellByUserID)
 		authorized.POST("/user/lands/requestsell/metadata", controller.GetMultipleLandMetadataHandler)
@@ -174,7 +174,7 @@ func main() {
 	// }
 
 	r.Run(":8080")
-
+	r.Run()
 }
 
 // Middleware CORS
