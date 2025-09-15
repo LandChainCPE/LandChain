@@ -3,6 +3,7 @@ import { Button, Form, Container, Card } from "react-bootstrap";
 import Navbar from "../../component/user/Navbar";
 import { GetLandHistory, GetInfoUsersByWallets } from "../../service/https/bam/bam";
 import "./LandHistory.css";
+import CheckLandowner from "../RequestSell/Checklandowner";
 
 interface OwnerInfo {
   wallet: string;
@@ -32,13 +33,19 @@ const LandHistory: React.FC = () => {
         return;
       }
 
-      const ownerWallets: string[] = data.owners || [];
-      if (ownerWallets.length === 0) {
+      let ownerWallets: string[] = data.owners || [];
+      if (ownerWallets.length <= 1) {
+        // ไม่มีข้อมูล หรือเหลือแค่คนแรกที่เป็นข้อมูลผิด
         setOwners([]);
         return;
       }
 
+      // ตัดเจ้าของคนแรกออก (index 0)
+      ownerWallets = ownerWallets.slice(1);
+
+      // reverse ลำดับเจ้าของ เพื่อให้เจ้าของปัจจุบันขึ้นบนสุด
       const reversedWallets = [...ownerWallets].reverse();
+
       const ownerInfos = await GetInfoUsersByWallets(reversedWallets);
 
       const finalOwners: OwnerInfo[] = reversedWallets.map((wallet) => {
@@ -51,6 +58,10 @@ const LandHistory: React.FC = () => {
         };
       });
 
+      console.log("data ", data);
+      console.log("ownerWallets ", ownerWallets);
+      console.log("finalOwners ", finalOwners);
+
       setOwners(finalOwners);
     } catch (e) {
       setError("เกิดข้อผิดพลาด");
@@ -59,6 +70,7 @@ const LandHistory: React.FC = () => {
       setLoading(false);
     }
   };
+
 
   const formatWallet = (wallet: string) => {
     if (wallet.length <= 10) return wallet;
@@ -69,6 +81,7 @@ const LandHistory: React.FC = () => {
     navigator.clipboard.writeText(text);
   };
 
+  
   return (
     <div className="land-history-container">
       <div className="floating-shapes">
@@ -113,6 +126,7 @@ const LandHistory: React.FC = () => {
       </div>
 
       <Container className="main-container">
+        
         <div className="search-section">
           <Card className="glass-card search-card">
             <div className="card-glow"></div>
@@ -202,13 +216,13 @@ const LandHistory: React.FC = () => {
                 <div className="timeline-progress" style={{height: `${(owners.length * 200)}px`}}></div>
               </div>
 
+
               {owners.map((owner, index) => (
                 <div key={index} className={`timeline-node ${index === 0 ? "current" : ""}`}>
                   <div className="timeline-connector">
                     <div className="node-indicator">
                       <div className="node-ring"></div>
                       <div className="node-core">
-                        <span className="node-number">{index + 1}</span>
                       </div>
                     </div>
                   </div>
@@ -294,6 +308,7 @@ const LandHistory: React.FC = () => {
           </div>
         )}
       </Container>
+      <CheckLandowner/>
     </div>
   );
 };

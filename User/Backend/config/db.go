@@ -268,7 +268,7 @@ func SetupDatabase() {
 
 		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0x81C7a15aE0b72CADE82D428844cff477f6E364b5", RoleID: RefRole}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
 		db.Create(&entity.Users{Firstname: "Panachai", Lastname: "Potisuwan", Email: "Panachai@gmail.com", Phonenumber: "0555555554", Metamaskaddress: "0x81C7a15aE0b72CADE82D428844cff477f6E36455", RoleID: RefRole})
-		db.Create(&entity.Users{Firstname: "Noth", Lastname: "Potisuwan", Email: "Noth@gmail.com", Phonenumber: "0555555556", Metamaskaddress: "0x81C7a15aE0b72CADE82D428844cff477f6E36465", RoleID: RefRole})
+			
 
 		// //RefServiceType := uint(1)
 		// db.Create(&entity.Users{Name: "Jo", Password: "jo123456", Land: "12กท85", RoleID: RefRole,})

@@ -356,3 +356,44 @@ export async function DeleteAllRequestBuyByLandID(landID: string | number) {
     return { error: "เกิดข้อผิดพลาดในการลบคำขอซื้อ" };
   }
 }
+
+
+interface CheckOwnerResponse {
+  message: string;
+  isOwner: boolean;
+}
+
+export async function CheckOwner(
+  landID: string | number,
+  wallet: string
+): Promise<CheckOwnerResponse | { error: string }> {
+  try {
+    const res = await api.get<CheckOwnerResponse>("/lands/check-owner", {
+      params: { tokenId: landID, wallet },
+    });
+    return res.data;
+  } catch (err: unknown) {
+    // เช็คว่า err เป็น object และมี response
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "response" in err &&
+      typeof (err as any).response.data === "object"
+    ) {
+      return (err as any).response.data;
+    }
+
+    return { error: "เกิดข้อผิดพลาดในการตรวจสอบเจ้าของที่ดิน" };
+  }
+}
+
+export async function DeleteTransactionandAllrequest(id: number | string) {
+  try {
+    const res = await api.delete(`/user/lands/delete/transactionallrequest/${id}`); // ✅ แทนค่า id จริง
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}

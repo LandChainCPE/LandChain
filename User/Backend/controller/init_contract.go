@@ -432,3 +432,43 @@ func BuyLandHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"txHash": req.TxHash})
 }
+
+func CheckOwnerHandler(c *gin.Context) {
+	walletParam := c.Query("wallet")
+	tokenIdParam := c.Query("tokenId")
+
+	if walletParam == "" || tokenIdParam == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "wallet and tokenId are required"})
+		return
+	}
+
+	tokenId := new(big.Int)
+	if _, ok := tokenId.SetString(tokenIdParam, 10); !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid tokenId"})
+		return
+	}
+
+	walletAddress := common.HexToAddress(walletParam)
+
+	if ContractInstance == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "contract not initialized"})
+		return
+	}
+
+	// ใช้ Contract + CallOpts
+	owner, err := ContractInstance.Contract.OwnerOf(&ContractInstance.CallOpts, tokenId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	isOwner := owner == walletAddress
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": map[bool]string{
+			true:  "เป็นเจ้าของที่ดินนี้",
+			false: "ไม่ใช่เจ้าของที่ดินนี้",
+		}[isOwner],
+		"isOwner": isOwner,
+	})
+}

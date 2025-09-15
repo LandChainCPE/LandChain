@@ -96,7 +96,7 @@ func main() {
 		authorized.GET("/user/lands", controller.GetLandTitleInfoByWallet)
 		authorized.GET("/user/info", controller.GetInfoUserByToken)
 
-		authorized.GET("/user/lands/requestbuy/:id", controller.GetRequestBuybyLandID)
+		authorized.GET("/user/lands/requestbuy/:id", controller.GetRequestBuyByTokenID)
 		authorized.DELETE("/user/lands/delete/requestbuy", controller.DeleteRequestBuyByUserIDAndLandID)
 
 		authorized.GET("/user/lands/requestsell", controller.GetAllRequestSellByUserID)
@@ -119,6 +119,9 @@ func main() {
 		authorized.GET("/user/get/metamaskaddress/:id", controller.GetUserAddressLand)
 		authorized.POST("/user/post/tranferland", controller.BuyLandHandler)
 		authorized.DELETE("/user/lands/delete/allrequset/:id", controller.DeleteAllRequestBuyByLandID)
+		authorized.DELETE("/user/lands/delete/transactionallrequest/:id", controller.DeleteTransactionandAllrequest)
+		// ส่ง ContractInstance.Contract เข้าไป
+		authorized.GET("/lands/check-owner", controller.CheckOwnerHandler)
 
 		// CONTROLLER RegisterLand
 		authorized.POST("/user/userregisland", controller.UserRegisLand)

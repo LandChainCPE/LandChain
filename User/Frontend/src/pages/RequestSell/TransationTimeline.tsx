@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { GetTransationByUserID, GetInfoUserByToken, UpdateTransactionBuyerAccept, SetSellInfoHandler, DeleteTransaction, GetSaleInfoHandler, GetUserAddressLand, BuyLandHandler, DeleteAllRequestBuyByLandID } from "../../service/https/bam/bam";
+import { GetTransationByUserID, GetInfoUserByToken, UpdateTransactionBuyerAccept, SetSellInfoHandler, DeleteTransaction, GetSaleInfoHandler, GetUserAddressLand, BuyLandHandler, DeleteTransactionandAllrequest } from "../../service/https/bam/bam";
 import './TransactionTimeline.css';
 import Navbar from "../../component/user/Navbar";
 import { Modal, Button } from "react-bootstrap";
 import { ethers } from "ethers";
 import smartcontrat from "../../../../Backend/smartcontract/smartcontract.json";
+import Swal from "sweetalert2";
 
 function TransactionTimeline() {
     const [transactions, setTransactions] = useState<any[]>([]);
@@ -37,22 +38,23 @@ function TransactionTimeline() {
         return () => socket.close();
     }, []);
 
+    const fetchTransactions = async () => {
+    try {
+        setLoading(true);
+        const user = await GetInfoUserByToken();
+        setUserId(user.id);
+        const apiTransactions = await GetTransationByUserID(user.id);
+        setTransactions(apiTransactions ?? []);
+    } catch (err) {
+        setError("เกิดข้อผิดพลาดในการดึงข้อมูล");
+    } finally {
+        setLoading(false);
+    }
+};
+
     useEffect(() => {
-        async function fetchTransactions() {
-            try {
-                setLoading(true);
-                const user = await GetInfoUserByToken();
-                setUserId(user.id);
-                const apiTransactions = await GetTransationByUserID(user.id);
-                setTransactions(apiTransactions ?? []);
-            } catch (err) {
-                setError("เกิดข้อผิดพลาดในการดึงข้อมูล");
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchTransactions();
-    }, []);
+    fetchTransactions();
+}, []);
 
     const [saleInfos, setSaleInfos] = useState<{ [key: number]: any }>({});
 
@@ -103,7 +105,12 @@ const checkWalletBalance = async (requiredEth: number): Promise<boolean> => {
   try {
     // ✅ ใช้ Metamask provider
     if (!(window as any).ethereum) {
-      alert("กรุณาเชื่อมต่อกระเป๋า Metamask ก่อน");
+      Swal.fire({
+                      icon: "warning",
+                      title: "เกิดข้อผิดพลาดในการปฏิเสธ",
+                      text: "กรุณาเชื่อมต่อกระเป๋า Metamask ก่อน",
+                      confirmButtonColor: "#e74c3c",
+                      });
       return false;
     }
 
@@ -126,7 +133,11 @@ const checkWalletBalance = async (requiredEth: number): Promise<boolean> => {
     return balanceEth >= requiredEth;
   } catch (err) {
     console.error("เกิดข้อผิดพลาดในการตรวจสอบยอดเงิน", err);
-    alert("เกิดข้อผิดพลาดในการตรวจสอบยอดเงิน");
+    Swal.fire({
+                      icon: "error",
+                      title: "เกิดข้อผิดพลาดในการตรวจสอบยอดเงิน",
+                      confirmButtonColor: "#e74c3c",
+                      });
     return false;
   }
 };
@@ -173,7 +184,11 @@ const checkWalletBalance = async (requiredEth: number): Promise<boolean> => {
         // ✅ เช็คยอดเงินใน wallet
         const hasEnough = await checkWalletBalance(requiredEth);
         if (!hasEnough) {
-            alert("ยอดเงินไม่พอ");
+            Swal.fire({
+                      icon: "error",
+                      title: "ยอดเงินไม่พอ",
+                      confirmButtonColor: "#e74c3c",
+                      });
             return;
         }
 
@@ -183,7 +198,12 @@ const checkWalletBalance = async (requiredEth: number): Promise<boolean> => {
         closeModal();
     } catch (err) {
         console.error("ยืนยันไม่สำเร็จ", err);
-        alert("เกิดข้อผิดพลาดในการยืนยัน");
+        Swal.fire({
+                      icon: "error",
+                      title: "เกิดข้อผิดพลาดในการยืนยัน",
+                      confirmButtonColor: "#e74c3c",
+                      });
+        
     }
 };
 
@@ -196,7 +216,11 @@ const handleSetsaleinfo = async (transaction: any) => {
     const buyer = transaction.Buyer?.Metamaskaddress;
 
     if (!tokenId || !buyer || !priceTHB) {
-      alert("ไม่พบ Token ID, buyer หรือราคาขาย");
+       Swal.fire({
+                      icon: "error",
+                      title: "ไม่พบ Token ID, buyer หรือราคาขาย",
+                      confirmButtonColor: "#e74c3c",
+                      });
       console.log(tokenId, buyer, priceTHB);
       return;
     }
@@ -208,7 +232,11 @@ const handleSetsaleinfo = async (transaction: any) => {
     const { signature, wei } = res;
 
     if (!signature || !wei) {
-      alert("เซ็นต์ข้อมูลล้มเหลว");
+      Swal.fire({
+                      icon: "error",
+                      title: "เซ็นต์ข้อมูลล้มเหลว",
+                      confirmButtonColor: "#e74c3c",
+                      });
       setProcessingTxId(null);
       return;
     }
@@ -222,7 +250,11 @@ const handleSetsaleinfo = async (transaction: any) => {
     console.log("=======================");
 
     if (!(window as any).ethereum) {
-      alert("กรุณาติดตั้งและเชื่อมต่อ Metamask");
+      Swal.fire({
+                      icon: "warning",
+                      title: "กรุณาติดตั้งและเชื่อมต่อ",
+                      confirmButtonColor: "#e74c3c",
+                      });
       setProcessingTxId(null);
       return;
     }
@@ -242,10 +274,19 @@ const handleSetsaleinfo = async (transaction: any) => {
     console.log("Transaction sent:", tx.hash);
 
     await tx.wait();
-    alert("ร่างสัญญาสำเร็จ!");
+    Swal.fire({
+                      icon: "success",
+                      title: "ร่างสัญญาสำเร็จ!",
+                      confirmButtonColor: "#00fa4fff",
+                      });
   } catch (err: any) {
     console.error("เกิดข้อผิดพลาดในการโอนโฉนด", err);
-    alert("เกิดข้อผิดพลาด: " + (err?.message ?? err));
+    Swal.fire({
+                      icon: "error",
+                      title: "เกิดข้อผิดพลาด!",
+                      text : "เกิดข้อผิดพลาด: " + (err?.message ?? err),
+                      confirmButtonColor: "#e74c3c",
+                      });
   } finally {
     setProcessingTxId(null);
   }
@@ -272,10 +313,18 @@ const handleConfirmDelete = async () => {
 
     setTransactions((prev) => prev.filter((tx) => tx.ID !== selectedTransaction));
 
-    alert("ลบธุรกรรมเรียบร้อยแล้ว");
+    Swal.fire({
+                      icon: "success",
+                      title: "ลบธุรกรรมเรียบร้อยแล้ว",
+                      confirmButtonColor: "#00fa4fff",
+                      });
   } catch (err) {
     console.error("ลบธุรกรรมไม่สำเร็จ", err);
-    alert("เกิดข้อผิดพลาดในการลบธุรกรรม");
+    Swal.fire({
+                      icon: "error",
+                      title: "เกิดข้อผิดพลาดในการลบธุรกรรม!",
+                      confirmButtonColor: "#e74c3c",
+                      });
   } finally {
     handleCloseDeleteModal();
   }
@@ -324,29 +373,41 @@ const confirmDraftSale = async () => {
     closeSaleModal();
   } catch (err) {
     console.error(err);
-    alert("เกิดข้อผิดพลาดในการร่างสัญญา");
+     Swal.fire({
+                      icon: "error",
+                      title: "เกิดข้อผิดพลาดในการร่างสัญญา!",
+                      confirmButtonColor: "#e74c3c",
+                      });
+    
   } finally {
     setLoadingMetamask(false); // จบ animation
   }
 };
 
+interface EthTransaction {
+  toAddress: string;
+  amountWei: string;
+  tokenId: string;
+  transactionId: number;
+}
 
+const [ethTransaction, setEthTransaction] = useState<EthTransaction | null>(null);
 const [showETHModal, setShowETHModal] = useState(false);
-const [ethTransaction, setEthTransaction] = useState<{ toAddress: string; amountWei: string; tokenId: string } | null>(null);
 const [loadingETH, setLoadingETH] = useState(false);
 
-const openETHModal = (toAddress: string, amountWei: string, tokenId: string) => {
+const openETHModal = (toAddress: string, amountWei: string, tokenId: string, transactionId: number) => {
   setEthTransaction({ 
-    toAddress,       // ✅ เปลี่ยนชื่อ field เป็น toAddress
-    amountWei, 
+    toAddress,
+    amountWei,
     tokenId,
+    transactionId
   });
   setShowETHModal(true);
 };
 
 
 interface SaleInfoType {
-tokenId: string;
+    tokenId: string;
   price: string; // สมมติเป็น ETH เช่น "1.5"
   buyer?: string;
 }
@@ -354,7 +415,7 @@ tokenId: string;
  const confirmBuyLand = async (
   tokenId: string,
   transactionId: number,
-  LandID: number
+
 ) => {
   setLoadingETH(true);
   try {
@@ -383,6 +444,9 @@ if (!txInfo) {
     const priceWei = ethers.parseUnits(txInfo.price, "wei"); // bigint เช่น
     if (balance < priceWei) throw new Error("ยอดเงินในกระเป๋าไม่เพียงพอ");
 
+
+    
+    console.log("transaction:", transactionId);
     // เรียก contract
     const contract = new ethers.Contract(import.meta.env.VITE_CONTRACT_ADDRESS, smartcontrat, signer);
 
@@ -393,33 +457,36 @@ if (!txInfo) {
     await tx.wait();
     console.log("Transaction confirmed:", tx.hash);
 
-    // บันทึก txHash ลง backend
-    const buyRes = await BuyLandHandler(tokenId, tx.hash);
-    if (buyRes.error) throw new Error("เกิดข้อผิดพลาดในการบันทึกการซื้อ: " + buyRes.error);
-
     // ลบ transaction และ sale info
-    setTransactions(prev => prev.filter(tx => tx.Landtitle?.TokenID !== tokenId));
-    setSaleInfos(prev => {
-      const copy = { ...prev } as Record<string, any>;
-      delete copy[tokenId];
-      return copy;
-    });
 
     await DeleteTransaction(transactionId);
+    await DeleteTransactionandAllrequest(transactionId);
 
-    return { ethTx: tx.hash, contractTx: buyRes.txHash };
+
+    await fetchTransactions();
+    setShowETHModal(false);
+    setEthTransaction(null);
+    Swal.fire({
+      icon: "success",
+      title: "ซื้อขายสำเร็จและลบ request เรียบร้อย",
+      confirmButtonColor: "#00fa4fff",
+    });
+
+    
+    // return { ethTx: tx.hash};
   } catch (err: any) {
     console.error(err);
+    Swal.fire({
+      icon: "error",
+      title: "เกิดข้อผิดพลาด",
+      text: err?.message ?? err,
+      confirmButtonColor: "#e74c3c",
+    });
     throw err;
   } finally {
     setLoadingETH(false);
   }
 };
-
-
-
-
-
 
 
 
@@ -436,7 +503,8 @@ const openETHModalForTransaction = (tx: any) => {
   openETHModal(
     tx.Buyer.Metamaskaddress, // ผู้รับ ETH
     amountWeiStr,              // จำนวน ETH (wei) เป็น string
-    tx.Landtitle.TokenID       // Token ID
+    tx.Landtitle.TokenID,       // Token ID
+    tx.ID  
   );
 };
 
@@ -761,7 +829,7 @@ const openETHModalForTransaction = (tx: any) => {
                             </Button>
                             <Button
                             variant="primary"
-                            onClick={() => confirmBuyLand(ethTransaction?.tokenId ?? "", tx.ID+1, tx.landID-1)}
+                            onClick={() => confirmBuyLand(ethTransaction?.tokenId ?? "", ethTransaction?.transactionId ?? 0 )}
                             disabled={loadingETH}
                             >
                             {loadingETH ? (
