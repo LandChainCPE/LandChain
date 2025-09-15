@@ -33,16 +33,10 @@ type Landsalepost struct {
 	// StateID uint  `json:"state_id"`
 	// States  State `gorm:"foreignKey:StateID"`
 
-<<<<<<< HEAD
 	Booking []Booking `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
 
-	Roomchat  []Roomchat  `gorm:"foreignKey:LandsalepostID"`
+	Roomchat []Roomchat `gorm:"foreignKey:LandsalepostID"`
+
 	Photoland []Photoland `gorm:"foreignKey:LandsalepostID"`
 	Location  []Location  `gorm:"foreignKey:LandsalepostID"` // One-to-One relationship with Location
-=======
-	Roomchat []Roomchat  `gorm:"foreignKey:LandsalepostID"`
-	Transaction []Transaction  `gorm:"foreignKey:LandsalepostID"`
-	Photoland []Photoland  `gorm:"foreignKey:LandsalepostID"`
-	Location []Location `gorm:"foreignKey:LandsalepostID"` // One-to-One relationship with Location
->>>>>>> ad1e73b48cc24ba959fafd9fdcd19211d47d890a
 }

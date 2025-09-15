@@ -137,7 +137,7 @@ func main() {
 		authorized.GET("/user/lands", controller.GetLandTitleInfoByWallet)
 		authorized.GET("/user/info", controller.GetInfoUserByToken)
 
-		authorized.GET("/user/lands/requestbuy/:id", controller.GetRequestBuybyLandID)
+		// authorized.GET("/user/lands/requestbuy/:id", controller.GetRequestBuybyLandID)
 		authorized.DELETE("/user/lands/delete/requestbuy", controller.DeleteRequestBuyByUserIDAndLandID)
 
 		authorized.GET("/user/lands/requestsell", controller.GetAllRequestSellByUserID)
@@ -174,7 +174,7 @@ func main() {
 	// }
 
 	r.Run(":8080")
-	r.Run()
+
 }
 
 // Middleware CORS

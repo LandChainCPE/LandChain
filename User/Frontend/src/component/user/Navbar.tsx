@@ -62,7 +62,7 @@ const Navbar = () => {
         <div className="navbar-container">
           {/* Brand Section */}
           <div className="navbar-brand-section">
-            <Link to="/" className="navbar-brand-text">
+            <Link to="/user" className="navbar-brand-text">
               LANDCHAIN
             </Link>
           </div>
@@ -71,27 +71,27 @@ const Navbar = () => {
           <div className="navbar-nav-section">
             <ul className="navbar-nav-list">
               <li className="navbar-nav-item">
-                <Link 
-                  to="/" 
-                  className={`navbar-nav-link ${isActiveLink('/') ? 'active' : ''}`}
+                <a 
+                  href="/user" 
+                  className={`navbar-nav-link ${location.pathname === '/user' ? 'active' : ''}`}
                 >
                   หน้าแรก
-                </Link>
+                </a>
               </li>
               <li className="navbar-nav-item">
-                <Link 
-                  to="/appointment" 
-                  className={`navbar-nav-link ${isActiveLink('/appointment') ? 'active' : ''}`}
+                <a 
+                  href="/user/regisland" 
+                  className={`navbar-nav-link ${location.pathname === '/user/regisland' ? 'active' : ''}`}
                 >
                   นัดหมายกรมที่ดิน
-                </Link>
+                </a>
               </li>
               <li className="navbar-nav-item">
                 <Link 
                   to="/news" 
                   className={`navbar-nav-link ${isActiveLink('/news') ? 'active' : ''}`}
                 >
-                  ข่าวสาร
+                  โปรไฟล์
                 </Link>
               </li>
             </ul>
@@ -109,41 +109,41 @@ const Navbar = () => {
                 </button>
 
                 <div className="dropdown-menu-landchain">
-                  <Link 
-                    to="/user/manage" 
+                  <a 
+                    href="/user/manage" 
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}
                   >
                     จัดการข้อมูล
-                  </Link>
-                  <Link 
-                    to="/user/regisland" 
+                  </a>
+                  <a 
+                    href="/user/userregisland" 
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}
                   >
                     ลงทะเบียนโฉนดที่ดิน
-                  </Link>
-                  <Link 
-                    to="/user/transation" 
+                  </a>
+                  <a 
+                    href="/user/transation" 
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}
                   >
                     สถานะธุรกรรม
-                  </Link>
-                  <Link 
-                    to="/user/requestsell" 
+                  </a>
+                  <a 
+                    href="/user/requestsell" 
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}
                   >
                     คำขอซื้อ/ขายที่ดิน
-                  </Link>
-                  <Link 
-                    to="/user/landhistory" 
+                  </a>
+                  <a 
+                    href="/user/landhistory" 
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}
                   >
                     ประวัติโฉนดที่ดิน/ตรวจสอบเจ้าของที่ดิน
-                  </Link>
+                  </a>
                   <button 
                     className="dropdown-item-landchain logout-btn"
                     onClick={handleLogout}
