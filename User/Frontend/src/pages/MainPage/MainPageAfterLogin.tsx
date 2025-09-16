@@ -10,6 +10,7 @@ import LandpicKorat from "../../assets/LandPicKorat.jpg"
 import type { JSX } from "react";
 import { Link } from 'react-router-dom';
 import Header from "./HeaderUserMain";
+import Navbar from "../../component/user/Navbar";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -22,7 +23,7 @@ const MainPage = (): JSX.Element => {
     <div className="main-container">
       <div className="bg-[#364049] w-full relative">
         {/* Header */}
-        <Header />
+        <Navbar />
 
         {/* Title Section */}
         <Row justify="center" style={{ marginTop: "40px" }}>
