@@ -14,6 +14,7 @@ import (
 	"encoding/csv"
 	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -269,7 +270,7 @@ func SetupDatabase() {
 
 		RefRole := uint(1)
 
-		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f469a", RoleID: RefRole}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
+		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0x81c7a15ae0b72cade82d428844cff477f6e364b5", RoleID: RefRole}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
 		db.Create(&entity.Users{Firstname: "Panachai", Lastname: "Potisuwan", Email: "Panachai@gmail.com", Phonenumber: "0555555554", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f4444", RoleID: RefRole})
 		db.Create(&entity.Users{Firstname: "Noth", Lastname: "Potisuwan", Email: "Noth@gmail.com", Phonenumber: "0555555556", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f6666", RoleID: RefRole})
 
@@ -322,7 +323,7 @@ func SetupDatabase() {
 		db.Create(&entity.Transaction{LandID: 1, BuyerID: 2, SellerID: 4, TypetransactionID: 1})
 
 		db.Create(&entity.Landtitle{
-			TokenID:            0,
+			TokenID:            nil,
 			IsLocked:           false,
 			SurveyNumber:       "5336 IV 8632",
 			LandNumber:         "๑๑",
@@ -334,16 +335,17 @@ func SetupDatabase() {
 			Ngan:               2,
 			SquareWa:           50,
 			Status_verify:      false,
-			GeographyID:        nil, // Replace with actual GeographyID if available
-			ProvinceID:         1,   // Replace with actual ProvinceID
-			DistrictID:         1,   // Replace with actual DistrictID
-			SubdistrictID:      1,   // Replace with actual SubdistrictID
-			LandVerificationID: nil, // Replace with actual LandVerificationID if available
-			UserID:             1,   // Replace with actual UserID
+			GeographyID:        nil,  // Replace with actual GeographyID if available
+			ProvinceID:         38,   // Replace with actual ProvinceID
+			DistrictID:         537,  // Replace with actual DistrictID
+			SubdistrictID:      4320, // Replace with actual SubdistrictID
+			LandVerificationID: nil,  // Replace with actual LandVerificationID if available
+			UserID:             1,    // Replace with actual UserID
+			Uuid:               uuid.New().String(),
 		})
 
 		db.Create(&entity.Landtitle{
-			TokenID:            1,
+			TokenID:            nil,
 			IsLocked:           false,
 			SurveyNumber:       "5336 IV 8632",
 			LandNumber:         "๑๑",
@@ -355,16 +357,17 @@ func SetupDatabase() {
 			Ngan:               2,
 			SquareWa:           50,
 			Status_verify:      false,
-			GeographyID:        nil, // Replace with actual GeographyID if available
-			ProvinceID:         2,   // Replace with actual ProvinceID
-			DistrictID:         1,   // Replace with actual DistrictID
-			SubdistrictID:      1,   // Replace with actual SubdistrictID
-			LandVerificationID: nil, // Replace with actual LandVerificationID if available
-			UserID:             1,   // Replace with actual UserID
+			GeographyID:        nil,  // Replace with actual GeographyID if available
+			ProvinceID:         16,   // Replace with actual ProvinceID
+			DistrictID:         138,  // Replace with actual DistrictID
+			SubdistrictID:      1371, // Replace with actual SubdistrictID
+			LandVerificationID: nil,  // Replace with actual LandVerificationID if available
+			UserID:             1,    // Replace with actual UserID
+			Uuid:               uuid.New().String(),
 		})
 
 		db.Create(&entity.Landtitle{
-			TokenID:            2,
+			TokenID:            nil,
 			IsLocked:           false,
 			SurveyNumber:       "5336 IV 8632",
 			LandNumber:         "๑๑",
@@ -377,11 +380,12 @@ func SetupDatabase() {
 			SquareWa:           50,
 			Status_verify:      false,
 			GeographyID:        nil, // Replace with actual GeographyID if available
-			ProvinceID:         3,   // Replace with actual ProvinceID
-			DistrictID:         1,   // Replace with actual DistrictID
-			SubdistrictID:      1,   // Replace with actual SubdistrictID
+			ProvinceID:         6,   // Replace with actual ProvinceID
+			DistrictID:         87,  // Replace with actual DistrictID
+			SubdistrictID:      568, // Replace with actual SubdistrictID
 			LandVerificationID: nil, // Replace with actual LandVerificationID if available
 			UserID:             1,   // Replace with actual UserID
+			Uuid:               uuid.New().String(),
 		})
 
 		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})

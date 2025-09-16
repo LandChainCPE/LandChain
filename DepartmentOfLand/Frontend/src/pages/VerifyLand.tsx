@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Loader from "../component/third-patry/Loader";
-import { getAllLandData } from "../service/https/aut/https";
+import { getAllLandData, VerifyLandTitle } from "../service/https/aut/https";
 
 function VerifyLand() {
   const [landData, setLandData] = useState<any>(null);
@@ -41,30 +41,9 @@ function VerifyLand() {
       setLoading(true);
       const { response, result } = await getAllLandData();
       if (response && result && Array.isArray(result.data)) {
+        console.log("result", result)
         // Map backend data to UI format
-        const requests = result.data.map((item: any, idx: number) => ({
-          id: idx + 1, ///index ของ array (เริ่มที่ 0) ดังนั้น idx + 1 จะทำให้ id เริ่มที่ 1, 2, 3, ... แทนที่จะเป็น 0, 1, 2, ...
-          // โฉนด
-          survey_number: item.survey_number,
-          land_number: item.land_number,
-          survey_page: item.survey_page,
-          number: item.number,
-          title_deed_number: item.title_deed_number,
-          volume: item.volume,
-          page: item.page,
-          rai: item.rai,
-          ngan: item.ngan,
-          square_wa: item.square_wa,
-          status_verify: item.status_verify,
-          // ที่ตั้ง
-          province: item.province,
-          district: item.district,
-          subdistrict: item.subdistrict,
-          // เจ้าของ
-          firstname: item.firstname,
-          lastname: item.lastname,
-          metamaskaddress: item.metamaskaddress,
-        }));
+        const requests = result.data;
         setLandData({ requests });
       } else {
         setLandData({ requests: [] });
@@ -117,56 +96,20 @@ function VerifyLand() {
   const handleConfirmHold = () => {
     setIsHolding(true);
     setHoldProgress(0);
-    let progress = 0;
-    let intervalRef: NodeJS.Timeout;
+    processVerification();
 
-    intervalRef = setInterval(() => {
-      progress += 2;
-      setHoldProgress(progress);
-      if (progress >= 100) {
-        clearInterval(intervalRef);
-        processVerification();
-      }
-    }, 20);
-
-    const resetOnRelease = () => {
-      clearInterval(intervalRef);
-      if (progress < 100) {
-        setIsHolding(false);
-        setHoldProgress(0);
-      }
-      document.removeEventListener('mouseup', resetOnRelease);
-      document.removeEventListener('touchend', resetOnRelease);
-    };
-
-    document.addEventListener('mouseup', resetOnRelease);
-    document.addEventListener('touchend', resetOnRelease);
   };
 
   const processVerification = async () => {
     setLoading(true);
-    setShowConfirmModal(false);
-    
-    // Simulate API call
-    setTimeout(() => {
-      console.log(`${confirmAction} for land ${selectedLand?.landId}`);
+    console.log("Click", selectedLand.idlandtitle);
+    let { response, result } = await VerifyLandTitle(selectedLand.idlandtitle);
+    console.log(response, result)
+    if(response.status === 200){
+      setShowConfirmModal(false);
       setLoading(false);
-      setIsHolding(false);
-      setHoldProgress(0);
-      
-      // Update the land status in local state
-      if (landData && landData.requests) {
-        const updatedRequests = landData.requests.map((req: any) => {
-          if (req.id === selectedLand?.id) {
-            return { ...req, status: confirmAction === "approve" ? "approved" : "rejected" };
-          }
-          return req;
-        });
-        setLandData({ ...landData, requests: updatedRequests });
-      }
-      
-      window.alert(`การ${confirmAction === "approve" ? "อนุมัติ" : "ปฏิเสธ"}โฉนดที่ดิน ${selectedLand?.landId} เสร็จสิ้น`);
-    }, 2000);
+    }
+    
   };
 
   const toggleWalletExpansion = (requestId: number) => {
@@ -326,7 +269,7 @@ function VerifyLand() {
         {/* Land Verification Requests */}
         <div className="space-y-3">
           {filteredRequests.map((request: any) => (
-            <div key={request.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+            <div key={request.idlandtitle} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
               
               {/* Compact Header with All Key Info */}
               <div className="bg-gradient-to-r from-slate-700 to-slate-800 px-4 py-3">
@@ -564,7 +507,7 @@ function VerifyLand() {
                 ยกเลิก
               </button>
               <div className="flex-1 relative">
-                <button
+                <button  //ปุ่มยืนยัน โมเดล สุดท้าย
                   onMouseDown={handleConfirmHold}
                   onTouchStart={handleConfirmHold}
                   disabled={isHolding && holdProgress >= 100}

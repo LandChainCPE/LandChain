@@ -137,7 +137,9 @@ func GetLandMetadataByWallet(c *gin.Context) {
 	// map LandID -> IsLocked
 	lockedMap := make(map[string]bool)
 	for _, l := range lands {
-		lockedMap[strconv.FormatUint(uint64(l.TokenID), 10)] = l.IsLocked
+		if l.TokenID != nil {
+			lockedMap[strconv.FormatUint(uint64(*l.TokenID), 10)] = l.IsLocked
+		}
 	}
 
 	// 3️⃣ ดึง metadata จาก contract และ merge IsLocked
