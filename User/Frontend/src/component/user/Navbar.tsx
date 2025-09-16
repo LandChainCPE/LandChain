@@ -88,8 +88,8 @@ const Navbar = () => {
               </li>
               <li className="navbar-nav-item">
                 <Link 
-                  to="/news" 
-                  className={`navbar-nav-link ${isActiveLink('/news') ? 'active' : ''}`}
+                  to="/user/userdashboard" 
+                  className={`navbar-nav-link ${isActiveLink('/user/userdashboard') ? 'active' : ''}`}
                 >
                   โปรไฟล์
                 </Link>

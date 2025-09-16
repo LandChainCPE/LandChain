@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Upload, FileText, MapPin, User, CheckCircle, AlertCircle, Loader2, Shield, Hash } from 'lucide-react';
+import { Container } from 'react-bootstrap';
 import './VerifyLand.css';   // ✅ import CSS แยกไฟล์
 
 interface LandDeed {
@@ -72,135 +73,216 @@ const VerifyLand: React.FC = () => {
     new Date(dateString).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
-    <div className="upload-container">
-      <div className="upload-wrapper">
-        <div className="upload-header">
-          <h1>อัปโหลดโฉนดที่ดินสู่ Blockchain</h1>
-          <p>นำโฉนดที่ดินที่ผ่านการตรวจสอบแล้วขึ้นสู่ระบบ Blockchain เพื่อความปลอดภัยสูงสุด</p>
-        </div>
+    <div className="verify-land-container">
+      <div className="floating-shapes">
+        <div className="shape-1"></div>
+        <div className="shape-2"></div>
+        <div className="shape-3"></div>
+        <div className="shape-4"></div>
+      </div>
 
-        <div className="upload-grid">
-          {/* Left */}
-          <div className="upload-left">
-            <div className="section-header">
-              <FileText className="icon-blue" />
-              <h2>เลือกโฉนดที่ดิน</h2>
+      <div className="hero-section">
+        <Container>
+          <div className="hero-content">
+            <div className="hero-badge">
+              <span>🏛️ Blockchain Land Verification</span>
             </div>
-            <div className="deed-list">
-              {verifiedDeeds.map((deed) => (
-                <div
-                  key={deed.id}
-                  onClick={() => setSelectedDeed(deed)}
-                  className={`deed-item ${selectedDeed?.id === deed.id ? 'active' : ''}`}
-                >
-                  <div className="deed-item-header">
-                    <h3>{deed.title}</h3>
-                    <div className="verified">
-                      <CheckCircle className="icon-green" />
-                      <span>ยืนยันแล้ว</span>
-                    </div>
+            <h1 className="hero-title">
+              <span className="gradient-text">อัปโหลดโฉนดสู่ Blockchain</span>
+            </h1>
+            <p className="hero-subtitle">
+              นำโฉนดที่ดินที่ผ่านการตรวจสอบแล้วขึ้นสู่ระบบ Blockchain
+              <br />
+              เพื่อความปลอดภัยและความโปร่งใสสูงสุด
+            </p>
+          </div>
+        </Container>
+      </div>
+
+      <Container className="main-container">
+        <div className="upload-grid">
+          {/* Left Section */}
+          <div className="upload-left">
+            <div className="glass-card">
+              <div className="card-glow"></div>
+              <div className="section-card-body">
+                <div className="section-header">
+                  <div className="section-icon">
+                    <FileText className="icon-xxl" />
                   </div>
-                  <div className="deed-info">
-                    <div><User className="icon-small" /> {deed.owner}</div>
-                    <div><MapPin className="icon-small" /> {formatArea(deed.area)}</div>
-                  </div>
-                  <div className="deed-location">{deed.location}</div>
+                  <h2>เลือกโฉนดที่ดิน</h2>
+                  <p>เลือกจากรายการโฉนดที่ผ่านการตรวจสอบแล้ว</p>
                 </div>
-              ))}
+
+                <div className="deed-list">
+                  {verifiedDeeds.map((deed) => (
+                    <div
+                      key={deed.id}
+                      onClick={() => setSelectedDeed(deed)}
+                      className={`deed-item-modern ${selectedDeed?.id === deed.id ? 'active' : ''}`}
+                    >
+                      <div className="deed-card-shine"></div>
+                      <div className="deed-item-header">
+                        <h3>{deed.title}</h3>
+                        <div className="verified-badge">
+                          <CheckCircle className="icon-green" />
+                          <span>ยืนยันแล้ว</span>
+                        </div>
+                      </div>
+                      <div className="deed-info-grid">
+                        <div className="deed-info-item">
+                          <User className="icon-small" />
+                          <span>{deed.owner}</span>
+                        </div>
+                        <div className="deed-info-item">
+                          <MapPin className="icon-small" />
+                          <span>{formatArea(deed.area)}</span>
+                        </div>
+                      </div>
+                      <div className="deed-location">{deed.location}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Right */}
+          {/* Right Section */}
           <div className="upload-right">
             {selectedDeed ? (
-              <>
-                <div className="section-header">
-                  <Shield className="icon-green" />
-                  <h2>รายละเอียดโฉนด</h2>
+              <div className="glass-card">
+                <div className="card-glow"></div>
+                <div className="section-card-body">
+                  <div className="section-header">
+                    <div className="section-icon">
+                      <Shield className="icon-xxl" />
+                    </div>
+                    <h2>รายละเอียดโฉนด</h2>
+                    <p>ข้อมูลโฉนดที่เลือกและพร้อมอัปโหลด</p>
+                  </div>
+
+                  <div className="deed-details-modern">
+                    <div className="alert-modern success">
+                      <div className="alert-icon">✅</div>
+                      <div className="alert-content">
+                        <div className="alert-title">ได้รับการตรวจสอบแล้ว</div>
+                        <div className="alert-message">เมื่อ {formatDate(selectedDeed.verificationDate)}</div>
+                      </div>
+                    </div>
+
+                    <div className="deed-info-cards">
+                      <div className="info-card">
+                        <label>เลขที่โฉนด</label>
+                        <p>{selectedDeed.id}</p>
+                      </div>
+                      <div className="info-card">
+                        <label>เจ้าของ</label>
+                        <p>{selectedDeed.owner}</p>
+                      </div>
+                      <div className="info-card">
+                        <label>เนื้อที่</label>
+                        <p>{formatArea(selectedDeed.area)}</p>
+                      </div>
+                      <div className="info-card">
+                        <label>วันที่ออกโฉนด</label>
+                        <p>{formatDate(selectedDeed.issueDate)}</p>
+                      </div>
+                      <div className="info-card">
+                        <label>วันที่หมดอายุ</label>
+                        <p>{formatDate(selectedDeed.expiryDate)}</p>
+                      </div>
+                      <div className="info-card">
+                        <label>พิกัด</label>
+                        <p>{selectedDeed.coordinates.lat}, {selectedDeed.coordinates.lng}</p>
+                      </div>
+                    </div>
+
+                    <div className="info-card full-width">
+                      <label>ที่ตั้ง</label>
+                      <p>{selectedDeed.location}</p>
+                    </div>
+
+                    <div className="hash-display">
+                      <Hash className="icon-small" />
+                      <span>{selectedDeed.documentHash}</span>
+                    </div>
+                  </div>
+
+                  {/* Upload Section */}
+                  <div className="upload-section-modern">
+                    {uploadStatus === 'success' ? (
+                      <div className="status-modern success">
+                        <div className="status-icon-container">
+                          <CheckCircle className="status-icon success" />
+                        </div>
+                        <h3>อัปโหลดสำเร็จ!</h3>
+                        <div className="tx-hash-display">
+                          <code>{transactionHash}</code>
+                        </div>
+                        <button
+                          className="btn-modern secondary"
+                          onClick={() => { setUploadStatus('idle'); setTransactionHash(''); }}
+                        >
+                          อัปโหลดอีกหนึ่งรายการ
+                        </button>
+                      </div>
+                    ) : uploadStatus === 'error' ? (
+                      <div className="status-modern error">
+                        <div className="status-icon-container">
+                          <AlertCircle className="status-icon error" />
+                        </div>
+                        <h3>เกิดข้อผิดพลาด</h3>
+                        <button
+                          className="btn-modern secondary"
+                          onClick={() => setUploadStatus('idle')}
+                        >
+                          ลองใหม่
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="status-modern idle">
+                        <div className="status-icon-container">
+                          <Upload className="status-icon idle" />
+                        </div>
+                        <h3>พร้อมอัปโหลดสู่ Blockchain</h3>
+                        <button
+                          className="btn-modern primary"
+                          onClick={handleUploadToBlockchain}
+                          disabled={uploadStatus === 'uploading'}
+                        >
+                          <div className="btn-content">
+                            {uploadStatus === 'uploading' ? (
+                              <>
+                                <Loader2 className="btn-icon spin" />
+                                <span>กำลังอัปโหลด...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="btn-icon" />
+                                <span>อัปโหลดสู่ Blockchain</span>
+                                <div className="btn-arrow">→</div>
+                              </>
+                            )}
+                          </div>
+                          <div className="btn-ripple"></div>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-
-                <div className="deed-details">
-                  <div className="verified-box">
-                    <CheckCircle className="icon-green" />
-                    <span>ได้รับการตรวจสอบแล้วเมื่อ {formatDate(selectedDeed.verificationDate)}</span>
-                  </div>
-
-                  <div className="deed-grid">
-                    <div>
-                      <label>เลขที่โฉนด</label>
-                      <p>{selectedDeed.id}</p>
-                    </div>
-                    <div>
-                      <label>เจ้าของ</label>
-                      <p>{selectedDeed.owner}</p>
-                    </div>
-                    <div>
-                      <label>เนื้อที่</label>
-                      <p>{formatArea(selectedDeed.area)}</p>
-                    </div>
-                    <div>
-                      <label>วันที่ออกโฉนด</label>
-                      <p>{formatDate(selectedDeed.issueDate)}</p>
-                    </div>
-                    <div>
-                      <label>วันที่หมดอายุ</label>
-                      <p>{formatDate(selectedDeed.expiryDate)}</p>
-                    </div>
-                    <div>
-                      <label>พิกัด</label>
-                      <p>{selectedDeed.coordinates.lat}, {selectedDeed.coordinates.lng}</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label>ที่ตั้ง</label>
-                    <p>{selectedDeed.location}</p>
-                  </div>
-
-                  <div className="hash-box">
-                    <Hash className="icon-small" /> {selectedDeed.documentHash}
-                  </div>
-                </div>
-
-                {/* Upload */}
-                <div className="upload-section">
-                  {uploadStatus === 'success' ? (
-                    <div className="status success">
-                      <CheckCircle className="status-icon success" />
-                      <h3>อัปโหลดสำเร็จ!</h3>
-                      <p className="tx-hash">{transactionHash}</p>
-                      <button onClick={() => { setUploadStatus('idle'); setTransactionHash(''); }}>
-                        อัปโหลดอีกหนึ่งรายการ
-                      </button>
-                    </div>
-                  ) : uploadStatus === 'error' ? (
-                    <div className="status error">
-                      <AlertCircle className="status-icon error" />
-                      <h3>เกิดข้อผิดพลาด</h3>
-                      <button onClick={() => setUploadStatus('idle')}>ลองใหม่</button>
-                    </div>
-                  ) : (
-                    <div className="status idle">
-                      <Upload className="status-icon idle" />
-                      <h3>พร้อมอัปโหลดสู่ Blockchain</h3>
-                      <button onClick={handleUploadToBlockchain} disabled={uploadStatus === 'uploading'}>
-                        {uploadStatus === 'uploading' ? <Loader2 className="spin" /> : <Upload />}
-                        {uploadStatus === 'uploading' ? 'กำลังอัปโหลด...' : 'อัปโหลดสู่ Blockchain'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </>
+              </div>
             ) : (
-              <div className="empty">
-                <FileText className="empty-icon" />
-                <h3>เลือกโฉนดที่ดิน</h3>
-                <p>กรุณาเลือกโฉนดที่ดินจากรายการทางซ้ายเพื่อดูรายละเอียด</p>
+              <div className="empty-state">
+                <div className="empty-icon">📄</div>
+                <h3 className="empty-title">เลือกโฉนดที่ดิน</h3>
+                <p className="empty-message">
+                  กรุณาเลือกโฉนดที่ดินจากรายการทางซ้ายเพื่อดูรายละเอียดและอัปโหลดสู่ Blockchain
+                </p>
               </div>
             )}
           </div>
         </div>
-      </div>
+      </Container>
     </div>
   );
 };
