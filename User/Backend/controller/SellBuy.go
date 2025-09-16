@@ -432,3 +432,17 @@ func DeleteAllRequestBuyByLandID(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "ลบคำขอซื้อเรียบร้อย"})
 }
+
+func GetRequestBuybyLandID(c *gin.Context) {
+	var request []entity.RequestBuySell
+	landID := c.Param("id")
+	db := config.DB()
+
+	// ดึงข้อความห้องแชทพร้อมเรียงเวลาข้อความ
+	if err := db.Where("land_id = ?", landID).Preload("Seller").Preload("Buyer").Preload("RequestBuySellType").Find(&request).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลผู้ใช้ได้"})
+		return
+	}
+
+	c.JSON(http.StatusOK, request)
+}
