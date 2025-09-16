@@ -3,6 +3,8 @@ import "./UserDashboard.css";
 import { useNavigate } from "react-router-dom";
 import { GetUserinfoByID } from "../../service/https/garfield/http";
 import { UserCheck, CheckSquare } from "react-feather"; // Assuming 'react-feather' contains the User and Home icons
+import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";
+
 
 
 /* =======================
@@ -180,9 +182,10 @@ const StatCard = ({ title, value, sub }: { title: React.ReactNode; value: React.
 /* ===================================================
    UserProfilePage
    =================================================== */
-export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: LandTitle[] }) {
+export default function UserProfilePage() {
   // State สำหรับ user info
   const [userInfo, setUserInfo] = useState<{ firstName?: string; lastName?: string; email?: string; user_verification_id?: number }>({});
+  const [titles, setTitles] = useState<LandTitle[]>([]);
   useEffect(() => {
     const user_id = localStorage.getItem("user_id") || "";
     console.log("User id:", user_id);
@@ -223,6 +226,21 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
   useEffect(() => {
     console.log("User info:", userInfo);
   }, [userInfo]);
+
+  useEffect(() => {
+    async function fetchLandTitles() {
+      try {
+        const data = await GetLandTitleInfoByWallet();
+        if (data && Array.isArray(data)) {
+          setTitles(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch land titles:", error);
+      }
+    }
+
+    fetchLandTitles();
+  }, []);
 
   return (
     <div className="container">
