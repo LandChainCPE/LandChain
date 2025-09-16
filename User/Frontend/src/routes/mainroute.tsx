@@ -39,21 +39,40 @@ const Transation = Loadable(lazy(() => import("../pages/RequestSell/TransationTi
 const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     const isLogin = localStorage.getItem("isLogin") === "true";
-    
+
     if (!token || !isLogin) {
-      // เก็บ path ปัจจุบันไว้เพื่อ redirect กลับมาหลัง login
       localStorage.setItem("redirectPath", location.pathname);
       navigate("/login", { replace: true });
+      return;
     }
+
+    // ตรวจสอบ Token กับ API
+    fetch("/api/validate-token", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => {
+        if (response.status === 401) {
+          // ลบ Token และ Redirect ไปหน้า Login
+          localStorage.removeItem("token");
+          localStorage.removeItem("isLogin");
+          navigate("/login", { replace: true });
+        }
+      })
+      .catch((error) => {
+        console.error("Error validating token:", error);
+      });
   }, [navigate, location]);
 
   const token = localStorage.getItem("token");
   const isLogin = localStorage.getItem("isLogin") === "true";
-  
+
   if (!token || !isLogin) {
     return null; // หรือจะแสดง loading spinner
   }
@@ -66,139 +85,141 @@ const UserRoutes = (): RouteObject[] => [
     path: "/user",
     children: [
       { index: true, element: <MainPageAfterLogin /> },
-      { 
-        path: "regisland", 
+      {
+        path: "regisland",
         element: (
           <ProtectedRoute>
             <Regisland />
           </ProtectedRoute>
-        ) 
+        )
       },
-      { 
-        path: "dashboard", 
+      {
+        path: "dashboard",
         element: (
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
-        ) 
+        )
       },
-      { 
-        path: "petition", 
+      {
+        path: "petition",
         element: (
           <ProtectedRoute>
             <Petition />
           </ProtectedRoute>
-        ) 
+        )
       },
-      { 
-        path: "state", 
+      {
+        path: "state",
         element: (
           <ProtectedRoute>
             <State />
           </ProtectedRoute>
-        ) 
+        )
       },
-      { 
-        path: "sellmainpage", 
+      {
+        path: "sellmainpage",
         element: (
           <ProtectedRoute>
             <SellMainPage />
           </ProtectedRoute>
-        ) 
+        )
       },
-      { 
-        path: "map", 
+      {
+        path: "map",
         element: (
           <ProtectedRoute>
             <Map />
           </ProtectedRoute>
-        ) 
+        )
       },
-      { 
-        path: "sellpost", 
+      {
+        path: "sellpost",
         element: (
           <ProtectedRoute>
             <SellPost />
           </ProtectedRoute>
-        ) 
+        )
       },
-      { 
-        path: "chat", 
+      {
+        path: "chat",
         element: (
           <ProtectedRoute>
-            <Chat roomId={null} onNewMessage={() => {}} />
+            <Chat roomId={null} onNewMessage={() => { }} />
           </ProtectedRoute>
-        ) 
+        )
       },
-      { 
-        path: "userregisland", 
+      {
+        path: "userregisland",
         element: (
           <ProtectedRoute>
             <UserRegisland />
           </ProtectedRoute>
-        ) 
+        )
       },
-      { 
-        path: "sellpostmain", 
+      {
+        path: "sellpostmain",
         element: (
           <ProtectedRoute>
             <SellPostMain />
           </ProtectedRoute>
-        ) 
+        )
       },
-      { 
-        path: "landdetail/:id", 
+      {
+        path: "landdetail/:id",
         element: (
           <ProtectedRoute>
             <LandDetail />
           </ProtectedRoute>
         )
       },
-      { 
-        path: "requestsell", 
+      {
+        path: "requestsell",
         element: (
           <ProtectedRoute>
             <RequestSell />
           </ProtectedRoute>
-        ) 
+        )
       },
-      { 
-        path: "requestbuy", 
+      {
+        path: "requestbuy",
         element: (
           <ProtectedRoute>
             <RequestBuy />
           </ProtectedRoute>
-        ) 
+        )
       },
-      { 
-        path: "transation", 
+      {
+        path: "transation",
         element: (
           <ProtectedRoute>
             <Transation />
           </ProtectedRoute>
-        ) 
+        )
       },
-      { 
-        path: "verifyusertoblockchain", 
+      {
+        path: "verifyusertoblockchain",
         element: (
           <ProtectedRoute>
             <VerifyUser />
           </ProtectedRoute>
-        )},
+        )
+      },
       {
-        path: "userdashboard", 
+        path: "userdashboard",
         element: (
           <ProtectedRoute>
             <UserDashboard />
           </ProtectedRoute>
-        )},
-      { 
-        path: "verifyland", 
+        )
+      },
+      {
+        path: "verifyland",
         element: (
           <ProtectedRoute>
             <VerifyLand />
           </ProtectedRoute>
-        ) 
+        )
       },
       { path: "*", element: <MainPageAfterLogin /> },
     ],
@@ -207,37 +228,37 @@ const UserRoutes = (): RouteObject[] => [
 
 const MainRoutes = (): RouteObject[] => [
   {
-    path: "/", 
-    element: <MainPage />, 
-  },                                          
+    path: "/",
+    element: <MainPage />,
+  },
   {
     path: "/login",
     element: <Login />
   },
-  { 
-    path: "/register", 
-    element: <RegisterUser /> 
+  {
+    path: "/register",
+    element: <RegisterUser />
   },
-  { 
-    path: "/createaccount", 
-    element: <CreateAccount/> 
+  {
+    path: "/createaccount",
+    element: <CreateAccount />
   },
-    {
+  {
     path: "/mapbox_test",
     element: <LandMarkingMap />
   },
-  { 
-    path: "/connectmetamask", 
-    element: <ConnectMetamask /> 
+  {
+    path: "/connectmetamask",
+    element: <ConnectMetamask />
   },
 
   // เพิ่ม user routes เข้ามาด้วย
   ...UserRoutes(),
-  { 
-    path: "*", 
-    element: <MainPage /> 
+  {
+    path: "*",
+    element: <MainPage />
   },
-  
+
 ];
 
 function ConfigRoutes() {

@@ -19,7 +19,7 @@
     "@metamask/detect-provider": "^2.0.0",
     "@mui/material": "^7.3.2",
     "@tailwindcss/postcss": "^4.1.13",
-    "@tailwindcss/vite": "^4.1.12",
+    "@tailwindcss/vite": "^4.1.13",
     "@types/styled-components": "^5.1.34",
     "antd": "^5.26.5",
     "axios": "^1.12.2",

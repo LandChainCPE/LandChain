@@ -311,7 +311,7 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
                 className="landtoblockchain"
                 variant="primary"
                 style={{ marginTop: '1rem' }}
-                onClick={() => navigate('/verifyusertoblockchain')}
+                onClick={() => navigate('/user/verifyland')}
               >
                 ลงทะเบียนที่ดิน
               </Button>

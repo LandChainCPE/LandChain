@@ -53,8 +53,8 @@ async function LoginWallet(walletAddress: string) {
     localStorage.setItem("walletAddress", walletAddress);
     localStorage.setItem("token", result.token || "");
     localStorage.setItem("token_type", result.token_type || "Bearer");
-    localStorage.setItem("firstName", result.first_name || "");
-    localStorage.setItem("lastName", result.last_name || "");
+    //localStorage.setItem("firstName", result.first_name || "");
+    //localStorage.setItem("lastName", result.last_name || "");
     localStorage.setItem("user_id", result.user_id);
     localStorage.setItem("isLogin", "true"); // ✅ ต้องมี
   }
