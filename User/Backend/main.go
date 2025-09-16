@@ -55,6 +55,7 @@ func main() {
 		//r.PUT("/bookings/:id", controller.UpdateBooking) // อัปเดตการจอง
 
 		//J
+		authorized.GET("/petition/:user_id", controller.GetAllPetition)
 		authorized.GET("/petitions", controller.GetAllPetition)
 		authorized.POST("/petitions", controller.CreatePetition)
 		authorized.GET("/states", controller.GetAllStates)

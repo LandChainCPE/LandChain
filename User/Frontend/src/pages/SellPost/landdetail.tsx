@@ -1,20 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  MapPin,
-  Phone,
-  User,
-  Home,
-  Calendar,
-  Ruler,
-  Map,
-  MessageCircle,
-  Share2,
-  Heart,
-} from "lucide-react";
+import { MapPin, Phone, User, Home, Calendar, Ruler, Map, MessageCircle, Share2, Heart } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { GetAllPostLandData /*, GetPostLandByID*/ } from "../../service/https/jib/jib";
+import { GetAllPostLandData } from "../../service/https/jib/jib";
 
-/** ---------------- Utils ---------------- */
+/** Leaflet / React-Leaflet */
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, useMap } from "react-leaflet";
+
+
 type LandDetailType = {
   ID: number | string;
   Name?: string;
@@ -29,27 +23,20 @@ type LandDetailType = {
   Width?: string;
   Depth?: string;
   Features?: string[];
-  Images: string[];
+  Image?: string[]; // เปลี่ยนจาก string เป็น string[]
   Province?: { NameTH?: string };
   District?: { NameTH?: string };
   Subdistrict?: { NameTH?: string };
-  Landtitle?: {
-    Rai?: number;
-    Ngan?: number;
-    SquareWa?: number;
-    TitleDeedNumber?: string;
-  };
+  Landtitle?: { Rai?: number; Ngan?: number; SquareWa?: number; TitleDeedNumber?: string };
+  Location?: { Sequence: number; Latitude: number; Longitude: number }[];
 };
 
+/** ---------------- Utils ---------------- */
 const thDate = (d?: string) => {
   if (!d) return "";
   const dt = new Date(d);
-  if (isNaN(dt.getTime())) return d;
-  return dt.toLocaleDateString("th-TH", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  if (isNaN(dt.getTime())) return d as string;
+  return dt.toLocaleDateString("th-TH", { year: "numeric", month: "long", day: "numeric" });
 };
 
 const areaText = (lt?: LandDetailType["Landtitle"]) => {
@@ -69,34 +56,31 @@ const calcPricePerRai = (price?: number, lt?: LandDetailType["Landtitle"]) => {
   return Math.round(price / rai);
 };
 
-/** รองรับคีย์ตัวเล็ก/ใหญ่ และโครงสร้างที่อาจต่างกัน */
+/** ---------------- Normalize Data ---------------- */
 function normalizeDetail(item: any): LandDetailType {
   const provinceObj = item.province ?? item.Province ?? undefined;
   const districtObj = item.district ?? item.District ?? undefined;
   const subdistrictObj = item.subdistrict ?? item.Subdistrict ?? undefined;
   const landtitleObj = item.landtitle ?? item.Landtitle ?? undefined;
+  const locationArr: any[] = item.location ?? item.Location ?? [];
 
-  // ดึงรูปภาพจาก Photoland (เดา key หลัก ๆ)
-  const photosRaw: any[] = item.photoland ?? item.Photoland ?? [];
-  const images: string[] =
-    Array.isArray(photosRaw) && photosRaw.length
-      ? photosRaw
-          .map((p) => p?.url ?? p?.URL ?? p?.image ?? p?.Image ?? p?.path ?? p?.Path)
-          .filter(Boolean)
-      : [];
+     // ดึงรูปจาก Photoland (ถ้ามี)
+  let images: string[] = [];
+  if (Array.isArray(item.Photoland) && item.Photoland.length > 0) {
+    images = item.Photoland.map((p: any) => p.Path).filter(Boolean);
+  } else if (item.image ?? item.Image) {
+    images = [item.image ?? item.Image];
+  }
+
 
   const features: string[] = [];
-  // ถ้าเป็น tag เดี่ยว
   const tagOne = item.tag ?? item.Tag;
   if (tagOne?.Tag || tagOne?.name || tagOne?.Name || typeof tagOne === "string") {
     features.push(tagOne.Tag ?? tagOne.name ?? tagOne.Name ?? tagOne);
   }
-  // ถ้าเป็น tags array
   const tagsArr = item.tags ?? item.Tags;
   if (Array.isArray(tagsArr)) {
-    tagsArr.forEach((t) =>
-      features.push(t?.Tag ?? t?.name ?? t?.Name ?? "").toString()
-    );
+    tagsArr.forEach((t) => features.push((t?.Tag ?? t?.name ?? t?.Name ?? "").toString()));
   }
 
   // เจ้าของ
@@ -104,11 +88,12 @@ function normalizeDetail(item: any): LandDetailType {
   const last = item.last_name ?? item.LastName ?? "";
   const owner = [first, last].filter(Boolean).join(" ").trim();
 
-  // คำอธิบาย (ถ้าไม่มี ใช้ชื่อ/ที่ตั้งแทนเพื่อไม่ให้โล่ง)
   const desc =
     item.description ??
     item.Description ??
-    `ที่ดินใน${subdistrictObj?.name_th ?? subdistrictObj?.NameTH ?? ""} ${districtObj?.name_th ?? districtObj?.NameTH ?? ""} ${provinceObj?.name_th ?? provinceObj?.NameTH ?? ""}`.trim();
+    `ที่ดินใน${subdistrictObj?.name_th ?? subdistrictObj?.NameTH ?? ""} ${
+      districtObj?.name_th ?? districtObj?.NameTH ?? ""
+    } ${provinceObj?.name_th ?? provinceObj?.NameTH ?? ""}`.trim();
 
   return {
     ID: item.id ?? item.ID,
@@ -124,45 +109,113 @@ function normalizeDetail(item: any): LandDetailType {
     ]
       .filter(Boolean)
       .join(", "),
-    PostedDate:
-      thDate(item.created_at ?? item.CreatedAt ?? item.createdAt) || undefined,
+    PostedDate: thDate(item.created_at ?? item.CreatedAt ?? item.createdAt) || undefined,
     LandType: item.land_type ?? item.LandType ?? "ที่ดิน",
     Title: "โฉนดที่ดิน",
     Width: item.width ?? item.Width ?? undefined,
     Depth: item.depth ?? item.Depth ?? undefined,
     Features: features.filter(Boolean),
-    Images: images.length ? images : ["/default-image.png"],
-    Province: provinceObj
-      ? { NameTH: provinceObj.name_th ?? provinceObj.NameTH }
-      : undefined,
-    District: districtObj
-      ? { NameTH: districtObj.name_th ?? districtObj.NameTH }
-      : undefined,
-    Subdistrict: subdistrictObj
-      ? { NameTH: subdistrictObj.name_th ?? subdistrictObj.NameTH }
-      : undefined,
+    Image: images, // ใช้รูปจาก entity landsalepost
+    Province: provinceObj ? { NameTH: provinceObj.name_th ?? provinceObj.NameTH } : undefined,
+    District: districtObj ? { NameTH: districtObj.name_th ?? districtObj.NameTH } : undefined,
+    Subdistrict: subdistrictObj ? { NameTH: subdistrictObj.name_th ?? subdistrictObj.NameTH } : undefined,
     Landtitle: landtitleObj
       ? {
           Rai: landtitleObj.rai ?? landtitleObj.Rai,
           Ngan: landtitleObj.ngan ?? landtitleObj.Ngan,
           SquareWa: landtitleObj.square_wa ?? landtitleObj.SquareWa,
-          TitleDeedNumber:
-            landtitleObj.title_deed_number ?? landtitleObj.TitleDeedNumber,
+          TitleDeedNumber: landtitleObj.title_deed_number ?? landtitleObj.TitleDeedNumber,
         }
       : undefined,
+    Location: Array.isArray(locationArr)
+      ? locationArr
+          .map((l) => ({
+            Sequence: l.sequence ?? l.Sequence,
+            Latitude: l.latitude ?? l.Latitude,
+            Longitude: l.longitude ?? l.Longitude,
+          }))
+          .filter((l) => typeof l.Latitude === "number" && typeof l.Longitude === "number")
+          .sort((a, b) => (a.Sequence ?? 0) - (b.Sequence ?? 0))
+      : [],
   };
 }
 
-const LandDetail = () => { 
+/** ---------------- Leaflet Helpers ---------------- */
+// Fix ไอคอน marker ไม่ขึ้นในบางบันเดล
+const defaultIcon = L.icon({
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
+(L.Marker.prototype as any).options.icon = defaultIcon;
+
+const FitToPoints: React.FC<{ latlngs: [number, number][] }> = ({ latlngs }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (!latlngs.length) return;
+    if (latlngs.length === 1) {
+      map.setView(latlngs[0], 16);
+    } else {
+      const bounds = L.latLngBounds(latlngs);
+      map.fitBounds(bounds, { padding: [20, 20] });
+    }
+  }, [latlngs, map]);
+  return null;
+};
+
+const MapView: React.FC<{ points: { Sequence?: number; Latitude: number; Longitude: number }[]; name?: string }> = ({ points, name }) => {
+  const latlngs: [number, number][] = (points || [])
+    .filter((p) => typeof p.Latitude === "number" && typeof p.Longitude === "number")
+    .sort((a, b) => (a.Sequence ?? 0) - (b.Sequence ?? 0))
+    .map((p) => [p.Latitude, p.Longitude]);
+
+  const center: [number, number] = latlngs[0] ?? [13.7563, 100.5018]; // fallback: Bangkok
+
+  // ปิดรูปหรือไม่ (first == last)
+  const isClosed =
+    latlngs.length >= 3 &&
+    latlngs[0][0] === latlngs[latlngs.length - 1][0] &&
+    latlngs[0][1] === latlngs[latlngs.length - 1][1];
+
+  return (
+    <MapContainer center={center} zoom={15} style={{ width: "100%", height: 256, borderRadius: 10 }} scrollWheelZoom={false}>
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
+
+      <FitToPoints latlngs={latlngs} />
+
+      {latlngs.length === 1 && (
+        <Marker position={latlngs[0]}>
+          <Popup>{name || "ตำแหน่งที่ดิน"}</Popup>
+        </Marker>
+      )}
+
+      {latlngs.length >= 2 && !isClosed && <Polyline positions={latlngs} />}
+
+      {latlngs.length >= 3 && isClosed && <Polygon positions={latlngs} pathOptions={{ fillOpacity: 0.2 }} />}
+
+      {latlngs.map((latlng, idx) => (
+        <Marker key={idx} position={latlng}>
+          <Popup>
+            จุดที่ {points[idx]?.Sequence ?? idx + 1}
+            <br />
+            {latlng[0]}, {latlng[1]}
+          </Popup>
+        </Marker>
+      ))}
+    </MapContainer>
+  );
+};
+
+/** ---------------- Component ---------------- */
+const LandDetail = () => {
   const { id = "" } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [land, setLand] = useState<LandDetailType | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [isLarge, setIsLarge] = useState<boolean>(
-    typeof window !== "undefined" ? window.innerWidth >= 1024 : true
-  );
+  const [isLarge, setIsLarge] = useState<boolean>(typeof window !== "undefined" ? window.innerWidth >= 1024 : true);
 
   useEffect(() => {
     const onResize = () => setIsLarge(window.innerWidth >= 1024);
@@ -174,15 +227,10 @@ const LandDetail = () => {
     (async () => {
       setLoading(true);
       try {
-        // ถ้ามี API รายตัว ให้ใช้แทน (ปลดคอมเมนต์บรรทัดด้านล่าง และลบ fallback)
         // const one = await GetPostLandByID(Number(id));
         // setLand(normalizeDetail(one));
-        // Fallback: ดึงทั้งหมดแล้วค้นหา ID ที่ตรง
         const all = await GetAllPostLandData();
-        const raw =
-          (all || []).find(
-            (x: any) => String(x.id ?? x.ID) === String(id)
-          ) ?? null;
+        const raw = (all || []).find((x: any) => String(x.id ?? x.ID) === String(id)) ?? null;
         if (!raw) {
           setLand(null);
         } else {
@@ -197,41 +245,18 @@ const LandDetail = () => {
     })();
   }, [id]);
 
-  const images = land?.Images ?? [];
-  const nextImage = () =>
-    setCurrentImageIndex((p) => (p + 1) % (images.length || 1));
-  const prevImage = () =>
-    setCurrentImageIndex((p) => (p - 1 + (images.length || 1)) % (images.length || 1));
+const images = land?.Image ?? [];
+  const nextImage = () => setCurrentImageIndex((p) => (p + 1) % (images.length || 1));
+  const prevImage = () => setCurrentImageIndex((p) => (p - 1 + (images.length || 1)) % (images.length || 1));
 
   const areaStr = useMemo(() => areaText(land?.Landtitle), [land]);
-  const pricePerRai = useMemo(
-    () => calcPricePerRai(land?.Price, land?.Landtitle),
-    [land]
-  );
+  const pricePerRai = useMemo(() => calcPricePerRai(land?.Price, land?.Landtitle), [land]);
 
   if (loading) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#F9FAFB",
-        }}
-      >
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F9FAFB" }}>
         <div style={{ textAlign: "center" }}>
-          <div
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: "9999px",
-              border: "3px solid #2563EB",
-              borderTopColor: "transparent",
-              margin: "0 auto",
-              animation: "spin 1s linear infinite",
-            }}
-          />
+          <div style={{ width: 48, height: 48, borderRadius: "9999px", border: "3px solid #2563EB", borderTopColor: "transparent", margin: "0 auto", animation: "spin 1s linear infinite" }} />
           <p style={{ marginTop: 16, color: "#4B5563" }}>กำลังโหลดรายละเอียด...</p>
         </div>
       </div>
@@ -242,21 +267,10 @@ const LandDetail = () => {
     return (
       <div style={{ minHeight: "100vh", background: "#F9FAFB" }}>
         <div style={{ maxWidth: 720, margin: "0 auto", padding: 24 }}>
-          <button
-            style={{ color: "#2563EB", display: "flex", alignItems: "center", gap: 8 }}
-            onClick={() => navigate("/user/sellpostmain")}
-          >
+          <button style={{ color: "#2563EB", display: "flex", alignItems: "center", gap: 8 }} onClick={() => navigate("/user/sellpostmain")}>
             ← ย้อนกลับ
           </button>
-          <div
-            style={{
-              marginTop: 16,
-              background: "#fff",
-              borderRadius: 12,
-              padding: 24,
-              boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
-            }}
-          >
+          <div style={{ marginTop: 16, background: "#fff", borderRadius: 12, padding: 24, boxShadow: "0 1px 2px rgba(0,0,0,0.06)" }}>
             ไม่พบข้อมูลประกาศที่ดินนี้
           </div>
         </div>
@@ -285,43 +299,11 @@ const LandDetail = () => {
     imageWrap: { position: "relative" as const, width: "100%", height: 384, overflow: "hidden" as const, borderRadius: 12 },
     image: { width: "100%", height: "100%", objectFit: "cover" as const },
     imageOverlay: { position: "absolute" as const, inset: 0, backgroundColor: "rgba(0,0,0,0.2)" },
-    navBtn: {
-      position: "absolute" as const,
-      top: "50%",
-      transform: "translateY(-50%)",
-      background: "rgba(255,255,255,0.85)",
-      borderRadius: 9999,
-      padding: 8,
-      border: "none",
-      cursor: "pointer",
-    },
-    imgCounter: {
-      position: "absolute" as const,
-      right: 16,
-      bottom: 16,
-      background: "rgba(0,0,0,0.6)",
-      color: "#fff",
-      padding: "6px 10px",
-      borderRadius: 9999,
-      fontSize: 12,
-    },
+    navBtn: { position: "absolute" as const, top: "50%", transform: "translateY(-50%)", background: "rgba(255,255,255,0.85)", borderRadius: 9999, padding: 8, border: "none", cursor: "pointer" },
+    imgCounter: { position: "absolute" as const, right: 16, bottom: 16, background: "rgba(0,0,0,0.6)", color: "#fff", padding: "6px 10px", borderRadius: 9999, fontSize: 12 },
     thumbsRow: { display: "flex", gap: 8, padding: 16, overflowX: "auto" as const },
-    thumb: (active = false) => ({
-      flexShrink: 0,
-      width: 80,
-      height: 64,
-      borderRadius: 8,
-      overflow: "hidden",
-      border: `2px solid ${active ? "#3B82F6" : "#E5E7EB"}`,
-      cursor: "pointer",
-      padding: 0,
-      background: "transparent",
-    }),
-    grid: {
-      display: "grid",
-      gridTemplateColumns: isLarge ? "2fr 1fr" : "1fr",
-      gap: 24,
-    },
+    thumb: (active = false) => ({ flexShrink: 0, width: 80, height: 64, borderRadius: 8, overflow: "hidden", border: `2px solid ${active ? "#3B82F6" : "#E5E7EB"}`, cursor: "pointer", padding: 0, background: "transparent" }),
+    grid: { display: "grid", gridTemplateColumns: isLarge ? "2fr 1fr" : "1fr", gap: 24 },
     title: { fontWeight: 800, color: "#111827", marginBottom: 16, fontSize: 24 },
     locRow: { display: "flex", alignItems: "center", gap: 8, color: "#4B5563", marginBottom: 16 },
     priceRow: { display: "flex", flexDirection: "column" as const, gap: 8 },
@@ -338,140 +320,94 @@ const LandDetail = () => {
     featureRow: { display: "flex", alignItems: "center", gap: 8, color: "#374151" },
     desc: { color: "#374151", lineHeight: 1.8 },
     mapBox: { position: "relative" as const },
-    fakeMap: {
-      width: "100%",
-      height: 256,
-      background: "#E5E7EB",
-      borderRadius: 10,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      color: "#6B7280",
-      textAlign: "center" as const,
-      padding: 12,
-    },
-    mapBtn: {
-      position: "absolute" as const,
-      top: 16,
-      right: 16,
-      background: "#fff",
-      border: "1px solid #E5E7EB",
-      borderRadius: 10,
-      padding: "8px 12px",
-      fontSize: 14,
-      cursor: "pointer",
-    },
-    sticky: { position: isLarge ? "sticky" as const : "static" as const, top: 24 },
+    fakeMap: { width: "100%", height: 256, background: "#E5E7EB", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280", textAlign: "center" as const, padding: 12 },
+    mapBtn: { position: "absolute" as const, top: 16, right: 16, background: "#fff", border: "1px solid #E5E7EB", borderRadius: 10, padding: "8px 12px", fontSize: 14, cursor: "pointer" },
+    sticky: { position: isLarge ? ("sticky" as const) : ("static" as const), top: 24 },
     contactRow: { display: "flex", alignItems: "center", gap: 12, marginBottom: 16 },
-    avatar: {
-      width: 48,
-      height: 48,
-      borderRadius: 9999,
-      background: "#DBEAFE",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      color: "#2563EB",
-    },
+    avatar: { width: 48, height: 48, borderRadius: 9999, background: "#DBEAFE", display: "flex", alignItems: "center", justifyContent: "center", color: "#2563EB" },
     contactBtn: (variant: "call" | "msg" | "ghost") => {
-      const base: React.CSSProperties = {
-        width: "100%",
-        borderRadius: 10,
-        padding: "12px 16px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 8,
-        cursor: "pointer",
-        border: "none",
-      };
+      const base: React.CSSProperties = { width: "100%", borderRadius: 10, padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer", border: "none" };
       if (variant === "call") return { ...base, background: "#16A34A", color: "#fff" };
       if (variant === "msg") return { ...base, background: "#2563EB", color: "#fff" };
       return { ...base, background: "#fff", color: "#374151", border: "1px solid #D1D5DB" };
     },
     warn: { marginTop: 16, background: "#FEF3C7", color: "#92400E", padding: 16, borderRadius: 10, fontSize: 14 },
     smallText: { fontSize: 12, color: "#6B7280" },
-    smallTitle: {
-      fontSize: 14,
-      fontWeight: 600,
-      color: "#111827",
-      whiteSpace: "nowrap" as const,
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-    },
+    smallTitle: { fontSize: 14, fontWeight: 600, color: "#111827", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" },
     smallPrice: { fontSize: 14, fontWeight: 700, color: "#2563EB" },
-  };
+  } as const;
 
   /** --------------- Render --------------- */
   return (
     <div style={styles.page}>
-      {/* Header */}
-      <div style={styles.header}>
-        <div style={styles.container}>
-          <div style={styles.headerRow}>
-            <button style={styles.headerBtn} onClick={() => navigate("/user/sellpostmain")}>
-              ← ย้อนกลับ
-            </button>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <button onClick={() => setIsFavorite(!isFavorite)} style={styles.iconBtn(isFavorite)}>
-                <Heart style={{ width: 20, height: 20, ...(isFavorite ? { fill: "currentColor" } : {}) }} />
-              </button>
-              <button style={styles.iconBtn(false)}>
-                <Share2 style={{ width: 20, height: 20 }} />
-              </button>
-            </div>
-          </div>
-        </div>
+      <div style={{ maxWidth: 1152, margin: "0 auto", padding: "24px 16px 0 16px" }}>
+        <button
+          onClick={() => navigate(-1)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            background: "none",
+            border: "none",
+            color: "#2563EB",
+            fontSize: 16,
+            cursor: "pointer",
+            padding: 0,
+            marginBottom: 12,
+          }}
+        >
+          <span style={{ fontSize: 20, lineHeight: 1 }}>←</span> ย้อนกลับ
+        </button>
       </div>
-
+      
       {/* Body */}
       <div style={styles.body}>
         {/* Image Gallery */}
-        <div style={{ ...styles.card, overflow: "hidden" }}>
-          <div style={styles.imageWrap}>
-            <img
-              src={images[currentImageIndex]}
-              alt={`รูปที่ดิน ${currentImageIndex + 1}`}
-              style={styles.image}
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = "/default-image.png";
-              }}
-            />
-            <div style={styles.imageOverlay} />
-            {images.length > 1 && (
-              <>
-                <button onClick={prevImage} style={{ ...styles.navBtn, left: 16 }}>
-                  ←
-                </button>
-                <button onClick={nextImage} style={{ ...styles.navBtn, right: 16 }}>
-                  →
-                </button>
-              </>
-            )}
-            <div style={styles.imgCounter}>
-              {Math.min(currentImageIndex + 1, images.length)} / {images.length || 1}
-            </div>
-          </div>
+<div style={{ ...styles.card, overflow: "hidden" }}>
+  {/* กรอบรูปหลัก */}
+  <div style={styles.imageWrap}>
+    <img
+      src={images[currentImageIndex] || "/default-image.png"}
+      alt={`รูปที่ดิน ${currentImageIndex + 1}`}
+      style={styles.image}
+      onError={(e) => {
+        (e.target as HTMLImageElement).src = "/default-image.png";
+      }}
+    />
+    <div style={styles.imageOverlay} />
+    {images.length > 1 && (
+      <>
+        <button onClick={prevImage} style={{ ...styles.navBtn, left: 16 }}>←</button>
+        <button onClick={nextImage} style={{ ...styles.navBtn, right: 16 }}>→</button>
+      </>
+    )}
+    <div style={styles.imgCounter}>
+      {Math.min(currentImageIndex + 1, images.length)} / {images.length || 1}
+    </div>
+  </div>
+  {/* thumbnails แยกออกมาอยู่นอกกรอบรูปหลัก */}
+  {images.length > 1 && (
+    <div style={styles.thumbsRow}>
+      {images.map((img, index) => (
+        <button
+          key={index}
+          onClick={() => setCurrentImageIndex(index)}
+          style={styles.thumb(index === currentImageIndex)}
+        >
+          <img
+            src={img}
+            alt={`ภาพย่อ ${index + 1}`}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "/default-image.png";
+            }}
+          />
+        </button>
+      ))}
+    </div>
+  )}
+</div>
 
-          <div style={styles.thumbsRow}>
-            {images.map((img, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentImageIndex(index)}
-                style={styles.thumb(index === currentImageIndex)}
-              >
-                <img
-                  src={img}
-                  alt={`ภาพย่อ ${index + 1}`}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/default-image.png";
-                  }}
-                />
-              </button>
-            ))}
-          </div>
-        </div>
 
         <div style={styles.grid}>
           {/* Main Details */}
@@ -484,12 +420,7 @@ const LandDetail = () => {
                 <span>{land.LocationText || "-"}</span>
               </div>
               <div style={styles.priceRow}>
-                {typeof land.Price === "number" && (
-                  <div style={styles.price}>{land.Price.toLocaleString()} ฿</div>
-                )}
-                {pricePerRai != null && (
-                  <div style={styles.priceNote}>(~{pricePerRai.toLocaleString()} ฿/ไร่)</div>
-                )}
+                {typeof land.Price === "number" && <div style={styles.price}>{land.Price.toLocaleString()} ฿</div>}
               </div>
             </div>
 
@@ -523,26 +454,10 @@ const LandDetail = () => {
                   <Calendar style={{ width: 20, height: 20, color: "#2563EB" }} />
                   <div>
                     <div style={styles.smallText}>ลงประกาศ</div>
-                    <div style={{ fontWeight: 500 }}>
-                      {land.PostedDate || "—"}
-                    </div>
+                    <div style={{ fontWeight: 500 }}>{land.PostedDate || "—"}</div>
                   </div>
                 </div>
               </div>
-
-              {/* มิติหน้ากว้าง/ลึก (ถ้ามี) */}
-              {(land.Width || land.Depth) && (
-                <div style={styles.dimGrid}>
-                  <div style={styles.dimCell}>
-                    <div style={styles.dimLabel}>หน้ากว้าง</div>
-                    <div style={styles.dimValue}>{land.Width || "-"}</div>
-                  </div>
-                  <div style={styles.dimCell}>
-                    <div style={styles.dimLabel}>ลึก</div>
-                    <div style={styles.dimValue}>{land.Depth || "-"}</div>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Features */}
@@ -552,9 +467,7 @@ const LandDetail = () => {
                 <div style={styles.featuresGrid}>
                   {land.Features.map((feature, idx) => (
                     <div key={idx} style={styles.featureRow}>
-                      <div
-                        style={{ width: 8, height: 8, background: "#10B981", borderRadius: 9999 }}
-                      />
+                      <div style={{ width: 8, height: 8, background: "#10B981", borderRadius: 9999 }} />
                       <span>{feature}</span>
                     </div>
                   ))}
@@ -562,29 +475,38 @@ const LandDetail = () => {
               </div>
             )}
 
-            {/* Description */}
-            <div style={{ ...styles.card, ...styles.cardPad }}>
-              <h2 style={styles.sectionTitle}>รายละเอียดเพิ่มเติม</h2>
-              <p style={styles.desc}>{land.Description || "-"}</p>
-            </div>
-
-            {/* Map (placeholder) */}
+            {/* Map (real) */}
             <div style={{ ...styles.card, ...styles.cardPad }}>
               <h2 style={styles.sectionTitle}>แผนที่</h2>
+              <div style={{ padding: 10, backgroundColor: "#fff3cd", border: "1px solid #ffeeba", color: "#856404", borderRadius: 4 }}>
+                แผนที่นี้มีไว้เพื่อประกอบการพิจารณา
+              </div>
               <div style={styles.mapBox}>
-                <div style={styles.fakeMap}>
-                  <div>
-                    <MapPin
-                      style={{ width: 48, height: 48, margin: "0 auto 8px auto", display: "block" }}
-                    />
-                    <div>แผนที่ตำแหน่งที่ดิน</div>
-                    <div style={{ fontSize: 12 }}>{land.LocationText || "-"}</div>
+                {land.Location && land.Location.length > 0 ? (
+                  <MapView points={land.Location} name={land.Name} />
+                ) : (
+                  <div style={styles.fakeMap}>
+                    <div>
+                      <MapPin style={{ width: 48, height: 48, margin: "0 auto 8px auto", display: "block" }} />
+                      <div>ยังไม่มีจุดพิกัดสำหรับแผนที่</div>
+                    </div>
                   </div>
-                </div>
-                <button style={styles.mapBtn}>
+                )}
+
+                {/* ปุ่มเปิด Google Maps โดยใช้พิกัดจุดแรก */}
+                <a
+                  href={
+                    land.Location && land.Location.length
+                      ? `https://www.google.com/maps?q=${land.Location[0].Latitude},${land.Location[0].Longitude}`
+                      : `https://www.google.com/maps`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={styles.mapBtn}
+                >
                   <Map style={{ width: 16, height: 16, marginRight: 8, verticalAlign: "text-bottom" }} />
                   ดูแผนที่ขนาดใหญ่
-                </button>
+                </a>
               </div>
             </div>
           </div>
@@ -631,7 +553,6 @@ const LandDetail = () => {
       </div>
     </div>
   );
-}
-
+};
 
 export default LandDetail;

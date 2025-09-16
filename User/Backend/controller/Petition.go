@@ -114,3 +114,15 @@ func UpdatePetition(c *gin.Context) {
 	c.JSON(http.StatusOK, petition)
 }
 
+// Handler to get petitions by user_id
+func GetPetitionsByUserID(c *gin.Context) {
+    userID := c.Param("user_id")
+
+    var petitions []entity.Petition
+    if err := config.DB().Where("user_id = ?", userID).Find(&petitions).Error; err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "ไม่พบข้อมูลคำร้อง"})
+        return
+    }
+
+    c.JSON(http.StatusOK, petitions)
+}

@@ -8,12 +8,8 @@ type Landsalepost struct {
 	LastName      string `json:"last_name"`
 	PhoneNumber   string `json:"phone_number"`
 	Name          string `json:"name"`
-	Image         string `json:"image"`
+	//Image         string `json:"image"`
 	Price         int `json:"price"`
-// //แผนที่
-//     Sequence      int     `gorm:"not null"`                    // ลำดับของพิกัด
-//     Latitude      float64 `gorm:"type:decimal(10,6);not null"`
-//     Longitude     float64 `gorm:"type:decimal(10,6);not null"`
 
 	ProvinceID uint  `json:"province_id"`
 	Province   Province  `gorm:"foreignKey:ProvinceID"`
@@ -24,8 +20,6 @@ type Landsalepost struct {
 	SubdistrictID uint  `json:"subdistrict_id"`
 	Subdistrict	Subdistrict `gorm:"foreignKey:SubdistrictID"`
 	
-	TagID 	uint `json:"tag_id"`
-	Tag	Tag `gorm:"foreignKey:TagID"`
 
 	LandID    uint     `json:"landtitle_id"`
 	Landtitle Landtitle `gorm:"foreignKey:LandID"`
@@ -40,5 +34,7 @@ type Landsalepost struct {
 	Transaction []Transaction  `gorm:"foreignKey:LandsalepostID"`
 	Photoland []Photoland  `gorm:"foreignKey:LandsalepostID"`
 	Location []Location `gorm:"foreignKey:LandsalepostID"` // One-to-One relationship with Location
+	Tags []Tag `gorm:"many2many:landsalepost_tag;"`
+
 }
 

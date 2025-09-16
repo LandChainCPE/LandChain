@@ -18,3 +18,9 @@ npm install --save-dev typescript ts-node @types/node @types/ws @types/express
 npm install ws express pg
 go get github.com/gorilla/websocket
 .
+
+npm install --save-dev @types/leaflet
+
+npm install --save-dev @types/react-leaflet
+
+npm install --save-dev vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom @vitejs/plugin-react

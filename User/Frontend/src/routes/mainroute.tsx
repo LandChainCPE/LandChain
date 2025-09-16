@@ -11,9 +11,9 @@ const Regisland = Loadable(lazy(() => import("../pages/RegisLand/RegisLand")));
 const VerifyUser = Loadable(lazy(() => import("../pages/VerifyUser/verifyuser")));
 
 
-const Dashboard = Loadable(lazy(() => import("../pages/Petition/Dashboard")));
+//const Dashboard = Loadable(lazy(() => import("../pages/Petition/Dashboard")));
 const Petition = Loadable(lazy(() => import("../pages/Petition/Petition")));
-const State = Loadable(lazy(() => import("../pages/Petition/State")));
+//const State = Loadable(lazy(() => import("../pages/Petition/State")));
 
 const SellMainPage = Loadable(lazy(() => import("../pages/Sell-Buy/SellMainpage")));
 const Map = Loadable(lazy(() => import("../pages/Map/map")));
@@ -74,14 +74,14 @@ const UserRoutes = (): RouteObject[] => [
           </ProtectedRoute>
         ) 
       },
-      { 
-        path: "dashboard", 
-        element: (
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        ) 
-      },
+      // { 
+      //   path: "dashboard", 
+      //   element: (
+      //     <ProtectedRoute>
+      //       <Dashboard />
+      //     </ProtectedRoute>
+      //   ) 
+      // },
       { 
         path: "petition", 
         element: (
@@ -90,14 +90,14 @@ const UserRoutes = (): RouteObject[] => [
           </ProtectedRoute>
         ) 
       },
-      { 
-        path: "state", 
-        element: (
-          <ProtectedRoute>
-            <State />
-          </ProtectedRoute>
-        ) 
-      },
+      // { 
+      //   path: "state", 
+      //   element: (
+      //     <ProtectedRoute>
+      //       <State />
+      //     </ProtectedRoute>
+      //   ) 
+      // },
       { 
         path: "sellmainpage", 
         element: (

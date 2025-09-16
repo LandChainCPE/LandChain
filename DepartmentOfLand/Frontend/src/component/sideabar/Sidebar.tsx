@@ -20,6 +20,7 @@ const Sidebar: React.FC = () => {
     { label: "ตรวจสอบโฉนดที่ดิน", icon: <SearchOutlined />, path: "/verify" },
     { label: "โอนกรรมสิทธิ์", icon: <SwapOutlined />, path: "/transfer" },
     { label: "ลงทะเบียนโฉนดที่ดิน", icon: <FileProtectOutlined />, path: "/regisland" },
+    { label: "ตรวจสอบคำร้อง", icon: <SettingOutlined />, path: "/statepetition" },
     { label: "การตั้งค่า", icon: <SettingOutlined />, path: "/settings" },
   ];
 

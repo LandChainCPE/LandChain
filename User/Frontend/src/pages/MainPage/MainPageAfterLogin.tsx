@@ -246,7 +246,7 @@ const MainPage = (): JSX.Element => {
 
             <Row justify="start" gutter={[16, 16]} style={{ marginTop: "20px" }}>
               <Col span={11}>
-              <Link to="/user/dashboard"> 
+              <Link to="/user/petition"> 
                 <Card style={{ height: 250, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                     <CopyOutlined style={{ fontSize: '70px' }} />

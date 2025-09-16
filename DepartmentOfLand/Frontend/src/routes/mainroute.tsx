@@ -8,6 +8,7 @@ const Verify = Loadable(lazy(() => import("../pages/Verify")));
 const RegisLand = Loadable(lazy(() => import("../pages/regisland/RegisLand")));
 const Transfer = Loadable(lazy(() => import("../pages/Transfer")));
 const Settings = Loadable(lazy(() => import("../pages/Settings")));
+const StatePetition = Loadable(lazy(() => import("../pages/Petition")));
 
 const UserRoutes = (): RouteObject[] => [
   {
@@ -20,6 +21,7 @@ const UserRoutes = (): RouteObject[] => [
       { path: "regisland", element: <RegisLand /> },
       { path: "transfer", element: <Transfer /> },
       { path: "settings", element: <Settings /> },
+      { path: "statepetition", element: <StatePetition /> },
       { path: "*", element: <Main /> },
     ],
   },

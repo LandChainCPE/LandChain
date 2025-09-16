@@ -102,6 +102,13 @@ async function getLandtitleIdByTokenId(tokenId: string) {
     .catch((e) => e.response);
 }
 
+async function GetPetitionsByUserID(userId: string) {
+  return await axios
+    .get(`${apiUrl}/petition/${userId}`, requestOptions)
+    .then((res) => res.data)
+    .catch((e) => e.response);
+}
+
 export { 
   GetAllPetition, 
   CreatePetition, 
@@ -115,4 +122,5 @@ export {
   GetSubdistrict,
   CreateLandPost,
   getLandtitleIdByTokenId,
+  GetPetitionsByUserID
 };
