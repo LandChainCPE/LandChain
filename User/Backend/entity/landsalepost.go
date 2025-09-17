@@ -8,14 +8,13 @@ type Landsalepost struct {
 	LastName      string `json:"last_name"`
 	PhoneNumber   string `json:"phone_number"`
 	Name          string `json:"name"`
-	//Image         string `json:"image"`
 	Price         int `json:"price"`
 
-	ProvinceID uint  `json:"province_id"`
-	Province   Province  `gorm:"foreignKey:ProvinceID"`
+	ProvinceID uint     `json:"province_id"`
+	Province   Province `gorm:"foreignKey:ProvinceID"`
 
-	DistrictID uint `json:"district_id"`
-	District	District  `gorm:"foreignKey:DistrictID"`
+	DistrictID uint     `json:"district_id"`
+	District   District `gorm:"foreignKey:DistrictID"`
 
 	SubdistrictID uint  `json:"subdistrict_id"`
 	Subdistrict	Subdistrict `gorm:"foreignKey:SubdistrictID"`

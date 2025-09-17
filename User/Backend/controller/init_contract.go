@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"landchain/config"
 	"landchain/entity"
@@ -278,4 +279,196 @@ func GetLandMetadataByToken(c *gin.Context) {
 		"walletID":   meta.WalletID.Hex(),
 	})
 
+}
+
+// GET /api/land/:tokenId/history
+func GetLandHistory(c *gin.Context) {
+	tokenIDStr := c.Param("id")
+	if tokenIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "tokenId is required"})
+		return
+	}
+
+	// แปลงเป็น big.Int
+	tokenIDInt, ok := new(big.Int).SetString(tokenIDStr, 10)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid tokenId"})
+		return
+	}
+
+	// ดึงเจ้าของปัจจุบัน
+	currentOwner, err := ContractInstance.OwnerOf(tokenIDInt)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// ดึงประวัติ
+	addresses, err := ContractInstance.GetOwnershipHistory(tokenIDInt)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// รวมเจ้าของปัจจุบันกับประวัติ
+	owners := []string{currentOwner.Hex()}
+	for _, addr := range addresses {
+		owners = append(owners, addr.Hex())
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"tokenId": tokenIDStr,
+		"owners":  owners,
+	})
+}
+
+func GetSaleInfoHandler(c *gin.Context) {
+	if ContractInstance == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "contract not initialized"})
+		return
+	}
+
+	// 1️⃣ ดึง tokenID จาก path
+	tokenIDStr := c.Param("id")
+	if tokenIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "tokenID is required"})
+		return
+	}
+
+	tokenID := new(big.Int)
+	if _, ok := tokenID.SetString(tokenIDStr, 10); !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid tokenID format"})
+		return
+	}
+
+	// 2️⃣ ใช้ CallOpts จาก session
+	callOpts := &ContractInstance.CallOpts
+	callOpts.Pending = false // read-only
+
+	// 3️⃣ เรียก SaleInfos ผ่าน ContractInstance
+	saleInfo, err := ContractInstance.Contract.SaleInfos(callOpts, tokenID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch sale info", "detail": err.Error()})
+		return
+	}
+
+	// 4️⃣ Return JSON
+	c.JSON(http.StatusOK, gin.H{
+		"tokenId": tokenID.String(),
+		"price":   saleInfo.Price.String(),
+		"buyer":   saleInfo.Buyer.Hex(),
+	})
+}
+
+func GetUserAddressLand(c *gin.Context) {
+	if ContractInstance == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "contract not initialized"})
+		return
+	}
+
+	// ดึง tokenID จาก path param
+	tokenIDStr := c.Param("id")
+	if tokenIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "tokenID is required"})
+		return
+	}
+
+	// แปลง tokenID เป็น big.Int
+	tokenID := new(big.Int)
+	if _, ok := tokenID.SetString(tokenIDStr, 10); !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid tokenID"})
+		return
+	}
+
+	// 1️⃣ ดึง seller address
+	seller, err := ContractInstance.OwnerOf(tokenID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot get owner", "detail": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"tokenID": tokenIDStr,
+		"seller":  seller.Hex(),
+	})
+}
+
+type BuyLandRequest struct {
+	TokenID string `json:"tokenId" binding:"required"`
+	TxHash  string `json:"txHash" binding:"required"` // รับ tx hash จาก frontend
+}
+
+func BuyLandHandler(c *gin.Context) {
+	var req BuyLandRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	tokenID := new(big.Int)
+	if _, ok := tokenID.SetString(req.TokenID, 10); !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid tokenId"})
+		return
+	}
+
+	walletAddr, exists := c.Get("wallet")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Wallet not found in token"})
+		return
+	}
+	wallet := walletAddr.(string)
+
+	if ContractInstance != nil {
+		owner, err := ContractInstance.OwnerOf(tokenID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if strings.EqualFold(owner.Hex(), wallet) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "You already own this token"})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"txHash": req.TxHash})
+}
+
+func CheckOwnerHandler(c *gin.Context) {
+	walletParam := c.Query("wallet")
+	tokenIdParam := c.Query("tokenId")
+
+	if walletParam == "" || tokenIdParam == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "wallet and tokenId are required"})
+		return
+	}
+
+	tokenId := new(big.Int)
+	if _, ok := tokenId.SetString(tokenIdParam, 10); !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid tokenId"})
+		return
+	}
+
+	walletAddress := common.HexToAddress(walletParam)
+
+	if ContractInstance == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "contract not initialized"})
+		return
+	}
+
+	// ใช้ Contract + CallOpts
+	owner, err := ContractInstance.Contract.OwnerOf(&ContractInstance.CallOpts, tokenId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	isOwner := owner == walletAddress
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": map[bool]string{
+			true:  "เป็นเจ้าของที่ดินนี้",
+			false: "ไม่ใช่เจ้าของที่ดินนี้",
+		}[isOwner],
+		"isOwner": isOwner,
+	})
 }

@@ -99,9 +99,9 @@ func LoginUser(c *gin.Context) {
 	// เชื่อมต่อกับฐานข้อมูล
 	db := config.DB()
 
-	// ค้นหาผู้ใช้ในฐานข้อมูลจาก Wallet Address (Metamask Address)
+	// ค้นหาผู้ใช้ในฐานข้อมูลจาก Wallet Address (Metamask Address) พร้อม Role
 	var existingUser entity.Users
-	if err := db.Where("metamaskaddress = ?", loginReq.Address).First(&existingUser).Error; err != nil {
+	if err := db.Preload("Role").Where("metamaskaddress = ?", loginReq.Address).First(&existingUser).Error; err != nil {
 		// หากไม่พบผู้ใช้ในระบบ ให้แจ้งว่าไม่พบผู้ใช้
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 		return
@@ -127,11 +127,76 @@ func LoginUser(c *gin.Context) {
 		"token_type":     "Bearer",
 		"token":          signedToken,
 		"user_id":        existingUser.ID,
+		"role_id":        existingUser.RoleID,
+		"role_name":      existingUser.Role.Role,
 		"first_name":     existingUser.Firstname,
 		"last_name":      existingUser.Lastname,
 		"wallet_address": existingUser.Metamaskaddress,
 		"success":        true,
 		"exists":         true,
+	})
+}
+
+// DepartmentLogin สำหรับ Department Frontend โดยเฉพาะ
+func DepartmentLogin(c *gin.Context) {
+	var loginReq LoginRequest
+	if err := c.ShouldBindJSON(&loginReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input", "details": err.Error()})
+		return
+	}
+
+	// ตรวจสอบและใช้ nonce
+	if !ValidateAndConsumeNonce(loginReq.Address, loginReq.Nonce) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired nonce"})
+		return
+	}
+
+	// ตรวจสอบ signature
+	if !verifySignature(loginReq.Address, loginReq.Nonce, loginReq.Signature) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid signature"})
+		return
+	}
+
+	db := config.DB()
+
+	// ค้นหาผู้ใช้และตรวจสอบว่าเป็น Admin (role_id = 2) เท่านั้น
+	var existingUser entity.Users
+	if err := db.Preload("Role").Where("metamaskaddress = ? AND role_id = ?", loginReq.Address, 2).First(&existingUser).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error":   "Access denied: Admin role required or user not found",
+			"message": "Only Admin users can access Department system",
+		})
+		return
+	}
+
+	// สร้าง JWT Token
+	jwtWrapper := services.JwtWrapper{
+		SecretKey:       os.Getenv("JWT_SECRET"),
+		Issuer:          os.Getenv("JWT_ISSUER"),
+		ExpirationHours: 1,
+	}
+
+	signedToken, err := jwtWrapper.GenerateToken(existingUser.Metamaskaddress)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error signing token"})
+		return
+	}
+
+	// ส่งข้อมูลพร้อมระบุชัดเจนว่าเป็น Department Login
+	c.JSON(http.StatusOK, gin.H{
+		"message":        "Admin logged in successfully to Department system",
+		"token_type":     "Bearer",
+		"token":          signedToken,
+		"user_id":        existingUser.ID,
+		"role_id":        existingUser.RoleID, // ต้องเป็น 2
+		"role_name":      existingUser.Role.Role,
+		"first_name":     existingUser.Firstname,
+		"last_name":      existingUser.Lastname,
+		"wallet_address": existingUser.Metamaskaddress,
+		"success":        true,
+		"exists":         true,
+		"system":         "department",
+		"access_level":   "admin",
 	})
 }
 

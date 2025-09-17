@@ -214,10 +214,7 @@ func SetupDatabase() {
 		&entity.ServiceType{},
 		&entity.LandAmphures{},
 		&entity.LandTambons{},
-		&entity.Landtitle{}, // ✅ ต้องมาก่อน RequestBuy/Sell
-
 		&entity.LandVerification{}, /////
-		&entity.Landtitle{},
 
 		&entity.Landsalepost{},
 		&entity.Transaction{},
@@ -258,7 +255,7 @@ func SetupDatabase() {
 	db.Model(&entity.ServiceType{}).Count(&serviceCount)
 	if serviceCount == 0 {
 		db.Create(&entity.ServiceType{Service: "ขึ้นทะเบียนที่ดิน"})
-		db.Create(&entity.ServiceType{Service: "ลงทะเบียนชื่อผู้ใช้"})
+		db.Create(&entity.ServiceType{Service: "ขอคัดสำเนาโฉนด"})
 	}
 
 	if count == 0 {
@@ -268,9 +265,9 @@ func SetupDatabase() {
 
 		RefRole := uint(1)
 
-		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f469a", RoleID: RefRole}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
-		db.Create(&entity.Users{Firstname: "Panachai", Lastname: "Potisuwan", Email: "Panachai@gmail.com", Phonenumber: "0555555554", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f4444", RoleID: RefRole})
-		db.Create(&entity.Users{Firstname: "Noth", Lastname: "Potisuwan", Email: "Noth@gmail.com", Phonenumber: "0555555556", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f6666", RoleID: RefRole})
+		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0x81C7a15aE0b72CADE82D428844cff477f6E364b5", RoleID: RefRole}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
+		db.Create(&entity.Users{Firstname: "Panachai", Lastname: "Potisuwan", Email: "Panachai@gmail.com", Phonenumber: "0555555554", Metamaskaddress: "0x81C7a15aE0b72CADE82D428844cff477f6E36455", RoleID: RefRole})
+			
 
 		// //RefServiceType := uint(1)
 		// db.Create(&entity.Users{Name: "Jo", Password: "jo123456", Land: "12กท85", RoleID: RefRole,})
@@ -310,6 +307,7 @@ func SetupDatabase() {
 		db.Create(&entity.Typetransaction{StatusNameTh: "รอผู้ซื้อ/ผู้ขายตกลง", StatusNameEn: "in_progress"})
 		db.Create(&entity.Typetransaction{StatusNameTh: "เสร็จสิ้น", StatusNameEn: "completed"})
 		db.Create(&entity.Typetransaction{StatusNameTh: "ถูกยกเลิกโดยผู้ซื้อหรือผู้ขาย", StatusNameEn: "cancelled"})
+		db.Create(&entity.Typetransaction{StatusNameTh: "รอการชำระเงิน", StatusNameEn: "money_clear"})
 		db.Create(&entity.Typetransaction{StatusNameTh: "หมดอายุ", StatusNameEn: "expired"})
 
 		db.Create(&entity.RequestBuySellType{StatusNameTh: "เจ้าของโฉลดสร้างคำขอขาย", StatusNameEn: "pending"})
@@ -383,13 +381,34 @@ func SetupDatabase() {
 			UserID:             1,   // Replace with actual UserID
 		})
 
+		db.Create(&entity.Landtitle{
+			TokenID:            3,
+			IsLocked:           false,
+			SurveyNumber:       "5336 IV 8632",
+			LandNumber:         "๑๑",
+			SurveyPage:         "๙๔๖๑",
+			TitleDeedNumber:    "12345",
+			Volume:             "10",
+			Page:               "20",
+			Rai:                5,
+			Ngan:               2,
+			SquareWa:           50,
+			Status:             "Process",
+			GeographyID:        nil, // Replace with actual GeographyID if available
+			ProvinceID:         4,   // Replace with actual ProvinceID
+			DistrictID:         1,   // Replace with actual DistrictID
+			SubdistrictID:      1,   // Replace with actual SubdistrictID
+			LandVerificationID: nil, // Replace with actual LandVerificationID if available
+			UserID:             1,   // Replace with actual UserID
+		})
+
 		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
 		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 3, SellerID: 4, RequestBuySellTypeID: 1})
 		db.Create(&entity.RequestBuySell{LandID: 2, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
 		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
 		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
 
-			// ✅ Seed States
+		// ✅ Seed States
 		db.Create(&entity.State{ Name:  "รอตรวจสอบ", Color: "orange",})
 		db.Create(&entity.State{ Name:  "กำลังดำเนินการ", Color: "blue",})
 		db.Create(&entity.State{ Name:  "เสร็จสิ้น", Color: "green",})
@@ -453,6 +472,31 @@ func SetupDatabase() {
 		}
 		log.Println("✅ Landpost with tags created successfully")
 
+		db.Create(&entity.Transaction{
+			Amount:                 1500,
+			BuyerAccepted:          true,
+			SellerAccepted:         false,
+			MoneyChecked:           false,
+			LandDepartmentApproved: false,
+			Expire:                 time.Now().AddDate(0, 0, 7),
+			TypetransactionID:      1,
+			BuyerID:                4,
+			SellerID:               2,
+			LandID:                 2,
+		})
+
+		db.Create(&entity.Transaction{
+			Amount:                 15000,
+			BuyerAccepted:          true,
+			SellerAccepted:         true,
+			MoneyChecked:           true,
+			LandDepartmentApproved: true,
+			Expire:                 time.Now().AddDate(0, 0, 7),
+			TypetransactionID:      2,
+			BuyerID:                2,
+			SellerID:               4,
+			LandID:                 2,
+		})
 		// 🔸 สร้าง Roomchat หลังจากสร้าง Landsalepost แล้ว
 		createRoomchatsAndMessages()
 	}

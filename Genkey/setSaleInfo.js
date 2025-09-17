@@ -1,9 +1,9 @@
 const { ethers } = require("ethers");
 
 // ข้อมูล
-const tokenId = 2;
+const tokenId = 1;
 const price = ethers.parseEther("0.03"); // 1.5 ETH
-const buyer = "0xD53668db2e273872C9E2A6866d72cd0283d2E994";  //walletID 2
+const buyer = "0x81C7a15aE0b72CADE82D428844cff477f6E364b5";  //walletID 2
 
 // hash ตาม smart contract
 const messageHash = ethers.keccak256(
