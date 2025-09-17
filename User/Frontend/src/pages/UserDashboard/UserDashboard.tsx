@@ -443,7 +443,7 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
       <Card>
         <CardHeader>
           <CardTitle>ติดตามสถานะคำร้อง</CardTitle>
-          <CardDescription>ดูสถานะคำร้องขอเอกสารของคุณ</CardDescription>
+          <CardDescription>ดูสถานะคำร้องขอคัดโฉนดของคุณ</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="petition-stats">
