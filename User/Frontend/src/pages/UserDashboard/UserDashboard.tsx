@@ -2,7 +2,15 @@ import React, { useMemo, useState, useEffect } from "react";
 import "./UserDashboard.css";
 import { useNavigate } from "react-router-dom";
 import { GetDataUserVerification } from "../../service/https/garfield/http";
-
+import { Table, Tag, Card as AntCard, Row, Col, Statistic, Empty } from "antd";
+import {
+  FileTextOutlined,
+  CalendarOutlined,
+  ClockCircleOutlined,
+  CheckCircleOutlined,
+  ExclamationCircleOutlined,
+} from "@ant-design/icons";
+import { GetAllPetition } from "../../service/https/jib/jib";
 
 /* =======================
    Icon Components (SVG)
@@ -103,7 +111,15 @@ const Button = ({
   return (
     <button
       onClick={onClick}
-      className={`btn ${variant === "primary" ? "btn-primary" : variant === "outline" ? "btn-outline" : variant === "danger" ? "btn-danger" : "btn-ghost"} ${className}`}
+      className={`btn ${
+        variant === "primary"
+          ? "btn-primary"
+          : variant === "outline"
+          ? "btn-outline"
+          : variant === "danger"
+          ? "btn-danger"
+          : "btn-ghost"
+      } ${className}`}
       style={style}
     >
       {children}
@@ -122,6 +138,21 @@ interface LandTitle {
   status: TitleStatus;
 }
 
+interface State {
+  id: number;
+  name: string;
+  color: string;
+}
+interface Petition {
+  ID: number;
+  first_name: string;
+  last_name: string;
+  topic: string;
+  date: string;
+  description: string;
+  State: State | null;
+}
+
 /* ===== Mock Data ===== */
 const MOCK_TITLES: LandTitle[] = [
   { tokenId: "721-0001", landNo: "PHL-100/2567", location: "อ.เมืองพิษณุโลก จ.พิษณุโลก", area: "2-1-35 ไร่", contract: "0xABCD...EF12", status: "active" },
@@ -131,9 +162,7 @@ const MOCK_TITLES: LandTitle[] = [
 
 /* ===== Helpers ===== */
 const StatusPill = ({ status }: { status: TitleStatus }) => {
-  const label =
-    status === "active" ? "พร้อมใช้งาน" :
-      status === "encumbered" ? "มีภาระผูกพัน" : "รอตรวจสอบ";
+  const label = status === "active" ? "พร้อมใช้งาน" : status === "encumbered" ? "มีภาระผูกพัน" : "รอตรวจสอบ";
   return <span className={`badge ${status === "active" ? "badge-green" : status === "encumbered" ? "badge-amber" : "badge-slate"}`}>{label}</span>;
 };
 
@@ -156,12 +185,7 @@ const Copyable = ({ text }: { text: string }) => {
 };
 
 const ExplorerLink = ({ txOrContract, label = "Explorer" }: { txOrContract: string; label?: string }) => (
-  <a
-    href={`https://polygonscan.com/address/${txOrContract.replace(/\s/g, "")}`}
-    target="_blank"
-    rel="noreferrer"
-    className="explorer-link"
-  >
+  <a href={`https://polygonscan.com/address/${txOrContract.replace(/\s/g, "")}`} target="_blank" rel="noreferrer" className="explorer-link">
     {label} <ExternalLink className="icon-xs" />
   </a>
 );
@@ -177,145 +201,182 @@ const StatCard = ({ title, value, sub }: { title: React.ReactNode; value: React.
 );
 
 /* ===================================================
-   UserProfilePage
+   UserProfilePage (CLEAN LAYOUT)
    =================================================== */
 export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: LandTitle[] }) {
-  // State สำหรับ user info
-  const [userInfo, setUserInfo] = useState<{ firstName?: string; lastName?: string; email?: string; user_verification_id?: string | number }>({});
+  const navigate = useNavigate();
 
+  // ---------- User info ----------
+  const [userInfo, setUserInfo] = useState<{ firstName?: string; lastName?: string; email?: string; user_verification_id?: string | number }>({});
   useEffect(() => {
-    // ดึงข้อมูลจาก localStorage ก่อน
     const firstName = localStorage.getItem("firstName") || "";
     const lastName = localStorage.getItem("lastName") || "";
     const email = localStorage.getItem("email") || "";
-    let user_id = localStorage.getItem("user_id") || "";
+    const user_id = localStorage.getItem("user_id") || "";
 
-    // ถ้ามีข้อมูลใน localStorage ให้ set เลย
     setUserInfo({ firstName, lastName, email });
 
-    // ถ้าไม่มี email ให้ลองดึงจาก API
-    if ((!email || email === "") && user_id) {
-      GetDataUserVerification(user_id).then(({ result }) => {
-        if (result && (result.email || result.first_name)) {
-          setUserInfo({
-            firstName: result.first_name || firstName,
-            lastName: result.last_name || lastName,
-            email: result.email || email,
-            user_verification_id: result.user_verification_id,
-          });
+    const fetchVerification = async () => {
+      if (!user_id) return;
+      try {
+        const { result } = await GetDataUserVerification(user_id);
+        if (result) {
+          setUserInfo(prev => ({
+            firstName: result.first_name || prev.firstName,
+            lastName: result.last_name || prev.lastName,
+            email: result.email || prev.email,
+            user_verification_id: result.user_verification_id ?? prev.user_verification_id,
+          }));
         }
-      });
-    } else if (user_id) {
-      // ดึง user_verification_id ด้วยถ้ามี user_id
-      GetDataUserVerification(user_id).then(({ result }) => {
-        if (result && result.user_verification_id) {
-          setUserInfo((prev) => ({ ...prev, user_verification_id: result.user_verification_id }));
-        }
-      });
-    }
+      } catch {}
+    };
+    fetchVerification();
   }, []);
-  // ถ้าใช้ react-router-dom ให้แทน navigate นี้ด้วย useNavigate()
 
+  // ---------- Titles stats ----------
   const { total, active, encumbered, reviewing } = useMemo(() => {
     const total = titles.length;
-    const active = titles.filter((t) => t.status === "active").length;
-    const encumbered = titles.filter((t) => t.status === "encumbered").length;
-    const reviewing = titles.filter((t) => t.status === "under_review").length;
+    const active = titles.filter(t => t.status === "active").length;
+    const encumbered = titles.filter(t => t.status === "encumbered").length;
+    const reviewing = titles.filter(t => t.status === "under_review").length;
     return { total, active, encumbered, reviewing };
   }, [titles]);
 
-  const navigate = useNavigate();
+  // ---------- Petitions ----------
+  const [petitions, setPetitions] = useState<Petition[]>([]);
+  const [loadingPetition, setLoadingPetition] = useState(false);
+  useEffect(() => {
+    const fetchPetitions = async () => {
+      setLoadingPetition(true);
+      try {
+        const response = await GetAllPetition();
+        setPetitions(response);
+      } catch {
+        // noop
+      } finally {
+        setLoadingPetition(false);
+      }
+    };
+    fetchPetitions();
+  }, []);
 
-  const handleRegisterLandClick = () => {
-    navigate('/user/userregisland');
+  const getStatusIcon = (state?: State | null) => {
+    switch (state?.name) {
+      case "รอตรวจสอบ":
+        return <ClockCircleOutlined />;
+      case "อนุมัติแล้ว":
+        return <CheckCircleOutlined />;
+      case "กำลังดำเนินการ":
+        return <ExclamationCircleOutlined />;
+      default:
+        return <ClockCircleOutlined />;
+    }
   };
-    useEffect(() => {
-    console.log("User info:", userInfo);
-  }, [userInfo]);
+
+  const petitionColumns = [
+    {
+      title: "เลขคำร้อง",
+      dataIndex: "ID",
+      key: "ID",
+      width: 120,
+      render: (id: number) => (
+        <Tag color="blue" style={{ fontWeight: 600 }}>#{id}</Tag>
+      ),
+    },
+    { title: "ชื่อ", dataIndex: "first_name", key: "first_name" },
+    { title: "นามสกุล", dataIndex: "last_name", key: "last_name" },
+    { title: "เรื่อง", dataIndex: "topic", key: "topic" },
+    { title: "รายละเอียด", dataIndex: "description", key: "description" },
+    {
+      title: "วันที่ยื่น",
+      dataIndex: "date",
+      key: "date",
+      width: 130,
+      render: (date: string) => {
+        const formattedDate = date
+          ? new Date(date).toLocaleDateString("th-TH", { day: "2-digit", month: "2-digit", year: "numeric" })
+          : "ไม่ระบุวันที่";
+        return (
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <CalendarOutlined style={{ color: "#8c8c8c" }} />
+            <span>{formattedDate}</span>
+          </div>
+        );
+      },
+    },
+    {
+      title: "สถานะ",
+      key: "status",
+      width: 150,
+      render: (record: Petition) => {
+        const state = record.State;
+        const color = state?.color || "default";
+        const statusName = state?.name || "ไม่ระบุสถานะ";
+        return (
+          <Tag color={color} icon={getStatusIcon(state)} style={{ borderRadius: 16, padding: "4px 12px", fontWeight: 600 }}>
+            {statusName}
+          </Tag>
+        );
+      },
+    },
+  ];
 
   return (
     <div className="container">
-      {/* Header */}
-
+      {/* 1) HEADER */}
       <Card>
         <CardHeader>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+          <div className="header-row">
             <CardTitle>
-              <div style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div className="header-title">
                 <ShieldCheck className="icon-lg text-white" />
                 {userInfo.firstName || "User"} {userInfo.lastName || ""}
               </div>
             </CardTitle>
-          </div>
-          <CardDescription>
-            {userInfo.email ? userInfo.email : "-"}
-          </CardDescription>
-
-          <div className="chip-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {userInfo.user_verification_id && userInfo.user_verification_id !== "undefined" ? (
-                <span className="chip chip-strong chip-green">
-                  <BadgeCheck className="icon-sm mr-1" />
-                  Verified
+            <CardDescription>{userInfo.email ? userInfo.email : "-"}</CardDescription>
+            <div className="chip-row">
+              <div className="chip-group">
+                {userInfo.user_verification_id && userInfo.user_verification_id !== "undefined" ? (
+                  <span className="chip chip-strong chip-green">
+                    <BadgeCheck className="icon-sm mr-1" />
+                    Verified
+                  </span>
+                ) : (
+                  <span className="chip chip-strong chip-red">
+                    <BadgeCheck className="icon-sm mr-1" />
+                    Unverified
+                  </span>
+                )}
+                <span className="chip chip-soft">
+                  <Wallet className="icon-sm mr-1" />
+                  Wallet Linked
                 </span>
-              ) : (
-                <span className="chip chip-strong chip-red">
-                  <BadgeCheck className="icon-sm mr-1" />
-                  Unverified
-                </span>
-              )}
-              <span className="chip chip-soft">
-                <Wallet className="icon-sm mr-1" />
-                Wallet Linked
-              </span>
+              </div>
+              <Button variant="primary" className="button-registland" onClick={() => navigate("/user/userregisland")}>
+                <FileText className="icon mr-1" />
+                ลงทะเบียนโฉนดที่ดิน
+              </Button>
             </div>
-            <Button
-              variant="primary"
-              className="button-registland"
-              onClick={handleRegisterLandClick}
-            >
-              <FileText className="icon mr-1" />
-              ลงทะเบียนโฉนดที่ดิน
-            </Button>
           </div>
-
         </CardHeader>
       </Card>
 
+      {/* 2) ACTION CARDS */}
       <div className="card-row">
-        {/* <Card>
-          <div className="card-header user-header">
-            <CardTitle>นำข้อมูลผู้ใช้ของคุณไปยัง Blockchain</CardTitle>
-            <CardDescription>ผู้ใช้</CardDescription>
-          </div>
-          <CardContent className="user-content">
-            <Button
-              className="usertoblockchain"
-              variant="primary"
-              onClick={() => navigate('/verifyusertoblockchain')}
-            >
-              ดำเนินการ
-            </Button>
-          </CardContent>
-        </Card> */}
         <Card>
           <div className="card-header land-header">
             <CardTitle>นำข้อมูลที่ดินของคุณไปยัง Blockchain</CardTitle>
             <CardDescription>ที่ดิน</CardDescription>
           </div>
           <CardContent className="land-content">
-            <Button
-              className="landtoblockchain"
-              variant="primary"
-              onClick={() => navigate('/verifyusertoblockchain')}
-            >
+            <Button className="landtoblockchain" variant="primary" onClick={() => navigate("/verifyusertoblockchain")}>
               ดำเนินการ
             </Button>
           </CardContent>
         </Card>
       </div>
 
-      {/* Land Titles Dashboard */}
+      {/* 3) TITLES STATS */}
       <div className="grid-4">
         <StatCard title="ที่ดินบนเชนทั้งหมด" value={total} />
         <StatCard title="พร้อมใช้งาน" value={active} />
@@ -323,6 +384,7 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
         <StatCard title="รอตรวจสอบ" value={reviewing} />
       </div>
 
+      {/* 4) TITLES TABLE */}
       <Card>
         <CardHeader>
           <CardTitle>รายการที่ดิน (บน Blockchain)</CardTitle>
@@ -344,9 +406,7 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
               <tbody>
                 {titles.map((t) => (
                   <tr key={t.tokenId} className="row-hover">
-                    <td>
-                      <code className="code">{t.tokenId}</code>
-                    </td>
+                    <td><code className="code">{t.tokenId}</code></td>
                     <td>{t.landNo}</td>
                     <td>
                       <div className="loc">
@@ -355,17 +415,11 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
                       </div>
                     </td>
                     <td>{t.area}</td>
-                    <td>
-                      <StatusPill status={t.status} />
-                    </td>
+                    <td><StatusPill status={t.status} /></td>
                     <td>
                       <div className="actions">
-                        <Button variant="outline" className="btn-sm" onClick={() => navigate(`/titles/${t.tokenId}`)}>
-                          รายละเอียด
-                        </Button>
-                        <Button variant="outline" className="btn-sm" onClick={() => navigate(`/listings/new?tokenId=${t.tokenId}`)}>
-                          ประกาศขาย
-                        </Button>
+                        <Button variant="outline" className="btn-sm" onClick={() => navigate(`/titles/${t.tokenId}`)}>รายละเอียด</Button>
+                        <Button variant="outline" className="btn-sm" onClick={() => navigate(`/listings/new?tokenId=${t.tokenId}`)}>ประกาศขาย</Button>
                         <div className="inline-actions">
                           <ExplorerLink txOrContract={t.contract} label="Explorer" />
                           <Copyable text={t.contract} />
@@ -376,9 +430,7 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
                 ))}
                 {titles.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="empty-cell">
-                      ยังไม่มีรายการที่ดินบนเชน — เริ่มต้นด้วยการลงทะเบียนโฉนดแรกของคุณ
-                    </td>
+                    <td colSpan={6} className="empty-cell">ยังไม่มีรายการที่ดินบนเชน — เริ่มต้นด้วยการลงทะเบียนโฉนดแรกของคุณ</td>
                   </tr>
                 )}
               </tbody>
@@ -387,7 +439,50 @@ export default function UserProfilePage({ titles = MOCK_TITLES }: { titles?: Lan
         </CardContent>
       </Card>
 
-      {/* Quick Links */}
+      {/* 5) PETITIONS OVERVIEW + TABLE */}
+      <Card>
+        <CardHeader>
+          <CardTitle>ติดตามสถานะคำร้อง</CardTitle>
+          <CardDescription>ดูสถานะคำร้องขอคัดโฉนดของคุณ</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="petition-stats">
+            <Row gutter={24}>
+              <Col xs={24} sm={6}>
+                <AntCard style={{ borderRadius: 12, textAlign: "center" }}>
+                  <Statistic title="คำร้องทั้งหมด" value={petitions.length} prefix={<FileTextOutlined style={{ color: "#1890ff" }} />} valueStyle={{ color: "#1890ff", fontWeight: 700 }} />
+                </AntCard>
+              </Col>
+              <Col xs={24} sm={6}>
+                <AntCard style={{ borderRadius: 12, textAlign: "center" }}>
+                  <Statistic title="รอตรวจสอบ" value={petitions.filter(p => p.State?.name === "รอตรวจสอบ").length} prefix={<ClockCircleOutlined style={{ color: "#fa8c16" }} />} valueStyle={{ color: "#fa8c16", fontWeight: 700 }} />
+                </AntCard>
+              </Col>
+              <Col xs={24} sm={6}>
+                <AntCard style={{ borderRadius: 12, textAlign: "center" }}>
+                  <Statistic title="กำลังดำเนินการ" value={petitions.filter(p => p.State?.name === "กำลังดำเนินการ").length} prefix={<ExclamationCircleOutlined style={{ color: "#1890ff" }} />} valueStyle={{ color: "#1890ff", fontWeight: 700 }} />
+                </AntCard>
+              </Col>
+              <Col xs={24} sm={6}>
+                <AntCard style={{ borderRadius: 12, textAlign: "center" }}>
+                  <Statistic title="อนุมัติแล้ว" value={petitions.filter(p => p.State?.name === "อนุมัติแล้ว").length} prefix={<CheckCircleOutlined style={{ color: "#52c41a" }} />} valueStyle={{ color: "#52c41a", fontWeight: 700 }} />
+                </AntCard>
+              </Col>
+            </Row>
+          </div>
+
+          <Table
+            columns={petitionColumns as any}
+            dataSource={petitions}
+            rowKey="ID"
+            loading={loadingPetition}
+            pagination={{ pageSize: 10, showSizeChanger: true, showQuickJumper: true, showTotal: (total, range) => `${range[0]}-${range[1]} จาก ${total} รายการ` }}
+            locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="ไม่พบข้อมูลคำร้อง" /> }}
+          />
+        </CardContent>
+      </Card>
+
+      {/* 6) QUICK LINKS */}
       <div className="grid-2">
         <Card>
           <CardHeader>

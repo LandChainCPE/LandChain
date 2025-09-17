@@ -10,14 +10,15 @@ import (
 
 // ฟังก์ชันดึงข้อมูลทั้งหมดของ Tag
 func GetTags(c *gin.Context) {
-	var tags []entity.Tag
+    var tags []entity.Tag
 
-	// ดึงข้อมูล Tag ทั้งหมด
-	if err := config.DB().Preload("Landsalepost").Find(&tags).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to fetch tags"})
-		return
-	}
+    db := config.DB()
+    results := db.Order("id").Find(&tags)
 
-	// ส่งข้อมูล Tag ที่ดึงมาไปยัง client
-	c.JSON(http.StatusOK, tags)
+    if results.Error != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": results.Error.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, tags)
 }

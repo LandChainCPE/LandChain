@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -216,10 +215,7 @@ func SetupDatabase() {
 		&entity.ServiceType{},
 		&entity.LandAmphures{},
 		&entity.LandTambons{},
-		&entity.Landtitle{}, // ✅ ต้องมาก่อน RequestBuy/Sell
-
 		&entity.LandVerification{}, /////
-		&entity.Landtitle{},
 
 		&entity.Landsalepost{},
 		&entity.Transaction{},
@@ -260,7 +256,7 @@ func SetupDatabase() {
 	db.Model(&entity.ServiceType{}).Count(&serviceCount)
 	if serviceCount == 0 {
 		db.Create(&entity.ServiceType{Service: "ขึ้นทะเบียนที่ดิน"})
-		db.Create(&entity.ServiceType{Service: "ลงทะเบียนชื่อผู้ใช้"})
+		db.Create(&entity.ServiceType{Service: "ขอคัดสำเนาโฉนด"})
 	}
 
 	if count == 0 {
@@ -270,9 +266,11 @@ func SetupDatabase() {
 
 		RefRole := uint(1)
 
+
 		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0x81c7a15ae0b72cade82d428844cff477f6e364b5", RoleID: RefRole}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
 		db.Create(&entity.Users{Firstname: "Panachai", Lastname: "Potisuwan", Email: "Panachai@gmail.com", Phonenumber: "0555555554", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f4444", RoleID: RefRole})
 		db.Create(&entity.Users{Firstname: "Noth", Lastname: "Potisuwan", Email: "Noth@gmail.com", Phonenumber: "0555555556", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f6666", RoleID: RefRole})
+
 
 		// //RefServiceType := uint(1)
 		// db.Create(&entity.Users{Name: "Jo", Password: "jo123456", Land: "12กท85", RoleID: RefRole,})
@@ -312,6 +310,7 @@ func SetupDatabase() {
 		db.Create(&entity.Typetransaction{StatusNameTh: "รอผู้ซื้อ/ผู้ขายตกลง", StatusNameEn: "in_progress"})
 		db.Create(&entity.Typetransaction{StatusNameTh: "เสร็จสิ้น", StatusNameEn: "completed"})
 		db.Create(&entity.Typetransaction{StatusNameTh: "ถูกยกเลิกโดยผู้ซื้อหรือผู้ขาย", StatusNameEn: "cancelled"})
+		db.Create(&entity.Typetransaction{StatusNameTh: "รอการชำระเงิน", StatusNameEn: "money_clear"})
 		db.Create(&entity.Typetransaction{StatusNameTh: "หมดอายุ", StatusNameEn: "expired"})
 
 		db.Create(&entity.RequestBuySellType{StatusNameTh: "เจ้าของโฉลดสร้างคำขอขาย", StatusNameEn: "pending"})
@@ -388,96 +387,128 @@ func SetupDatabase() {
 			Uuid:               uuid.New().String(),
 		})
 
+		db.Create(&entity.Landtitle{
+			TokenID:            3,
+			IsLocked:           false,
+			SurveyNumber:       "5336 IV 8632",
+			LandNumber:         "๑๑",
+			SurveyPage:         "๙๔๖๑",
+			TitleDeedNumber:    "12345",
+			Volume:             "10",
+			Page:               "20",
+			Rai:                5,
+			Ngan:               2,
+			SquareWa:           50,
+			Status:             "Process",
+			GeographyID:        nil, // Replace with actual GeographyID if available
+			ProvinceID:         4,   // Replace with actual ProvinceID
+			DistrictID:         1,   // Replace with actual DistrictID
+			SubdistrictID:      1,   // Replace with actual SubdistrictID
+			LandVerificationID: nil, // Replace with actual LandVerificationID if available
+			UserID:             1,   // Replace with actual UserID
+		})
+
 		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
 		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 3, SellerID: 4, RequestBuySellTypeID: 1})
 		db.Create(&entity.RequestBuySell{LandID: 2, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
 		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
 		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
+
+		// ✅ Seed States
+		db.Create(&entity.State{ Name:  "รอตรวจสอบ", Color: "orange",})
+		db.Create(&entity.State{ Name:  "กำลังดำเนินการ", Color: "blue",})
+		db.Create(&entity.State{ Name:  "เสร็จสิ้น", Color: "green",})
+
+		log.Println("✅ States have been seeded successfully")
+
+		// ✅ Seed Petition
+		db.Create(&entity.Petition{
+			FirstName:   "มาลี",
+			LastName:    "มาดี",
+			Tel:         "0987654321",
+			Email:       "j@gmail.com",
+			Description: "โฉนดเก่าหาย",
+			Date:        "2025-07-31",
+			Topic:       "ขอคัดสำเนาโฉนด",
+			StateID:     1,
+			UserID:      1,
+		})
+		log.Println("✅ Petition created successfully")
+
+		// ✅ Seed Tags
+		db.Create(&entity.Tag{Tag: "ติดถนน"})
+		db.Create(&entity.Tag{Tag: "ติดทะเล"})
+		db.Create(&entity.Tag{Tag: "ติดแม่น้ำ"})
+		db.Create(&entity.Tag{Tag: "ใกล้BTS"})
+		db.Create(&entity.Tag{Tag: "ใกล้MRT"})
+		db.Create(&entity.Tag{Tag: "ติดภูเขา"})
+
+		log.Println("✅ Tags have been inserted successfully")
+
+		// ✅ Seed Landpost
+		post := entity.Landsalepost{
+			FirstName:     "มาลี",
+			LastName:      "มาดี",
+			PhoneNumber:   "0987654321",
+			Name:          "สวนคุณตา",
+			Price:         120000,
+			ProvinceID:    12,
+			DistrictID:    144,
+			SubdistrictID: 1077,
+			LandID:        1,
+			UserID:        1,
+		}
+		db.Create(&post)
+
+		// เพิ่มรูปภาพ (Photoland)
+		// photos := []entity.Photoland{
+		// 	{Path: "https://backside.legardy.com/uploads/1_3bf04b6ebb.png", LandsalepostID: 1},
+		// 	{Path: "https://backside.legardy.com/uploads/2_abc123.png", LandsalepostID: 1},
+		// }
+		// for _, photo := range photos {
+		// 	db.Create(&photo)
+		// }
+
+		var tags []entity.Tag
+		if err := db.Where("id IN ?", []uint{1, 4, 5}).Find(&tags).Error; err != nil {
+			log.Fatal("❌ Failed to find tags:", err)
+		}
+		if err := db.Model(&post).Association("Tags").Replace(&tags); err != nil {
+			log.Fatal("❌ Failed to associate tags:", err)
+		}
+		log.Println("✅ Landpost with tags created successfully")
+
+		db.Create(&entity.Transaction{
+			Amount:                 1500,
+			BuyerAccepted:          true,
+			SellerAccepted:         false,
+			MoneyChecked:           false,
+			LandDepartmentApproved: false,
+			Expire:                 time.Now().AddDate(0, 0, 7),
+			TypetransactionID:      1,
+			BuyerID:                4,
+			SellerID:               2,
+			LandID:                 2,
+		})
+
+		db.Create(&entity.Transaction{
+			Amount:                 15000,
+			BuyerAccepted:          true,
+			SellerAccepted:         true,
+			MoneyChecked:           true,
+			LandDepartmentApproved: true,
+			Expire:                 time.Now().AddDate(0, 0, 7),
+			TypetransactionID:      2,
+			BuyerID:                2,
+			SellerID:               4,
+			LandID:                 2,
+		})
 		// 🔸 สร้าง Roomchat หลังจากสร้าง Landsalepost แล้ว
 		createRoomchatsAndMessages()
 	}
 
 	log.Println("✅ Database Migrated & Seeded Successfully")
 
-	states := []entity.State{
-		{Name: "รอตรวจสอบ", Color: "orange"},
-		{Name: "กำลังดำเนินการ", Color: "blue"},
-		{Name: "เสร็จสิ้น", Color: "green"},
-	}
-
-	for _, s := range states {
-		var exist entity.State
-		if err := db.Where("name = ?", s.Name).First(&exist).Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// ✅ ถ้าไม่เจอค่อยสร้างใหม่
-				if err := db.Create(&s).Error; err != nil {
-					log.Fatal("❌ Failed to create state:", err)
-				}
-			} else {
-				log.Fatal("❌ Failed to query state:", err)
-			}
-		}
-	}
-
-	log.Println("✅ States have been seeded successfully")
-
-	// สร้าง Petition
-	petition := entity.Petition{
-		FirstName:   "มาลี",
-		LastName:    "มาดี",
-		Tel:         "0987654321",
-		Email:       "j@gmail.com",
-		Description: "โฉนดเก่าหาย",
-		Date:        "2025-07-31",
-		Topic:       "ขอคัดสำเนาโฉนด",
-		StateID:     1,
-		UserID:      1,
-	}
-
-	if err := db.Create(&petition).Error; err != nil {
-		log.Fatal("❌ Failed to create petition:", err)
-	}
-
-	log.Println("✅ Petition created successfully")
-
-	tags := []entity.Tag{
-		{Tag: "ติดถนน"},
-		{Tag: "ติดทะเล"},
-		{Tag: "ติดแม่น้ำ"},
-		{Tag: "ใกล้BTS"},
-		{Tag: "ใกล้MRT"},
-		{Tag: "ติดภูเขา"},
-	}
-	// เพิ่ม tags ลงในฐานข้อมูล
-	if err := db.Create(&tags).Error; err != nil {
-		log.Fatal("Error inserting tags:", err)
-	}
-
-	// แสดงผลการบันทึกข้อมูล
-	fmt.Println("Tags have been inserted successfully")
-
-	//postlad
-	landpost := entity.Landsalepost{
-		FirstName:     "มาลี",
-		LastName:      "มาดี",
-		PhoneNumber:   "0987654321",
-		Image:         "j@gmail.com",
-		Name:          "สวนคุณตา",
-		Price:         120000,
-		TagID:         1,
-		ProvinceID:    20,
-		DistrictID:    1,
-		SubdistrictID: 1,
-		//Map: 		"aaa",
-		LandID: 1,
-		UserID: 1,
-	}
-
-	if err := db.Create(&landpost).Error; err != nil {
-		log.Fatal("❌ Failed to create petition:", err)
-	}
-
-	log.Println("✅ Landpost created successfully")
 
 } // <<<<<<<<<<<<<< ปิดฟังก์ชัน SetupDatabase()
 // แยกการสร้าง Roomchat และ Message ออกมาเป็น function แยก

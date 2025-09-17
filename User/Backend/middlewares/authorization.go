@@ -13,8 +13,11 @@ import (
 
 func Authorizes() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		fmt.Printf("🚀 Authorizes: Middleware called for path: %s\n", c.FullPath())
+
 		clientToken := c.Request.Header.Get("Authorization")
 		if clientToken == "" {
+			fmt.Println("❌ Authorizes: No Authorization header provided")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "No Authorization header provided"})
 			return
 		}
@@ -41,10 +44,11 @@ func Authorizes() gin.HandlerFunc {
 		}
 
 		if claims == nil || claims.Wallet == "" {
+			fmt.Printf("❌ Authorizes: Invalid token claims - claims: %+v\n", claims)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
 			return
 		}
-		fmt.Println("🔑 JWT Claims Wallet:", claims.Wallet)
+		fmt.Printf("🔑 JWT Claims Wallet: %s\n", claims.Wallet)
 		// ✅ เก็บ wallet ลง context
 		c.Set("wallet", claims.Wallet)
 

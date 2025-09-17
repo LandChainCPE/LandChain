@@ -1,39 +1,32 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { 
-  FaUser, 
-  FaHome, 
-  FaCalendarAlt, 
-  FaNewspaper, 
-  FaCog, 
-  FaLandmark, 
-  FaHistory, 
-  FaSignOutAlt,
-  FaBars,
-  FaTimes,
-  FaChevronDown
-} from "react-icons/fa";
-import './Navbar.css';
+import { FaUser, FaBars, FaTimes } from "react-icons/fa";
+import "./Navbar.css";
 
 const Navbar = () => {
   const [isLoggedIn] = useState(localStorage.getItem("isLogin") === "true");
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
 
-  // Scroll effect
+  // Handle scroll effect
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 20;
+      setScrolled(isScrolled);
+    };
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest(".user-dropdown")) {
-        setIsDropdownOpen(false);
+      const target = event.target as Element;
+      if (!target.closest('.user-dropdown')) {
+        setShowDropdown(false);
       }
     };
 
@@ -41,119 +34,208 @@ const Navbar = () => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  // Close mobile menu on route change
+  useEffect(() => {
+    setShowMobileMenu(false);
+    setShowDropdown(false);
+  }, [location]);
+
+  const isActiveLink = (path: string) => location.pathname === path;
 
   const toggleDropdown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation(); // กันไม่ให้ event bubble ไปปิด dropdown
-    setIsDropdownOpen(!isDropdownOpen);
+    e.stopPropagation();
+    setShowDropdown(!showDropdown);
   };
 
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-    setIsDropdownOpen(false);
+  const toggleMobileMenu = () => {
+    setShowMobileMenu(!showMobileMenu);
   };
 
   const handleLogout = () => {
     localStorage.removeItem("isLogin");
-    closeMenu();
+    window.location.href = "/";
   };
 
   return (
-    <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
-      <div className="nav-container">
-        {/* Brand */}
-        <Link to="/" className="nav-brand" onClick={closeMenu}>
-          <div className="brand-logo">
-            <FaLandmark />
+    <>
+      <nav className={`navbar-landchain ${scrolled ? 'scrolled' : ''}`}>
+        <div className="navbar-container">
+          {/* Brand Section */}
+          <div className="navbar-brand-section">
+            <Link to="/user" className="navbar-brand-text">
+              LANDCHAIN
+            </Link>
           </div>
-          <span className="brand-name">LANDCHAIN</span>
-        </Link>
 
-        {/* Desktop Navigation */}
-        <div className="nav-menu">
-          <ul className="nav-list">
-            <li>
-              <Link to="/" className="nav-link" onClick={closeMenu}>
-                <FaHome />
-                <span>หน้าแรก</span>
+          {/* Desktop Navigation */}
+          <div className="navbar-nav-section">
+            <ul className="navbar-nav-list">
+              <li className="navbar-nav-item">
+                <a 
+                  href="/user" 
+                  className={`navbar-nav-link ${location.pathname === '/user' ? 'active' : ''}`}
+                >
+                  หน้าแรก
+                </a>
+              </li>
+              <li className="navbar-nav-item">
+                <a 
+                  href="/user/regisland" 
+                  className={`navbar-nav-link ${location.pathname === '/user/regisland' ? 'active' : ''}`}
+                >
+                  นัดหมายกรมที่ดิน
+                </a>
+              </li>
+              <li className="navbar-nav-item">
+                <Link 
+                  to="/news" 
+                  className={`navbar-nav-link ${isActiveLink('/news') ? 'active' : ''}`}
+                >
+                  โปรไฟล์
+                </Link>
+              </li>
+            </ul>
+
+            {/* User Dropdown */}
+            {isLoggedIn && (
+              <div className={`user-dropdown ${showDropdown ? 'show' : ''}`}>
+                <button 
+                  className="user-dropdown-toggle" 
+                  onClick={toggleDropdown}
+                  aria-expanded={showDropdown}
+                >
+                  <FaUser className="user-icon" />
+                  <span>บัญชี</span>
+                </button>
+
+                <div className="dropdown-menu-landchain">
+                  <a 
+                    href="/user/manage" 
+                    className="dropdown-item-landchain"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    จัดการข้อมูล
+                  </a>
+                  <a 
+                    href="/user/userregisland" 
+                    className="dropdown-item-landchain"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    ลงทะเบียนโฉนดที่ดิน
+                  </a>
+                  <a 
+                    href="/user/transation" 
+                    className="dropdown-item-landchain"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    สถานะธุรกรรม
+                  </a>
+                  <a 
+                    href="/user/requestsell" 
+                    className="dropdown-item-landchain"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    คำขอซื้อ/ขายที่ดิน
+                  </a>
+                  <a 
+                    href="/user/landhistory" 
+                    className="dropdown-item-landchain"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    ประวัติโฉนดที่ดิน/ตรวจสอบเจ้าของที่ดิน
+                  </a>
+                  <button 
+                    className="dropdown-item-landchain logout-btn"
+                    onClick={handleLogout}
+                  >
+                    ออกจากระบบ
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Toggle Button */}
+          <button className="mobile-toggle" onClick={toggleMobileMenu}>
+            <FaBars />
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile Menu Overlay */}
+      <div className={`mobile-menu ${showMobileMenu ? 'show' : ''}`}>
+        <div className="mobile-menu-content">
+          <div className="mobile-menu-header">
+            <div className="navbar-brand-section">
+              <span className="navbar-brand-text">LANDCHAIN</span>
+            </div>
+            <button className="mobile-close" onClick={toggleMobileMenu}>
+              <FaTimes />
+            </button>
+          </div>
+
+          <ul className="mobile-nav-list">
+            <li className="mobile-nav-item">
+              <Link to="/" className="mobile-nav-link">
+                หน้าแรก
               </Link>
             </li>
-            <li>
-              <Link to="/appointment" className="nav-link" onClick={closeMenu}>
-                <FaCalendarAlt />
-                <span>นัดหมายกรมที่ดิน</span>
+            <li className="mobile-nav-item">
+              <Link to="/appointment" className="mobile-nav-link">
+                นัดหมายกรมที่ดิน
               </Link>
             </li>
-            <li>
-              <Link to="/news" className="nav-link" onClick={closeMenu}>
-                <FaNewspaper />
-                <span>ข่าวสาร</span>
+            <li className="mobile-nav-item">
+              <Link to="/news" className="mobile-nav-link">
+                ข่าวสาร
               </Link>
             </li>
           </ul>
 
-          {/* User Menu */}
           {isLoggedIn && (
-            <div className="user-dropdown">
-              <button
-                className="user-btn"
-                onClick={toggleDropdown}
-                aria-expanded={isDropdownOpen}
-                aria-label="เมนูผู้ใช้"
-              >
-                <div className="user-icon">
-                  <FaUser />
-                </div>
-                <FaChevronDown className={`chevron ${isDropdownOpen ? "open" : ""}`} />
-              </button>
-
-              {isDropdownOpen && (
-                <div className="dropdown-menu">
-                  <Link to="/user/manage" className="dropdown-link" onClick={closeMenu}>
-                    <FaCog />
-                    <span>จัดการข้อมูล</span>
+            <div className="mobile-user-section">
+              <div className="mobile-user-title">บัญชีผู้ใช้</div>
+              <ul className="mobile-nav-list">
+                <li className="mobile-nav-item">
+                  <Link to="/user/manage" className="mobile-nav-link">
+                    จัดการข้อมูล
                   </Link>
-                  <Link to="/user/regisland" className="dropdown-link" onClick={closeMenu}>
-                    <FaLandmark />
-                    <span>ลงทะเบียนโฉนดที่ดิน</span>
+                </li>
+                <li className="mobile-nav-item">
+                  <Link to="/user/regisland" className="mobile-nav-link">
+                    ลงทะเบียนโฉนดที่ดิน
                   </Link>
-                  <Link to="/user/history" className="dropdown-link" onClick={closeMenu}>
-                    <FaHistory />
-                    <span>ประวัติ/สถานะ ธุรกรรม</span>
+                </li>
+                <li className="mobile-nav-item">
+                  <Link to="/user/history" className="mobile-nav-link">
+                    ประวัติ/สถานะ ธุรกรรม
                   </Link>
-                  <hr className="dropdown-divider" />
-                  <Link to="/logout" className="dropdown-link logout" onClick={handleLogout}>
-                    <FaSignOutAlt />
-                    <span>ออกจากระบบ</span>
+                </li>
+                <li className="mobile-nav-item">
+                  <Link to="/checklandowner" className="mobile-nav-link">
+                    ตรวจสอบเจ้าของที่ดิน
                   </Link>
-                </div>
-              )}
-            </div>
-          )}
-
-          {!isLoggedIn && (
-            <div className="auth-buttons">
-              <Link to="/login" className="btn-login">
-                เข้าสู่ระบบ
-              </Link>
-              <Link to="/register" className="btn-register">
-                สมัครสมาชิก
-              </Link>
+                </li>
+                <li className="mobile-nav-item">
+                  <Link to="/landhistory" className="mobile-nav-link">
+                    ประวัติโฉนดที่ดิน
+                  </Link>
+                </li>
+                <li className="mobile-nav-item">
+                  <button 
+                    className="mobile-nav-link" 
+                    onClick={handleLogout}
+                    style={{border: 'none', background: 'none', width: '100%', textAlign: 'left'}}
+                  >
+                    ออกจากระบบ
+                  </button>
+                </li>
+              </ul>
             </div>
           )}
         </div>
-
-        {/* Mobile Menu Toggle */}
-        <button
-          className="mobile-toggle"
-          onClick={toggleMenu}
-          aria-label="เปิด/ปิดเมนู"
-        >
-          {isMenuOpen ? <FaTimes /> : <FaBars />}
-        </button>
       </div>
-    </nav>
+    </>
   );
 };
 

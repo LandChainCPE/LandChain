@@ -13,9 +13,7 @@ const LandToBlockchain = Loadable(lazy(() => import("../pages/LandToBlockChain/L
 const VerifyUser = Loadable(lazy(() => import("../pages/VerifyUser/verifyuser")));
 
 
-const Dashboard = Loadable(lazy(() => import("../pages/Petition/Dashboard")));
 const Petition = Loadable(lazy(() => import("../pages/Petition/Petition")));
-const State = Loadable(lazy(() => import("../pages/Petition/State")));
 
 const SellMainPage = Loadable(lazy(() => import("../pages/Sell-Buy/SellMainpage")));
 const Map = Loadable(lazy(() => import("../pages/Map/map")));
@@ -36,6 +34,9 @@ const VerifyLand = Loadable(lazy(() => import("../pages/VerifyLand/VerifyLand"))
 const RequestSell = Loadable(lazy(() => import("../pages/RequestSell/ReausetSell")));
 const RequestBuy = Loadable(lazy(() => import("../pages/RequestSell/RequsetBuy")));
 const Transation = Loadable(lazy(() => import("../pages/RequestSell/TransationTimeline")));
+const History = Loadable(lazy(() => import("../pages/Landhistory/landhistory.tsx")));
+const CheckLandowner = Loadable(lazy(() => import("../pages/RequestSell/Checklandowner.tsx")));
+
 
 // Component สำหรับป้องกันหน้าที่ต้อง login
 const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
@@ -77,26 +78,10 @@ const UserRoutes = (): RouteObject[] => [
         ) 
       },
       { 
-        path: "dashboard", 
-        element: (
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        ) 
-      },
-      { 
         path: "petition", 
         element: (
           <ProtectedRoute>
             <Petition />
-          </ProtectedRoute>
-        ) 
-      },
-      { 
-        path: "state", 
-        element: (
-          <ProtectedRoute>
-            <State />
           </ProtectedRoute>
         ) 
       },
@@ -203,6 +188,7 @@ const UserRoutes = (): RouteObject[] => [
         ) 
       },
       { 
+
         path: "landcardlist", 
         element: (
           <ProtectedRoute>
@@ -215,6 +201,7 @@ const UserRoutes = (): RouteObject[] => [
         element: (
           <ProtectedRoute>
             <LandToBlockchain />
+
           </ProtectedRoute>
         ) 
       },

@@ -85,6 +85,13 @@ const LoginMetamask = () => {
 
   return (
     <div className="container">
+    {/* เพิ่ม floating shapes */}
+      <div className="floating-shapes">
+        <div className="shape-1"></div>
+        <div className="shape-2"></div>
+        <div className="shape-3"></div>
+      </div>
+      
       <div className="card">
         {/* Header */}
         <div className="header">

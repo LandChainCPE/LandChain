@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Badge, Card, Modal, Button } from "react-bootstrap"; // ✅ ใช้ Modal จาก react-bootstrap
-import CardContent from "@mui/material/CardContent";
+import { Badge, Card, Modal, Button, Form, Row, Col } from "react-bootstrap";
 import "./RequsetBuy.css";
 import {
   GetAllRequestSellByUserID,
@@ -16,6 +15,8 @@ interface RequestBuySellType {
   Landtitle: { TokenID: number; title: string };
   LandID: number;
   CreatedAt: string;
+  DeletedAt?: string;
+  Status?: string;
 }
 
 interface Metadata {
@@ -26,11 +27,49 @@ interface Metadata {
   WalletID: string;
 }
 
+// ฟังก์ชันแปลงวันที่เป็น พ.ศ.
+function formatThaiDate(dateStr: string) {
+  if (!dateStr) return "-";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "-";
+
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const year = date.getFullYear() + 543;
+  return `${day}/${month}/${year}`;
+}
+
+// แปลง MetaFields เป็น object
+function parseMetaFields(metaString: string) {
+  const fields: Record<string, string> = {};
+  if (!metaString) return fields;
+
+  metaString.split(",").forEach((pair) => {
+    const [key, value] = pair.split(":").map((s) => s.trim());
+    if (key && value) {
+      fields[key] = value;
+    }
+  });
+
+  return fields;
+}
+
 const RequestBuyPage = () => {
   const [requests, setRequests] = useState<RequestBuySellType[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [metadata, setMetadata] = useState<Metadata[]>([]);
-  const [DeleteData, setDeleteData] = useState<[]>([]);
+  const [DeleteData, setDeleteData] = useState<RequestBuySellType[]>([]);
+  const [metadataMap, setMetadataMap] = useState<Map<number, Record<string, string>>>(new Map());
+  const [loading, setLoading] = useState(true);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+
+  // Modal state รวม
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [selectedRejectData, setSelectedRejectData] = useState<{
+    buyerID: number;
+    sellerID: number;
+    landID: number;
+  } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,12 +78,14 @@ const RequestBuyPage = () => {
         const delData = await GetAllRequestSellByUserIDAndDelete();
         setRequests(reqRes);
         setDeleteData(delData);
-        console.log(delData)
-        const tokenIDs = reqRes.map(
-          (r: RequestBuySellType) => r.Landtitle.TokenID
-        );
+
+        const tokenIDs = reqRes.map((r: { Landtitle: { TokenID: any; }; }) => r.Landtitle.TokenID);
         const metaRes = await GetMultipleLandMetadataHandler(tokenIDs);
-        setMetadata(metaRes);
+
+        // สร้าง Map จาก TokenID → parsed MetaFields
+        const map = new Map<number, Record<string, string>>();
+        metaRes.forEach((m: { TokenID: number; MetaFields: string; }) => map.set(m.TokenID, parseMetaFields(m.MetaFields)));
+        setMetadataMap(map);
       } catch (err) {
         console.error(err);
       } finally {
@@ -55,143 +96,229 @@ const RequestBuyPage = () => {
     fetchData();
   }, []);
 
-  // state สำหรับ modal
-  const [showRejectModal, setShowRejectModal] = useState(false);
-  const [selectedRejectUserID, setSelectedRejectUserID] = useState<number | null>(null);
-  const [selectedLand, setSelectedLand] = useState<number | null>(null);
-  const [selectedSellerID, setSelectedSellerID] = useState<number | null>(null);
-
   const handleOpenRejectModal = (buyerID: number, sellerID: number, landID: number) => {
-  setSelectedRejectUserID(buyerID);
-  setSelectedSellerID(sellerID);
-  setSelectedLand(landID);
-  setShowRejectModal(true);
-};
+    setSelectedRejectData({ buyerID, sellerID, landID });
+    setShowRejectModal(true);
+  };
 
   const handleCloseRejectModal = () => {
-    setSelectedRejectUserID(null);
-    setSelectedLand(null);
+    setSelectedRejectData(null);
     setShowRejectModal(false);
   };
 
   const handleConfirmReject = async () => {
-  if (!selectedRejectUserID || !selectedSellerID || !selectedLand) return;
-  try {
-    await DeleteRequestSell(selectedRejectUserID, selectedSellerID, selectedLand); // ✅ ส่งครบ 3 ตัว
-    console.log(selectedRejectUserID,selectedSellerID,selectedLand );
-    setRequests((prev) =>
-      prev.filter(
-        (r) => !(r.Buyer.ID === selectedRejectUserID && r.Seller.ID === selectedSellerID && r.LandID === selectedLand)
-      )
-    );
-    handleCloseRejectModal();
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-  const renderStatus = (status?: string) => {
-    switch (status) {
-      case "pending":
-        return <Badge bg="warning">รอการตอบรับ</Badge>;
-      case "approved":
-        return <Badge bg="success">อนุมัติ</Badge>;
-      case "rejected":
-        return <Badge bg="danger">ปฏิเสธ</Badge>;
-      default:
-        return <Badge bg="secondary">ไม่ทราบสถานะ</Badge>;
+    if (!selectedRejectData) return;
+    const { buyerID, sellerID, landID } = selectedRejectData;
+    try {
+      await DeleteRequestSell(buyerID, sellerID, landID);
+      setRequests((prev) =>
+        prev.filter(
+          (r) => !(r.Buyer.ID === buyerID && r.Seller.ID === sellerID && r.LandID === landID)
+        )
+      );
+      handleCloseRejectModal();
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  if (loading) return <p>กำลังโหลดข้อมูล...</p>;
+  // Filter + Search
+  const filterData = (data: RequestBuySellType[]) => {
+    return data.filter((item) => {
+      const tokenID = item.Landtitle.TokenID.toString();
+      const sellerName = `${item.Seller.Firstname} ${item.Seller.Lastname}`;
+      const buyerName = item.Buyer.Firstname ?? "";
+      const status = item.Status ?? "pending";
+      const meta = metadataMap.get(item.Landtitle.TokenID);
+
+      const metaValues = Object.values(meta ?? {}).join(" ").toLowerCase();
+
+      const matchSearch =
+        tokenID.includes(searchTerm) ||
+        sellerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        buyerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        metaValues.includes(searchTerm.toLowerCase());
+
+      const matchStatus = filterStatus === "all" ? true : status === filterStatus;
+
+      return matchSearch && matchStatus;
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="request-page">
+        <div className="loading-state">
+          <p>กำลังโหลดข้อมูล...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const renderCard = (item: RequestBuySellType, isDeleted = false) => {
+    const meta = metadataMap.get(item.Landtitle.TokenID);
+    const status = isDeleted ? "rejected" : item.Status ?? "pending";
+
+    return (
+      <div className="request-card-horizontal" key={item.ID}>
+        <div className="card-shine"></div>
+        
+        {/* Status Badge */}
+        <div className="status-section">
+          <span className={`status-badge ${status}`}>
+            {status === "pending" && "⏳ รอการตอบรับ"}
+            {status === "rejected" && "❌ ปฏิเสธ"}
+          </span>
+        </div>
+
+        {/* Land Information */}
+        <div className="land-section">
+          <div className="land-info-horizontal">
+            <div className="token-info">
+              <strong>TokenID: {item.Landtitle.TokenID}</strong>
+            </div>
+            {meta && (
+              <div className="land-details-horizontal">
+                {/* กลุ่มที่อยู่ */}
+                <div className="detail-group location-group">
+                  {meta["Province"] && <span><strong>จังหวัด:</strong> {meta["Province"]}</span>}
+                  {meta["District"] && <span><strong>อำเภอ:</strong> {meta["District"]}</span>}
+                  {meta["Subdistrict"] && <span><strong>ตำบล:</strong> {meta["Subdistrict"]}</span>}
+                </div>
+                
+                {/* กลุ่มขนาดที่ดิน */}
+                {(meta["Rai"] || meta["Ngan"] || meta["SqWa"]) && (
+                  <div className="detail-group size-group">
+                    <span>
+                      <strong>ขนาด:</strong> 
+                      {meta["Rai"] && `${meta["Rai"]} ไร่ `}
+                      {meta["Ngan"] && `${meta["Ngan"]} งาน `}
+                      {meta["SqWa"] && `${meta["SqWa"]} ตร.ว.`}
+                    </span>
+                  </div>
+                )}
+                
+                {/* กลุ่มเอกสาร */}
+                <div className="detail-group document-group">
+                  {meta["Map"] && <span><strong>แผ่นที่:</strong> {meta["Map"]}</span>}
+                  {meta["Deed No"] && <span><strong>เลขที่โฉนด:</strong> {meta["Deed No"]}</span>}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Owner Information */}
+        <div className="owner-section">
+          <div className="owner-info-horizontal">
+            <div className="owner-title">เจ้าของ</div>
+            <div className="owner-name">{item.Seller.Firstname} {item.Seller.Lastname}</div>
+          </div>
+        </div>
+
+        {/* Date Information */}
+        <div className="date-section">
+          <div className="date-info-horizontal">
+            <div className="date-item">
+              <span className="date-label">วันที่ยื่น:</span>
+              <span className="date-value">{formatThaiDate(item.CreatedAt)}</span>
+            </div>
+            {isDeleted && (
+              <div className="date-item">
+                <span className="date-label">วันที่ปฏิเสธ:</span>
+                <span className="date-value">{formatThaiDate(item.DeletedAt ?? "")}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        {!isDeleted && (
+          <div className="action-section">
+            <Button
+              className="btn-modern-small btn-danger"
+              onClick={() =>
+                handleOpenRejectModal(item.Buyer.ID, item.Seller.ID, item.LandID)
+              }
+            >
+              <span className="btn-content">
+                <span>❌</span>
+                <span>ยกเลิกขอซื้อ</span>
+              </span>
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="request-page">
       <h2 className="request-title">ประวัติการยื่นซื้อโฉนด</h2>
 
-      {requests.length === 0 ? (
-        <p>ยังไม่มีคำขอซื้อ</p>
-      ) : (
-        requests.map((item) => {
-          const meta = metadata.find((m) => m.TokenID === item.Landtitle.TokenID);
-          return (
-            <Card key={item.ID} className="mb-3">
-              <CardContent className="request-card d-flex justify-content-between align-items-center">
-                <div className="land-info">
-                  <p><strong>โฉนด: {item.Landtitle.TokenID}</strong></p>
-                  {meta && <p>รายละเอียด: {meta.MetaFields}</p>}
-                </div>
-                <div className="owner-info">
-                  <p>เจ้าของ: {item.Seller.Firstname} {item.Seller.Lastname}</p>
-                </div>
-                <div className="request-info text-end">
-                  <p>วันที่ยื่น: {new Date(item.CreatedAt).toLocaleDateString("th-TH")}</p>
-                  {meta && <p>Buyer: {meta.Buyer}</p>}
-                  {meta && <p>Wallet ID: {meta.WalletID}</p>}
-                </div>
-              </CardContent>
-              <Button
-                variant="danger"
-                onClick={() => handleOpenRejectModal(item.Buyer.ID, item.Seller.ID, item.LandID)}
-              >
-                ยกเลิกขอซื้อ
-              </Button>
-            </Card>
-          );
-        })
-      )}
+      <div className="search-filter-section">
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Control
+              className="form-control-modern"
+              type="text"
+              placeholder="🔍 ค้นหาโฉนด, เจ้าของ, ผู้ซื้อ, Wallet..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </Col>
+          <Col md={3}>
+            <Form.Select
+              className="form-select-modern"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">ทั้งหมด</option>
+              <option value="pending">รอการตอบรับ</option>
+              <option value="rejected">ปฏิเสธ</option>
+            </Form.Select>
+          </Col>
+        </Row>
+      </div>
 
-      <h2 className="request-title">รายการที่ถูกปฏิเสธ</h2>
-
-      {DeleteData.length === 0 ? (
-  <p>ยังไม่มีรายการที่ถูกปฏิเสธ</p>
-) : (
-  DeleteData.map((item: any) => {
-    const tokenID = item?.Landtitle?.TokenID;
-    const meta = tokenID ? metadata?.find((m) => m.TokenID === tokenID) : null;
-
-    const createdAt = item?.CreatedAt ? new Date(item.CreatedAt) : null;
-    const deletedAt = item?.DeletedAt ? new Date(item.DeletedAt) : null;
-
-    return (
-      <Card key={item.ID} className="mb-3" bg="light">
-        <CardContent className="request-card d-flex justify-content-between align-items-center">
-          <div className="land-info">
-            <p><strong>โฉนด: {tokenID ?? "ไม่พบข้อมูล"}</strong></p>
-            {meta?.MetaFields && <p>รายละเอียด: {meta.MetaFields}</p>}
+      <div className="request-card-container-horizontal">
+        {filterData(requests).length === 0 ? (
+          <div className="empty-state-request">
+            <div className="empty-icon">📝</div>
+            <h3>ยังไม่มีคำขอซื้อ</h3>
+            <p>คุณยังไม่มีคำขอซื้อที่ดินในระบบ</p>
           </div>
+        ) : (
+          filterData(requests).map((item) => renderCard(item))
+        )}
+      </div>
 
-          <div className="owner-info">
-            <p>
-              เจ้าของ: {item?.Seller?.Firstname ?? "-"} {item?.Seller?.Lastname ?? "-"}
-            </p>
-          </div>
+      <div className="rejected-section">
+        <h2 className="request-title mt-4">รายการที่ถูกปฏิเสธ</h2>
+        <div className="request-card-container-horizontal">
+          {filterData(DeleteData).length === 0 ? (
+            <div className="empty-state-request">
+              <div className="empty-icon">🚫</div>
+              <h3>ยังไม่มีรายการที่ถูกปฏิเสธ</h3>
+              <p>ยังไม่มีคำขอซื้อที่ถูกปฏิเสธ</p>
+            </div>
+          ) : (
+            filterData(DeleteData).map((item) => renderCard(item, true))
+          )}
+        </div>
+      </div>
 
-          <div className="request-info text-end">
-            <p>
-              วันที่ยื่น: {createdAt ? createdAt.toLocaleDateString("th-TH") + " " + createdAt.toLocaleTimeString("th-TH") : "-"}
-            </p>
-            <p>
-              วันที่ถูกปฏิเสธ: {deletedAt ? deletedAt.toLocaleDateString("th-TH") + " " + deletedAt.toLocaleTimeString("th-TH") : "-"}
-            </p>
-            {meta?.Buyer && <p>Buyer: {meta.Buyer}</p>}
-            {meta?.WalletID && <p>Wallet ID: {meta.WalletID}</p>}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  })
-)}
-
-
-
-      {/* Modal แบบ react-bootstrap */}
       <Modal show={showRejectModal} onHide={handleCloseRejectModal} centered>
         <Modal.Header closeButton>
-          <Modal.Title>ยืนยันการปฏิเสธคำขอซื้อ</Modal.Title>
+          <Modal.Title>ยืนยันการยกเลิกคำขอซื้อ</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          คุณแน่ใจหรือไม่ว่าต้องการปฏิเสธคำขอซื้อ?
+          <div className="text-center">
+            <div className="mb-3">
+              <span style={{ fontSize: "3rem" }}>⚠️</span>
+            </div>
+            <h5>คุณต้องการยกเลิกคำขอซื้อโฉนดนี้หรือไม่?</h5>
+          </div>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseRejectModal}>

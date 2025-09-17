@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 // ข้อมูล metadata เป็น string เดียว (ตามรูปแบบที่ smart contract รับ)
 const walletID = "0xf55988edca178d5507454107945a0c96f3af628c";
 const metaFields =
-  "Map:5336 IV 8633, Land No:131, Survey Page:7541, Subdistrict:ตะกรานพืชผล, Deed No:7543031, Book:754, Page:30, District:กบินทร์บุรี, Province:ปราจีนบุรี, Rai:20, Ngan:2, SqWa:50";
+  "Map:5336 IV 8633, Land No:999, Survey Page:7541, Subdistrict:ตะกรานพืชผล, Deed No:7543031, Book:754, Page:30, District:กบินทร์บุรี, Province:ปราจีนบุรี, Rai:20, Ngan:2, SqWa:50";
 
 // 1. สร้าง hash สำหรับเซ็น (wallet + metaFields)
 const messageHash = ethers.keccak256(

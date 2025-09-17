@@ -1,96 +1,545 @@
-@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap');
 
-/* Style ของ Card */
+/* Variables */
+:root {
+  --primary-dark: #172E25;
+  --primary-medium: #3F5658;
+  --primary-light: #6F969B;
+  --secondary-light: #D0E2E6;
+  --white: #FFFFFF;
+  --gradient-primary: linear-gradient(135deg, #6F969B 0%, #3F5658 100%);
+  --gradient-dark: linear-gradient(135deg, #172E25 0%, #3F5658 100%);
+  --gradient-light: linear-gradient(135deg, #D0E2E6 0%, #FFFFFF 100%);
+  --shadow-soft: 0 8px 32px rgba(23, 46, 37, 0.1);
+  --shadow-medium: 0 16px 64px rgba(23, 46, 37, 0.15);
+  --shadow-strong: 0 24px 96px rgba(23, 46, 37, 0.25);
+  --error-color: #ef4444;
+  --error-bg: rgba(239, 68, 68, 0.1);
+  --error-border: rgba(239, 68, 68, 0.2);
+  --success-color: #22c55e;
+  --success-bg: rgba(34, 197, 94, 0.1);
+  --success-border: rgba(34, 197, 94, 0.2);
+}
+
+/* Base Container */
+.d-flex.justify-content-center.align-items-center.min-vh-100.bg-light {
+  position: relative;
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 20% 50%, rgba(111, 150, 155, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(208, 226, 230, 0.3) 0%, transparent 50%),
+              linear-gradient(135deg, #D0E2E6 0%, #FFFFFF 70%);
+  overflow-x: hidden;
+  font-family: 'Kanit', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Floating Background Shapes */
+.d-flex.justify-content-center.align-items-center.min-vh-100.bg-light::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236F969B' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+.d-flex.justify-content-center.align-items-center.min-vh-100.bg-light::after {
+  content: '';
+  position: fixed;
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, rgba(111, 150, 155, 0.1), rgba(63, 86, 88, 0.05));
+  border-radius: 50%;
+  top: 10%;
+  right: -150px;
+  animation: float 20s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-20px) rotate(5deg); }
+  50% { transform: translateY(0px) rotate(10deg); }
+  75% { transform: translateY(-10px) rotate(5deg); }
+}
+
+/* Additional Floating Shapes */
+.floating-shapes {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.floating-shapes .shape-1,
+.floating-shapes .shape-2,
+.floating-shapes .shape-3 {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(111, 150, 155, 0.08), rgba(63, 86, 88, 0.04));
+  animation: float 25s ease-in-out infinite;
+}
+
+.floating-shapes .shape-1 {
+  width: 200px;
+  height: 200px;
+  top: 60%;
+  left: -100px;
+  animation-delay: -7s;
+}
+
+.floating-shapes .shape-2 {
+  width: 150px;
+  height: 150px;
+  top: 20%;
+  left: 15%;
+  animation-delay: -14s;
+}
+
+.floating-shapes .shape-3 {
+  width: 250px;
+  height: 250px;
+  bottom: -125px;
+  left: 60%;
+  animation-delay: -3s;
+}
+
+/* Main Card Container */
 .card-container {
-  max-width: 500px;
+  position: relative;
   width: 100%;
-  background-color: white;
-  padding: 32px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  border-radius: 20px;
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
   overflow: hidden;
-  text-align: center;
-  margin-top: 30px;
-  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); เพิ่มพื้นหลังที่ดูดี */
+  box-shadow: var(--shadow-strong);
+  z-index: 10;
+  animation: slideInUp 0.8s ease-out;
+  margin: 2rem;
+  padding: 0;
 }
 
-/* Logo */
+.card-container::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: var(--gradient-primary);
+  border-radius: 24px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card-container:hover::before {
+  opacity: 0.1;
+}
+
+.card-container:hover {
+  transform: translateY(-2px);
+}
+
+/* Header Section with Logo */
+.card-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: var(--gradient-dark);
+  z-index: 1;
+  border-radius: 24px 24px 0 0;
+}
+
+.card-container::after {
+  background: var(--gradient-dark);
+  background-image: 
+    radial-gradient(circle at 30% 70%, rgba(111, 150, 155, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 70% 30%, rgba(208, 226, 230, 0.1) 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Logo Styling */
 .logo {
+  position: relative;
+  z-index: 2;
   width: 100%;
+  max-width: 300px;
   height: auto;
-  max-width: 400px;
-  margin-bottom: 20px;
+  margin: 2rem auto 1rem;
+  display: block;
+  filter: brightness(0) invert(1) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
 }
 
-/* สไตล์หัวข้อ */
+/* Title Styling */
 h2 {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 20px;
+  position: relative;
+  z-index: 2;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--white);
+  margin: 0 0 2rem 0;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* สไตล์ของฟอร์ม */
+/* Form Container */
+form {
+  position: relative;
+  z-index: 2;
+  padding: 2.5rem;
+  background: var(--white);
+  margin-top: 120px;
+  border-radius: 0 0 24px 24px;
+}
+
+/* Form Row Styling */
+.row {
+  margin-bottom: 1rem;
+}
+
+.row:last-child {
+  margin-bottom: 2rem;
+}
+
+/* Form Group Styling */
+.col-md-6 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.mb-3 {
+  margin-bottom: 1.5rem !important;
+}
+
+/* Form Label */
 .form-label {
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-weight: 600;
-  color: #333;
+  color: var(--primary-dark);
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
   text-align: left;
 }
 
+.form-label::before {
+  content: '👤';
+  font-size: 1rem;
+}
+
+.form-label[for="phonenumber"]::before {
+  content: '📞';
+}
+
+.form-label[for="email"]::before {
+  content: '📧';
+}
+
+/* Form Control */
 .form-control {
-  padding: 10px;
-  font-size: 14px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  margin-bottom: 20px;
-  transition: border 0.3s ease;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 0.875rem 1rem;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+  backdrop-filter: blur(10px);
+  color: var(--primary-dark);
+  font-weight: 500;
 }
 
 .form-control:focus {
-  border-color: #4C6EF5;
-  box-shadow: 0 0 5px rgba(76, 110, 245, 0.5);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--primary-light);
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(111, 150, 155, 0.1);
+  transform: translateY(-2px);
 }
 
-/* ปุ่มยืนยัน */
-.btn-primary {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-  color: white;
-  font-weight: 600;
-  padding: 16px 24px;
+.form-control::placeholder {
+  color: var(--primary-medium);
+  opacity: 0.7;
+}
+
+/* Form Control Wrapper for Gradient Border */
+.input-wrapper {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.input-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-primary);
   border-radius: 12px;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.form-control:focus + .input-wrapper::before {
+  opacity: 0.1;
+}
+
+/* Submit Button */
+.btn-primary {
+  position: relative;
+  width: 100%;
+  background: var(--gradient-primary);
   border: none;
+  border-radius: 16px;
+  padding: 0;
+  overflow: hidden;
   cursor: pointer;
-  font-size: 16px;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-soft);
+  font-family: 'Kanit', sans-serif;
+  margin-top: 1rem;
 }
 
 .btn-primary:hover {
-  transform: scale(1.05);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
 }
 
 .btn-primary:active {
-  transform: scale(0.98);
+  transform: translateY(-1px);
 }
 
-/* สไตล์ของพื้นหลัง */
-.bg-light {
-  background-color: #f9fafb;
+.btn-primary:disabled {
+  opacity: 0.7;
+  transform: none !important;
+  box-shadow: var(--shadow-soft) !important;
 }
 
-/* ให้การ์ดอยู่ตรงกลางของหน้าจอ */
-.min-vh-100 {
-  min-height: 100vh;
-}
-
-.d-flex {
+/* Button Content */
+.btn-primary {
   display: flex;
-}
-
-.justify-content-center {
-  justify-content: center;
-}
-
-.align-items-center {
   align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.25rem 2rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--white);
+  position: relative;
+  z-index: 2;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+  z-index: 1;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+.btn-primary::after {
+  content: '→';
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+  margin-left: 0.5rem;
+}
+
+.btn-primary:hover::after {
+  transform: translateX(4px);
+}
+
+/* Animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .card-container {
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+
+  .logo {
+    max-width: 250px;
+    margin: 1.5rem auto 0.75rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  form {
+    padding: 2rem 1.5rem;
+    margin-top: 100px;
+  }
+
+  .col-md-6 {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .btn-primary {
+    padding: 1.125rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .floating-shapes .shape-1,
+  .floating-shapes .shape-2,
+  .floating-shapes .shape-3 {
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-container {
+    margin: 0.5rem;
+    border-radius: 20px;
+  }
+
+  .card-container::after {
+    border-radius: 20px 20px 0 0;
+  }
+
+  form {
+    border-radius: 0 0 20px 20px;
+  }
+
+  .logo {
+    max-width: 200px;
+    margin: 1rem auto 0.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  form {
+    padding: 1.5rem 1rem;
+    margin-top: 80px;
+  }
+
+  .form-control {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-primary {
+    padding: 1rem 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  .floating-shapes .shape-1,
+  .floating-shapes .shape-2,
+  .floating-shapes .shape-3 {
+    display: none;
+  }
+}
+
+/* Hover Effects and Micro-interactions */
+.card-container {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control {
+  transition: all 0.3s ease;
+}
+
+.form-control:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(111, 150, 155, 0.3);
+}
+
+/* Focus States */
+.form-control:focus {
+  animation: inputFocus 0.3s ease;
+}
+
+@keyframes inputFocus {
+  0% {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+  50% {
+    transform: translateY(-1px);
+  }
+  100% {
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 4px rgba(111, 150, 155, 0.1);
+  }
+}
+
+/* Additional Visual Enhancements */
+.row {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.row:nth-child(1) {
+  animation-delay: 0.1s;
+  animation-fill-mode: both;
+}
+
+.row:nth-child(2) {
+  animation-delay: 0.2s;
+  animation-fill-mode: both;
+}
+
+.btn-primary {
+  animation: fadeIn 0.6s ease-out 0.3s both;
 }
