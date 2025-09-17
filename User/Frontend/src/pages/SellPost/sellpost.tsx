@@ -7,12 +7,7 @@ import { GetTags,CreateLandPost, getLandtitleIdByTokenId } from "../../service/h
 import { ethers } from "ethers";
 import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";
 import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield/http";
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-
-const MAPBOX_TOKEN =
-  (import.meta as any)?.env?.VITE_MAPBOX_TOKEN ||
-  'pk.eyJ1Ijoiam9oYXJ0MjU0NiIsImEiOiJjbWVmZ3YzMGcwcTByMm1zOWRkdjJkNTd0In0.DBDjy1rBDmc8A4PN3haQ4A';
+import MapPicker from "../../components/MapPicker";
 
 // ---- Helpers for saving polygon to backend ----
 type Coordinate = { lng: number; lat: number };
@@ -490,179 +485,7 @@ useEffect(() => {
     { number: 4, title: "ตำแหน่งที่ตั้ง", icon: "📍" }
   ];
 
-  const MapPicker: React.FC<{
-  value: Coordinate[];
-  onChange: (v: Coordinate[]) => void;
-  height?: number;
-  center?: [number, number]; // [lng, lat]
-}> = ({ value, onChange, height = 300, center = [100.5018, 13.7563] }) => {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const map = React.useRef<mapboxgl.Map | null>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
 
-  // ตั้ง token ครั้งเดียว
-  useEffect(() => {
-    (mapboxgl as any).accessToken = MAPBOX_TOKEN;
-  }, []);
-
-  // init map
-  useEffect(() => {
-    if (map.current || !ref.current) return;
-    map.current = new mapboxgl.Map({
-      container: ref.current,
-      style: 'mapbox://styles/mapbox/satellite-streets-v12',
-      center,
-      zoom: 12,
-    });
-
-    map.current.on('load', () => {
-      // sources
-      map.current!.addSource('markers', {
-        type: 'geojson',
-        data: { type: 'FeatureCollection', features: [] },
-      });
-      map.current!.addSource('poly', {
-        type: 'geojson',
-        data: { type: 'FeatureCollection', features: [] },
-      });
-
-      // layers
-      map.current!.addLayer({
-        id: 'markers',
-        type: 'circle',
-        source: 'markers',
-        paint: {
-          'circle-radius': 6,
-          'circle-color': '#ff4444',
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#ffffff',
-        },
-      });
-      map.current!.addLayer({
-        id: 'marker-labels',
-        type: 'symbol',
-        source: 'markers',
-        layout: {
-          'text-field': ['get', 'sequence'],
-          'text-size': 11,
-          'text-offset': [0, 0],
-          'text-anchor': 'center',
-        },
-        paint: {
-          'text-color': '#ffffff',
-          'text-halo-color': '#000000',
-          'text-halo-width': 1,
-        },
-      });
-      map.current!.addLayer({
-        id: 'poly-fill',
-        type: 'fill',
-        source: 'poly',
-        paint: { 'fill-color': '#ff4444', 'fill-opacity': 0.35 },
-      });
-      map.current!.addLayer({
-        id: 'poly-line',
-        type: 'line',
-        source: 'poly',
-        paint: { 'line-color': '#ff0000', 'line-width': 2, 'line-dasharray': [2, 2] },
-      });
-
-      updateAll();
-    });
-  }, []);
-
-  // วาด/อัปเดต markers + polygon ทุกครั้งที่ value เปลี่ยน
-  const updateAll = React.useCallback(() => {
-    if (!map.current) return;
-
-    const markerFeatures = value.map((c, i) => ({
-      type: 'Feature' as const,
-      properties: { sequence: i + 1 },
-      geometry: { type: 'Point' as const, coordinates: [c.lng, c.lat] },
-    }));
-
-    (map.current.getSource('markers') as mapboxgl.GeoJSONSource)?.setData({
-      type: 'FeatureCollection',
-      features: markerFeatures,
-    });
-
-    const poly =
-      value.length >= 3
-        ? [
-            [
-              ...value.map((c) => [c.lng, c.lat] as [number, number]),
-              [value[0].lng, value[0].lat],
-            ],
-          ]
-        : [];
-
-    (map.current.getSource('poly') as mapboxgl.GeoJSONSource)?.setData({
-      type: 'FeatureCollection',
-      features: poly.length
-        ? [{ type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: poly } }]
-        : [],
-    });
-  }, [value]);
-
-  useEffect(() => updateAll(), [value, updateAll]);
-
-  // คลิกเพื่อเพิ่มจุดเมื่ออยู่ในโหมดวาด
-  useEffect(() => {
-    if (!map.current) return;
-    const onClick = (e: mapboxgl.MapMouseEvent) => {
-      if (!isDrawing) return;
-      onChange([...value, { lng: e.lngLat.lng, lat: e.lngLat.lat }]);
-    };
-    map.current.on('click', onClick);
-    map.current.getCanvas().style.cursor = isDrawing ? 'crosshair' : '';
-    return () => {
-      map.current?.off('click', onClick);
-      if (map.current) map.current.getCanvas().style.cursor = '';
-    };
-  }, [isDrawing, value, onChange]);
-
-
-  return (
-    <div>
-      <div ref={ref} style={{ width: '100%', height, borderRadius: 16, overflow: 'hidden' }} />
-      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-        <button
-          type="button"
-          onClick={() => setIsDrawing((d) => !d)}
-          style={{
-            padding: '8px 12px',
-            borderRadius: 10,
-            border: 'none',
-            background: isDrawing ? '#dc2626' : '#3b82f6',
-            color: '#fff',
-            fontWeight: 600,
-          }}
-        >
-          {isDrawing ? '🛑 หยุดมาร์ค' : '🎯 เริ่มมาร์คที่ดิน'}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onChange(value.slice(0, -1))}
-          disabled={!value.length}
-          style={{
-            padding: '8px 12px',
-            borderRadius: 10,
-            border: '1px solid #E5E7EB',
-            background: '#FBBF24',
-            color: '#111827',
-            fontWeight: 600,
-            opacity: value.length ? 1 : 0.6,
-          }}
-        >
-          ↶ ยกเลิกจุดสุดท้าย
-        </button>
-
-        <span style={{ alignSelf: 'center', color: '#6B7280' }}>จุดที่เลือก: {value.length}</span>
-      </div>
-    </div>
-  );
-};
 
   return (
     <>
@@ -673,6 +496,11 @@ useEffect(() => {
         
         .main-container1 {
           max-width: 100%;
+        }
+        
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
         
         .error-alert {
@@ -1952,17 +1780,16 @@ useEffect(() => {
               แผนที่ตำแหน่ง
             </label>
             
-            <div style={{
-              background: "linear-gradient(135deg, #f8fafc, #f1f5f9)",
-              border: "2px solid #e2e8f0",
-              borderRadius: "16px",
-              padding: "1.5rem",
-              marginBottom: "1rem"
-            }}>
-              <MapPicker value={mapCoords} onChange={setMapCoords} height={500} />
-            </div>
-            
-            <div style={{ 
+          <div style={{
+            background: "linear-gradient(135deg, #f8fafc, #f1f5f9)",
+            border: "2px solid #e2e8f0",
+            borderRadius: "16px",
+            padding: "1.5rem",
+            marginBottom: "1rem",
+            position: "relative"
+          }}>
+            <MapPicker value={mapCoords} onChange={setMapCoords} height={500} />
+          </div>            <div style={{ 
               fontSize: "0.9rem", 
               color: mapCoords.length >= 3 ? "#059669" : "#f59e0b", 
               marginTop: "0.5rem",

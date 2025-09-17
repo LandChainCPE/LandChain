@@ -113,7 +113,6 @@ func main() {
 		admin.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
 		admin.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)
 		admin.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
-		admin.POST("/location", controller.CreateLocation) // สร้างโฉนดที่ดิน
 	}
 
 
@@ -160,7 +159,7 @@ func main() {
 		authorized.GET("/district/:id", controller.GetDistrict)
 		authorized.GET("/subdistrict/:id", controller.GetSubdistrict)
 		authorized.GET("/landtitle/by-token/:token_id", controller.GetLandtitleIdByTokenId)
-
+		authorized.POST("/location", controller.CreateLocation) // สร้างโฉนดที่ดิน
 		authorized.GET("/provinces", controller.GetProvince) // ดึงข้อมูลจังหวัด
 		authorized.GET("/branches", controller.GetBranch)    // ดึงข้อมูลสาขา
 		authorized.GET("/time", controller.GetTime)          // ดึงข้อมูลช่วงเวลา
