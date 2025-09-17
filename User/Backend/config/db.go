@@ -388,7 +388,7 @@ func SetupDatabase() {
 		})
 
 		db.Create(&entity.Landtitle{
-			TokenID:            3,
+			TokenID:            nil,
 			IsLocked:           false,
 			SurveyNumber:       "5336 IV 8632",
 			LandNumber:         "๑๑",
@@ -399,13 +399,14 @@ func SetupDatabase() {
 			Rai:                5,
 			Ngan:               2,
 			SquareWa:           50,
-			Status:             "Process",
+			Status_verify:      false,
 			GeographyID:        nil, // Replace with actual GeographyID if available
-			ProvinceID:         4,   // Replace with actual ProvinceID
-			DistrictID:         1,   // Replace with actual DistrictID
-			SubdistrictID:      1,   // Replace with actual SubdistrictID
+			ProvinceID:         6,   // Replace with actual ProvinceID
+			DistrictID:         87,  // Replace with actual DistrictID
+			SubdistrictID:      568, // Replace with actual SubdistrictID
 			LandVerificationID: nil, // Replace with actual LandVerificationID if available
 			UserID:             1,   // Replace with actual UserID
+			Uuid:               uuid.New().String(),
 		})
 
 		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})

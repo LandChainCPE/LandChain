@@ -109,6 +109,7 @@ func main() {
 		admin.GET("/getbookingdata", controller.GetBookingData)
 		admin.GET("/getdatauserforverify/:bookingID", controller.GetDataUserForVerify)
 		admin.POST("/verifywalletid/:bookingID", controller.VerifyWalletID)
+		admin.POST("/verifylandtitleid/:LandtitleID", controller.VerifyLandtitleID)
 		admin.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
 		admin.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)
 		admin.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
