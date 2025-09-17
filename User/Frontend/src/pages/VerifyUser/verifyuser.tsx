@@ -5,7 +5,7 @@ import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';
 
 import contractABI from "./ContractABI.json";
-const contractAddress = "0xb671A410D1ea59631bB8F843B64d30688903CcF1";
+const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
 
 /* =======================
    Icon Components (SVG)

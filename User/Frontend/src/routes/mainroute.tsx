@@ -7,6 +7,8 @@ const MainPage = Loadable(lazy(() => import("../pages/MainPage/MainPage")));
 const MainPageAfterLogin = Loadable(lazy(() => import("../pages/MainPage/MainPageAfterLogin")));
 const RegisterUser = Loadable(lazy(() => import("../pages/LoginRegister/Register")));
 const Regisland = Loadable(lazy(() => import("../pages/RegisLand/RegisLand")));
+const LandCardList = Loadable(lazy(() => import("../pages/LandToBlockChain/LandCardList.tsx")));
+const LandToBlockchain = Loadable(lazy(() => import("../pages/LandToBlockChain/LandToBlockchain.tsx")));
 
 const VerifyUser = Loadable(lazy(() => import("../pages/VerifyUser/verifyuser")));
 
@@ -186,18 +188,20 @@ const UserRoutes = (): RouteObject[] => [
         ) 
       },
       { 
-        path: "landhistory", 
+
+        path: "landcardlist", 
         element: (
           <ProtectedRoute>
-            <History />
+            <LandCardList />
           </ProtectedRoute>
         ) 
       },
-       { 
-        path: "checklandowner", 
+      { 
+        path: "landtoblockchain", 
         element: (
           <ProtectedRoute>
-            <CheckLandowner />
+            <LandToBlockchain />
+
           </ProtectedRoute>
         ) 
       },

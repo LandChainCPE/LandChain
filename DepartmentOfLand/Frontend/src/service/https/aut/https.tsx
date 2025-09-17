@@ -50,9 +50,35 @@ async function VerifyWalletID(bookingID: any) {
     return { response, result };
 };
 
+async function VerifyLandTitle(LandtitleID: any) {
+    const requestOptions = {
+        method: "POST",
+        headers: getAuthHeaders(),
+    };
+
+    let response = await fetch(`${apiUrl}/verifylandtitleid/${LandtitleID}`, requestOptions)
+    const result = await response.json();
+    return { response, result };
+};
+
+
+
+async function getAllLandData() {
+    const requestOptions = {
+        method: "GET",
+        headers: getAuthHeaders(),
+    };
+
+    let response = await fetch(`${apiUrl}/getalllanddata`, requestOptions)
+    const result = await response.json();
+    return { response, result };
+};
+
 
 export {
     getQueueByDate,
     getDataUserForVerify,
-    VerifyWalletID
+    VerifyLandTitle,
+    VerifyWalletID,
+    getAllLandData
 }

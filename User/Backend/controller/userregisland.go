@@ -93,6 +93,7 @@ func UserRegisLand(c *gin.Context) {
 		Rai:                rai,
 		Ngan:               ngan,
 		SquareWa:           squareWa,
+		Status_verify:		false,  ///// 
 		ProvinceID:         uint(provinceID),
 		DistrictID:         uint(districtID),
 		SubdistrictID:      uint(subdistrictID),

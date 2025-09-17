@@ -31,6 +31,9 @@ func main() {
 	// เริ่มต้น Scheduler สำหรับลบการจองที่หมดอายุ
 	controller.StartBookingCleanupScheduler()
 
+	//อ่านค่าการตอบกลับจาก Smartcontract (ควรใช้ go routine)
+	go controller.ListenSmartContractEvents()
+
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
@@ -79,6 +82,7 @@ func main() {
 	debugAuth := r.Group("")
 	debugAuth.Use(middlewares.Authorizes())
 	{
+
 		debugAuth.GET("/debug/myinfo", func(c *gin.Context) {
 			currentWallet, _ := c.Get("wallet")
 			db := config.DB()
@@ -110,6 +114,7 @@ func main() {
 		admin.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
 		admin.POST("/location", controller.CreateLocation) // สร้างโฉนดที่ดิน
 	}
+
 
 	// 👤 User routes with ownership validation - ต้องเป็นเจ้าของข้อมูลหรือ admin
 	userOwnership := r.Group("")

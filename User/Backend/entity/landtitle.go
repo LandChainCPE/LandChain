@@ -7,7 +7,7 @@ import (
 type Landtitle struct {
 	gorm.Model
 
-	TokenID  uint
+	TokenID  *uint
 	IsLocked bool
 
 	SurveyNumber string `json:"survey_number" gorm:"type:varchar(50);not null"` // ระวาง เช่น "5336 IV 8632"
@@ -15,7 +15,7 @@ type Landtitle struct {
 	SurveyPage   string `json:"survey_page" gorm:"type:varchar(20);not null"`   // หน้าสำรวจ เช่น "๙๔๖๑"
 	//Tambo_n   string `json:"tambon" gorm:"type:varchar(100);not null"`   // ตำบล
 
-	Number string `gorm:"type:varchar(100)"`
+	// Number string `gorm:"type:varchar(100)"`
 
 	// ข้อมูลโฉนด
 	TitleDeedNumber string `json:"title_deed_number" gorm:"type:varchar(50);not null"` // เลขที่โฉนด
@@ -29,7 +29,7 @@ type Landtitle struct {
 	Ngan          int `json:"ngan" gorm:"default:0"`            // งาน
 	SquareWa      int `json:"square_wa" gorm:"default:0"`       // ตารางวา
 
-	Status 	string `json:"ststus" gorm:"type:varchar(50);not null"`
+	Status_verify   bool
 	
 	// FK ไปยัง Geography / Province / Amphure / District
 	GeographyID *uint
@@ -49,6 +49,8 @@ type Landtitle struct {
 
 	UserID uint `json:"user_id"`
 	User   Users `gorm:"foreignKey:UserID"`
+
+	Uuid string
 
 	// LandProvincesID uint
 	// LandProvinces   LandProvinces
