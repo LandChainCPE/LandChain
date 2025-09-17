@@ -82,7 +82,54 @@ func ListenSmartContractEvents() {
 				fmt.Println("tokenId:", tokenId.String())
 				fmt.Println("owner:", owner.Hex())
 				fmt.Println("metaFields:", metaFields)
-				// TODO: update database here
+
+				// Extract UUID from metaFields
+				uuid := ""
+				fields := strings.Split(metaFields, ",")
+				for _, field := range fields {
+					kv := strings.SplitN(strings.TrimSpace(field), ":", 2)
+					if len(kv) == 2 && strings.TrimSpace(kv[0]) == "UUID" {
+						uuid = strings.TrimSpace(kv[1])
+						break
+					}
+				}
+				fmt.Println("UUID:", uuid)
+				if uuid == "" {
+					log.Println("UUID not found in metaFields")
+					break
+				}
+
+				db := config.DB()
+				var landtitle entity.Landtitle
+				if err := db.Where("uuid = ?", uuid).First(&landtitle).Error; err != nil {
+					log.Println("Landtitle not found for UUID:", uuid)
+					break
+				}
+				// Update TokenID
+				tokenIDUint := uint(tokenId.Uint64())
+				landtitle.TokenID = &tokenIDUint
+				if err := db.Save(&landtitle).Error; err != nil {
+					log.Println("Failed to update Landtitle TokenID:", err)
+				} else {
+					log.Println("Landtitle TokenID updated for UUID:", uuid)
+				}
+
+				// Update LandVerification.Status_onchain
+				if landtitle.LandVerificationID != nil {
+					var landVerif entity.LandVerification
+					if err := db.First(&landVerif, *landtitle.LandVerificationID).Error; err != nil {
+						log.Println("LandVerification not found for ID:", *landtitle.LandVerificationID)
+					} else {
+						landVerif.Status_onchain = true
+						if err := db.Save(&landVerif).Error; err != nil {
+							log.Println("Failed to update LandVerification Status_onchain:", err)
+						} else {
+							log.Println("LandVerification Status_onchain updated for UUID:", uuid)
+						}
+					}
+				} else {
+					log.Println("Landtitle.LandVerificationID is nil for UUID:", uuid)
+				}
 
 			case "OwnerRegistered":
 				// wallet (indexed) = vLog.Topics[1]

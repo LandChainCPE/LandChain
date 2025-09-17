@@ -182,6 +182,12 @@ func VerifyWalletID(c *gin.Context) {
 		return
 	}
 
+	// อัพเดต Status_verify เป็น true
+	if err := tx.Model(&booking.Users).Update("status_verify", true).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update user status_verify: " + err.Error()})
+		return
+	}
+
 	// commit เมื่อทุกอย่างสำเร็จ
 	if err := tx.Commit().Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to commit transaction: " + err.Error()})
