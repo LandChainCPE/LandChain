@@ -40,6 +40,38 @@ func main() {
 	r.POST("/login", controller.LoginUser)
 	r.POST("/register", controller.RegisterUser)
 
+	// Department Login endpoint สำหรับ Admin เท่านั้น
+	r.POST("/department/login", controller.DepartmentLogin)
+
+	// 🔒 Security API สำหรับตรวจสอบ role จาก server-side
+	adminVerify := r.Group("")
+	adminVerify.Use(middlewares.Authorizes())
+	adminVerify.Use(middlewares.CheckAdminRole())
+	{
+		adminVerify.GET("/verify/admin", func(c *gin.Context) {
+			// หาก middleware ผ่าน = เป็น Admin แน่นอน
+			currentUser, exists := c.Get("currentUser")
+			if !exists {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": "Current user not found in context",
+					"is_admin": false,
+				})
+				return
+			}
+			
+			user := currentUser.(entity.Users)
+			c.JSON(http.StatusOK, gin.H{
+				"is_admin": true,
+				"role_id": user.RoleID,
+				"role_name": user.Role.Role,
+				"user_id": user.ID,
+				"wallet_address": user.Metamaskaddress,
+				"verified_at": "server-side-middleware",
+				"message": "Admin role verified by secure middleware",
+			})
+		})
+	}
+
 	r.GET("/nonce/:address", controller.GetNonce)
 	r.POST("/nonce/validate", controller.ValidateNonce)
 
@@ -177,10 +209,31 @@ func main() {
 	r.Run()
 }
 
-// Middleware CORS
+// Middleware CORS - รองรับ Frontend หลายตัว
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		// รองรับ User Frontend และ Department Frontend
+		origin := c.Request.Header.Get("Origin")
+		allowedOrigins := []string{
+			"http://localhost:5173", // User Frontend (Vite default)
+			"http://localhost:5174", // Department Frontend (Vite port 2)
+			"http://localhost:3000", // React default (ถ้ามี)
+			"http://localhost:3001", // React port 2 (ถ้ามี)
+		}
+
+		// ตรวจสอบว่า origin อยู่ในรายการที่อนุญาตไหม
+		for _, allowedOrigin := range allowedOrigins {
+			if origin == allowedOrigin {
+				c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+				break
+			}
+		}
+
+		// ถ้าไม่พบ origin ที่อนุญาต ให้ใช้ * (สำหรับ development)
+		if c.Writer.Header().Get("Access-Control-Allow-Origin") == "" {
+			c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		}
+
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, PATCH")
