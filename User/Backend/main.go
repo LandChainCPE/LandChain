@@ -29,7 +29,7 @@ func main() {
 	r.Use(CORSMiddleware())
 
 	// เริ่มต้น Scheduler สำหรับลบการจองที่หมดอายุ
-	controller.StartBookingCleanupScheduler()
+	//controller.StartBookingCleanupScheduler()
 
 	//อ่านค่าการตอบกลับจาก Smartcontract (ควรใช้ go routine)
 	go controller.ListenSmartContractEvents()

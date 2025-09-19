@@ -23,8 +23,10 @@ import (
 
 // Minimal ABI for events
 const contractABI = `[
-  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":false,"internalType":"string","name":"metaFields","type":"string"}],"name":"LandMinted","type":"event"},
-  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"wallet","type":"address"},{"indexed":true,"internalType":"bytes32","name":"nameHash","type":"bytes32"}],"name":"OwnerRegistered","type":"event"}
+	{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":false,"internalType":"string","name":"metaFields","type":"string"}],"name":"LandMinted","type":"event"},
+	{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"wallet","type":"address"},{"indexed":true,"internalType":"bytes32","name":"nameHash","type":"bytes32"}],"name":"OwnerRegistered","type":"event"},
+	{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"price","type":"uint256"},{"indexed":true,"internalType":"address","name":"buyer","type":"address"},{"indexed":true,"internalType":"address","name":"owner","type":"address"}],"name":"SaleInfoSet","type":"event"},
+	{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":true,"internalType":"address","name":"seller","type":"address"},{"indexed":true,"internalType":"address","name":"buyer","type":"address"}],"name":"LandTitleBought","type":"event"}
 ]`
 
 func ListenSmartContractEvents() {
@@ -82,6 +84,7 @@ func ListenSmartContractEvents() {
 				fmt.Println("tokenId:", tokenId.String())
 				fmt.Println("owner:", owner.Hex())
 				fmt.Println("metaFields:", metaFields)
+				fmt.Println("TxHash:", vLog.TxHash.Hex())
 
 				// Extract UUID from metaFields
 				uuid := ""
@@ -139,6 +142,7 @@ func ListenSmartContractEvents() {
 				fmt.Println("--- OwnerRegistered Event ---")
 				fmt.Println("wallet:", wallet.Hex())
 				fmt.Println("nameHash:", nameHash)
+				fmt.Println("TxHash:", vLog.TxHash.Hex())
 
 				// อัพเดต Status ใน user_verification เป็น on-chain
 				// ต้อง import "landchain/config" และ "landchain/entity"
@@ -155,6 +159,35 @@ func ListenSmartContractEvents() {
 				} else {
 					log.Println("user_verification status updated to on-chain for wallet:", walletLower)
 				}
+
+			case "SaleInfoSet":
+				// tokenId (indexed) = vLog.Topics[1]
+				// price (not indexed) = vLog.Data (first 32 bytes)
+				// buyer (indexed) = vLog.Topics[2]
+				// owner (indexed) = vLog.Topics[3]
+				tokenId := new(big.Int).SetBytes(vLog.Topics[1].Bytes())
+				price := new(big.Int).SetBytes(vLog.Data[:32])
+				buyer := common.HexToAddress(vLog.Topics[2].Hex())
+				owner := common.HexToAddress(vLog.Topics[3].Hex())
+				fmt.Println("--- SaleInfoSet Event ---")
+				fmt.Println("tokenId:", tokenId.String())
+				fmt.Println("price:", price.String())
+				fmt.Println("buyer:", buyer.Hex())
+				fmt.Println("owner:", owner.Hex())
+				fmt.Println("TxHash:", vLog.TxHash.Hex())
+
+			case "LandTitleBought":
+				// tokenId (indexed) = vLog.Topics[1]
+				// seller (indexed) = vLog.Topics[2]
+				// buyer (indexed) = vLog.Topics[3]
+				tokenId := new(big.Int).SetBytes(vLog.Topics[1].Bytes())
+				seller := common.HexToAddress(vLog.Topics[2].Hex())
+				buyer := common.HexToAddress(vLog.Topics[3].Hex())
+				fmt.Println("--- LandTitleBought Event ---")
+				fmt.Println("tokenId:", tokenId.String())
+				fmt.Println("seller:", seller.Hex())
+				fmt.Println("buyer:", buyer.Hex())
+				fmt.Println("TxHash:", vLog.TxHash.Hex())
 			}
 		}
 	}
