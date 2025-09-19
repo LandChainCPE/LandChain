@@ -76,34 +76,6 @@ function LogoutWallet() {
   localStorage.removeItem("isLogin");
 }
 
-/** บันทึกข้อมูลที่ดิน (multipart/form-data) */
-// async function RegisterLand(
-//   DataCreateLand: Record<string, any>,
-//   imageFile?: File
-// ) {
-//   const formData = new FormData();
-//   Object.entries(DataCreateLand).forEach(([key, value]) => {
-//     formData.append(key, value != null ? String(value) : "");
-//   });
-//   if (imageFile) formData.append("deed_image", imageFile);
-
-//   // debug + ensure header แนบจริง
-//   const headers = { ...getAuthHeaders() };
-//   console.log("RegisterLand -> auth headers:", headers);
-
-//   try {
-//     // ส่ง explicit headers (axios จะไม่ override multipart Content-Type)
-//     const res = await api.post("/user/userregisland", formData, { headers });
-//     return { result: res.data, response: res };
-//   } catch (err: any) {
-//     const resp = err?.response;
-//     let result: any = null;
-//     try { result = resp?.data ?? null } catch { result = null }
-//     return { result, response: resp ?? err };
-//   }
-// }
-
-
 async function RegisterLand(payload: any) {
   const requestOptions = {
     method: "POST",
@@ -178,6 +150,15 @@ async function GetUserinfoByID(userId: string) {
   return { response, result };
 }
 
+async function GetLandtitlesByUserID(userId: string) {
+  const response = await fetch(`${apiUrl}/landtitles/${userId}`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+  const result = await response.json();
+  return { response, result };
+}
+
 export {
   getAuthHeaders,
   CreateAccount,
@@ -189,4 +170,5 @@ export {
   GetDistrict,
   GetSubdistrict,
   GetUserinfoByID,
+  GetLandtitlesByUserID,
 };

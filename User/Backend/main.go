@@ -140,7 +140,7 @@ func main() {
 	userToken.Use(middlewares.Authorizes())
 	userToken.Use(middlewares.CheckTokenOwnership())
 	{
-		userToken.GET("/getdatauserverification/:userid", controller.GetDataUserVerification)
+		userToken.GET("/getdatauserverification/:userid", controller.GetDataUserVerification) //ดึงข้อมูล user_verification
 		//555userToken.GET("/user/info/", controller.GetInfoUserByWalletID)
 		//555userToken.GET("/user/lands", controller.GetLandTitleInfoByWallet)
 		//555userToken.GET("/user/info", controller.GetInfoUserByToken)
@@ -206,6 +206,8 @@ func main() {
 		// CONTROLLER RegisterLand
 		authorized.POST("/user/userregisland", controller.UserRegisLand)
 		authorized.GET("/userinfo/:userId", controller.GetUserinfoByID)
+		authorized.GET("/landtitles/:userid", controller.GetLandtitlesByUserID) //ดึงข้อมูล landtitles
+		// authorized.GET("/land_verification/:userid", controller.GetLandVerificationByUserID) //ดึงข้อมูล land_verification
 	}
 
 	// 🌐 Public routes (outside authorized groups)

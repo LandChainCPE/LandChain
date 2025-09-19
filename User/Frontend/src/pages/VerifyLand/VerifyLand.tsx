@@ -3,6 +3,7 @@ import { Upload, FileText, MapPin, User, CheckCircle, AlertCircle, Loader2, Shie
 import { Container } from 'react-bootstrap';
 import './VerifyLand.css';   // ✅ import CSS แยกไฟล์
 
+
 interface LandDeed {
   id: string;
   title: string;
@@ -202,9 +203,15 @@ const VerifyLand: React.FC = () => {
                       <p>{selectedDeed.location}</p>
                     </div>
 
+                    {/* Add spacing */}
+                    <div style={{ marginTop: '1rem' }}></div>
+
                     <div className="hash-display">
-                      <Hash className="icon-small" />
-                      <span>{selectedDeed.documentHash}</span>
+                      <label>Wallet ID</label>
+                    </div>
+
+                    <div className="hash-display">
+                      <label>Signature</label>
                     </div>
                   </div>
 

@@ -12,6 +12,7 @@ import {
 import { GetAllPetition } from "../../service/https/jib/jib";
 import { UserCheck, CheckSquare } from "react-feather"; // Assuming 'react-feather' contains the User and Home icons
 import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";
+import { GetLandtitlesByUserID } from "../../service/https/garfield/http";
 import "./UserDashboard.css";
 
 
@@ -247,11 +248,14 @@ const StatCard = ({ title, value, sub }: { title: React.ReactNode; value: React.
 export default function UserProfilePage() {
   // State สำหรับ user info
   const [userInfo, setUserInfo] = useState<{ firstName?: string; lastName?: string; email?: string; user_verification_id?: number }>({});
-  const [titles, setTitles] = useState<LandTitle[]>([]);
+  const [titles, setTitles] = useState<LandTitle[]>([]); // ที่ดินของผู้ใช้
+  const [allTitles, setAllTitles] = useState<LandTitle[]>([]); // ที่ดินทั้งหมด
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [isLoadingTitles, setIsLoadingTitles] = useState(true);
+  const [isLoadingAllTitles, setIsLoadingAllTitles] = useState(true);
   const [userError, setUserError] = useState<string | null>(null);
   const [titlesError, setTitlesError] = useState<string | null>(null);
+  const [allTitlesError, setAllTitlesError] = useState<string | null>(null);
   useEffect(() => {
     const user_id = localStorage.getItem("user_id") || "";
     console.log("User id:", user_id);
@@ -399,32 +403,23 @@ export default function UserProfilePage() {
       try {
         setIsLoadingTitles(true);
         setTitlesError(null);
-        console.log("Fetching land titles...");
-        const data = await GetLandTitleInfoByWallet();
-        console.log("Land titles API response:", data);
-
-        // ตรวจสอบว่า API response มี tokens array หรือไม่
-        if (data && data.tokens && Array.isArray(data.tokens)) {
-          console.log("Processing titles data from tokens:", data.tokens);
-          const processedTitles = data.tokens.map(processLandTitleData);
-          console.log("Processed titles:", processedTitles);
-          setTitles(processedTitles);
-        } else if (data && Array.isArray(data)) {
-          // กรณีที่ API ส่งกลับเป็น array โดยตรง
-          console.log("Processing titles data as array:", data);
-          const processedTitles = data.map(processLandTitleData);
-          console.log("Processed titles:", processedTitles);
-          setTitles(processedTitles);
-        } else if (data === null || data === undefined || (data.tokens && data.tokens.length === 0)) {
-          console.log("No land titles found");
+        const user_id = localStorage.getItem("user_id") || "";
+        if (!user_id) {
+          setTitlesError("ไม่พบ User ID");
           setTitles([]);
+          setIsLoadingTitles(false);
+          return;
+        }
+        const { result } = await GetLandtitlesByUserID(user_id);
+        console.log("API landtitle result:", result); // Debug API response
+        if (Array.isArray(result)) {
+          const processedTitles = result.map(processLandTitleData);
+          setTitles(processedTitles);
         } else {
-          console.log("Invalid data format:", data);
           setTitlesError("รูปแบบข้อมูลที่ดินไม่ถูกต้อง");
           setTitles([]);
         }
       } catch (error) {
-        console.error("Failed to fetch land titles:", error);
         setTitlesError("เกิดข้อผิดพลาดในการโหลดข้อมูลที่ดิน");
         setTitles([]);
       } finally {
@@ -432,7 +427,33 @@ export default function UserProfilePage() {
       }
     }
 
+    async function fetchAllLandTitles() {
+      try {
+        setIsLoadingAllTitles(true);
+        setAllTitlesError(null);
+        // TODO: เปลี่ยนเป็น API ที่ดึงข้อมูลที่ดินทั้งหมด เช่น GetAllLandtitles()
+        // ตัวอย่าง mock API:
+        // const { result } = await GetAllLandtitles();
+        // สำหรับตัวอย่างนี้จะใช้ GetLandtitlesByUserID("all")
+        const { result } = await GetLandtitlesByUserID("all");
+        console.log("API all landtitle result:", result);
+        if (Array.isArray(result)) {
+          const processedTitles = result.map(processLandTitleData);
+          setAllTitles(processedTitles);
+        } else {
+          setAllTitlesError("รูปแบบข้อมูลที่ดินทั้งหมดไม่ถูกต้อง");
+          setAllTitles([]);
+        }
+      } catch (error) {
+        setAllTitlesError("เกิดข้อผิดพลาดในการโหลดข้อมูลที่ดินทั้งหมด");
+        setAllTitles([]);
+      } finally {
+        setIsLoadingAllTitles(false);
+      }
+    }
+
     fetchLandTitles();
+    fetchAllLandTitles();
   }, []);
 
   return (
@@ -650,6 +671,92 @@ export default function UserProfilePage() {
                       <tr>
                         <td colSpan={6} className="empty-cell">
                           ยังไม่มีรายการที่ดินบนเชน — เริ่มต้นด้วยการลงทะเบียนโฉนดแรกของคุณ
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+        {/* ตารางใหม่: แสดง landtitle ทั้งหมด */}
+        <CardHeader>
+          <CardTitle>รายการที่ดินทั้งหมด</CardTitle>
+          <CardDescription>
+            {isLoadingAllTitles ? "กำลังโหลดข้อมูลที่ดินทั้งหมด..." : allTitlesError ? allTitlesError : "รายการที่ดินทั้งหมดในระบบ"}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="titles-content">
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Token ID</th>
+                  <th>เลขโฉนด</th>
+                  <th>ที่ตั้ง</th>
+                  <th>ขนาด</th>
+                  <th>สถานะ</th>
+                  <th>การดำเนินการ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {isLoadingAllTitles ? (
+                  <tr>
+                    <td colSpan={6} className="empty-cell">
+                      <LoadingSpinner className="icon-lg" style={{ margin: '0 auto' }} />
+                      <div style={{ marginTop: '8px' }}>กำลังโหลดข้อมูลที่ดินทั้งหมด...</div>
+                    </td>
+                  </tr>
+                ) : allTitlesError ? (
+                  <tr>
+                    <td colSpan={6} className="empty-cell">
+                      <div style={{ color: '#dc2626', marginBottom: '8px' }}>⚠️ {allTitlesError}</div>
+                      <Button variant="outline" onClick={() => window.location.reload()}>
+                        ลองใหม่
+                      </Button>
+                    </td>
+                  </tr>
+                ) : (
+                  <>
+                    {allTitles.map((t, index) => (
+                      <tr key={t.tokenId || `alltitle-${index}`} className="row-hover">
+                        <td>
+                          <code className="code">{t.tokenId || '-'}</code>
+                        </td>
+                        <td>{t.landNo || '-'}</td>
+                        <td>
+                          <div className="loc">
+                            <MapPin className="icon-xs text-muted" />
+                            <span>{t.location || '-'}</span>
+                          </div>
+                        </td>
+                        <td>{t.area || '-'}</td>
+                        <td>
+                          <StatusPill status={t.status || 'under_review'} />
+                        </td>
+                        <td>
+                          <div className="actions">
+                            <Button variant="outline" className="btn-sm" onClick={() => navigate(`/titles/${t.tokenId}`)}>
+                              รายละเอียด
+                            </Button>
+                            <Button variant="outline" className="btn-sm" onClick={() => navigate(`/listings/new?tokenId=${t.tokenId}`)}>
+                              ประกาศขาย
+                            </Button>
+                            {t.contract && (
+                              <div className="inline-actions">
+                                <ExplorerLink txOrContract={t.contract} label="Explorer" />
+                                <Copyable text={t.contract} />
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {allTitles.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="empty-cell">
+                          ยังไม่มีรายการที่ดินในระบบ
                         </td>
                       </tr>
                     )}
