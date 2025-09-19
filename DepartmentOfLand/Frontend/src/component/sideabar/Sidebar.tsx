@@ -16,9 +16,9 @@ const Sidebar: React.FC = () => {
   const navigate = useNavigate();
 
   const menus = [
-    { label: "หน้าหลัก", icon: <HomeOutlined />, path: "/" },
+    { label: "หน้าหลัก", icon: <HomeOutlined />, path: "/main" },
     { label: "รายการดำเนินการ", icon: <UnorderedListOutlined />, path: "/operations" },
-    { label: "ตรวจสอบโฉนดที่ดิน", icon: <SearchOutlined />, path: "/verify" },
+    { label: "ตรวจสอบโฉนดที่ดิน", icon: <SearchOutlined />, path: "/verifyland" },
     { label: "โอนกรรมสิทธิ์", icon: <SwapOutlined />, path: "/transfer" },
     { label: "ลงทะเบียนโฉนดที่ดิน", icon: <FileProtectOutlined />, path: "/regisland" },
     { label: "ตรวจสอบคำร้อง", icon: <FileTextOutlined />, path: "/statepetition" },

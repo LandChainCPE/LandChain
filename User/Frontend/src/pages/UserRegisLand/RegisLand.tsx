@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Select, Card, Typography, Spin, message, DatePicker, Modal } from "antd";
-import { GetBranches, GetProvinces, GetTimeSlots, CreateBooking, GetServiceTypes, GetAvailableSlots, GetBookingStatus } from "../../service/https/index";
+import { GetBranches, GetProvinces, GetTimeSlots, CreateBooking, GetServiceTypes, GetAvailableSlots, GetBookingStatus } from "../../service/https/jo/index";
 import type { BookingInterface } from "../../interfaces/Booking";
 import dayjs from "dayjs";
-import axios from "axios";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -84,7 +83,7 @@ const BookingCalendar = () => {
       }
 
       try {
-        const bookingsResponse = await GetBookingStatus(currentUserId, selectedDate, selectedBranch, selectedServiceType);
+        const bookingsResponse = await GetBookingStatus(currentUserId, selectedDate, selectedBranch, selectedServiceType, "");
         setUserBookings(bookingsResponse);
 
         // Filter bookings that match current selection
@@ -226,7 +225,8 @@ const BookingCalendar = () => {
           currentUserId,
           selectedDate!,
           selectedBranch!,
-          selectedServiceType!
+          selectedServiceType!,
+          "" // pass empty string to match expected string type
         );
         setUserBookings(bookingsResponse);
         

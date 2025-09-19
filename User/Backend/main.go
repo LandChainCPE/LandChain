@@ -31,6 +31,9 @@ func main() {
 	// เริ่มต้น Scheduler สำหรับลบการจองที่หมดอายุ
 	controller.StartBookingCleanupScheduler()
 
+	//อ่านค่าการตอบกลับจาก Smartcontract (ควรใช้ go routine)
+	go controller.ListenSmartContractEvents()
+
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
@@ -53,21 +56,21 @@ func main() {
 			currentUser, exists := c.Get("currentUser")
 			if !exists {
 				c.JSON(http.StatusInternalServerError, gin.H{
-					"error": "Current user not found in context",
+					"error":    "Current user not found in context",
 					"is_admin": false,
 				})
 				return
 			}
-			
+
 			user := currentUser.(entity.Users)
 			c.JSON(http.StatusOK, gin.H{
-				"is_admin": true,
-				"role_id": user.RoleID,
-				"role_name": user.Role.Role,
-				"user_id": user.ID,
+				"is_admin":       true,
+				"role_id":        user.RoleID,
+				"role_name":      user.Role.Role,
+				"user_id":        user.ID,
 				"wallet_address": user.Metamaskaddress,
-				"verified_at": "server-side-middleware",
-				"message": "Admin role verified by secure middleware",
+				"verified_at":    "server-side-middleware",
+				"message":        "Admin role verified by secure middleware",
 			})
 		})
 	}
@@ -79,6 +82,7 @@ func main() {
 	debugAuth := r.Group("")
 	debugAuth.Use(middlewares.Authorizes())
 	{
+
 		debugAuth.GET("/debug/myinfo", func(c *gin.Context) {
 			currentWallet, _ := c.Get("wallet")
 			db := config.DB()
@@ -102,14 +106,20 @@ func main() {
 	admin.Use(middlewares.Authorizes())
 	admin.Use(middlewares.CheckAdminRole())
 	{
-		admin.GET("/getbookingdata", controller.GetBookingData)
-		admin.GET("/getdatauserforverify/:bookingID", controller.GetDataUserForVerify)
-		admin.POST("/verifywalletid/:bookingID", controller.VerifyWalletID)
+		//----- อรรถ -------
+		admin.GET("/getbookingdata", controller.GetBookingData)   //กรมที่ดินดึงข้อมูลการจอง User ทั้งหมด มาแสดง
+		admin.GET("/getdatauserforverify/:bookingID", controller.GetDataUserForVerify)  //กรมที่ดิน ดึงข้อมูลการจอง มาแสดงว่าเป็น ชื่อ นามสกุล walletid อะไร
+		admin.POST("/verifywalletid/:bookingID", controller.VerifyWalletID)   //กรมที่ดินกดยืนยัน ระบบ ทำการเซ็นข้อมูล เป็น Signature เก็บลง user_verification 
+		admin.POST("/verifylandtitleid/:LandtitleID", controller.VerifyLandtitleID) //กรมที่ดินกดยืนยัน ระบบทำการดึงข้อมูลของที่ดิน รวมเป็น metadata ทำการเซ็นข้อมูล เก็บลง land_verification
+		admin.GET("/getalllanddata", controller.GetAllLandData)   //ดึงข้อมูล โฉนดมาแสดง ทั้งหมด
+		//admin.GET("getdatauserverification/:userid", controller.GetDataUserVerification)   //เป็นของ User ดึงข้อมูล ผู้ใช้ WalletID  NameHash Signature  เพื่อลงทะเบียนผู้ใช้ลงBlockchain
+		//จบ----- อรรถ -------
+
 		admin.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
 		admin.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)
 		admin.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
-		
 	}
+
 
 	// 👤 User routes with ownership validation - ต้องเป็นเจ้าของข้อมูลหรือ admin
 	userOwnership := r.Group("")
@@ -155,10 +165,12 @@ func main() {
 		authorized.GET("/district/:id", controller.GetDistrict)
 		authorized.GET("/subdistrict/:id", controller.GetSubdistrict)
 		authorized.GET("/landtitle/by-token/:token_id", controller.GetLandtitleIdByTokenId)
-		authorized.POST("/location", controller.CreateLocation) // สร้างโฉนดที่ดิน
-		authorized.GET("/provinces", controller.GetProvince) // ดึงข้อมูลจังหวัด
-		authorized.GET("/branches", controller.GetBranch)    // ดึงข้อมูลสาขา
-		authorized.GET("/time", controller.GetTime)          // ดึงข้อมูลช่วงเวลา
+		authorized.POST("/location", controller.CreateLocation)               // สร้างโฉนดที่ดิน
+		authorized.GET("/provinces", controller.GetProvince)                  // ดึงข้อมูลจังหวัด
+		authorized.GET("/provinces/filter", controller.GetProvincesForFilter) // ดึงข้อมูลจังหวัดสำหรับ filter
+		authorized.GET("/branches", controller.GetBranch)                     // ดึงข้อมูลสาขา
+		authorized.GET("/branches/filter", controller.GetBranchesForFilter)   // ดึงข้อมูลสาขาสำหรับ filter
+		authorized.GET("/time", controller.GetTime)                           // ดึงข้อมูลช่วงเวลา
 		authorized.GET("/bookings", controller.GetBookingsByDateAndBranch)
 		authorized.GET("/service-types", controller.GetServiceType)          // ดึงข้อมูลประเภทบริการ
 		authorized.GET("/bookings/checklim", controller.CheckAvailableSlots) // ดึงข้อมูลการจองตาม ID
@@ -194,6 +206,7 @@ func main() {
 
 		// CONTROLLER RegisterLand
 		authorized.POST("/user/userregisland", controller.UserRegisLand)
+		authorized.GET("/userinfo/:userId", controller.GetUserinfoByID)
 	}
 
 	// 🌐 Public routes (outside authorized groups)

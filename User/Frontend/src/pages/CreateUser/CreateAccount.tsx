@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Container } from 'react-bootstrap';
 import Logo from "../../assets/LogoLandchainBlack.png";
 import { useNavigate } from 'react-router-dom';
 import './CreateAccount.css';
@@ -38,62 +39,83 @@ const CreateAccount = () => {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light">
-      <div className="card-container">
-        <img src={Logo} alt="LandChain Logo" className="logo" />
-        <h2>Create Account</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <label htmlFor="firstname" className="form-label">First Name</label>
-              <input
-                type="text"
-                id="firstname"
-                value={firstname}
-                onChange={(e) => setFirstname(e.target.value)}
-                required
-                className="form-control"
-              />
-            </div>
-            <div className="col-md-6 mb-3">
-              <label htmlFor="lastname" className="form-label">Last Name</label>
-              <input
-                type="text"
-                id="lastname"
-                value={lastname}
-                onChange={(e) => setLastname(e.target.value)}
-                required
-                className="form-control"
-              />
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <label htmlFor="phonenumber" className="form-label">Phone Number</label>
-              <input
-                type="text"
-                id="phonenumber"
-                value={phonenumber}
-                onChange={(e) => setPhonenumber(e.target.value)}
-                required
-                className="form-control"
-              />
-            </div>
-            <div className="col-md-6 mb-3">
-              <label htmlFor="email" className="form-label">Email</label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="form-control"
-              />
-            </div>
-          </div>
-          <button type="submit" className="btn btn-primary w-100">Confirm</button>
-        </form>
+    <div className="create-account-container">
+      <div className="floating-shapes">
+        <div className="shape-1"></div>
+        <div className="shape-2"></div>
+        <div className="shape-3"></div>
+        <div className="shape-4"></div>
       </div>
+
+      <Container className="main-container">
+        <div className="form-section">
+          <div className="glass-card">
+            <div className="card-glow"></div>
+            <div className="form-card-body">
+              <div className="form-header">
+                <img src={Logo} alt="LandChain Logo" className="logo" />
+                <h4>สร้างบัญชีผู้ใช้</h4>
+              </div>
+              <form onSubmit={handleSubmit}>
+                <div className="row">
+                  <div className="col-md-6 mb-3">
+                    <label htmlFor="firstname" className="form-label">ชื่อ</label>
+                    <input
+                      type="text"
+                      id="firstname"
+                      value={firstname}
+                      onChange={(e) => setFirstname(e.target.value)}
+                      required
+                      className="form-control"
+                    />
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <label htmlFor="lastname" className="form-label">นามสกุล</label>
+                    <input
+                      type="text"
+                      id="lastname"
+                      value={lastname}
+                      onChange={(e) => setLastname(e.target.value)}
+                      required
+                      className="form-control"
+                    />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-6 mb-3">
+                    <label htmlFor="phonenumber" className="form-label">เบอร์โทรศัพท์</label>
+                    <input
+                      type="text"
+                      id="phonenumber"
+                      value={phonenumber}
+                      onChange={(e) => setPhonenumber(e.target.value)}
+                      required
+                      className="form-control"
+                    />
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <label htmlFor="email" className="form-label">อีเมล</label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="form-control"
+                    />
+                  </div>
+                </div>
+                <button type="submit" className="btn btn-primary w-100">
+                  <div className="btn-content">
+                    <span>ยืนยัน</span>
+                    <div className="btn-arrow">→</div>
+                  </div>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </Container>
     </div>
   );
 };

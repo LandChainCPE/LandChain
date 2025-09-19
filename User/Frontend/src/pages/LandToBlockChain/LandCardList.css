@@ -1,0 +1,371 @@
+/* LandCardList Component Styles */
+
+.land-list-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 2rem 0;
+}
+
+.land-list-wrapper {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.land-list-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.land-list-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #1a202c;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.land-list-subtitle {
+  font-size: 1.125rem;
+  color: #4a5568;
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+/* Loading Styles */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  gap: 1rem;
+}
+
+.loading-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  font-size: 1.125rem;
+  color: #4a5568;
+}
+
+/* Land Cards Grid */
+.land-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+  .land-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .land-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Land Card Styles */
+.land-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  overflow: hidden;
+}
+
+.land-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.land-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border-color: #667eea;
+}
+
+.land-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* Verified Badge */
+.verified-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2rem;
+  height: 2rem;
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+  z-index: 10;
+}
+
+.verified-badge svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: white;
+  stroke-width: 3;
+}
+
+/* Card Header */
+.land-card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-right: 3rem; /* Space for verified badge */
+}
+
+.land-card-icon {
+  width: 3rem;
+  height: 3rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.land-card-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: white;
+}
+
+.land-card-number h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Card Content */
+.land-card-content {
+  margin-bottom: 1.5rem;
+}
+
+.land-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: #718096;
+  font-weight: 500;
+  min-width: fit-content;
+}
+
+.info-value {
+  font-size: 0.875rem;
+  color: #2d3748;
+  font-weight: 500;
+  text-align: right;
+  flex: 1;
+}
+
+/* Card Footer */
+.land-card-footer {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chain-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-indicator {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.chain-status.on-chain .status-indicator {
+  background-color: #48bb78;
+  box-shadow: 0 0 0 4px rgba(72, 187, 120, 0.3);
+}
+
+.chain-status.off-chain .status-indicator {
+  background-color: #f56565;
+  box-shadow: 0 0 0 4px rgba(245, 101, 101, 0.3);
+}
+
+.status-text {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.view-details {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: #667eea;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.land-card:hover .view-details {
+  opacity: 1;
+}
+
+.view-details svg {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.land-card:hover .view-details svg {
+  transform: translateX(2px);
+}
+
+/* Summary Stats */
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #718096;
+  font-weight: 500;
+}
+
+/* Animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .land-list-title {
+    font-size: 2rem;
+  }
+  
+  .land-list-subtitle {
+    font-size: 1rem;
+  }
+  
+  .land-card {
+    padding: 1rem;
+  }
+  
+  .land-card-header {
+    padding-right: 2.5rem;
+  }
+  
+  .verified-badge {
+    width: 1.75rem;
+    height: 1.75rem;
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+  
+  .verified-badge svg {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  .summary-stats {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .land-list-wrapper {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .land-list-wrapper {
+    padding: 0 2rem;
+  }
+}

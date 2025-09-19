@@ -7,12 +7,7 @@ import { GetTags,CreateLandPost, getLandtitleIdByTokenId } from "../../service/h
 import { ethers } from "ethers";
 import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";
 import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield/http";
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-
-const MAPBOX_TOKEN =
-  (import.meta as any)?.env?.VITE_MAPBOX_TOKEN ||
-  'pk.eyJ1Ijoiam9oYXJ0MjU0NiIsImEiOiJjbWVmZ3YzMGcwcTByMm1zOWRkdjJkNTd0In0.DBDjy1rBDmc8A4PN3haQ4A';
+import MapPicker from "../../components/MapPicker";
 
 type Coordinate = { lng: number; lat: number };
 
@@ -109,6 +104,210 @@ function toEth(weiStr?: string): string {
   }
 }
 
+// ฟังก์ชันสำหรับคำนวณพิกัดและ zoom level จากชื่อพื้นที่ (ประมาณการ)
+function getLocationCoordinates(provinceName: string, districtName?: string, subdistrictName?: string): { center: [number, number], zoom: number } {
+  // พิกัดละเอียดของอำเภอและตำบลต่างๆ
+  const detailedCoordinates: Record<string, Record<string, Record<string, [number, number]>>> = {
+    "กรุงเทพมหานคร": {
+      "เขตบางรัก": {
+        "แขวงสี่พระยา": [100.5141, 13.7221],
+        "แขวงมหาพฤฒาราม": [100.5089, 13.7185],
+        "แขวงบางรัก": [100.5167, 13.7251]
+      },
+      "เขตสาทร": {
+        "แขวงสีลม": [100.5330, 13.7278],
+        "แขวงสุริยวงศ์": [100.5289, 13.7245]
+      }
+    },
+    "เชียงใหม่": {
+      "อำเภอเมืองเชียงใหม่": {
+        "ตำบลศรีภูมิ": [98.9817, 18.7875],
+        "ตำบลพระสิงห์": [98.9853, 18.7874],
+        "ตำบลช่างคลาน": [98.9956, 18.7789]
+      },
+      "อำเภอแม่ริม": {
+        "ตำบลแม่ริม": [98.9289, 18.8756],
+        "ตำบลสันโป่ง": [98.9156, 18.8634]
+      }
+    },
+    "ขอนแก่น": {
+      "อำเภอเมืองขอนแก่น": {
+        "ตำบลในเมือง": [102.8431, 16.4322],
+        "ตำบลศิลา": [102.8567, 16.4289]
+      }
+    },
+    "ชลบุรี": {
+      "อำเภอเมืองชลบุรี": {
+        "ตำบลเสม็ด": [100.9847, 13.3611],
+        "ตำบลบ้านสวน": [100.9734, 13.3756]
+      },
+      "อำเภอพัทยา": {
+        "ตำบลหนองปรือ": [100.8767, 12.9234]
+      }
+    },
+    "ภูเก็ต": {
+      "อำเภอเมืองภูเก็ต": {
+        "ตำบลตลาดใหญ่": [98.3923, 7.8804],
+        "ตำบลรัษฎา": [98.3756, 7.8934]
+      }
+    },
+    "อุบลราชธานี": {
+      "อำเภอเมืองอุบลราชธานี": {
+        "ตำบลในเมือง": [104.8472, 15.2286],
+        "ตำบลแจระแม": [104.8567, 15.2289]
+      },
+      "อำเภอตระการพืชผล": {
+        "ตำบลขุหลุ": [104.2817, 15.3206],
+        "ตำบลตระการพืชผล": [104.2956, 15.3134]
+      }
+    }
+  };
+
+  // พิกัดประมาณของจังหวัดต่างๆ ในประเทศไทย (สำหรับ fallback)
+  const provinceCoordinates: Record<string, [number, number]> = {
+    "กรุงเทพมหานคร": [100.5018, 13.7563],
+    "กรุงเทพฯ": [100.5018, 13.7563],
+    "นนทบุรี": [100.5144, 13.8621],
+    "ปทุมธานี": [100.5249, 14.0208],
+    "สมุทรปราการ": [100.5988, 13.5991],
+    "สมุทรสาคร": [100.2737, 13.5472],
+    "สมุทรสงคราม": [100.0024, 13.4106],
+    "เชียงใหม่": [98.9853, 18.7061],
+    "เชียงราย": [99.8325, 19.9105],
+    "แม่ฮ่องสอน": [97.9659, 19.3014],
+    "ลำปาง": [99.4871, 18.2741],
+    "ลำพูน": [99.0016, 18.5745],
+    "อุตรดิตถ์": [100.0992, 17.6302],
+    "แพร่": [100.1405, 18.1447],
+    "น่าน": [100.7734, 18.7838],
+    "พะเยา": [99.8989, 19.1921],
+    "ขอนแก่น": [102.8431, 16.4322],
+    "อุดรธานี": [102.8156, 17.4065],
+    "อุบลราชธานี": [104.8472, 15.2286],
+    "เลย": [101.7223, 17.4860],
+    "หนองคาย": [102.7417, 17.8782],
+    "มหาสารคาม": [103.3020, 16.1851],
+    "ร้อยเอ็ด": [103.6531, 16.0544],
+    "กาฬสินธุ์": [103.5052, 16.4322],
+    "สกลนคร": [104.1482, 17.1547],
+    "นครพนม": [104.7718, 17.4065],
+    "มุกดาหาร": [104.7223, 16.5429],
+    "ยโสธร": [104.1447, 15.7921],
+    "อำนาจเจริญ": [104.6259, 15.8650],
+    "นครราชสีมา": [102.0977, 14.9799],
+    "บุรีรัมย์": [103.1029, 14.9930],
+    "สุรินทร์": [103.4938, 14.8825],
+    "ศีขรภูมิ": [104.0556, 15.1851],
+    "ชัยภูมิ": [102.0310, 15.8065],
+    "นครสวรรค์": [100.1372, 15.6957],
+    "อุทัยธานี": [100.0244, 15.3794],
+    "กำแพงเพชร": [99.5226, 16.4827],
+    "ตาก": [99.1265, 16.8697],
+    "สุโขทัย": [99.7372, 17.0061],
+    "พิษณุโลก": [100.2649, 16.8211],
+    "พิจิตร": [100.3488, 16.4373],
+    "เพชรบูรณ์": [101.1560, 16.4193],
+    "ราชบุรี": [99.8135, 13.5282],
+    "กาญจนบุรี": [99.5329, 14.0227],
+    "สุพรรณบุรี": [100.1217, 14.4744],
+    "นครปฐม": [100.0607, 13.8199],
+    "สระบุรี": [100.9104, 14.5289],
+    "ลพบุรี": [100.6534, 14.7995],
+    "สิงห์บุรี": [100.3975, 14.8938],
+    "อ่างทอง": [100.4549, 14.5896],
+    "พระนครศรีอยุธยา": [100.5692, 14.3532],
+    "อยุธยา": [100.5692, 14.3532],
+    "ชลบุรี": [100.9847, 13.3611],
+    "ระยอง": [101.2538, 12.6868],
+    "จันทบุรี": [102.1038, 12.6103],
+    "ตราด": [102.5150, 12.2436],
+    "ฉะเชิงเทรา": [101.0777, 13.6904],
+    "ปราจีนบุรี": [101.3687, 14.0508],
+    "นครนายก": [101.2130, 14.2069],
+    "สระแก้ว": [102.0645, 13.8241],
+    "เพชรบุรี": [99.9397, 13.1110],
+    "ประจวบคีรีขันธ์": [99.7971, 11.8104],
+    "นครศรีธรรมราช": [99.9631, 8.4304],
+    "กระบี่": [99.0731, 8.0863],
+    "พังงา": [98.5350, 8.4504],
+    "ภูเก็ต": [98.3923, 7.8804],
+    "สุราษฎร์ธานี": [99.3210, 9.1382],
+    "ระนอง": [98.6047, 9.9539],
+    "ชุมพร": [99.1797, 10.4930],
+    "สงขลา": [100.6087, 7.2056],
+    "สตูล": [99.6114, 6.6238],
+    "ตรัง": [99.6114, 7.5563],
+    "พัทลุง": [100.0745, 7.6161],
+    "ปัตตานี": [101.2463, 6.8693],
+    "ยะลา": [101.2804, 6.5397],
+    "นราธิวาส": [101.8253, 6.4254]
+  };
+
+  console.log("🔍 getLocationCoordinates called with:", { provinceName, districtName, subdistrictName });
+
+  // ลำดับการค้นหา: ตำบล -> อำเภอ -> จังหวัด
+  
+  // 1. ถ้ามีตำบลและอำเภอ ให้หาใน detailedCoordinates ก่อน - zoom 16
+  if (subdistrictName && districtName) {
+    const normalizedProvince = provinceName.toLowerCase();
+    const normalizedDistrict = districtName.toLowerCase().replace(/อำเภอ/g, '').trim();
+    const normalizedSubdistrict = subdistrictName.toLowerCase().replace(/ตำบล/g, '').trim();
+    
+    console.log("🔍 Searching for subdistrict:", { normalizedProvince, normalizedDistrict, normalizedSubdistrict });
+    
+    for (const [province, districts] of Object.entries(detailedCoordinates)) {
+      if (province.toLowerCase().includes(normalizedProvince) || normalizedProvince.includes(province.toLowerCase())) {
+        for (const [district, subdistricts] of Object.entries(districts)) {
+          if (district.toLowerCase().includes(normalizedDistrict) || normalizedDistrict.includes(district.toLowerCase())) {
+            for (const [subdistrict, coords] of Object.entries(subdistricts)) {
+              if (subdistrict.toLowerCase().includes(normalizedSubdistrict) || normalizedSubdistrict.includes(subdistrict.toLowerCase())) {
+                console.log("✅ Found subdistrict coordinates:", coords, "zoom: 16");
+                return { center: coords, zoom: 16 };
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // 2. ถ้ามีอำเภอแต่ไม่เจอตำบล ให้หาอำเภอ - zoom 14
+  if (districtName) {
+    const normalizedProvince = provinceName.toLowerCase();
+    const normalizedDistrict = districtName.toLowerCase().replace(/อำเภอ/g, '').trim();
+    
+    console.log("🔍 Searching for district:", { normalizedProvince, normalizedDistrict });
+    
+    for (const [province, districts] of Object.entries(detailedCoordinates)) {
+      if (province.toLowerCase().includes(normalizedProvince) || normalizedProvince.includes(province.toLowerCase())) {
+        for (const [district, subdistricts] of Object.entries(districts)) {
+          if (district.toLowerCase().includes(normalizedDistrict) || normalizedDistrict.includes(district.toLowerCase())) {
+            // ใช้พิกัดของตำบลแรกในอำเภอนั้น
+            const firstSubdistrictCoords = Object.values(subdistricts)[0];
+            if (firstSubdistrictCoords) {
+              console.log("✅ Found district coordinates:", firstSubdistrictCoords, "zoom: 14");
+              return { center: firstSubdistrictCoords, zoom: 14 };
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 3. หาพิกัดจากชื่อจังหวัด - zoom 12
+  for (const [province, coords] of Object.entries(provinceCoordinates)) {
+    if (province.toLowerCase().includes(provinceName.toLowerCase()) || 
+        provinceName.toLowerCase().includes(province.toLowerCase())) {
+      console.log("✅ Found province coordinates:", coords, "zoom: 12");
+      return { center: coords, zoom: 12 };
+    }
+  }
+
+  // ถ้าไม่เจออะไรเลย ใช้พิกัดกรุงเทพเป็นค่าเริ่มต้น
+  console.log("⚠️ No coordinates found, using Bangkok default");
+  return { center: [100.5018, 13.7563], zoom: 12 };
+}
+
 const SellPost = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -131,6 +330,8 @@ const SellPost = () => {
   const [loadingD, setLoadingD] = useState(false);
   const [loadingS, setLoadingS] = useState(false);
   const [mapCoords, setMapCoords] = useState<Coordinate[]>([]);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([100.5018, 13.7563]); // Default: Bangkok
+  const [mapZoom, setMapZoom] = useState<number>(12); // Default zoom level
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -147,6 +348,15 @@ const SellPost = () => {
       user_id: "",
   });
 
+  // สำหรับเก็บข้อมูลที่อยู่ที่รอการประมวลผล
+  const [pendingLocationData, setPendingLocationData] = useState<{
+    provinceName: string;
+    districtName: string;
+    subdistrictName: string;
+    landtitleId: string;
+  } | null>(null);
+
+  // Enhanced CSS styles using the color scheme
   const styles = {
     card: {
       background: "linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.9))",
@@ -280,12 +490,80 @@ const handleSelectLand = async (tokenID: string) => {
     const res = await getLandtitleIdByTokenId(tokenID);
     const landtitleId = res?.land_id ? String(res.land_id) : tokenID; // fallback เป็น tokenID ถ้าไม่เจอ
 
-    setFormData((prev) => ({
-      ...prev,
-      land_id: landtitleId
-    }));
-    console.log("Selected land token:", tokenID, "Mapped land_id:", landtitleId);
+    // หาข้อมูล metadata ของโฉนดที่เลือก
+    const selectedLandData = landMetadata.find(land => land.tokenID === tokenID);
+    
+    // Debug: ดูข้อมูลใน console
+    console.log("🔍 Selected Token ID:", tokenID);
+    console.log("📋 Selected Land Data:", selectedLandData);
+    console.log("🏛️ All Provinces:", provinces);
+    console.log("🏘️ All Districts:", districts);
+    console.log("🏞️ All Subdistricts:", subdistricts);
+    
+    if (selectedLandData?.meta) {
+      const provinceName = selectedLandData.meta["Province"] || "";
+      const districtName = selectedLandData.meta["District"] || "";
+      const subdistrictName = selectedLandData.meta["Subdistrict"] || "";
+
+      console.log("🎯 Found location data:", { provinceName, districtName, subdistrictName });
+
+      // คำนวณพิกัดและ zoom level สำหรับแผนที่
+      const locationData = getLocationCoordinates(provinceName, districtName, subdistrictName);
+      console.log("📍 Calculated location data:", locationData);
+      
+      // อัปเดตพิกัดและ zoom level ของแผนที่
+      setMapCenter(locationData.center);
+      setMapZoom(locationData.zoom);
+
+      // บันทึกข้อมูลสำหรับการค้นหา
+      setPendingLocationData({
+        provinceName,
+        districtName,
+        subdistrictName,
+        landtitleId
+      });
+
+      // หา ID ของจังหวัดจากชื่อ
+      const foundProvince = provinces.find(p => 
+        p.name_th?.toLowerCase().includes(provinceName.toLowerCase()) ||
+        provinceName.toLowerCase().includes(p.name_th?.toLowerCase())
+      );
+
+      console.log("🔍 Province search result:", foundProvince);
+      console.log("🔍 Province search criteria:", provinceName);
+
+      if (foundProvince) {
+        console.log("✅ Found province:", foundProvince);
+        
+        // เซ็ตจังหวัดและรีเซ็ตอำเภอ/ตำบล
+        setFormData((prev) => ({
+          ...prev,
+          landtitle_id: landtitleId,
+          province_id: String(foundProvince.ID),
+          district_id: "",
+          subdistrict_id: ""
+        }));
+      } else {
+        console.log("Province not found:", provinceName);
+        setFormData((prev) => ({
+          ...prev,
+          landtitle_id: landtitleId,
+          province_id: "",
+          district_id: "",
+          subdistrict_id: ""
+        }));
+      }
+    } else {
+      setPendingLocationData(null);
+      setFormData((prev) => ({
+        ...prev,
+        landtitle_id: landtitleId
+      }));
+    }
+
+    console.log("Selected land token:", tokenID, "Mapped landtitle_id:", landtitleId);
   } catch (err) {
+    setPendingLocationData(null);
     setFormData((prev) => ({
       ...prev,
       land_id: tokenID // fallback
@@ -400,6 +678,115 @@ const handleUpload = (file: File) => {
     return () => ctrl.abort();
   }, [formData.district_id]);
 
+  // useEffect สำหรับจัดการข้อมูลที่อยู่จาก blockchain เมื่อ districts โหลดเสร็จ
+  useEffect(() => {
+    console.log("🏘️ Districts useEffect triggered:", { pendingLocationData, districtsCount: districts.length });
+    
+    if (!pendingLocationData || !districts.length) return;
+
+    const { districtName } = pendingLocationData;
+    
+    console.log("🔍 Searching for district:", districtName);
+    console.log("🏘️ Available districts:", districts.map(d => ({ id: d.ID, name: d.name_th })));
+
+    // Normalize ชื่อสำหรับการเปรียบเทียบ
+    const normalizeText = (text: string) => {
+      return text.toLowerCase()
+        .replace(/อำเภอ/g, '')
+        .replace(/เมือง/g, '')
+        .replace(/\s+/g, '')
+        .trim();
+    };
+
+    const normalizedDistrictName = normalizeText(districtName);
+    console.log("🔍 Normalized district name:", normalizedDistrictName);
+
+    // ค้นหาอำเภอด้วยวิธีต่างๆ
+    const foundDistrict = districts.find(d => {
+      if (!d.name_th) return false;
+      
+      const normalizedDbName = normalizeText(d.name_th);
+      
+      // ตรวจสอบการตรงกันแบบต่างๆ
+      return (
+        d.name_th === districtName || // ตรงทุกตัวอักษร
+        normalizedDbName === normalizedDistrictName || // ตรงหลัง normalize
+        normalizedDbName.includes(normalizedDistrictName) || // มีส่วนที่ตรง
+        normalizedDistrictName.includes(normalizedDbName) // ชื่อใน blockchain มีส่วนที่ตรงกับฐานข้อมูล
+      );
+    });
+
+    if (foundDistrict) {
+      console.log("✅ Found district:", foundDistrict);
+      
+      // เซ็ตอำเภอ
+      setFormData((prev) => ({
+        ...prev,
+        district_id: String(foundDistrict.ID)
+      }));
+    } else {
+      console.log("❌ District not found:", districtName);
+      console.log("🔍 Available district names:", districts.map(d => d.name_th));
+    }
+  }, [districts, pendingLocationData]);
+
+  // useEffect สำหรับจัดการข้อมูลที่อยู่จาก blockchain เมื่อ subdistricts โหลดเสร็จ
+  useEffect(() => {
+    console.log("🏞️ Subdistricts useEffect triggered:", { pendingLocationData, subdistrictsCount: subdistricts.length });
+    
+    if (!pendingLocationData || !subdistricts.length) return;
+
+    const { subdistrictName } = pendingLocationData;
+    
+    console.log("🔍 Searching for subdistrict:", subdistrictName);
+    console.log("🏞️ Available subdistricts:", subdistricts.map(s => ({ id: s.ID, name: s.name_th })));
+
+    // Normalize ชื่อสำหรับการเปรียบเทียบ
+    const normalizeText = (text: string) => {
+      return text.toLowerCase()
+        .replace(/ตำบล/g, '')
+        .replace(/แขวง/g, '')
+        .replace(/เขต/g, '')
+        .replace(/\s+/g, '')
+        .trim();
+    };
+
+    const normalizedSubdistrictName = normalizeText(subdistrictName);
+    console.log("🔍 Normalized subdistrict name:", normalizedSubdistrictName);
+
+    // ค้นหาตำบลด้วยวิธีต่างๆ
+    const foundSubdistrict = subdistricts.find(s => {
+      if (!s.name_th) return false;
+      
+      const normalizedDbName = normalizeText(s.name_th);
+      
+      // ตรวจสอบการตรงกันแบบต่างๆ
+      return (
+        s.name_th === subdistrictName || // ตรงทุกตัวอักษร
+        normalizedDbName === normalizedSubdistrictName || // ตรงหลัง normalize
+        normalizedDbName.includes(normalizedSubdistrictName) || // มีส่วนที่ตรง
+        normalizedSubdistrictName.includes(normalizedDbName) // ชื่อใน blockchain มีส่วนที่ตรงกับฐานข้อมูล
+      );
+    });
+
+    if (foundSubdistrict) {
+      console.log("✅ Found subdistrict:", foundSubdistrict);
+      
+      // เซ็ตตำบล
+      setFormData((prev) => ({
+        ...prev,
+        subdistrict_id: String(foundSubdistrict.ID)
+      }));
+
+      // เคลียร์ pending data เมื่อเสร็จสิ้น
+      setPendingLocationData(null);
+    } else {
+      console.log("❌ Subdistrict not found:", subdistrictName);
+      console.log("🔍 Available subdistrict names:", subdistricts.map(s => s.name_th));
+      setPendingLocationData(null);
+    }
+  }, [subdistricts, pendingLocationData]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
   const { name, value } = e.target;
   if (name === "province_id") {
@@ -426,6 +813,57 @@ useEffect(() => {
   };
   fetchTags();
 }, []);
+
+// useEffect สำหรับอัปเดตแผนที่เมื่อเปลี่ยน dropdown
+useEffect(() => {
+  console.log("🔄 Dropdown useEffect triggered with:", { 
+    province_id: formData.province_id, 
+    district_id: formData.district_id, 
+    subdistrict_id: formData.subdistrict_id 
+  });
+
+  const updateMapFromDropdown = () => {
+    let provinceName = "";
+    let districtName = "";
+    let subdistrictName = "";
+
+    // หาชื่อจังหวัด
+    if (formData.province_id) {
+      const selectedProvince = provinces.find(p => String(p.ID) === String(formData.province_id));
+      provinceName = selectedProvince?.name_th || "";
+      console.log("📍 Found province:", provinceName);
+    }
+
+    // หาชื่ออำเภอ
+    if (formData.district_id) {
+      const selectedDistrict = districts.find(d => String(d.ID) === String(formData.district_id));
+      districtName = selectedDistrict?.name_th || "";
+      console.log("🏘️ Found district:", districtName);
+    }
+
+    // หาชื่อตำบล
+    if (formData.subdistrict_id) {
+      const selectedSubdistrict = subdistricts.find(s => String(s.ID) === String(formData.subdistrict_id));
+      subdistrictName = selectedSubdistrict?.name_th || "";
+      console.log("🏞️ Found subdistrict:", subdistrictName);
+    }
+
+    // อัปเดตแผนที่หากมีการเลือกจังหวัดอย่างน้อย
+    if (provinceName) {
+      const { center, zoom } = getLocationCoordinates(provinceName, districtName, subdistrictName);
+      console.log("🗺️ Updating map from dropdown:", { provinceName, districtName, subdistrictName, center, zoom });
+      console.log("🎯 Setting mapCenter to:", center);
+      console.log("🔍 Setting mapZoom to:", zoom);
+      
+      setMapCenter(center);
+      setMapZoom(zoom);
+    } else {
+      console.log("❌ No province selected, skipping map update");
+    }
+  };
+
+  updateMapFromDropdown();
+}, [formData.province_id, formData.district_id, formData.subdistrict_id, provinces, districts, subdistricts]);
 
 
 // 
@@ -488,179 +926,7 @@ useEffect(() => {
     { number: 4, title: "ตำแหน่งที่ตั้ง", icon: "📍" }
   ];
 
-  const MapPicker: React.FC<{
-  value: Coordinate[];
-  onChange: (v: Coordinate[]) => void;
-  height?: number;
-  center?: [number, number]; // [lng, lat]
-}> = ({ value, onChange, height = 300, center = [100.5018, 13.7563] }) => {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const map = React.useRef<mapboxgl.Map | null>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
 
-  // ตั้ง token ครั้งเดียว
-  useEffect(() => {
-    (mapboxgl as any).accessToken = MAPBOX_TOKEN;
-  }, []);
-
-  // init map
-  useEffect(() => {
-    if (map.current || !ref.current) return;
-    map.current = new mapboxgl.Map({
-      container: ref.current,
-      style: 'mapbox://styles/mapbox/satellite-streets-v12',
-      center,
-      zoom: 12,
-    });
-
-    map.current.on('load', () => {
-      // sources
-      map.current!.addSource('markers', {
-        type: 'geojson',
-        data: { type: 'FeatureCollection', features: [] },
-      });
-      map.current!.addSource('poly', {
-        type: 'geojson',
-        data: { type: 'FeatureCollection', features: [] },
-      });
-
-      // layers
-      map.current!.addLayer({
-        id: 'markers',
-        type: 'circle',
-        source: 'markers',
-        paint: {
-          'circle-radius': 6,
-          'circle-color': '#ff4444',
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#ffffff',
-        },
-      });
-      map.current!.addLayer({
-        id: 'marker-labels',
-        type: 'symbol',
-        source: 'markers',
-        layout: {
-          'text-field': ['get', 'sequence'],
-          'text-size': 11,
-          'text-offset': [0, 0],
-          'text-anchor': 'center',
-        },
-        paint: {
-          'text-color': '#ffffff',
-          'text-halo-color': '#000000',
-          'text-halo-width': 1,
-        },
-      });
-      map.current!.addLayer({
-        id: 'poly-fill',
-        type: 'fill',
-        source: 'poly',
-        paint: { 'fill-color': '#ff4444', 'fill-opacity': 0.35 },
-      });
-      map.current!.addLayer({
-        id: 'poly-line',
-        type: 'line',
-        source: 'poly',
-        paint: { 'line-color': '#ff0000', 'line-width': 2, 'line-dasharray': [2, 2] },
-      });
-
-      updateAll();
-    });
-  }, []);
-
-  // วาด/อัปเดต markers + polygon ทุกครั้งที่ value เปลี่ยน
-  const updateAll = React.useCallback(() => {
-    if (!map.current) return;
-
-    const markerFeatures = value.map((c, i) => ({
-      type: 'Feature' as const,
-      properties: { sequence: i + 1 },
-      geometry: { type: 'Point' as const, coordinates: [c.lng, c.lat] },
-    }));
-
-    (map.current.getSource('markers') as mapboxgl.GeoJSONSource)?.setData({
-      type: 'FeatureCollection',
-      features: markerFeatures,
-    });
-
-    const poly =
-      value.length >= 3
-        ? [
-            [
-              ...value.map((c) => [c.lng, c.lat] as [number, number]),
-              [value[0].lng, value[0].lat],
-            ],
-          ]
-        : [];
-
-    (map.current.getSource('poly') as mapboxgl.GeoJSONSource)?.setData({
-      type: 'FeatureCollection',
-      features: poly.length
-        ? [{ type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: poly } }]
-        : [],
-    });
-  }, [value]);
-
-  useEffect(() => updateAll(), [value, updateAll]);
-
-  // คลิกเพื่อเพิ่มจุดเมื่ออยู่ในโหมดวาด
-  useEffect(() => {
-    if (!map.current) return;
-    const onClick = (e: mapboxgl.MapMouseEvent) => {
-      if (!isDrawing) return;
-      onChange([...value, { lng: e.lngLat.lng, lat: e.lngLat.lat }]);
-    };
-    map.current.on('click', onClick);
-    map.current.getCanvas().style.cursor = isDrawing ? 'crosshair' : '';
-    return () => {
-      map.current?.off('click', onClick);
-      if (map.current) map.current.getCanvas().style.cursor = '';
-    };
-  }, [isDrawing, value, onChange]);
-
-
-  return (
-    <div>
-      <div ref={ref} style={{ width: '100%', height, borderRadius: 16, overflow: 'hidden' }} />
-      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-        <button
-          type="button"
-          onClick={() => setIsDrawing((d) => !d)}
-          style={{
-            padding: '8px 12px',
-            borderRadius: 10,
-            border: 'none',
-            background: isDrawing ? '#dc2626' : '#3b82f6',
-            color: '#fff',
-            fontWeight: 600,
-          }}
-        >
-          {isDrawing ? '🛑 หยุดมาร์ค' : '🎯 เริ่มมาร์คที่ดิน'}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onChange(value.slice(0, -1))}
-          disabled={!value.length}
-          style={{
-            padding: '8px 12px',
-            borderRadius: 10,
-            border: '1px solid #E5E7EB',
-            background: '#FBBF24',
-            color: '#111827',
-            fontWeight: 600,
-            opacity: value.length ? 1 : 0.6,
-          }}
-        >
-          ↶ ยกเลิกจุดสุดท้าย
-        </button>
-
-        <span style={{ alignSelf: 'center', color: '#6B7280' }}>จุดที่เลือก: {value.length}</span>
-      </div>
-    </div>
-  );
-};
 
   return (
     <>
@@ -671,6 +937,11 @@ useEffect(() => {
         
         .main-container1 {
           max-width: 100%;
+        }
+        
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
         
         .error-alert {
@@ -1848,6 +2119,27 @@ useEffect(() => {
             เลือกจังหวัด อำเภอ ตำบล และกำหนดพื้นที่ของที่ดินบนแผนที่
           </p>
 
+          {/* ข้อความแจ้งเตือนเกี่ยวกับการดึงข้อมูลจากโฉนดที่ดิน */}
+          {selectedLand && (
+            <div style={{
+              background: "linear-gradient(135deg, #dbeafe, #bfdbfe)",
+              border: "1px solid #93c5fd",
+              borderRadius: "12px",
+              padding: "1rem",
+              marginBottom: "2rem",
+              fontSize: "0.95rem",
+              color: "#1e40af",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem"
+            }}>
+              <span style={{ fontSize: "1.2rem" }}>💡</span>
+              <span>
+                <strong>ข้อมูลจากโฉนดที่ดิน:</strong> ระบบได้ดึงข้อมูลจังหวัด อำเภอ ตำบล จากโฉนดที่ดินที่คุณเลือกมาใส่ให้โดยอัตโนมัติแล้ว คุณสามารถแก้ไขได้หากต้องการ
+              </span>
+            </div>
+          )}
+
           <div style={{ 
             display: "grid", 
             gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", 
@@ -1950,17 +2242,48 @@ useEffect(() => {
               แผนที่ตำแหน่ง
             </label>
             
-            <div style={{
-              background: "linear-gradient(135deg, #f8fafc, #f1f5f9)",
-              border: "2px solid #e2e8f0",
-              borderRadius: "16px",
-              padding: "1.5rem",
-              marginBottom: "1rem"
-            }}>
-              <MapPicker value={mapCoords} onChange={setMapCoords} height={500} />
-            </div>
+            {/* ข้อความแจ้งเตือนเกี่ยวกับการซูมแผนที่ */}
+            {pendingLocationData && (
+              <div style={{
+                background: "linear-gradient(135deg, #dbeafe, #bfdbfe)",
+                border: "1px solid #93c5fd",
+                borderRadius: "12px",
+                padding: "1rem",
+                marginBottom: "1rem",
+                fontSize: "0.9rem",
+                color: "#1e40af",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem"
+              }}>
+                <span style={{ fontSize: "1.2rem" }}>📍</span>
+                <div>
+                  <strong>แผนที่ได้ซูมไปยังตำแหน่ง:</strong>{" "}
+                  {pendingLocationData.subdistrictName && `${pendingLocationData.subdistrictName} `}
+                  {pendingLocationData.districtName && `${pendingLocationData.districtName} `}
+                  {pendingLocationData.provinceName}
+                  <br />
+                  <small>สามารถมาร์คจุดรอบๆ พื้นที่นี้เพื่อระบุขอบเขตที่ดินได้เลย</small>
+                </div>
+              </div>
+            )}
             
-            <div style={{ 
+          <div style={{
+            background: "linear-gradient(135deg, #f8fafc, #f1f5f9)",
+            border: "2px solid #e2e8f0",
+            borderRadius: "16px",
+            padding: "1.5rem",
+            marginBottom: "1rem",
+            position: "relative"
+          }}>
+            <MapPicker 
+              value={mapCoords} 
+              onChange={setMapCoords} 
+              height={500} 
+              center={mapCenter}
+              zoom={mapZoom}
+            />
+          </div>            <div style={{ 
               fontSize: "0.9rem", 
               color: mapCoords.length >= 3 ? "#059669" : "#f59e0b", 
               marginTop: "0.5rem",

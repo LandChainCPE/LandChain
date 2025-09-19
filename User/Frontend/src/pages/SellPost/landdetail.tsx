@@ -1,11 +1,15 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { MapPin, Phone, User, Home, Calendar, Ruler, Map, MessageCircle, Share2, Heart } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { GetAllPostLandData, CreateRequestBuySell } from "../../service/https/jib/jib";
 import { message, Modal } from "antd"; 
 import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-import { MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, useMap } from "react-leaflet";
+//import L from "leaflet";
+//import { MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, useMap } from "react-leaflet";
+
+/** Mapbox GL JS */
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 
 type LandDetailType = {
@@ -139,71 +143,304 @@ function normalizeDetail(item: any): LandDetailType {
   };
 }
 
-/** ---------------- Leaflet Helpers ---------------- */
-// Fix ไอคอน marker ไม่ขึ้นในบางบันเดล
-const defaultIcon = L.icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
-(L.Marker.prototype as any).options.icon = defaultIcon;
+/** ---------------- Mapbox GL JS Config ---------------- */
+const MAPBOX_TOKEN = 'pk.eyJ1Ijoiam9oYXJ0MjU0NiIsImEiOiJjbWVmZ3YzMGcwcTByMm1zOWRkdjJkNTd0In0.DBDjy1rBDmc8A4PN3haQ4A';
 
-const FitToPoints: React.FC<{ latlngs: [number, number][] }> = ({ latlngs }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (!latlngs.length) return;
-    if (latlngs.length === 1) {
-      map.setView(latlngs[0], 16);
-    } else {
-      const bounds = L.latLngBounds(latlngs);
-      map.fitBounds(bounds, { padding: [20, 20] });
+// Set Mapbox access token
+mapboxgl.accessToken = MAPBOX_TOKEN;
+
+const MapDisplay: React.FC<{ 
+  points: { Sequence?: number; Latitude: number; Longitude: number }[]; 
+  name?: string 
+}> = ({ points, name }) => {
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const navigate = useNavigate();
+
+  const handleMapClick = () => {
+    if (!points || points.length === 0) return;
+    
+    const confirmed = window.confirm(
+      `คุณกำลังจะเปิดแผนที่ขนาดใหญ่เพื่อดูตำแหน่งที่ดินต้องการดำเนินการต่อหรือไม่?`
+    );
+    
+    if (confirmed) {
+      navigate('/user/fullmapview', {
+        state: {
+          points: points,
+          landName: name || 'ที่ดิน'
+        }
+      });
     }
-  }, [latlngs, map]);
-  return null;
-};
+  };
 
-const MapView: React.FC<{ points: { Sequence?: number; Latitude: number; Longitude: number }[]; name?: string }> = ({ points, name }) => {
-  const latlngs: [number, number][] = (points || [])
-    .filter((p) => typeof p.Latitude === "number" && typeof p.Longitude === "number")
-    .sort((a, b) => (a.Sequence ?? 0) - (b.Sequence ?? 0))
-    .map((p) => [p.Latitude, p.Longitude]);
+  useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current) return;
 
-  const center: [number, number] = latlngs[0] ?? [13.7563, 100.5018]; // fallback: Bangkok
+    // Transform points to coordinates
+    const coordinates: [number, number][] = (points || [])
+      .filter((p) => typeof p.Latitude === "number" && typeof p.Longitude === "number")
+      .sort((a, b) => (a.Sequence ?? 0) - (b.Sequence ?? 0))
+      .map((p) => [p.Longitude, p.Latitude]); // Mapbox uses [lng, lat]
 
-  // ปิดรูปหรือไม่ (first == last)
-  const isClosed =
-    latlngs.length >= 3 &&
-    latlngs[0][0] === latlngs[latlngs.length - 1][0] &&
-    latlngs[0][1] === latlngs[latlngs.length - 1][1];
+    const center: [number, number] = coordinates[0] ?? [100.5018, 13.7563]; // fallback: Bangkok
+
+    // Create map
+    mapRef.current = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: 'mapbox://styles/mapbox/satellite-streets-v12',
+      center: center,
+      zoom: 15,
+      doubleClickZoom: false,
+    });
+
+    mapRef.current.on('load', () => {
+      if (!mapRef.current || !coordinates.length) return;
+
+      // Add markers source
+      mapRef.current.addSource('markers', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: coordinates.map((coord, idx) => ({
+            type: 'Feature',
+            properties: { sequence: (points[idx]?.Sequence ?? idx + 1).toString() },
+            geometry: { type: 'Point', coordinates: coord },
+          })),
+        },
+      });
+
+        // Add polygon/line source
+        if (coordinates.length >= 3) {
+          // สำหรับ polygon ต้องมีอย่างน้อย 3 จุด และต้องปิดให้เป็นรูปหลายเหลี่ยม
+          let polygonCoordinates = [...coordinates];
+          
+          // ตรวจสอบว่าจุดแรกและจุดสุดท้ายเหมือนกันหรือไม่ (ปิด polygon)
+          const firstPoint = coordinates[0];
+          const lastPoint = coordinates[coordinates.length - 1];
+          const isClosed = firstPoint[0] === lastPoint[0] && firstPoint[1] === lastPoint[1];
+          
+          // ถ้ายังไม่ปิด ให้ปิดให้เป็น polygon
+          if (!isClosed) {
+            polygonCoordinates = [...coordinates, firstPoint];
+          }
+
+          // เพิ่ม source สำหรับ polygon
+          mapRef.current.addSource('boundary', {
+            type: 'geojson',
+            data: {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'Polygon',
+                coordinates: [polygonCoordinates],
+              },
+            },
+          });
+
+          // เพิ่ม layer สำหรับพื้นที่ polygon (สีแดงโปร่งแสง)
+          mapRef.current.addLayer({
+            id: 'polygon-fill',
+            type: 'fill',
+            source: 'boundary',
+            paint: {
+              'fill-color': '#DC2626', // สีแดง
+              'fill-opacity': 0.3,
+            },
+          });
+
+          // เพิ่ม layer สำหรับเส้นขอบ polygon
+          mapRef.current.addLayer({
+            id: 'boundary-line',
+            type: 'line',
+            source: 'boundary',
+            paint: {
+              'line-color': '#DC2626', // สีแดง
+              'line-width': 3,
+              'line-opacity': 0.8,
+            },
+          });
+        } else if (coordinates.length === 2) {
+          // ถ้ามีแค่ 2 จุด ให้วาดเป็นเส้นตรง
+          mapRef.current.addSource('boundary', {
+            type: 'geojson',
+            data: {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'LineString',
+                coordinates: coordinates,
+              },
+            },
+          });
+
+          mapRef.current.addLayer({
+            id: 'boundary-line',
+            type: 'line',
+            source: 'boundary',
+            paint: {
+              'line-color': '#DC2626', // สีแดง
+              'line-width': 3,
+              'line-opacity': 0.8,
+            },
+          });
+        }
+
+      // Add marker layers
+      mapRef.current.addLayer({
+        id: 'markers',
+        type: 'circle',
+        source: 'markers',
+        paint: {
+          'circle-radius': 8,
+          'circle-color': '#2563EB',
+          'circle-stroke-width': 3,
+          'circle-stroke-color': '#ffffff',
+        },
+      });
+
+      mapRef.current.addLayer({
+        id: 'marker-labels',
+        type: 'symbol',
+        source: 'markers',
+        layout: {
+          'text-field': ['get', 'sequence'],
+          'text-size': 12,
+          'text-anchor': 'center',
+        },
+        paint: {
+          'text-color': '#ffffff',
+          'text-halo-color': '#000000',
+          'text-halo-width': 1,
+        },
+      });
+
+      // Fit map to show all points
+      if (coordinates.length === 1) {
+        mapRef.current.setCenter(coordinates[0]);
+        mapRef.current.setZoom(16);
+      } else if (coordinates.length > 1) {
+        const bounds = coordinates.reduce(
+          (bounds, coord) => bounds.extend(coord),
+          new mapboxgl.LngLatBounds()
+        );
+        mapRef.current.fitBounds(bounds, { padding: 50 });
+      }
+
+      // Add popups on marker click
+      mapRef.current.on('click', 'markers', (e) => {
+        if (!e.features?.[0]) return;
+        
+        const coordinates = (e.features[0].geometry as any).coordinates.slice();
+        const sequence = e.features[0].properties?.sequence || '1';
+        
+        new mapboxgl.Popup()
+          .setLngLat(coordinates)
+          .setHTML(`
+            <div style="padding: 8px;">
+              <strong>จุดที่ ${sequence}</strong><br/>
+              <small>${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}</small>
+            </div>
+          `)
+          .addTo(mapRef.current!);
+      });
+
+      // Change cursor on hover
+      mapRef.current.on('mouseenter', 'markers', () => {
+        if (mapRef.current) mapRef.current.getCanvas().style.cursor = 'pointer';
+      });
+
+      mapRef.current.on('mouseleave', 'markers', () => {
+        if (mapRef.current) mapRef.current.getCanvas().style.cursor = '';
+      });
+    });
+
+    // Cleanup
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [points, name]);
+
+  if (!points || points.length === 0) {
+    return (
+      <div style={{ 
+        width: "100%", 
+        height: 300, 
+        background: "#E5E7EB", 
+        borderRadius: 12, 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "center", 
+        color: "#6B7280" 
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <Map size={32} style={{ margin: "0 auto 8px" }} />
+          <p>ไม่มีข้อมูลตำแหน่งที่ดิน</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <MapContainer center={center} zoom={15} style={{ width: "100%", height: 256, borderRadius: 10 }} scrollWheelZoom={false}>
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
-
-      <FitToPoints latlngs={latlngs} />
-
-      {latlngs.length === 1 && (
-        <Marker position={latlngs[0]}>
-          <Popup>{name || "ตำแหน่งที่ดิน"}</Popup>
-        </Marker>
-      )}
-
-      {latlngs.length >= 2 && !isClosed && <Polyline positions={latlngs} />}
-
-      {latlngs.length >= 3 && isClosed && <Polygon positions={latlngs} pathOptions={{ fillOpacity: 0.2 }} />}
-
-      {latlngs.map((latlng, idx) => (
-        <Marker key={idx} position={latlng}>
-          <Popup>
-            จุดที่ {points[idx]?.Sequence ?? idx + 1}
-            <br />
-            {latlng[0]}, {latlng[1]}
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+    <div style={{ position: "relative" }}>
+      <div 
+        ref={mapContainerRef} 
+        onClick={handleMapClick}
+        style={{ 
+          width: "100%", 
+          height: 300, 
+          borderRadius: 12, 
+          overflow: "hidden",
+          cursor: "pointer",
+          position: "relative"
+        }} 
+      />
+      
+      {/* Click overlay */}
+      <div 
+        onClick={handleMapClick}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "rgba(0,0,0,0.1)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          opacity: 0,
+          transition: "opacity 0.2s",
+          cursor: "pointer",
+          borderRadius: 12,
+          pointerEvents: "auto"
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.opacity = "1";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.opacity = "0";
+        }}
+      >
+        <div style={{
+          background: "rgba(255,255,255,0.95)",
+          padding: "12px 20px",
+          borderRadius: 8,
+          boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          fontWeight: 500,
+          color: "#2563EB"
+        }}>
+          <Map size={20} />
+          คลิกเพื่อดูแผนที่ขนาดใหญ่
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -516,7 +753,7 @@ const handleBuy = async () => {
               </div>
               <div style={styles.mapBox}>
                 {land.Location && land.Location.length > 0 ? (
-                  <MapView points={land.Location} name={land.Name} />
+                  <MapDisplay points={land.Location} name={land.Name} />
                 ) : (
                   <div style={styles.fakeMap}>
                     <div>
