@@ -239,6 +239,8 @@ func SetupDatabase() {
 		&entity.District{},
 		&entity.Subdistrict{},
 		&entity.Nonce{},
+		&entity.LandOwnership{},
+		
 	); err != nil {
 		log.Fatal("❌ AutoMigrate failed:", err)
 	}
