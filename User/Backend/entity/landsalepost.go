@@ -20,7 +20,7 @@ type Landsalepost struct {
 	Subdistrict	Subdistrict `gorm:"foreignKey:SubdistrictID"`
 	
 
-	LandID    uint     `json:"landtitle_id"`
+	LandID    uint     `json:"land_id"`
 	Landtitle Landtitle `gorm:"foreignKey:LandID"`
 
 	UserID uint  `json:"user_id"`

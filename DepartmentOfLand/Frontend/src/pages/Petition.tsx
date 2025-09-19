@@ -72,7 +72,6 @@ const StatePetition: React.FC = () => {
   const stateOptions = states.map(s => ({
     label: s.name,
     value: s.id,
-    // แนบข้อมูลทั้ง object เผื่อใช้ตอนอัปเดต local state
     stateObj: s,
   }));
 
@@ -135,13 +134,14 @@ const StatePetition: React.FC = () => {
         <Select
           style={{ width: 180 }}
           placeholder="เลือกสถานะ"
-          // ใช้ id เป็นค่า
           value={record.State?.id}
           options={stateOptions}
           onChange={async (_value: number, option: any) => {
             try {
               const stateId = _value;
-              await UpdatePetitionState(record.ID.toString(), stateId);
+              console.log("UpdatePetitionState call", { id: record.ID, stateId, option });
+              const res = await UpdatePetitionState(record.ID.toString(), stateId);
+              console.log("UpdatePetitionState response", res);
               message.success("อัปเดตสถานะสำเร็จ");
 
               // อัปเดตค่าในตารางทันที (ทั้ง id, name, color)
@@ -157,7 +157,7 @@ const StatePetition: React.FC = () => {
                 )
               );
             } catch (err) {
-              console.error(err);
+              console.error("UpdatePetitionState error", err);
               message.error("อัปเดตสถานะไม่สำเร็จ");
             }
           }}

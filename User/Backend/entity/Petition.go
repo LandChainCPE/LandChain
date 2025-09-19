@@ -12,8 +12,8 @@ type Petition struct {
 	Date        string `gorm:"type:date" json:"date"`
 	Topic       string `gorm:"type:varchar(255)" json:"topic"`
 
-	StateID uint  `json:"state_id"` // Foreign key to the state table
-	State   State `gorm:"foreignKey:StateID"` // Relationship with the State model
+    StateID uint   `json:"state_id"`
+    State   *State `gorm:"foreignKey:StateID"`
 
 	UserID uint  `json:"user_id"`// 👈 FK ไปยัง role.id
 	Users  Users `gorm:"foreignKey:UserID"`

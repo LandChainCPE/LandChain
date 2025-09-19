@@ -62,7 +62,6 @@ func UpdatePetitionState(c *gin.Context) {
         StateID uint `json:"state_id"`
     }
 
-    // Receive the StateID from Request
     if err := c.ShouldBindJSON(&input); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
@@ -75,7 +74,6 @@ func UpdatePetitionState(c *gin.Context) {
         return
     }
 
-    // Update the petition state
     if err := config.DB().Model(&entity.Petition{}).
         Where("id = ?", id).
         Update("state_id", input.StateID).Error; err != nil {

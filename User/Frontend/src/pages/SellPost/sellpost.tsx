@@ -14,7 +14,6 @@ const MAPBOX_TOKEN =
   (import.meta as any)?.env?.VITE_MAPBOX_TOKEN ||
   'pk.eyJ1Ijoiam9oYXJ0MjU0NiIsImEiOiJjbWVmZ3YzMGcwcTByMm1zOWRkdjJkNTd0In0.DBDjy1rBDmc8A4PN3haQ4A';
 
-// ---- Helpers for saving polygon to backend ----
 type Coordinate = { lng: number; lat: number };
 
 async function saveLocations(
@@ -144,11 +143,10 @@ const SellPost = () => {
     province_id: "",
     district_id: "",
     subdistrict_id: "",
-    landtitle_id: "",
+    land_id: "",
       user_id: "",
   });
 
-  // Enhanced CSS styles using the color scheme
   const styles = {
     card: {
       background: "linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.9))",
@@ -280,19 +278,19 @@ const handleSelectLand = async (tokenID: string) => {
   // ดึง landtitle_id ที่แท้จริงจาก backend
   try {
     const res = await getLandtitleIdByTokenId(tokenID);
-    const landtitleId = res?.landtitle_id ? String(res.landtitle_id) : tokenID; // fallback เป็น tokenID ถ้าไม่เจอ
+    const landtitleId = res?.land_id ? String(res.land_id) : tokenID; // fallback เป็น tokenID ถ้าไม่เจอ
 
     setFormData((prev) => ({
       ...prev,
-      landtitle_id: landtitleId
+      land_id: landtitleId
     }));
-    console.log("Selected land token:", tokenID, "Mapped landtitle_id:", landtitleId);
+    console.log("Selected land token:", tokenID, "Mapped land_id:", landtitleId);
   } catch (err) {
     setFormData((prev) => ({
       ...prev,
-      landtitle_id: tokenID // fallback
+      land_id: tokenID // fallback
     }));
-    console.error("Error mapping landtitle_id:", err);
+    console.error("Error mapping land_id:", err);
   }
 };
 
@@ -455,7 +453,7 @@ useEffect(() => {
         district_id: Number(formData.district_id),
         subdistrict_id: Number(formData.subdistrict_id),
         tag_id: formData.tag_id,        // ✅ ส่ง array ของตัวเลข
-        landtitle_id: Number(formData.landtitle_id),
+        land_id: Number(formData.land_id),
         user_id: Number(userId),
       };
 

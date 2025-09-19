@@ -1,5 +1,3 @@
-import axios from "axios";
-
 const apiUrl = "http://localhost:8080";
 
 function getAuthHeaders() {
@@ -11,53 +9,48 @@ function getAuthHeaders() {
   };
 }
 
-function getRequestOptions() {
-  return { headers: getAuthHeaders() };
+function getRequestOptions(method = "GET", body?: any) {
+  const options: RequestInit = {
+    method,
+    headers: getAuthHeaders(),
+    credentials: "include",
+  };
+  if (body) {
+    options.body = JSON.stringify(body);
+  }
+  return options;
 }
 
-// ดึง Queue ตามวันที่ (ถ้าจะใช้จริงอาจต้องใส่พารามิเตอร์ date ด้วย)
 async function getQueueByDate() {
-  return await axios
-    .get(`${apiUrl}/queue`, getRequestOptions())
-    .then((res) => res.data)
-    .catch((e) => e.response);
+  const res = await fetch(`${apiUrl}/queue`, getRequestOptions());
+  return await res.json();
 }
 
-// ดึงรายการคำร้อง
 async function GetAllPetition() {
-  return await axios
-    .get(`${apiUrl}/petitions`, getRequestOptions())
-    .then((res) => res.data)
-    .catch((e) => e.response);
+  const res = await fetch(`${apiUrl}/petitions`, getRequestOptions());
+  return await res.json();
 }
 
-// อัปเดตคำร้องทั้งหมด
 async function UpdatePetition(id: string, data: any) {
-  return await axios
-    .put(`${apiUrl}/petitions/${id}`, data, getRequestOptions())
-    .then((res) => res.data)
-    .catch((e) => e.response);
+  const res = await fetch(`${apiUrl}/petitions/${id}`, getRequestOptions("PUT", data));
+  return await res.json();
 }
 
-// อัปเดตเฉพาะสถานะ
-async function UpdatePetitionState(id: string, state_id: number) {
-  return await axios
-    .patch(`${apiUrl}/petitions/${id}/state`, { state_id }, getRequestOptions())
-    .then((res) => res.data)
-    .catch((e) => e.response);
+async function UpdatePetitionState(id: string, stateId: number) {
+  const res = await fetch(`${apiUrl}/petitions/${id}/state`, getRequestOptions("PATCH", { state_id: stateId }));
+  if (!res.ok) throw new Error("Update failed");
+  return res.json();
 }
 
 async function GetAllStates() {
-  return await axios
-    .get(`${apiUrl}/states`, getRequestOptions())
-    .then((res) => res.data)
-    .catch((e) => e.response);
+  const res = await fetch(`${apiUrl}/states`, getRequestOptions());
+  return await res.json();
 }
 
-export { 
+export {
   getQueueByDate,
-  GetAllPetition, 
-  UpdatePetition, 
+  GetAllPetition,
+  UpdatePetition,
   UpdatePetitionState,
   GetAllStates,
 };

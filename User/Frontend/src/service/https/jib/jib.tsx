@@ -109,6 +109,13 @@ async function GetPetitionsByUserID(userId: string) {
     .catch((e) => e.response);
 }
 
+async function CreateRequestBuySell(data: any) {
+  return await axios
+    .post(`${apiUrl}/requestbuysell`, data, requestOptions)
+    .then((res) => res.data)
+    .catch((e) => e.response);
+}
+
 export { 
   GetAllPetition, 
   CreatePetition, 
@@ -122,5 +129,7 @@ export {
   GetSubdistrict,
   CreateLandPost,
   getLandtitleIdByTokenId,
-  GetPetitionsByUserID
+  GetPetitionsByUserID,
+  CreateRequestBuySell,
+
 };

@@ -402,11 +402,11 @@ func SetupDatabase() {
 			UserID:             1,   // Replace with actual UserID
 		})
 
-		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
-		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 3, SellerID: 4, RequestBuySellTypeID: 1})
-		db.Create(&entity.RequestBuySell{LandID: 2, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
-		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
-		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
+		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 2, SellerID: 4})
+		// db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 3, SellerID: 4, RequestBuySellTypeID: 1})
+		// db.Create(&entity.RequestBuySell{LandID: 2, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
+		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
+		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
 
 		// ✅ Seed States
 		db.Create(&entity.State{ Name:  "รอตรวจสอบ", Color: "orange",})

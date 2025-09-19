@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { MapPin, Phone, User, Home, Calendar, Ruler, Map, MessageCircle, Share2, Heart } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { GetAllPostLandData } from "../../service/https/jib/jib";
-
-/** Leaflet / React-Leaflet */
+import { GetAllPostLandData, CreateRequestBuySell } from "../../service/https/jib/jib";
+import { message, Modal } from "antd"; 
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, Polygon, useMap } from "react-leaflet";
@@ -216,6 +215,10 @@ const LandDetail = () => {
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLarge, setIsLarge] = useState<boolean>(typeof window !== "undefined" ? window.innerWidth >= 1024 : true);
+  const [msgApi, contextHolder] = message.useMessage();
+  const [confirmLoading, setConfirmLoading] = useState(false); 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const userId = Number(localStorage.getItem("user_id"));
 
   useEffect(() => {
     const onResize = () => setIsLarge(window.innerWidth >= 1024);
@@ -245,7 +248,37 @@ const LandDetail = () => {
     })();
   }, [id]);
 
-const images = land?.Image ?? [];
+const handleBuy = async () => {
+  if (!userId) {
+    msgApi.error("กรุณาเข้าสู่ระบบก่อนทำรายการซื้อ");
+    return;
+  }
+  try {
+    const res = await CreateRequestBuySell({
+      buyer_id: userId,
+      land_id: land?.ID,
+    });
+    if (res?.error) {
+      msgApi.error(res.error || "เกิดข้อผิดพลาด");
+      return;
+    }
+    msgApi.success("ส่งคำขอซื้อสำเร็จ");
+    // redirect หรืออัพเดต UI ต่อได้
+  } catch (e) {
+    msgApi.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+  }
+};
+
+  const showModal = () => setIsModalOpen(true);
+  const handleOk = async () => {
+    setConfirmLoading(true);
+    await handleBuy();
+    setConfirmLoading(false);
+    setIsModalOpen(false);
+  };
+  const handleCancel = () => setIsModalOpen(false);
+
+  const images = land?.Image ?? [];
   const nextImage = () => setCurrentImageIndex((p) => (p + 1) % (images.length || 1));
   const prevImage = () => setCurrentImageIndex((p) => (p - 1 + (images.length || 1)) % (images.length || 1));
 
@@ -541,7 +574,24 @@ const images = land?.Image ?? [];
                   ส่งข้อความ
                 </button>
 
-                <button style={styles.contactBtn("ghost")}>นัดชมที่ดิน</button>
+      <button
+        style={styles.contactBtn("ghost")}
+        onClick={showModal}
+        disabled={confirmLoading}
+      >
+        {confirmLoading ? "กำลังดำเนินการ..." : "ซื้อ"}
+      </button>
+      <Modal
+        title="ยืนยันการซื้อที่ดิน"
+        open={isModalOpen}
+        onOk={handleOk}
+        confirmLoading={confirmLoading}
+        onCancel={handleCancel}
+        okText="ยืนยัน"
+        cancelText="ยกเลิก"
+      >
+        คุณต้องการยืนยันการซื้อที่ดินนี้ใช่หรือไม่?
+      </Modal>
               </div>
 
               <div style={styles.warn}>

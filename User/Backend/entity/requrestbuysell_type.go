@@ -10,7 +10,7 @@ type RequestBuySellType struct {
 	StatusNameEn string 
 
 
-	RequestBuySells []RequestBuySell `gorm:"foreignKey:RequestBuySellTypeID"`
+	//RequestBuySells []RequestBuySell `gorm:"foreignKey:RequestBuySellTypeID"`
 
 
 }

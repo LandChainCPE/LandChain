@@ -6,6 +6,7 @@ import {
   FileProtectOutlined,
   HomeOutlined,
   SettingOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./sidebar.css";
@@ -20,7 +21,7 @@ const Sidebar: React.FC = () => {
     { label: "ตรวจสอบโฉนดที่ดิน", icon: <SearchOutlined />, path: "/verify" },
     { label: "โอนกรรมสิทธิ์", icon: <SwapOutlined />, path: "/transfer" },
     { label: "ลงทะเบียนโฉนดที่ดิน", icon: <FileProtectOutlined />, path: "/regisland" },
-    { label: "ตรวจสอบคำร้อง", icon: <SettingOutlined />, path: "/statepetition" },
+    { label: "ตรวจสอบคำร้อง", icon: <FileTextOutlined />, path: "/statepetition" },
     { label: "การตั้งค่า", icon: <SettingOutlined />, path: "/settings" },
   ];
 
