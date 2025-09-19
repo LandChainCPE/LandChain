@@ -151,6 +151,24 @@ const MapDisplay: React.FC<{
 }> = ({ points, name }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const navigate = useNavigate();
+
+  const handleMapClick = () => {
+    if (!points || points.length === 0) return;
+    
+    const confirmed = window.confirm(
+      `คุณกำลังจะเปิดแผนที่ขนาดใหญ่เพื่อดูตำแหน่งที่ดินต้องการดำเนินการต่อหรือไม่?`
+    );
+    
+    if (confirmed) {
+      navigate('/user/fullmapview', {
+        state: {
+          points: points,
+          landName: name || 'ที่ดิน'
+        }
+      });
+    }
+  };
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
@@ -363,15 +381,62 @@ const MapDisplay: React.FC<{
   }
 
   return (
-    <div 
-      ref={mapContainerRef} 
-      style={{ 
-        width: "100%", 
-        height: 300, 
-        borderRadius: 12, 
-        overflow: "hidden" 
-      }} 
-    />
+    <div style={{ position: "relative" }}>
+      <div 
+        ref={mapContainerRef} 
+        onClick={handleMapClick}
+        style={{ 
+          width: "100%", 
+          height: 300, 
+          borderRadius: 12, 
+          overflow: "hidden",
+          cursor: "pointer",
+          position: "relative"
+        }} 
+      />
+      
+      {/* Click overlay */}
+      <div 
+        onClick={handleMapClick}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "rgba(0,0,0,0.1)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          opacity: 0,
+          transition: "opacity 0.2s",
+          cursor: "pointer",
+          borderRadius: 12,
+          pointerEvents: "auto"
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.opacity = "1";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.opacity = "0";
+        }}
+      >
+        <div style={{
+          background: "rgba(255,255,255,0.95)",
+          padding: "12px 20px",
+          borderRadius: 8,
+          boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          fontWeight: 500,
+          color: "#2563EB"
+        }}>
+          <Map size={20} />
+          คลิกเพื่อดูแผนที่ขนาดใหญ่
+        </div>
+      </div>
+    </div>
   );
 };
 

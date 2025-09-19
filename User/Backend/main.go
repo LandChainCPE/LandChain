@@ -56,21 +56,21 @@ func main() {
 			currentUser, exists := c.Get("currentUser")
 			if !exists {
 				c.JSON(http.StatusInternalServerError, gin.H{
-					"error": "Current user not found in context",
+					"error":    "Current user not found in context",
 					"is_admin": false,
 				})
 				return
 			}
-			
+
 			user := currentUser.(entity.Users)
 			c.JSON(http.StatusOK, gin.H{
-				"is_admin": true,
-				"role_id": user.RoleID,
-				"role_name": user.Role.Role,
-				"user_id": user.ID,
+				"is_admin":       true,
+				"role_id":        user.RoleID,
+				"role_name":      user.Role.Role,
+				"user_id":        user.ID,
 				"wallet_address": user.Metamaskaddress,
-				"verified_at": "server-side-middleware",
-				"message": "Admin role verified by secure middleware",
+				"verified_at":    "server-side-middleware",
+				"message":        "Admin role verified by secure middleware",
 			})
 		})
 	}
@@ -164,10 +164,12 @@ func main() {
 		authorized.GET("/district/:id", controller.GetDistrict)
 		authorized.GET("/subdistrict/:id", controller.GetSubdistrict)
 		authorized.GET("/landtitle/by-token/:token_id", controller.GetLandtitleIdByTokenId)
-		authorized.POST("/location", controller.CreateLocation) // สร้างโฉนดที่ดิน
-		authorized.GET("/provinces", controller.GetProvince) // ดึงข้อมูลจังหวัด
-		authorized.GET("/branches", controller.GetBranch)    // ดึงข้อมูลสาขา
-		authorized.GET("/time", controller.GetTime)          // ดึงข้อมูลช่วงเวลา
+		authorized.POST("/location", controller.CreateLocation)               // สร้างโฉนดที่ดิน
+		authorized.GET("/provinces", controller.GetProvince)                  // ดึงข้อมูลจังหวัด
+		authorized.GET("/provinces/filter", controller.GetProvincesForFilter) // ดึงข้อมูลจังหวัดสำหรับ filter
+		authorized.GET("/branches", controller.GetBranch)                     // ดึงข้อมูลสาขา
+		authorized.GET("/branches/filter", controller.GetBranchesForFilter)   // ดึงข้อมูลสาขาสำหรับ filter
+		authorized.GET("/time", controller.GetTime)                           // ดึงข้อมูลช่วงเวลา
 		authorized.GET("/bookings", controller.GetBookingsByDateAndBranch)
 		authorized.GET("/service-types", controller.GetServiceType)          // ดึงข้อมูลประเภทบริการ
 		authorized.GET("/bookings/checklim", controller.CheckAvailableSlots) // ดึงข้อมูลการจองตาม ID

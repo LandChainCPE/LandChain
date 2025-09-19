@@ -446,18 +446,15 @@ func StartBookingCleanupScheduler() {
 		ticker := time.NewTicker(1 * time.Minute) // รันทุกนาที
 		defer ticker.Stop()
 
-		for {
-			select {
-			case <-ticker.C:
-				log.Println("⏰ Running automatic booking cleanup...")
-				deletedCount, err := DeleteExpiredBookingsInternal()
-				if err != nil {
-					log.Printf("❌ Automatic cleanup failed: %v", err)
-				} else if deletedCount > 0 {
-					log.Printf("✅ Automatic cleanup: deleted %d expired bookings", deletedCount)
-				} else {
-					log.Println("✅ Automatic cleanup: no expired bookings found")
-				}
+		for range ticker.C {
+			log.Println("⏰ Running automatic booking cleanup...")
+			deletedCount, err := DeleteExpiredBookingsInternal()
+			if err != nil {
+				log.Printf("❌ Automatic cleanup failed: %v", err)
+			} else if deletedCount > 0 {
+				log.Printf("✅ Automatic cleanup: deleted %d expired bookings", deletedCount)
+			} else {
+				log.Println("✅ Automatic cleanup: no expired bookings found")
 			}
 		}
 	}()
@@ -783,6 +780,7 @@ func GetUserBookingsDebug(c *gin.Context) {
         "count":    len(result),
     })
 }
+
 
 
 
