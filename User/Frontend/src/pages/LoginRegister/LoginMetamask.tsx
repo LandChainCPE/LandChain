@@ -48,7 +48,7 @@ const LoginMetamask = () => {
           } else {
             // wallet ยังไม่ได้สมัคร หรือ login ไม่สำเร็จ
             setErrorMessage('Login failed. Please try again or sign up first.');
-            
+
             // simulate disconnect
             setWalletAddress(null);
             localStorage.removeItem('isLogin');
@@ -85,13 +85,14 @@ const LoginMetamask = () => {
 
   return (
     <div className="container">
-    {/* เพิ่ม floating shapes */}
+      {/* เพิ่ม floating shapes */}
       <div className="floating-shapes">
         <div className="shape-1"></div>
         <div className="shape-2"></div>
         <div className="shape-3"></div>
+        <div className="shape-4"></div>
       </div>
-      
+
       <div className="card">
         {/* Header */}
         <div className="header">
@@ -123,7 +124,7 @@ const LoginMetamask = () => {
                 </>
               ) : (
                 <>
-                  <span>Login with MetaMask</span>
+                  <span>เข้าสู่ระบบด้วย MetaMask</span>
                 </>
               )}
             </button>
@@ -132,13 +133,13 @@ const LoginMetamask = () => {
           {/* Divider */}
           <div className="divider">
             <div className="dividerLine"></div>
-            <span className="dividerText">or</span>
+            <span className="dividerText">หรือ</span>
             <div className="dividerLine"></div>
           </div>
 
           {/* Register Link */}
           <div className="registerSection">
-            <p className="registerText">Don't have an account?</p>
+            <p className="registerText">ยังไม่มีบัญชีผู้ใช้ ใช่ไหม?</p>
             <a
               href="#"
               onClick={(e) => {
@@ -147,7 +148,7 @@ const LoginMetamask = () => {
               }}
               className="registerLink"
             >
-              Create Account →
+              สร้างบัญชีผู้ใช้ →
             </a>
           </div>
         </div>
@@ -155,14 +156,14 @@ const LoginMetamask = () => {
         {/* Footer */}
         <div className="footer">
           <p className="bottomText">
-            New to MetaMask?{' '}
+            MetaMask คืออะไร?{' '}
             <a
               href="https://metamask.io"
               target="_blank"
               rel="noopener noreferrer"
               className="bottomLink"
             >
-              Learn more
+              เรียนรู้เพิ่มเติม
             </a>
           </p>
         </div>

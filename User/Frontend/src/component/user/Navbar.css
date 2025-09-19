@@ -21,7 +21,8 @@
   border: none;
   box-shadow: var(--shadow-soft);
   padding: 1rem 2rem;
-  position: fixed; /* ติดด้านบน */
+  position: fixed;
+  /* ติดด้านบน */
   top: 0;
   left: 0;
   width: 100%;
@@ -51,7 +52,8 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 0; /* ชิดจอสุดขอบ */
+  padding: 0;
+  /* ชิดจอสุดขอบ */
 }
 
 /* Brand Section */
@@ -71,10 +73,29 @@
   transform: scale(1.05);
 }
 
+/* Header Logo Classes for consistency */
+.header-logo {
+  height: 42px;
+  width: auto;
+  transition: transform 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.header-logo:hover {
+  transform: scale(1.05);
+}
+
+.header-logo-black {
+  height: 42px;
+  width: auto;
+  max-width: 160px;
+}
+
 .navbar-brand-text {
   font-size: 1.5rem;
   font-weight: 700;
   background: var(--gradient-primary);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-decoration: none;
@@ -347,11 +368,11 @@
   .navbar-nav-section {
     gap: 1rem;
   }
-  
+
   .navbar-nav-list {
     gap: 1rem;
   }
-  
+
   .navbar-nav-link {
     font-size: 0.9rem;
     padding: 0.6rem 1rem;
@@ -362,25 +383,31 @@
   .navbar-landchain {
     padding: 1rem 1.5rem;
   }
-  
+
   .navbar-nav-section {
     display: none;
   }
-  
+
   .mobile-toggle {
     display: block;
   }
-  
+
   .mobile-menu {
     display: block;
   }
-  
+
   .navbar-brand-text {
     font-size: 1.25rem;
   }
-  
+
   .navbar-logo {
     height: 32px;
+  }
+
+  .header-logo,
+  .header-logo-black {
+    height: 36px;
+    max-width: 140px;
   }
 }
 
@@ -388,19 +415,25 @@
   .navbar-landchain {
     padding: 0.75rem 1rem;
   }
-  
+
   .navbar-brand-section {
     gap: 0.75rem;
   }
-  
+
   .navbar-brand-text {
     font-size: 1.1rem;
   }
-  
+
   .navbar-logo {
     height: 28px;
   }
-  
+
+  .header-logo,
+  .header-logo-black {
+    height: 32px;
+    max-width: 120px;
+  }
+
   .mobile-menu-content {
     width: 280px;
     padding: 1.5rem 1rem;
@@ -413,6 +446,7 @@
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

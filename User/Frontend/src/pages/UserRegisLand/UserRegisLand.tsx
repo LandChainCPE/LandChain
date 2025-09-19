@@ -145,7 +145,7 @@ const UserRegisLand: React.FC = () => {
     const ctrl = new AbortController();
 
     const pidNum = Number(pidStr);
-    
+
     console.log("province_id (ID):", pidNum);
 
     if (!Number.isFinite(pidNum) || pidNum <= 0) {
@@ -166,7 +166,7 @@ const UserRegisLand: React.FC = () => {
         setDistricts(list);
 
         console.log("Districts after setting:", list);
-        
+
         setSubdistricts([]);
         setFormData((p) => ({ ...p, district_id: "", subdistrict_id: "" }));
       } catch (e) {
@@ -211,17 +211,39 @@ const UserRegisLand: React.FC = () => {
   }, [formData.district_id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-  const { name, value } = e.target;
-  if (name === "province_id") {
-    console.log("Selected province_id (value):", value, typeof value); // ควรเป็นเลข string เช่น "1"
-  }
-  setFormData((prev) => ({ ...prev, [name]: value }));
-};
+    const { name, value } = e.target;
+    if (name === "province_id") {
+      console.log("Selected province_id (value):", value, typeof value); // ควรเป็นเลข string เช่น "1"
+    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   return (
-    <div className="container">
-      <div className="wrapper">
-        <div className="card">
+    <div className="user-regis-land-container">
+      <div className="floating-shapes">
+        <div className="shape-1"></div>
+        <div className="shape-2"></div>
+        <div className="shape-3"></div>
+        <div className="shape-4"></div>
+      </div>
+
+      {/* Hero Section */}
+      <div className="hero-section">
+        <div className="hero-content">
+          <h1 className="hero-title">
+            <span className="gradient-text">ลงทะเบียนที่ดิน</span>
+          </h1>
+          <p className="hero-subtitle">
+            เพิ่มข้อมูลที่ดินของคุณเข้าสู่ระบบเพื่อให้เจ้าหน้าที่กรมที่ดินตรวจสอบ
+          </p>
+        </div>
+      </div>
+
+      <div className="main-container">
+
+        {/* Main Form Card */}
+        <div className="glass-card">
+          <div className="card-glow"></div>
           {/* Header */}
           <div className="cardHeader">
             <h2 className="cardTitle">
@@ -232,218 +254,261 @@ const UserRegisLand: React.FC = () => {
 
           {/* Form Content */}
           <div className="formContent">
-            <div className="grid">
-              <div className="inputGroup">
-                <label className="label">ระวาง</label>
-                <input
-                  type="text"
-                  name="survey_number"
-                  value={formData.survey_number}
-                  onChange={handleChange}
-                  className="input"
-                  placeholder="ระวาง"
-                />
+            {/* Land Document Section */}
+            <div className="form-section">
+              <div className="section-header">
+                <div className="section-icon">📋</div>
+                <div className="section-title">
+                  <h3>ข้อมูลเอกสารที่ดิน</h3>
+                  <p>กรุณากรอกข้อมูลจากเอกสารสิทธิ์ที่ดิน</p>
+                </div>
               </div>
+              <div className="grid">
+                <div className="inputGroup">
+                  <label className="label">
+                    <span className="label-icon">�</span>
+                    ระวาง
+                  </label>
+                  <input
+                    type="text"
+                    name="survey_number"
+                    value={formData.survey_number}
+                    onChange={handleChange}
+                    className="input"
+                    placeholder="ระวาง"
+                  />
+                </div>
 
-              <div className="inputGroup">
-                <label className="label">เลขที่ดิน</label>
-                <input
-                  type="text"
-                  name="land_number"
-                  value={formData.land_number}
-                  onChange={handleChange}
-                  className="input"
-                  placeholder="เลขที่ดิน"
-                />
-              </div>
+                <div className="inputGroup">
+                  <label className="label">
+                    <span className="label-icon">🆔</span>
+                    เลขที่ดิน
+                  </label>
+                  <input
+                    type="text"
+                    name="land_number"
+                    value={formData.land_number}
+                    onChange={handleChange}
+                    className="input"
+                    placeholder="เลขที่ดิน"
+                  />
+                </div>
 
-              <div className="inputGroup">
-                <label className="label">หน้าสำรวจ</label>
-                <input
-                  type="text"
-                  name="survey_page"
-                  value={formData.survey_page}
-                  onChange={handleChange}
-                  className="input"
-                  placeholder="หน้าสำรวจ"
-                />
-              </div>
+                <div className="inputGroup">
+                  <label className="label">
+                    <span className="label-icon">📄</span>
+                    หน้าสำรวจ
+                  </label>
+                  <input
+                    type="text"
+                    name="survey_page"
+                    value={formData.survey_page}
+                    onChange={handleChange}
+                    className="input"
+                    placeholder="หน้าสำรวจ"
+                  />
+                </div>
 
-              <div className="inputGroup">
-                <label className="label">เลขที่โฉนด</label>
-                <input
-                  type="text"
-                  name="title_deed_number"
-                  value={formData.title_deed_number}
-                  onChange={handleChange}
-                  className="input"
-                  placeholder="เลขที่โฉนด"
-                />
-              </div>
+                <div className="inputGroup">
+                  <label className="label">
+                    <span className="label-icon">📜</span>
+                    เลขที่โฉนด
+                  </label>
+                  <input
+                    type="text"
+                    name="title_deed_number"
+                    value={formData.title_deed_number}
+                    onChange={handleChange}
+                    className="input"
+                    placeholder="เลขที่โฉนด"
+                  />
+                </div>
 
-              <div className="inputGroup">
-                <label className="label">เล่ม</label>
-                <input
-                  type="text"
-                  name="volume"
-                  value={formData.volume}
-                  onChange={handleChange}
-                  className="input"
-                  placeholder="เล่ม"
-                />
-              </div>
+                <div className="inputGroup">
+                  <label className="label">
+                    <span className="label-icon">📚</span>
+                    เล่ม
+                  </label>
+                  <input
+                    type="text"
+                    name="volume"
+                    value={formData.volume}
+                    onChange={handleChange}
+                    className="input"
+                    placeholder="เล่ม"
+                  />
+                </div>
 
-              <div className="inputGroup">
-                <label className="label">หน้า</label>
-                <input
-                  type="text"
-                  name="page"
-                  value={formData.page}
-                  onChange={handleChange}
-                  className="input"
-                  placeholder="หน้า"
-                />
-              </div>
-
-              <div className="inputGroup">
-                <label className="label">ไร่</label>
-                <input
-                  type="number"
-                  name="rai"
-                  value={formData.rai}
-                  onChange={handleChange}
-                  className="input"
-                  placeholder="จำนวนไร่"
-                  min={0}
-                />
-              </div>
-
-              <div className="inputGroup">
-                <label className="label">งาน</label>
-                <input
-                  type="number"
-                  name="ngan"
-                  value={formData.ngan}
-                  onChange={handleChange}
-                  className="input"
-                  placeholder="จำนวนงาน"
-                  min={0}
-                />
-              </div>
-
-              <div className="inputGroup">
-                <label className="label">ตารางวา</label>
-                <input
-                  type="number"
-                  name="square_wa"
-                  value={formData.square_wa}
-                  onChange={handleChange}
-                  className="input"
-                  placeholder="จำนวนตารางวา"
-                  min={0}
-                />
-              </div>
-
-              {/* จังหวัด */}
-              <div className="inputGroup">
-                <label className="label">จังหวัด</label>
-                <select
-                  name="province_id"
-                  value={formData.province_id}
-                  onChange={handleChange}
-                  className="input"
-                >
-                  <option value="">
-                    {loadingP ? "กำลังโหลด..." : "-- เลือกจังหวัด --"}
-                  </option>
-                  {provinces.map((p) => (
-                    <option key={p.ID} value={String(p.ID)}> {/* ใช้ province.ID แทนชื่อจังหวัด */}
-                      {p.name_th}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* อำเภอ */}
-              <div className="inputGroup">
-                <label className="label">อำเภอ</label>
-                <select
-                  name="district_id"
-                  value={formData.district_id}
-                  onChange={handleChange}
-                  className="input"
-                  disabled={!formData.province_id || loadingD}
-                >
-                  <option value="">
-                    {loadingD ? "กำลังโหลด..." : "-- เลือกอำเภอ --"}
-                  </option>
-                  {districts.map((d) => (
-                    <option key={d.ID} value={String(d.ID)}>
-                      {d.name_th}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* ตำบล */}
-              <div className="inputGroup">
-                <label className="label">ตำบล</label>
-                <select
-                  name="subdistrict_id"
-                  value={formData.subdistrict_id}
-                  onChange={handleChange}
-                  className="input"
-                  disabled={!formData.district_id || loadingS}
-                >
-                  <option value="">
-                    {loadingS ? "กำลังโหลด..." : "-- เลือกตำบล --"}
-                  </option>
-                  {subdistricts.map((s) => (
-                    <option key={s.ID} value={String(s.ID)}>
-                      {s.name_th}
-                    </option>
-                  ))}
-                </select>
+                <div className="inputGroup">
+                  <label className="label">
+                    <span className="label-icon">📃</span>
+                    หน้า
+                  </label>
+                  <input
+                    type="text"
+                    name="page"
+                    value={formData.page}
+                    onChange={handleChange}
+                    className="input"
+                    placeholder="หน้า"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Image Upload */}
-            {/* <div className="inputGroup">
-              <label className="label">
-                <Camera size={16} /> รูปภาพที่ดิน
-              </label>
-              <label className="uploadArea">
-                <Upload size={32} color="#94a3b8" />
-                <p className="uploadText">
-                  <span style={{ fontWeight: 600 }}>คลิกเพื่ออัพโหลด</span>{" "}
-                  หรือลากไฟล์มาวาง
-                </p>
-                <p className="uploadSubtext">PNG, JPG, JPEG (MAX. 10MB)</p>
-                <input
-                  type="file"
-                  style={{ display: "none" }}
-                  onChange={handleImageChange}
-                  accept="image/*"
-                />
-              </label>
-
-              {imagePreview && (
-                <div className="imagePreview">
-                  <img src={imagePreview} alt="Preview" className="previewImage" />
+            {/* Land Area Section */}
+            <div className="form-section">
+              <div className="section-header">
+                <div className="section-icon">📐</div>
+                <div className="section-title">
+                  <h3>ขนาดพื้นที่</h3>
+                  <p>ระบุขนาดพื้นที่ของที่ดิน</p>
                 </div>
-              )}
-            </div> */}
-          </div>
+              </div>
+              <div className="grid area-grid">
+                <div className="inputGroup">
+                  <label className="label">
+                    <span className="label-icon">🌾</span>
+                    ไร่
+                  </label>
+                  <input
+                    type="number"
+                    name="rai"
+                    value={formData.rai}
+                    onChange={handleChange}
+                    className="input"
+                    placeholder="จำนวนไร่"
+                    min={0}
+                  />
+                </div>
 
-          {/* Actions */}
-          <div className="footer">
-            <button type="button" className="cancelButton" onClick={handleCancel}>
-              ยกเลิก
-            </button>
-            <button onClick={handleSubmit} disabled={isSubmitting} className="submitButton">
-              <Save size={16} />
-              {isSubmitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
-            </button>
+                <div className="inputGroup">
+                  <label className="label">
+                    <span className="label-icon">🌿</span>
+                    งาน
+                  </label>
+                  <input
+                    type="number"
+                    name="ngan"
+                    value={formData.ngan}
+                    onChange={handleChange}
+                    className="input"
+                    placeholder="จำนวนงาน"
+                    min={0}
+                  />
+                </div>
+
+                <div className="inputGroup">
+                  <label className="label">
+                    <span className="label-icon">📏</span>
+                    ตารางวา
+                  </label>
+                  <input
+                    type="number"
+                    name="square_wa"
+                    value={formData.square_wa}
+                    onChange={handleChange}
+                    className="input"
+                    placeholder="จำนวนตารางวา"
+                    min={0}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Location Section */}
+            <div className="form-section">
+              <div className="section-header">
+                <div className="section-icon">📍</div>
+                <div className="section-title">
+                  <h3>ที่ตั้งที่ดิน</h3>
+                  <p>เลือกจังหวัด อำเภอ และตำบล</p>
+                </div>
+              </div>
+              <div className="grid location-grid">
+                {/* จังหวัด */}
+                <div className="inputGroup">
+                  <label className="label">
+                    <span className="label-icon">🏙️</span>
+                    จังหวัด
+                  </label>
+                  <select
+                    name="province_id"
+                    value={formData.province_id}
+                    onChange={handleChange}
+                    className="input"
+                  >
+                    <option value="">
+                      {loadingP ? "กำลังโหลด..." : "-- เลือกจังหวัด --"}
+                    </option>
+                    {provinces.map((p) => (
+                      <option key={p.ID} value={String(p.ID)}>
+                        {p.name_th}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* อำเภอ */}
+                <div className="inputGroup">
+                  <label className="label">
+                    <span className="label-icon">🏘️</span>
+                    อำเภอ
+                  </label>
+                  <select
+                    name="district_id"
+                    value={formData.district_id}
+                    onChange={handleChange}
+                    className="input"
+                    disabled={!formData.province_id || loadingD}
+                  >
+                    <option value="">
+                      {loadingD ? "กำลังโหลด..." : "-- เลือกอำเภอ --"}
+                    </option>
+                    {districts.map((d) => (
+                      <option key={d.ID} value={String(d.ID)}>
+                        {d.name_th}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* ตำบล */}
+                <div className="inputGroup">
+                  <label className="label">
+                    <span className="label-icon">🏡</span>
+                    ตำบล
+                  </label>
+                  <select
+                    name="subdistrict_id"
+                    value={formData.subdistrict_id}
+                    onChange={handleChange}
+                    className="input"
+                    disabled={!formData.district_id || loadingS}
+                  >
+                    <option value="">
+                      {loadingS ? "กำลังโหลด..." : "-- เลือกตำบล --"}
+                    </option>
+                    {subdistricts.map((s) => (
+                      <option key={s.ID} value={String(s.ID)}>
+                        {s.name_th}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="footer">
+              <button type="button" className="cancelButton" onClick={handleCancel}>
+                ยกเลิก
+              </button>
+              <button onClick={handleSubmit} disabled={isSubmitting} className="submitButton">
+                <Save size={16} />
+                {isSubmitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

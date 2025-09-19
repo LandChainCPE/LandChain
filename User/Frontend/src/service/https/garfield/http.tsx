@@ -53,9 +53,9 @@ async function LoginWallet(walletAddress: string) {
     localStorage.setItem("walletAddress", walletAddress);
     localStorage.setItem("token", result.token || "");
     localStorage.setItem("token_type", result.token_type || "Bearer");
-    localStorage.setItem("firstName", result.first_name || "");
-    localStorage.setItem("lastName", result.last_name || "");
-    localStorage.setItem("user_id", result.user_id ? result.user_id.toString() : "");
+    //localStorage.setItem("firstName", result.first_name || "");
+    //localStorage.setItem("lastName", result.last_name || "");
+    localStorage.setItem("user_id", result.user_id);
     localStorage.setItem("isLogin", "true"); // ✅ ต้องมี
   }
 
@@ -169,6 +169,15 @@ async function GetDataUserVerification(userid: string) {   ///แก้
   return { response, result };
 }
 
+async function GetUserinfoByID(userId: string) {
+  const response = await fetch(`${apiUrl}/userinfo/${userId}`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+  const result = await response.json();
+  return { response, result };
+}
+
 export {
   getAuthHeaders,
   CreateAccount,
@@ -179,4 +188,5 @@ export {
   GetAllProvinces,
   GetDistrict,
   GetSubdistrict,
+  GetUserinfoByID,
 };
