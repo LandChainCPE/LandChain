@@ -282,6 +282,16 @@ body {
   left: 100%;
 }
 
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn:disabled::before {
+  display: none;
+}
+
 .btn-primary {
   background: var(--gradient-primary);
   color: #fff;
@@ -694,6 +704,16 @@ body {
 
   75% {
     transform: translateY(-5px) rotate(2deg);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
   }
 }
 
