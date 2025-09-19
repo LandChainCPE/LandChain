@@ -106,10 +106,15 @@ func main() {
 	admin.Use(middlewares.Authorizes())
 	admin.Use(middlewares.CheckAdminRole())
 	{
-		admin.GET("/getbookingdata", controller.GetBookingData)
-		admin.GET("/getdatauserforverify/:bookingID", controller.GetDataUserForVerify)
-		admin.POST("/verifywalletid/:bookingID", controller.VerifyWalletID)
-		admin.POST("/verifylandtitleid/:LandtitleID", controller.VerifyLandtitleID)
+		//----- อรรถ -------
+		admin.GET("/getbookingdata", controller.GetBookingData)   //กรมที่ดินดึงข้อมูลการจอง User ทั้งหมด มาแสดง
+		admin.GET("/getdatauserforverify/:bookingID", controller.GetDataUserForVerify)  //กรมที่ดิน ดึงข้อมูลการจอง มาแสดงว่าเป็น ชื่อ นามสกุล walletid อะไร
+		admin.POST("/verifywalletid/:bookingID", controller.VerifyWalletID)   //กรมที่ดินกดยืนยัน ระบบ ทำการเซ็นข้อมูล เป็น Signature เก็บลง user_verification 
+		admin.POST("/verifylandtitleid/:LandtitleID", controller.VerifyLandtitleID) //กรมที่ดินกดยืนยัน ระบบทำการดึงข้อมูลของที่ดิน รวมเป็น metadata ทำการเซ็นข้อมูล เก็บลง land_verification
+		admin.GET("/getalllanddata", controller.GetAllLandData)   //ดึงข้อมูล โฉนดมาแสดง ทั้งหมด
+		//admin.GET("getdatauserverification/:userid", controller.GetDataUserVerification)   //เป็นของ User ดึงข้อมูล ผู้ใช้ WalletID  NameHash Signature  เพื่อลงทะเบียนผู้ใช้ลงBlockchain
+		//จบ----- อรรถ -------
+
 		admin.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
 		admin.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)
 		admin.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
