@@ -205,6 +205,7 @@ func main() {
 
 		// CONTROLLER RegisterLand
 		authorized.POST("/user/userregisland", controller.UserRegisLand)
+		authorized.GET("/userinfo/:userId", controller.GetUserinfoByID)
 	}
 
 	// 🌐 Public routes (outside authorized groups)
