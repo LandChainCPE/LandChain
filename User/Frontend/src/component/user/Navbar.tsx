@@ -138,6 +138,13 @@ const Navbar = () => {
                     คำขอซื้อ/ขายที่ดิน
                   </a>
                   <a 
+                    href="/user/appointmentstatus" 
+                    className="dropdown-item-landchain"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    สถานะการจองนัดหมาย
+                  </a>
+                  <a 
                     href="/user/landhistory" 
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}

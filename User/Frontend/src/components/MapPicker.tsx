@@ -11,13 +11,15 @@ interface MapPickerProps {
   onChange: (v: Coordinate[]) => void;
   height?: number;
   center?: [number, number];
+  zoom?: number;
 }
 
 const MapPicker: React.FC<MapPickerProps> = ({ 
   value, 
   onChange, 
   height = 300, 
-  center = [100.5018, 13.7563] 
+  center = [100.5018, 13.7563],
+  zoom = 12
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -46,7 +48,7 @@ const MapPicker: React.FC<MapPickerProps> = ({
       container: mapContainerRef.current,
       style: 'mapbox://styles/mapbox/satellite-streets-v12',
       center: center,
-      zoom: 12,
+      zoom: zoom,
       doubleClickZoom: false,
     });
 
@@ -184,6 +186,37 @@ const MapPicker: React.FC<MapPickerProps> = ({
       features: polygonFeatures,
     });
   }, [value]);
+
+  // Update map center and zoom when props change
+  useEffect(() => {
+    if (!mapRef.current) return;
+    
+    console.log("🗺️ MapPicker: Flying to new location", { center, zoom });
+    console.log("🗺️ Current map center:", mapRef.current.getCenter());
+    console.log("🗺️ Current map zoom:", mapRef.current.getZoom());
+    
+    // ตรวจสอบว่าค่าใหม่ต่างจากค่าปัจจุบันหรือไม่
+    const currentCenter = mapRef.current.getCenter();
+    const currentZoom = mapRef.current.getZoom();
+    
+    const centerChanged = Math.abs(currentCenter.lng - center[0]) > 0.001 || 
+                         Math.abs(currentCenter.lat - center[1]) > 0.001;
+    const zoomChanged = Math.abs(currentZoom - zoom) > 0.1;
+    
+    if (centerChanged || zoomChanged) {
+      console.log("🎯 Flying to new position with smooth animation");
+      mapRef.current.flyTo({
+        center: center,
+        zoom: zoom,
+        speed: 0.8, // ลดความเร็วให้ช้าลงเพื่อ animation ที่นุ่มนวล
+        curve: 1.2, // ปรับ curve ให้นุ่มนวล
+        duration: 1500, // ลดระยะเวลาลงเหลือ 1.5 วินาที
+        essential: true // บังคับให้ animation ทำงานแม้ prefers-reduced-motion
+      });
+    } else {
+      console.log("🔄 No significant change in position, skipping animation");
+    }
+  }, [center, zoom]);
 
   // Event handlers
   const handleToggleDrawing = (e: React.MouseEvent) => {

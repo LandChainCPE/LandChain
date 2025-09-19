@@ -18,6 +18,7 @@ const Map = Loadable(lazy(() => import("../pages/Map/map")));
 const SellPost = Loadable(lazy(() => import("../pages/SellPost/sellpost.tsx")));
 const SellPostMain = Loadable(lazy(() => import("../pages/SellPost/sellpostmain.tsx")));
 const LandDetail = Loadable(lazy(() => import("../pages/SellPost/landdetail.tsx")));
+const FullMapView = Loadable(lazy(() => import("../pages/SellPost/FullMapView.tsx")));
 
 const Chat = Loadable(lazy(() => import("../pages/ChatPage/chat")));
 
@@ -34,6 +35,7 @@ const RequestBuy = Loadable(lazy(() => import("../pages/RequestSell/RequsetBuy")
 const Transation = Loadable(lazy(() => import("../pages/RequestSell/TransationTimeline")));
 const History = Loadable(lazy(() => import("../pages/Landhistory/landhistory.tsx")));
 const CheckLandowner = Loadable(lazy(() => import("../pages/RequestSell/Checklandowner.tsx")));
+const AppointmentStatus = Loadable(lazy(() => import("../pages/appointmentstatus/appointmentstatus")));
 
 
 // Component สำหรับป้องกันหน้าที่ต้อง login
@@ -140,6 +142,14 @@ const UserRoutes = (): RouteObject[] => [
         )
       },
       { 
+        path: "fullmapview", 
+        element: (
+          <ProtectedRoute>
+            <FullMapView />
+          </ProtectedRoute>
+        )
+      },
+      { 
         path: "requestsell", 
         element: (
           <ProtectedRoute>
@@ -198,6 +208,14 @@ const UserRoutes = (): RouteObject[] => [
         element: (
           <ProtectedRoute>
             <CheckLandowner />
+          </ProtectedRoute>
+        ) 
+      },
+      { 
+        path: "appointmentstatus", 
+        element: (
+          <ProtectedRoute>
+            <AppointmentStatus />
           </ProtectedRoute>
         ) 
       },
