@@ -34,4 +34,6 @@ type Users struct {
 	TransactionBuyer  []Transaction    `gorm:"foreignKey:BuyerID"`
 	TransactionSeller []Transaction    `gorm:"foreignKey:SellerID"`
 	RequestBuySell    []RequestBuySell `gorm:"foreignKey:LandID"`
+
+	LandOwnership    []LandOwnership `gorm:"foreignKey:UserID"`
 }
