@@ -44,6 +44,13 @@ const HeaderMain = (): JSX.Element => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
     };
 
+    const scrollToTop = () => {
+        window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+        });
+    };
+
     return (
         <>
             <header className={`header-main ${isScrolled ? 'scrolled' : ''}`}>
@@ -54,7 +61,7 @@ const HeaderMain = (): JSX.Element => {
                             src={LogoBlack}
                             alt="LandChain Logo"
                             className="header-logo header-logo-black"
-                            onClick={goToHome}
+                            onClick={scrollToTop}
                             style={{ cursor: 'pointer' }}
                         />
                     </div>
