@@ -62,14 +62,14 @@ type Tag = {
   icon: string;
 };
 
-// แปลงเป็น checksum (ถ้าไม่ถูกต้องจะคืน "")
-const toChecksum = (addr?: string) => {
-  try { return ethers.getAddress(addr ?? ""); } catch { return ""; }
-};
+// // แปลงเป็น checksum (ถ้าไม่ถูกต้องจะคืน "")
+// const toChecksum = (addr?: string) => {
+//   try { return ethers.getAddress(addr ?? ""); } catch { return ""; }
+// };
 
-// ย่อ address สำหรับแสดงผล
-const truncate = (addr?: string, head = 6, tail = 4) =>
-  addr ? `${addr.slice(0, head)}…${addr.slice(-tail)}` : "";
+// // ย่อ address สำหรับแสดงผล
+// const truncate = (addr?: string, head = 6, tail = 4) =>
+//   addr ? `${addr.slice(0, head)}…${addr.slice(-tail)}` : "";
 
 // เช็ค zero address โดยไม่ hard-code
 const isZeroAddress = (addr?: string) => {
@@ -317,8 +317,7 @@ const SellPost = () => {
   const [districts, setDistricts] = useState<DistrictDTO[]>([]);
   const [subdistricts, setSubdistricts] = useState<SubdistrictDTO[]>([]);
   const [images, setImages] = useState<string[]>([]); // เปลี่ยนจาก image เดี่ยวเป็น array
-  const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
+  const [messageApi] = message.useMessage();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [tokenData, setTokenData] = useState<any | null>(null);
   const [landTokens, setLandTokens] = useState<any[]>([]);
@@ -359,10 +358,10 @@ const SellPost = () => {
   // Enhanced CSS styles using the color scheme
   const styles = {
     card: {
-      background: "linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.9))",
+      background: "linear-gradient(135deg, #ffffff, #f8fafc)",
       borderRadius: "20px",
-      boxShadow: "0 12px 32px rgba(23, 46, 37, 0.1)",
-      border: "1px solid rgba(111, 150, 155, 0.2)",
+      boxShadow: "0 12px 32px rgba(43, 66, 58, 0.1)",
+      border: "1px solid rgba(31, 54, 51, 0.2)",
       backdropFilter: "blur(10px)",
       transition: "all 0.3s ease"
     },
@@ -370,13 +369,13 @@ const SellPost = () => {
       background: "linear-gradient(135deg, #ffffff, #f8fafc)",
       borderRadius: "16px",
       padding: "1.5rem",
-      boxShadow: "0 8px 24px rgba(23, 46, 37, 0.08)",
-      border: "1px solid #e2e8f0",
+      boxShadow: "0 8px 24px rgba(43, 66, 58, 0.08)",
+      border: "1px solid rgba(31, 54, 51, 0.2)",
       transition: "all 0.3s ease"
     },
     button: {
       primary: {
-        background: "linear-gradient(135deg, #6F969B, #3F5658)",
+        background: "linear-gradient(135deg, #2b423a, #1f3b33)",
         color: "#ffffff",
         border: "none",
         borderRadius: "12px",
@@ -385,12 +384,12 @@ const SellPost = () => {
         fontSize: "1rem",
         cursor: "pointer",
         transition: "all 0.3s ease",
-        boxShadow: "0 4px 12px rgba(111, 150, 155, 0.3)"
+        boxShadow: "0 4px 12px rgba(43, 66, 58, 0.3)"
       },
       secondary: {
         background: "linear-gradient(135deg, #f1f5f9, #e2e8f0)",
-        color: "#172E25",
-        border: "1px solid #cbd5e1",
+        color: "#2b423a",
+        border: "1px solid rgba(43, 66, 58, 0.2)",
         borderRadius: "12px",
         padding: "0.875rem 2rem",
         fontWeight: "600",
@@ -1177,21 +1176,21 @@ useEffect(() => {
     }}>
       {/* Header */}
       <div style={{ 
-        backgroundColor: "#FFFFFF", 
+        background: "linear-gradient(135deg, #2b423a 0%, #1f3b33 100%)",
         boxShadow: "0 4px 6px -1px rgba(23, 46, 37, 0.1)", 
         backdropFilter: "blur(8px)",
-        borderBottom: "1px solid #e2e8f0"
+        borderBottom: "1px solid rgba(255, 255, 255, 0.1)"
       }}>
         <div style={{ maxWidth: "1024px", margin: "0 auto", padding: "2rem 1.5rem" }}>
           <h1 style={{ 
             fontSize: "2.5rem", 
             fontWeight: "800", 
-            color: "#172E25", 
+            color: "#ffffff", 
             display: "flex", 
             alignItems: "center", 
             gap: "1rem",
             margin: 0,
-            textShadow: "0 2px 4px rgba(23, 46, 37, 0.1)"
+            textShadow: "0 2px 4px rgba(0, 0, 0, 0.2)"
           }}>
             <span style={{ 
               background: "linear-gradient(135deg, #6F969B, #3F5658)",
@@ -1202,7 +1201,7 @@ useEffect(() => {
             ประกาศขายที่ดิน
           </h1>
           <p style={{ 
-            color: "#3F5658", 
+            color: "rgba(255, 255, 255, 0.9)", 
             fontSize: "1.1rem", 
             margin: "8px 0 0 0",
             fontWeight: "500"
@@ -1212,13 +1211,15 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Progress Steps */}
-      <div style={{ maxWidth: "1024px", margin: "0 auto", padding: "2rem 1.5rem" }}>
-        <div style={{ 
+      {/* Progress Steps ข้างบน*/}
+      <div style={{ maxWidth: "1024px", padding: "2rem 1.5rem" }}>
+        <div style={{
           display: "flex", 
           justifyContent: "space-between", 
           alignItems: "center", 
           marginBottom: "3rem",
+          marginLeft:"100px",
+          marginRight:"100px",
           background: "rgba(255, 255, 255, 0.8)",
           borderRadius: "20px",
           padding: "2rem",
@@ -1278,15 +1279,14 @@ useEffect(() => {
           ))}
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "2rem" }}>
-          {/* Main Content */}
-          <div style={{ gridColumn: "span 2" }}>
-            {/* Step 1: Land Selection */}
+            {/* Step 1: Land Selection ขนาด */}
             {currentStep === 1 && (
               <div style={{ 
                 ...styles.card, 
                 padding: "3rem",
-                marginTop: "1rem"
+                marginTop: "1rem",
+                minWidth: "95vw",
+                marginLeft: "0px"
               }}>
                 
                 <h2 style={{ 
@@ -1587,29 +1587,35 @@ useEffect(() => {
 
                 <div style={{ marginTop: "3rem", display: "flex", justifyContent: "flex-end" }}>
                   <button
-                    onClick={() => setCurrentStep(2)}
+                    onClick={() => selectedLand && setCurrentStep(2)}
+                    disabled={!selectedLand}
                     style={{
                       ...styles.button.primary,
                       fontSize: "1.1rem",
-                      padding: "1rem 2.5rem"
+                      padding: "1rem 2.5rem",
+                      opacity: !selectedLand ? 0.5 : 1,
+                      cursor: !selectedLand ? "not-allowed" : "pointer"
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                      e.currentTarget.style.boxShadow = "0 8px 24px rgba(111, 150, 155, 0.4)";
+                      if (selectedLand) {
+                        e.currentTarget.style.transform = "translateY(-2px)";
+                        e.currentTarget.style.boxShadow = "0 8px 24px rgba(111, 150, 155, 0.4)";
+                      }
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(111, 150, 155, 0.3)";
+                      if (selectedLand) {
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.boxShadow = "0 4px 12px rgba(111, 150, 155, 0.3)";
+                      }
                     }}
                   >
-                    ถัดไป →
+                    {selectedLand ? "ถัดไป →" : "เลือกโฉนดที่ดินก่อน"}
                   </button>
                 </div>
               </div>
             )}
           </div>
-        </div>
-      </div>
+
 
       {/* Continue from Step 2: Personal Information */}
       {currentStep === 2 && (
