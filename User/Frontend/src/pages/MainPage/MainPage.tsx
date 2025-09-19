@@ -8,7 +8,7 @@ import Landpic from "../../assets/LandPic.jpg";
 import LandpicKorat from "../../assets/LandPicKorat.jpg"
 import type { JSX } from "react";
 import { Link } from 'react-router-dom';
-import Header from "./HeaderMain";
+import HeaderMain from "./HeaderMain";
 const MainPage = (): JSX.Element => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -29,7 +29,7 @@ const MainPage = (): JSX.Element => {
   };
 
   return (
-    <div className="main-container">
+    <div className="main-container main-page-container">
       <div className="floating-shapes">
         <div className="shape-1"></div>
         <div className="shape-2"></div>
@@ -38,19 +38,16 @@ const MainPage = (): JSX.Element => {
       </div>
 
       {/* Header */}
-      <Header />
+      <HeaderMain />
 
       {/* Hero Section */}
       <div className="hero-section">
         <div className="hero-content">
-          <div className="hero-badge">
-            <span>🏛️ บริการกรมที่ดินออนไลน์</span>
-          </div>
           <h1 className="hero-title">
-            <span className="gradient-text">บริการที่ดินครบวงจร</span>
+            <span className="gradient-text">บริการที่ดินออนไลน์</span>
           </h1>
           <p className="hero-subtitle">
-            ตรวจสอบเอกสารสิทธิ์ นัดหมายส่งมอบที่ดิน และลงทะเบียนโฉนดบน Blockchain
+            ตรวจสอบเอกสารสิทธิ์ นัดหมายกรมที่ดิน และลงทะเบียนโฉนดบน Blockchain
             <br />
             ด้วยเทคโนโลยีที่ทันสมัย ปลอดภัย และโปร่งใส
           </p>
@@ -61,17 +58,6 @@ const MainPage = (): JSX.Element => {
       <div className="content-section">
         <div className="search-section">
           <h2 className="search-title">🔍 ค้นหาที่ดินของคุณ</h2>
-
-          <div className="search-input-group">
-            <input
-              className="search-input-modern"
-              placeholder="ค้นหาเลขโฉนด / เลขที่ดิน / ที่อยู่"
-              type="text"
-            />
-            <button className="search-btn-modern">
-              ค้นหา
-            </button>
-          </div>
 
           <div className="filter-section">
             <div className="filter-group">
@@ -102,6 +88,12 @@ const MainPage = (): JSX.Element => {
             <div className="filter-group">
               <label className="filter-label">ถึง</label>
               <input className="filter-input" placeholder="ราคาสูงสุด" type="number" />
+            </div>
+
+            <div className="filter-group button-group">
+              <button className="search-btn-modern">
+                ค้นหา
+              </button>
             </div>
           </div>
         </div>
@@ -211,17 +203,6 @@ const MainPage = (): JSX.Element => {
             <p className="service-description">
               ตรวจสอบความถูกต้องของเอกสารโฉนดที่ดิน
               พร้อมข้อมูลประวัติที่โปร่งใส
-            </p>
-          </div>
-
-          <div className="service-card">
-            <div className="service-icon">
-              <SafetyCertificateOutlined />
-            </div>
-            <h3 className="service-title">ยืนยันด้วย Blockchain</h3>
-            <p className="service-description">
-              ระบบยืนยันความถูกต้องด้วยเทคโนโลยี Blockchain
-              ที่ปลอดภัยและไม่สามารถปลอมแปลงได้
             </p>
           </div>
 

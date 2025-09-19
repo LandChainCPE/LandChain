@@ -71,6 +71,13 @@ const MapPin = ({ className = "" }) => (
   </svg>
 );
 
+const User = ({ className = "" }) => (
+  <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
 /* =======================
    Lightweight Primitives
    ======================= */
@@ -342,7 +349,6 @@ export default function UserProfilePage() {
       <div className="grid-4">
         <StatCard title="ที่ดินบนเชนทั้งหมด" value={total} />
         <StatCard title="พร้อมใช้งาน" value={active} />
-        <StatCard title="มีภาระผูกพัน" value={encumbered} />
         <StatCard title="รอตรวจสอบ" value={reviewing} />
       </div>
 
@@ -361,7 +367,6 @@ export default function UserProfilePage() {
                   <th>ที่ตั้ง</th>
                   <th>ขนาด</th>
                   <th>สถานะ</th>
-                  <th className="text-right">การกระทำ</th>
                 </tr>
               </thead>
               <tbody>

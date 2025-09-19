@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { FaUser, FaBars, FaTimes } from "react-icons/fa";
+import LogoBlack from "../../assets/LogoLandchainBlack.png";
 import "./Navbar.css";
 
 const Navbar = () => {
@@ -56,39 +57,59 @@ const Navbar = () => {
     window.location.href = "/";
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
+
   return (
     <>
       <nav className={`navbar-landchain ${scrolled ? 'scrolled' : ''}`}>
         <div className="navbar-container">
           {/* Brand Section */}
           <div className="navbar-brand-section">
-            <Link to="/user" className="navbar-brand-text">
-              LANDCHAIN
-            </Link>
+            <img
+              src={LogoBlack}
+              alt="LandChain Logo"
+              className="header-logo header-logo-black"
+              onClick={scrollToTop}
+              style={{ cursor: 'pointer' }}
+            />
           </div>
 
           {/* Desktop Navigation */}
           <div className="navbar-nav-section">
             <ul className="navbar-nav-list">
               <li className="navbar-nav-item">
-                <a 
-                  href="/user" 
+                <a
+                  href="/user"
                   className={`navbar-nav-link ${location.pathname === '/user' ? 'active' : ''}`}
                 >
                   หน้าแรก
                 </a>
               </li>
               <li className="navbar-nav-item">
-                <a 
-                  href="/user/regisland" 
+                <a
+                  href="/user/regisland"
                   className={`navbar-nav-link ${location.pathname === '/user/regisland' ? 'active' : ''}`}
                 >
                   นัดหมายกรมที่ดิน
                 </a>
               </li>
               <li className="navbar-nav-item">
-                <Link 
-                  to="/user/userdashboard" 
+                <a
+                  href="/user/sellpostmain"
+                  className={`navbar-nav-link ${location.pathname === '/user/sellpostmain' ? 'active' : ''}`}
+                >
+                  ประกาศขายที่ดิน
+                </a>
+              </li>
+              <li className="navbar-nav-item">
+                <Link
+                  to="/user/userdashboard"
                   className={`navbar-nav-link ${isActiveLink('/user/userdashboard') ? 'active' : ''}`}
                 >
                   โปรไฟล์
@@ -99,8 +120,8 @@ const Navbar = () => {
             {/* User Dropdown */}
             {isLoggedIn && (
               <div className={`user-dropdown ${showDropdown ? 'show' : ''}`}>
-                <button 
-                  className="user-dropdown-toggle" 
+                <button
+                  className="user-dropdown-toggle"
                   onClick={toggleDropdown}
                   aria-expanded={showDropdown}
                 >
@@ -109,42 +130,42 @@ const Navbar = () => {
                 </button>
 
                 <div className="dropdown-menu-landchain">
-                  <a 
-                    href="/user/manage" 
+                  <a
+                    href="/user/manage"
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}
                   >
                     จัดการข้อมูล
                   </a>
-                  <a 
-                    href="/user/userregisland" 
+                  <a
+                    href="/user/userregisland"
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}
                   >
                     ลงทะเบียนโฉนดที่ดิน
                   </a>
-                  <a 
-                    href="/user/transation" 
+                  <a
+                    href="/user/transation"
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}
                   >
                     สถานะธุรกรรม
                   </a>
-                  <a 
-                    href="/user/requestsell" 
+                  <a
+                    href="/user/requestsell"
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}
                   >
                     คำขอซื้อ/ขายที่ดิน
                   </a>
-                  <a 
-                    href="/user/landhistory" 
+                  <a
+                    href="/user/landhistory"
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}
                   >
                     ประวัติโฉนดที่ดิน/ตรวจสอบเจ้าของที่ดิน
                   </a>
-                  <button 
+                  <button
                     className="dropdown-item-landchain logout-btn"
                     onClick={handleLogout}
                   >
@@ -167,7 +188,13 @@ const Navbar = () => {
         <div className="mobile-menu-content">
           <div className="mobile-menu-header">
             <div className="navbar-brand-section">
-              <span className="navbar-brand-text">LANDCHAIN</span>
+              <span
+                className="navbar-brand-text"
+                onClick={scrollToTop}
+                style={{ cursor: 'pointer' }}
+              >
+                LANDCHAIN
+              </span>
             </div>
             <button className="mobile-close" onClick={toggleMobileMenu}>
               <FaTimes />
@@ -176,7 +203,18 @@ const Navbar = () => {
 
           <ul className="mobile-nav-list">
             <li className="mobile-nav-item">
-              <Link to="/" className="mobile-nav-link">
+              <Link
+                to="/"
+                className="mobile-nav-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToTop();
+                  setShowMobileMenu(false);
+                  setTimeout(() => {
+                    window.location.href = '/user';
+                  }, 100);
+                }}
+              >
                 หน้าแรก
               </Link>
             </li>
@@ -222,10 +260,10 @@ const Navbar = () => {
                   </Link>
                 </li>
                 <li className="mobile-nav-item">
-                  <button 
-                    className="mobile-nav-link" 
+                  <button
+                    className="mobile-nav-link"
                     onClick={handleLogout}
-                    style={{border: 'none', background: 'none', width: '100%', textAlign: 'left'}}
+                    style={{ border: 'none', background: 'none', width: '100%', textAlign: 'left' }}
                   >
                     ออกจากระบบ
                   </button>

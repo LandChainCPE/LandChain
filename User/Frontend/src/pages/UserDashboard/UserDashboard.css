@@ -1,9 +1,34 @@
+/* Variables */
+:root {
+  --primary-dark: #172E25;
+  --primary-medium: #3F5658;
+  --primary-light: #6F969B;
+  --secondary-light: #D0E2E6;
+  --white: #FFFFFF;
+  --gradient-primary: linear-gradient(135deg, #6F969B 0%, #3F5658 100%);
+  --gradient-dark: linear-gradient(135deg, #172E25 0%, #3F5658 100%);
+  --gradient-light: linear-gradient(135deg, #D0E2E6 0%, #FFFFFF 100%);
+  --shadow-soft: 0 8px 32px rgba(23, 46, 37, 0.1);
+  --shadow-medium: 0 16px 64px rgba(23, 46, 37, 0.15);
+  --shadow-strong: 0 24px 96px rgba(23, 46, 37, 0.25);
+}
+
+/* Body Background */
+body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(111, 150, 155, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(63, 86, 88, 0.1) 0%, transparent 50%),
+    linear-gradient(135deg, #D0E2E6 0%, #FFFFFF 70%);
+  min-height: 100vh;
+}
+
 .card-header.user-header {
-  background: #2c3e50;
+  background: var(--gradient-dark);
 }
 
 .card-header.land-header {
-  background: #2c3e50;
+  background: var(--gradient-dark);
 }
 
 /* Row for two cards side by side */
@@ -16,17 +41,55 @@
 
 /* Container */
 .container {
+  position: relative;
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px;
   min-height: 100vh;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Full-width Background */
+.container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: -1;
+  background: radial-gradient(circle at 20% 50%, rgba(111, 150, 155, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(63, 86, 88, 0.1) 0%, transparent 50%),
+    linear-gradient(135deg, #D0E2E6 0%, #FFFFFF 70%);
+}
+
+/* Additional Background Shapes */
+.container::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(111, 150, 155, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(63, 86, 88, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(208, 226, 230, 0.1) 0%, transparent 50%);
 }
 
 /* Icons */
 .icon {
   width: 24px;
   height: 24px;
+}
+
+.icon-xxl {
+  width: 64px;
+  height: 64px;
 }
 
 .icon-lg {
@@ -44,12 +107,35 @@
   height: 14px;
 }
 
+/* Action Icons */
+.action-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 120px;
+  height: 120px;
+  background: var(--gradient-light);
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.3s ease;
+}
+
+.action-icon:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-medium);
+}
+
+.action-icon .icon-xxl {
+  color: var(--primary-dark);
+}
+
 .text-white {
   color: #fff;
 }
 
 .text-muted {
-  color: #6b7280;
+  color: var(--primary-light);
 }
 
 .mr-1 {
@@ -60,22 +146,54 @@
   width: 100%;
 }
 
-/* Card */
+.text-right {
+  text-align: right;
+}
+
+.empty-cell {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--primary-light);
+}
+
+/* Glass Card Effects */
 .card {
-  border-radius: 16px;
-  background-color: white;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  margin-bottom: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  position: relative;
   overflow: hidden;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  animation: slideInUp 0.8s ease-out;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 24px;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-medium);
 }
 
 .card-header {
   padding: 24px;
-  border-bottom: 1px solid #e2e8f0;
-  background: linear-gradient(135deg, #2c3e50 30%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--gradient-dark);
   color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 .card-title {
@@ -85,16 +203,22 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  position: relative;
+  z-index: 2;
 }
 
 .card-description {
   font-size: 16px;
   opacity: 0.9;
   margin: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .card-content {
   padding: 24px;
+  position: relative;
+  z-index: 1;
 }
 
 /* Chips in header */
@@ -126,9 +250,9 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Buttons */
+/* Modern Button Styles */
 .btn {
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 12px 16px;
   border: none;
   cursor: pointer;
@@ -137,45 +261,73 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s ease;
   text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.btn:hover::before {
+  left: 100%;
 }
 
 .btn-primary {
-  background-color: #000;
+  background: var(--gradient-primary);
   color: #fff;
+  box-shadow: var(--shadow-soft);
 }
 
 .btn-primary:hover {
-  background-color: #1a1a1a;
+  background: var(--gradient-dark);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
 }
 
 .btn-outline {
-  background-color: transparent;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--primary-dark);
+  border: 2px solid var(--primary-light);
+  backdrop-filter: blur(10px);
 }
 
 .btn-outline:hover {
-  background-color: #f8fafc;
+  background: var(--gradient-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
 }
 
 .btn-ghost {
-  background-color: transparent;
-  color: #374151;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--primary-dark);
+  backdrop-filter: blur(10px);
 }
 
 .btn-ghost:hover {
-  background-color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
 }
 
 .btn-danger {
-  background-color: #dc2626;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
   color: #fff;
+  box-shadow: var(--shadow-soft);
 }
 
 .btn-danger:hover {
-  background-color: #b91c1c;
+  background: linear-gradient(135deg, #b91c1c, #991b1b);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
 }
 
 .btn-sm {
@@ -190,39 +342,138 @@
   height: 32px;
 }
 
-/* Custom button for register land */
+/* Custom Enhanced Buttons */
 .button-registland {
   font-size: 16px;
-  padding: 10px 24px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.10);
+  padding: 12px 24px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
   background: linear-gradient(135deg, #10b981, #059669);
   color: #fff;
   border: none;
   white-space: nowrap;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Stats */
+.button-registland::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.button-registland:hover::before {
+  left: 100%;
+}
+
+.button-registland:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+.usertoblockchain,
+.landtoblockchain {
+  font-size: 16px;
+  padding: 12px 24px;
+  width: 200px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+  background: var(--gradient-primary);
+  color: #fff;
+  border: none;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.usertoblockchain::before,
+.landtoblockchain::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.usertoblockchain:hover::before,
+.landtoblockchain:hover::before {
+  left: 100%;
+}
+
+.usertoblockchain:hover,
+.landtoblockchain:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
+  background: var(--gradient-dark);
+}
+
+/* Enhanced Stats Cards */
 .stat-card {
   text-align: center;
   margin-bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-light);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-medium);
+}
+
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+.stat-card .card-content {
+  position: relative;
+  z-index: 2;
 }
 
 .stat-title {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--primary-medium);
   margin: 0;
+  font-weight: 500;
 }
 
 .stat-value {
   font-size: 32px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--primary-dark);
   margin: 8px 0;
 }
 
 .stat-sub {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--primary-light);
 }
 
 /* Grids */
@@ -270,30 +521,6 @@
   background-color: #f8fafc;
 }
 
-.text-right {
-  text-align: right;
-}
-
-.empty-cell {
-  text-align: center;
-  padding: 48px 24px;
-  color: #6b7280;
-}
-
-/* Code & location cell */
-.code {
-  font-size: 12px;
-  background-color: #f1f5f9;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.loc {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-}
-
 /* Badges */
 .badge {
   display: inline-flex;
@@ -323,6 +550,58 @@
   border-color: #cbd5e1;
 }
 
+/* Enhanced Chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  color: white;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.chip:hover {
+  transform: translateY(-1px);
+}
+
+.chip-strong {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.chip-soft {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.text-right {
+  text-align: right;
+}
+
+.empty-cell {
+  text-align: center;
+  padding: 48px 24px;
+  color: #6b7280;
+}
+
+/* Code & location cell */
+.code {
+  font-size: 12px;
+  background-color: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.loc {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
 /* Actions in table */
 .actions {
   display: flex;
@@ -350,45 +629,147 @@
   text-decoration: underline;
 }
 
-.putinfomationetoblockchain {
-  display: grid;
-  gap: 16px;
-  margin-bottom: 32px;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-}
-
-.usertoblockchain {
-  font-size: 16px;
-  padding: 10px 24px;
-  width: 200px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.10);
-  background: linear-gradient(135deg, #eb7700, #eb7700);
-  color: #fff;
-  border: none;
-  white-space: nowrap;
-}
-
-.landtoblockchain {
-  font-size: 16px;
-  padding: 10px 24px;
-  width: 200px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.10);
-  background: linear-gradient(135deg, #eb7700, #eb7700);
-  color: #fff;
-  border: none;
-  white-space: nowrap;
-}
-
-.user-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 24px;
-}
-
+/* Content Areas */
+.user-content,
 .land-content {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 24px;
+}
+
+.quicklink-content {
+  padding: 16px 24px;
+}
+
+/* Enhanced Animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  25% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+
+  50% {
+    transform: translateY(0px) rotate(4deg);
+  }
+
+  75% {
+    transform: translateY(-5px) rotate(2deg);
+  }
+}
+
+/* Responsive Enhancements */
+@media (max-width: 992px) {
+  .container {
+    padding: 16px;
+  }
+
+  .card-header {
+    padding: 20px;
+  }
+
+  .card-content {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+
+  .card {
+    border-radius: 16px;
+  }
+
+  .card-header {
+    padding: 16px;
+  }
+
+  .card-content {
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 576px) {
+  .card-title {
+    font-size: 20px;
+  }
+
+  .button-registland,
+  .usertoblockchain,
+  .landtoblockchain {
+    width: 100%;
+    font-size: 14px;
+  }
+}
+
+/* Additional Styles */
+.titles-content {
+  padding: 0;
+}
+
+.quicklink-content {
+  text-align: center;
+  padding: 16px 24px;
+}
+
+/* Enhanced Visual Effects */
+.container>* {
+  animation: slideInUp 0.6s ease-out;
+}
+
+.container>*:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.container>*:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.container>*:nth-child(4) {
+  animation-delay: 0.3s;
 }

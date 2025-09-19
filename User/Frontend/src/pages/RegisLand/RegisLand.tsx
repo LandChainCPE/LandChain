@@ -351,38 +351,17 @@ const BookingCalendar = () => {
 
       <div className="hero-section">
         <div className="hero-content">
-          <div className="hero-badge">
-            <span>📅 ระบบจองออนไลน์</span>
-          </div>
           <h1 className="hero-title">
             <span className="gradient-text">จองการติดต่อกรมที่ดิน</span>
           </h1>
           <p className="hero-subtitle">
-            บริการจองนัดหมายออนไลน์สำหรับการตรวจสอบเอกสารสิทธิ์ที่ดิน
+            เลือกประเภทบริการและสาขาที่ต้องการใช้บริการ
             <br />
-            การโอนกรรมสิทธิ์ และการนำที่ดินขึ้น Blockchain
           </p>
         </div>
       </div>
 
       <div className="main-container" style={{ maxWidth: "1600px", margin: "0 auto" }}>
-        {/* Header Section - สร้างเป็น modern card */}
-        <div className="glass-card" style={{ marginBottom: 32 }}>
-          <div className="card-glow"></div>
-          <div style={{ textAlign: "center", padding: "3rem" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1rem", marginBottom: "2rem" }}>
-              <div className="service-icon">
-                <EnvironmentOutlined style={{ fontSize: "2rem", color: "white" }} />
-              </div>
-              <Title level={2} style={{ color: "var(--primary-dark)", marginBottom: 0, fontSize: "2rem" }}>
-                เลือกบริการและสาขา
-              </Title>
-            </div>
-            <Paragraph style={{ color: "var(--primary-medium)", fontSize: "1.1rem", margin: 0 }}>
-              เลือกประเภทบริการและสาขาที่ต้องการใช้บริการ
-            </Paragraph>
-          </div>
-        </div>
 
         <Row gutter={24}>
           {/* Left Column - Booking Form */}
