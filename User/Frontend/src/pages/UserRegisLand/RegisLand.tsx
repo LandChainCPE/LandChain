@@ -83,7 +83,7 @@ const BookingCalendar = () => {
       }
 
       try {
-        const bookingsResponse = await GetBookingStatus(currentUserId, selectedDate, selectedBranch, selectedServiceType, "");
+        const bookingsResponse = await GetBookingStatus(currentUserId, selectedBranch, selectedDate);
         setUserBookings(bookingsResponse);
 
         // Filter bookings that match current selection
@@ -223,10 +223,8 @@ const BookingCalendar = () => {
         // Refresh booking status after successful booking
         const bookingsResponse = await GetBookingStatus(
           currentUserId,
-          selectedDate!,
           selectedBranch!,
-          selectedServiceType!,
-          "" // pass empty string to match expected string type
+          selectedDate!
         );
         setUserBookings(bookingsResponse);
         

@@ -147,7 +147,7 @@ export async function GetAvailableSlots(
 }
 
 export const GetBookingStatus = async (
-userID: number, selectedDate: string, branchID: number, selectedServiceType: number, date: string) => {
+userID: number, branchID: number, date: string) => {
   try {
     const response = await api.get("/bookings/status", {
       params: {
