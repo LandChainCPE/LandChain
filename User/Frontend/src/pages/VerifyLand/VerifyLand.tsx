@@ -1,9 +1,14 @@
+import './VerifyLand.css';   // ✅ import CSS แยกไฟล์
 import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { GetLandtitlesByUser } from '../../service/https/garfield/http';
-import { Upload, FileText, MapPin, User, CheckCircle, AlertCircle, Loader2, Shield, Hash } from 'lucide-react';
+import { Upload, FileText, MapPin, User, CheckCircle, AlertCircle, Loader2, Shield} from 'lucide-react';
 import { Container } from 'react-bootstrap';
-import './VerifyLand.css';   // ✅ import CSS แยกไฟล์
+import detectEthereumProvider from '@metamask/detect-provider';
+import { Web3 } from 'web3';
+const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
+import contractABI from "../VerifyUser/ContractABI.json";
+import Navbar from '../../component/user/Navbar';
 
 
 interface LandDeed {
@@ -25,6 +30,9 @@ interface LandDeed {
   };
   land_verification_id?: string; // Add this property if it exists in the data
   documentHash: string;
+  wallet: string;
+  metafields: string;
+  signature: string;
 }
 
 const VerifyLand: React.FC = () => {
@@ -74,6 +82,9 @@ const VerifyLand: React.FC = () => {
     coordinates: { lat: 0, lng: 0 }, // ปรับตามข้อมูลจริงถ้ามี
     land_verification_id: raw.land_verification_id || raw.LandVerification?.ID || '',
     documentHash: raw.Uuid || '',
+    wallet: raw.LandVerification?.wallet || '',
+    metafields: raw.LandVerification?.metafields || '',
+    signature: raw.LandVerification?.signature || ''
   });
 
   useEffect(() => {
@@ -119,23 +130,41 @@ const VerifyLand: React.FC = () => {
 
   const handleUploadToBlockchain = async () => {
     if (!selectedDeed) return;
-
     setUploadStatus('uploading');
     try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      const mockTxHash = `0x${Math.random().toString(16).substr(2, 40)}`;
-      setTransactionHash(mockTxHash);
+      // import web3, detectEthereumProvider, contractABI, contractAddress
+      // (already imported at top)
+      const provider: any = await detectEthereumProvider();
+      if (!provider) {
+        alert("กรุณาติดตั้ง MetaMask");
+        setUploadStatus('error');
+        return;
+      }
+      const web3 = new Web3(provider);
+      const accounts = await web3.eth.requestAccounts();
+      const wallet = accounts[0];
+      const contractInstance = new web3.eth.Contract(
+        contractABI as any,
+        contractAddress
+      );
+      // mintLandTitleNFT(address wallet, string metaFields, bytes signature)
+      const tx = await contractInstance.methods.mintLandTitleNFT(
+        wallet,
+        selectedDeed.metafields,
+        selectedDeed.signature
+      ).send({ from: wallet });
+      setTransactionHash(tx.transactionHash);
       setUploadStatus('success');
-    } catch (error) {
+      alert('อัปโหลดข้อมูลที่ดินขึ้น Blockchain สำเร็จ!');
+    } catch (error: any) {
       setUploadStatus('error');
+      alert('Error: ' + (error?.message || error));
     }
   };
 
   const formatArea = (rai: number, ngan: number, square_wa: number) => {
     return `${rai} ไร่ ${ngan} งาน ${square_wa} ตารางวา`;
   };
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
     <div className="verify-land-container">
@@ -145,9 +174,9 @@ const VerifyLand: React.FC = () => {
         <div className="shape-3"></div>
         <div className="shape-4"></div>
       </div>
-
+      <Navbar />
       <div className="hero-section">
-        <Container>
+        <Container >
           <div className="hero-content">
             <div className="hero-badge">
               <span>🏛️ Blockchain Land Verification</span>
@@ -168,7 +197,7 @@ const VerifyLand: React.FC = () => {
         <div className="upload-grid">
           {/* Left Section */}
           <div className="upload-left">
-            <div className="glass-card">
+            <div className="verifyCard">
               <div className="card-glow"></div>
               <div className="section-card-body">
                 <div className="section-header">
@@ -225,7 +254,7 @@ const VerifyLand: React.FC = () => {
           {/* Right Section */}
           <div className="upload-right">
             {selectedDeed ? (
-              <div className="glass-card">
+              <div className="verifyCard">
                 <div className="card-glow"></div>
                 <div className="section-card-body">
                   <div className="section-header">
@@ -237,56 +266,49 @@ const VerifyLand: React.FC = () => {
                   </div>
 
                   <div className="deed-details-modern">
-                    <div className="alert-modern success">
-                      <div className="alert-icon">✅</div>
-                      <div className="alert-content">
-                        <div className="alert-title">ได้รับการตรวจสอบแล้ว</div>
-                        <div className="alert-message">เมื่อ {formatDate(selectedDeed.verificationDate)}</div>
-                      </div>
-                    </div>
+                    {selectedDeed ? (
+                      selectedDeed.verified ? (
+                        <div className="alert-modern success">
+                          <div className="alert-icon">✅</div>
+                          <div className="alert-content">
+                            <div className="alert-title">ได้รับการตรวจสอบแล้ว</div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="alert-modern" style={{ border: '2px solid #dc2626', background: '#fff5f5' }}>
+                          <div className="alert-icon">⚠️</div>
+                          <div className="alert-content">
+                            <div className="alert-title" style={{ color: '#dc2626' }}>ยังไม่ได้รับการตรวจสอบ</div>
+                          </div>
+                        </div>
+                      )
+                    ) : null}
 
                     <div className="deed-info-cards">
-                      <div className="info-card">
-                        <label>เลขที่โฉนด</label>
-                        <p>{selectedDeed.title}</p>
+                      <div className="info-card full-width">
+                        <label>Wallet</label>
+                        <p>{selectedDeed.wallet || '-'}</p>
                       </div>
-                      <div className="info-card">
-                        <label>เจ้าของ</label>
-                        <p>{selectedDeed.owner}</p>
+                      <div className="info-card full-width">
+                        <label>Signature</label>
+                        <div style={{
+                          background: '#e9ecef', // same as label background
+                          borderRadius: '6px',
+                          padding: '8px',
+                          wordBreak: 'break-all',
+                          fontFamily: 'monospace',
+                          fontSize: '0.95em',
+                          border: '1px solid #e0e0e0'
+                        }}>
+                          {selectedDeed.signature || '-'}
+                        </div>
                       </div>
-                      <div className="info-card">
-                        <label>เนื้อที่</label>
-                        <p>{formatArea(selectedDeed.rai, selectedDeed.ngan, selectedDeed.square_wa)}</p>
-                      </div>
-                      <div className="info-card">
-                        <label>วันที่ออกโฉนด</label>
-                        <p>{formatDate(selectedDeed.issueDate)}</p>
-                      </div>
-                      <div className="info-card">
-                        <label>วันที่หมดอายุ</label>
-                        <p>{formatDate(selectedDeed.expiryDate)}</p>
-                      </div>
-                      <div className="info-card">
-                        <label>พิกัด</label>
-                        <p>{selectedDeed.coordinates.lat}, {selectedDeed.coordinates.lng}</p>
+                      <div className="info-card full-width">
+                        <label>Metafields</label>
+                        <p>{selectedDeed.metafields || '-'}</p>
                       </div>
                     </div>
 
-                    <div className="info-card full-width">
-                      <label>ที่ตั้ง</label>
-                      <p>{selectedDeed.location}</p>
-                    </div>
-
-                    {/* Add spacing */}
-                    <div style={{ marginTop: '1rem' }}></div>
-
-                    <div className="hash-display">
-                      <label>Wallet ID</label>
-                    </div>
-
-                    <div className="hash-display">
-                      <label>Signature</label>
-                    </div>
                   </div>
 
                   {/* Upload Section */}
@@ -341,7 +363,6 @@ const VerifyLand: React.FC = () => {
                               <>
                                 <Upload className="btn-icon" />
                                 <span>อัปโหลดสู่ Blockchain</span>
-                                <div className="btn-arrow">→</div>
                               </>
                             )}
                           </div>

@@ -100,6 +100,8 @@
   padding-top: 3rem;
   padding-bottom: 2rem;
   z-index: 1;
+  margin-top: 64px;
+  /* Offset for Navbar height, adjust as needed */
 }
 
 .hero-section::before {
@@ -215,7 +217,7 @@
 }
 
 /* Glass Card */
-.glass-card {
+.verifyCard {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -444,11 +446,9 @@
   transition: all 0.3s ease;
 }
 
-.info-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-soft);
-  background: var(--white);
-}
+
+/* Rename generic card classes to avoid ecosystem conflicts and ensure camelCase naming */
+/* If you have .card-header, .card-title, .card-description, .card in your CSS, rename them to .verifyCardHeader, .verifyCardTitle, .verifyCardDescription, .verifyCard, and update the JSX accordingly. */
 
 .info-card.full-width {
   grid-column: 1 / -1;

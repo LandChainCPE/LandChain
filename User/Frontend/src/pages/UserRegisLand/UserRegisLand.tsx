@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { Upload, MapPin, Save, Camera } from "lucide-react";
 import "./UserRegisLand.css";
+import React, { useEffect, useState } from "react";
+import { MapPin, Save } from "lucide-react";
 import { RegisterLand } from "../../service/https/garfield/http";
 import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield/http";
 import { useNavigate } from "react-router-dom";
+
 
 type ProvinceDTO = { ID: number; name_th: string; name_en?: string };
 type DistrictDTO = { ID: number; name_th: string; province_id: number; name_en?: string };
@@ -23,11 +24,7 @@ const UserRegisLand: React.FC = () => {
     province_id: "",
     district_id: "",
     subdistrict_id: "",
-    status: "รอตรวจสอบ", // เพิ่มค่า default
   });
-
-  const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
 
   // geo lists
   const [provinces, setProvinces] = useState<ProvinceDTO[]>([]);
@@ -42,29 +39,6 @@ const UserRegisLand: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
-
-  // ----- handlers -----
-  // const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-  //   const { name, value } = e.target;
-  //   console.log(`Selected ${name}:`, value);
-  //   setFormData((prev) => ({ ...prev, [name]: value }));
-  //   // ตรวจสอบว่า province_id ถูกเลือกหรือไม่
-  //   if (name === "province_id") {
-  //     console.log("Selected province_id:", value);  // แสดงค่า province_id ที่เลือก
-  //   }
-  // };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setImage(file);
-
-      const reader = new FileReader();
-      reader.onload = (ev) => setImagePreview(ev.target?.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
@@ -75,7 +49,6 @@ const UserRegisLand: React.FC = () => {
         province_id: formData.province_id,
         district_id: formData.district_id,
         subdistrict_id: formData.subdistrict_id,
-        status: formData.status,
         userid: userid,
       };
       console.log("payload", payload);
@@ -112,10 +85,7 @@ const UserRegisLand: React.FC = () => {
       province_id: "",
       district_id: "",
       subdistrict_id: "",
-      status: "รอตรวจสอบ",
     });
-    setImage(null);
-    setImagePreview("");
     setDistricts([]);
     setSubdistricts([]);
     navigate("/user/userdashboard");

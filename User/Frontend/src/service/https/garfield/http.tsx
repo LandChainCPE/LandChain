@@ -91,8 +91,10 @@ async function RegisterLand(payload: any) {
 
 /** ดึงจังหวัด (รองรับ AbortSignal) */
 async function GetAllProvinces(signal?: AbortSignal) {
+  const config: any = {};
+  if (signal) config.signal = signal;
   return await api
-    .get("/province", { signal })
+    .get("/province", config)
     .then((res) => res.data)
     .catch((e) => e.response);
 }
@@ -100,13 +102,18 @@ async function GetAllProvinces(signal?: AbortSignal) {
 /** ดึงอำเภอตาม province id */
 async function GetDistrict(provinceId: number, signal?: AbortSignal) {
   try {
-    const resA = await api.get(`/district/${provinceId}`, { signal });
+    const config: any = {};
+    if (signal) config.signal = signal;
+    const resA = await api.get(`/district/${provinceId}`, config);
     if (Array.isArray(resA.data) && resA.data.length) return resA.data;
-    if (Array.isArray(resA.data?.result) && resA.data.result.length) return resA.data.result;
+    const resAData: any = resA.data;
+    if (Array.isArray(resAData?.result) && resAData.result.length) return resAData.result;
   } catch (_) { }
 
-  const resB = await api.get(`/district`, { params: { province_id: provinceId }, signal });
-  const dataB = resB.data;
+  const configB: any = { params: { province_id: provinceId } };
+  if (signal) configB.signal = signal;
+  const resB = await api.get(`/district`, configB);
+  const dataB: any = resB.data;
   if (Array.isArray(dataB)) return dataB;
   if (Array.isArray(dataB?.result)) return dataB.result;
   if (Array.isArray(dataB?.data)) return dataB.data;
@@ -116,13 +123,18 @@ async function GetDistrict(provinceId: number, signal?: AbortSignal) {
 /** ดึงตำบลตาม district id */
 async function GetSubdistrict(districtId: number, signal?: AbortSignal) {
   try {
-    const resA = await api.get(`/subdistrict/${districtId}`, { signal });
+    const config: any = {};
+    if (signal) config.signal = signal;
+    const resA = await api.get(`/subdistrict/${districtId}`, config);
     if (Array.isArray(resA.data) && resA.data.length) return resA.data;
-    if (Array.isArray(resA.data?.result) && resA.data.result.length) return resA.data.result;
+    const resAData: any = resA.data;
+    if (Array.isArray(resAData?.result) && resAData.result.length) return resAData.result;
   } catch (_) { }
 
-  const resB = await api.get(`/subdistrict`, { params: { district_id: districtId }, signal });
-  const dataB = resB.data;
+  const configB: any = { params: { district_id: districtId } };
+  if (signal) configB.signal = signal;
+  const resB = await api.get(`/subdistrict`, configB);
+  const dataB: any = resB.data;
   if (Array.isArray(dataB)) return dataB;
   if (Array.isArray(dataB?.result)) return dataB.result;
   if (Array.isArray(dataB?.data)) return dataB.data;

@@ -1,37 +1,18 @@
+import "./UserDashboard.css";
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { GetDataUserVerification, GetUserinfoByID, GetLandtitlesByUser } from "../../service/https/garfield/http";
+import { GetUserinfoByID, GetLandtitlesByUser } from "../../service/https/garfield/http";
 import { Table, Tag, Card as AntCard, Row, Col, Statistic, Empty } from "antd";
-import {
-  FileTextOutlined,
-  CalendarOutlined,
-  ClockCircleOutlined,
-  CheckCircleOutlined,
-  ExclamationCircleOutlined,
-} from "@ant-design/icons";
+import { FileTextOutlined, CalendarOutlined, ClockCircleOutlined, CheckCircleOutlined, ExclamationCircleOutlined, } from "@ant-design/icons";
 import { GetAllPetition } from "../../service/https/jib/jib";
 import { UserCheck, CheckSquare } from "react-feather"; // Assuming 'react-feather' contains the User and Home icons
-import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";
-import "./UserDashboard.css";
-
-
+import { GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";
+import Navbar from "../../component/user/Navbar";
 
 /* =======================
    Icon Components (SVG)
    ======================= */
-const Banknote = ({ className = "" }) => (
-  <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="2" y="6" width="20" height="12" rx="2" />
-    <circle cx="12" cy="12" r="2" />
-    <path d="m6 16-2-2 2-2" />
-    <path d="m16 8 2 2-2 2" />
-  </svg>
-);
-const MessageSquare = ({ className = "" }) => (
-  <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-  </svg>
-);
+
 const FileText = ({ className = "" }) => (
   <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
@@ -60,30 +41,10 @@ const BadgeCheck = ({ className = "" }) => (
     <path d="m9 12 2 2 4-4" />
   </svg>
 );
-const CopyIcon = ({ className = "" }) => (
-  <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-  </svg>
-);
-const ExternalLink = ({ className = "" }) => (
-  <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M15 3h6v6" />
-    <path d="m10 14 9-9" />
-    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-  </svg>
-);
 const MapPin = ({ className = "" }) => (
   <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
     <circle cx="12" cy="10" r="3" />
-  </svg>
-);
-
-const User = ({ className = "" }) => (
-  <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-    <circle cx="12" cy="7" r="4" />
   </svg>
 );
 
@@ -97,19 +58,19 @@ const LoadingSpinner = ({ className = "", style }: { className?: string; style?:
    Lightweight Primitives
    ======================= */
 const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <div className={`card ${className}`}>{children}</div>
+  <div className={`lcCard ${className}`}>{children}</div>
 );
 const CardHeader = ({ children }: { children: React.ReactNode }) => (
-  <div className="card-header">{children}</div>
+  <div className="lcCardHeader">{children}</div>
 );
 const CardTitle = ({ children }: { children: React.ReactNode }) => (
-  <h2 className="card-title">{children}</h2>
+  <h2 className="lcCardTitle">{children}</h2>
 );
 const CardDescription = ({ children }: { children: React.ReactNode }) => (
-  <p className="card-description">{children}</p>
+  <p className="lcCardDescription">{children}</p>
 );
 const CardContent = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <div className={`card-content ${className}`}>{children}</div>
+  <div className={`lcCardContent ${className}`}>{children}</div>
 );
 
 const Button = ({
@@ -157,7 +118,6 @@ interface LandTitle {
   size?: string;
   contract_address?: string;
 }
-
 interface State {
   id: number;
   name: string;
@@ -172,34 +132,6 @@ interface Petition {
   description: string;
   State: State | null;
 }
-/* ===== Data Processing ===== */
-const processLandTitleData = (rawData: any): LandTitle => {
-  console.log("Processing raw data:", rawData);
-  // แปลงข้อมูลจาก API format ให้เป็น LandTitle interface
-  const determineStatus = (status: any): TitleStatus => {
-    if (status === 'active') return 'active';
-    if (status === 'encumbered') return 'encumbered';
-    if (status === 'under_review') return 'under_review';
-    return 'under_review'; // default status
-  };
-
-  const processed: LandTitle = {
-    tokenId: rawData.tokenId || rawData.id || rawData.token_id || rawData.tokenID || String(rawData.tokenId || ''),
-    landNo: rawData.landNo || rawData.title_no || rawData.land_no || rawData.titleNumber || rawData.titleNo || '',
-    location: rawData.location ||
-      rawData.address ||
-      (rawData.province && rawData.district ?
-        `${rawData.subdistrict || ''} ${rawData.district || ''} ${rawData.province || ''}`.trim() : '') ||
-      (rawData.tambons && rawData.amphures && rawData.provinces ?
-        `ต.${rawData.tambons} อ.${rawData.amphures} จ.${rawData.provinces}` : '') ||
-      '',
-    area: rawData.area || rawData.size || rawData.landSize || rawData.dimension || '',
-    contract: rawData.contract || rawData.contract_address || rawData.contractAddress || '',
-    status: determineStatus(rawData.status)
-  };
-  console.log("Processed data:", processed);
-  return processed;
-};
 
 /* ===== Helpers ===== */
 const StatusPill = ({ status }: { status: TitleStatus }) => {
@@ -207,36 +139,14 @@ const StatusPill = ({ status }: { status: TitleStatus }) => {
   return <span className={`badge ${status === "active" ? "badge-green" : status === "encumbered" ? "badge-amber" : "badge-slate"}`}>{label}</span>;
 };
 
-const Copyable = ({ text }: { text: string }) => {
-  const [copied, setCopied] = useState(false);
-  return (
-    <Button
-      variant="ghost"
-      className="btn-xs"
-      onClick={() => {
-        navigator.clipboard.writeText(text);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 900);
-      }}
-    >
-      <CopyIcon className="icon-sm mr-1" />
-      {copied ? "คัดลอกแล้ว" : "คัดลอก"}
-    </Button>
-  );
-};
 
-const ExplorerLink = ({ txOrContract, label = "Explorer" }: { txOrContract: string; label?: string }) => (
-  <a href={`https://polygonscan.com/address/${txOrContract.replace(/\s/g, "")}`} target="_blank" rel="noreferrer" className="explorer-link">
-    {label} <ExternalLink className="icon-xs" />
-  </a>
-);
 
 const StatCard = ({ title, value, sub }: { title: React.ReactNode; value: React.ReactNode; sub?: React.ReactNode }) => (
-  <div className="card stat-card">
-    <div className="card-content">
-      <div className="stat-title">{title}</div>
-      <div className="stat-value">{value}</div>
-      {sub && <div className="stat-sub">{sub}</div>}
+  <div className="lcCard lcStatCard">
+    <div className="lcCardContent">
+      <div className="lcStatTitle">{title}</div>
+      <div className="lcStatValue">{value}</div>
+      {sub && <div className="lcStatSub">{sub}</div>}
     </div>
   </div>
 );
@@ -259,7 +169,6 @@ export default function UserProfilePage() {
       setIsLoadingUser(true);
       setUserError(null);
       GetUserinfoByID(user_id).then(({ result }) => {
-        console.log("API result:", result);
         if (result && (result.firstName || result.lastName || result.email)) {
           setUserInfo({
             firstName: result.firstName || "",
@@ -268,10 +177,10 @@ export default function UserProfilePage() {
             user_verification_id: result.user_verification_id || 0,
           });
           // อัปเดต localStorage ให้ตรงกับ backend
-          localStorage.setItem("firstName", result.firstName || "");
-          localStorage.setItem("lastName", result.lastName || "");
-          localStorage.setItem("email", result.email || "");
-          localStorage.setItem("user_verification_id", result.user_verification_id ? String(result.user_verification_id) : "0");
+          // localStorage.setItem("firstName", result.firstName || "");
+          // localStorage.setItem("lastName", result.lastName || "");
+          // localStorage.setItem("email", result.email || "");
+          // localStorage.setItem("user_verification_id", result.user_verification_id ? String(result.user_verification_id) : "0");
         } else {
           console.log("No user data found or invalid format");
           setUserError("ไม่พบข้อมูลผู้ใช้");
@@ -290,17 +199,46 @@ export default function UserProfilePage() {
   }, []);
 
   // ---------- Titles stats ----------
-  const { total, active, encumbered, reviewing } = useMemo(() => {
-    // ถ้ายังโหลดข้อมูลอยู่ ให้ return 0 ทั้งหมด
-    if (isLoadingTitles) {
-      return { total: 0, active: 0, encumbered: 0, reviewing: 0 };
-    }
+  // State สำหรับจำนวนที่ดินจาก backend
+  const [totalLandCount, setTotalLandCount] = useState<number>(0);
 
-    const total = titles.length;
-    const active = titles.filter(t => t.status === "active").length;
-    const encumbered = titles.filter(t => t.status === "encumbered").length;
-    const reviewing = titles.filter(t => t.status === "under_review").length;
-    return { total, active, encumbered, reviewing };
+  useEffect(() => {
+    const user_id = localStorage.getItem("user_id") || "";
+    if (user_id) {
+      GetLandtitlesByUser(user_id).then((res) => {
+        if (Array.isArray(res)) {
+          setTotalLandCount(res.length);
+        } else if (res?.result && Array.isArray(res.result)) {
+          setTotalLandCount(res.result.length);
+        } else {
+          setTotalLandCount(0);
+        }
+      }).catch(() => setTotalLandCount(0));
+    } else {
+      setTotalLandCount(0);
+    }
+  }, []);
+
+  // State สำหรับจำนวนที่ดินที่ยังไม่ verify จาก backend
+  const [notverifyCount, setNotverifyCount] = useState<number>(0);
+
+  useEffect(() => {
+    const user_id = localStorage.getItem("user_id") || "";
+    if (user_id) {
+      GetLandtitlesByUser(user_id).then((res) => {
+        let arr = Array.isArray(res) ? res : (res?.result && Array.isArray(res.result) ? res.result : []);
+        // รองรับทั้ง Status_verify และ status_verify
+        const count = arr.filter((item: any) => item.Status_verify === false || item.status_verify === false).length;
+        setNotverifyCount(count);
+      }).catch(() => setNotverifyCount(0));
+    } else {
+      setNotverifyCount(0);
+    }
+  }, []);
+
+  const active = useMemo(() => {
+    if (isLoadingTitles) return 0;
+    return titles.filter(t => t.status === "active").length;
   }, [titles, isLoadingTitles]);
 
   const navigate = useNavigate();
@@ -394,40 +332,96 @@ export default function UserProfilePage() {
     console.log("User info:", userInfo);
   }, [userInfo]);
 
-  useEffect(() => {
-    async function fetchLandTitles() {
+  // ฟังก์ชันเชื่อมต่อ MetaMask และบันทึก wallet address
+  const connectWallet = async () => {
+    if ((window as any).ethereum) {
       try {
-        setIsLoadingTitles(true);
-        setTitlesError(null);
-        const user_id = localStorage.getItem("user_id") || "";
-        if (!user_id) {
-          setTitlesError("ไม่พบ User ID");
-          setTitles([]);
-          setIsLoadingTitles(false);
-          return;
+        const accounts = await (window as any).ethereum.request({ method: "eth_requestAccounts" });
+        if (accounts && accounts[0]) {
+          localStorage.setItem("wallet", accounts[0]);
+          setWallet(accounts[0]);
+          setTitlesError(null);
+          fetchLandTitlesFromBlockchain(accounts[0]);
         }
-        const { result } = await GetLandtitlesByUser(user_id);
-        console.log("landtitle result:", result); // Debug API response
-        if (Array.isArray(result)) {
-          const processedTitles = result.map(processLandTitleData);
-          setTitles(processedTitles);
-        } else {
-          setTitlesError("รูปแบบข้อมูลที่ดินไม่ถูกต้อง");
-          setTitles([]);
-        }
-      } catch (error) {
-        setTitlesError("เกิดข้อผิดพลาดในการโหลดข้อมูลที่ดิน");
-        setTitles([]);
-      } finally {
-        setIsLoadingTitles(false);
+      } catch (err) {
+        setTitlesError("เชื่อมต่อ MetaMask ไม่สำเร็จ");
       }
+    } else {
+      setTitlesError("ไม่พบ MetaMask ในเบราว์เซอร์");
     }
+  };
 
-    fetchLandTitles();
-  }, []);
+  // State สำหรับ wallet address
+  const [wallet, setWallet] = useState<string>(localStorage.getItem("wallet") || "");
+
+  // ฟังก์ชันดึงข้อมูลที่ดินจาก blockchain
+  const fetchLandTitlesFromBlockchain = async (walletAddr?: string) => {
+    setIsLoadingTitles(true);
+    setTitlesError(null);
+    let walletToUse = walletAddr || wallet || localStorage.getItem("wallet") || "";
+    if (!walletToUse && (window as any).ethereum) {
+      try {
+        const accounts = await (window as any).ethereum.request({ method: "eth_accounts" });
+        walletToUse = accounts[0] || "";
+        if (walletToUse) {
+          localStorage.setItem("wallet", walletToUse);
+          setWallet(walletToUse);
+        }
+      } catch { }
+    }
+    if (!walletToUse) {
+      setTitlesError("ไม่พบ Wallet Address กรุณาเชื่อมต่อ MetaMask");
+      setTitles([]);
+      setIsLoadingTitles(false);
+      return;
+    }
+    try {
+      // ดึง token IDs จาก wallet
+      const resTokens = await GetLandTitleInfoByWallet();
+      const tokens: string[] = resTokens?.tokens || [];
+      // ดึง metadata ราย token แล้ว "แปลง" ให้พร้อมใช้
+      const allMetadata = await Promise.all(
+        tokens.map(async (tokenId: string) => {
+          const metaRes = await GetLandMetadataByToken(tokenId);
+          // กรณี metaFields เป็น string ให้แปลงเป็น object
+          let metaObj: any = {};
+          if (typeof metaRes?.metaFields === "string") {
+            metaRes.metaFields.split(",").forEach((pair: string) => {
+              const [key, value] = pair.split(":");
+              if (key && value !== undefined) metaObj[key.trim()] = value.trim();
+            });
+          } else if (metaRes?.metaFields) {
+            metaObj = parseMetaFields(metaRes.metaFields);
+          }
+          return { tokenID: tokenId, meta: metaObj, ...metaRes };
+        })
+      );
+      // สร้าง titles สำหรับแสดงผล
+      const processedTitles = allMetadata.map((data) => ({
+        tokenId: data.tokenID,
+        landNo: data.meta["TitleDeedNumber"] || "",
+        location: `${data.meta["Subdistrict"] || ""} ${data.meta["District"] || ""} ${data.meta["Province"] || ""}`.trim(),
+        area: `${data.meta["Rai"] || "-"} ไร่ ${data.meta["Ngan"] || "-"} งาน ${data.meta["SqWa"] || "-"} ตารางวา`,
+        contract: walletToUse,
+        status: "active" as TitleStatus
+      }));
+      setTitles(processedTitles);
+    } catch (error) {
+      setTitlesError("เกิดข้อผิดพลาดในการโหลดข้อมูลที่ดินจาก Blockchain");
+      setTitles([]);
+    } finally {
+      setIsLoadingTitles(false);
+    }
+  };
+
+  // ดึงข้อมูลที่ดินเมื่อ mount หรือ wallet เปลี่ยน
+  useEffect(() => {
+    fetchLandTitlesFromBlockchain();
+  }, [wallet]);
 
   return (
-    <div className="container">
+    <div className="lcContainer">
+      <Navbar />
       {/* Header */}
       <Card>
         <CardHeader>
@@ -438,9 +432,9 @@ export default function UserProfilePage() {
                   <LoadingSpinner className="icon-lg text-white" />
                 ) : (
                   userError ? null : (
-                    (userInfo.user_verification_id && userInfo.user_verification_id !== 0) && (
+                    userInfo.user_verification_id && userInfo.user_verification_id !== 0 ? (
                       <ShieldCheck className="icon-lg text-white" />
-                    )
+                    ) : null
                   )
                 )}
                 {isLoadingUser ? "กำลังโหลด..." :
@@ -500,9 +494,9 @@ export default function UserProfilePage() {
       </Card>
 
       {/* 2) ACTION CARDS */}
-      <div className="card-row">
+      <div className="lcCardRow">
         <Card>
-          <div className="card-header user-header">
+          <div className="lcCardHeader userHeader">
             <CardTitle>ยืนยันตัวตนบน Blockchain</CardTitle>
             <CardDescription>นำข้อมูลผู้ใช้ของคุณขึ้น Blockchain เพื่อความปลอดภัย</CardDescription>
           </div>
@@ -523,7 +517,7 @@ export default function UserProfilePage() {
           </CardContent>
         </Card>
         <Card>
-          <div className="card-header land-header">
+          <div className="lcCardHeader landHeader">
             <CardTitle>ลงทะเบียนที่ดินบน Blockchain</CardTitle>
             <CardDescription>นำข้อมูลที่ดินของคุณขึ้น Blockchain สร้างความโปร่งใส</CardDescription>
           </div>
@@ -548,16 +542,16 @@ export default function UserProfilePage() {
       {/* 3) TITLES STATS */}
       <div className="grid-4">
         <StatCard
-          title="ที่ดินบนเชนทั้งหมด"
-          value={isLoadingTitles ? <LoadingSpinner className="icon" /> : total}
+          title="ที่ดินทั้งหมด"
+          value={isLoadingTitles ? <LoadingSpinner className="icon" /> : totalLandCount}
         />
         <StatCard
-          title="พร้อมใช้งาน"
+          title="ที่ดินบน Blockchain"
           value={isLoadingTitles ? <LoadingSpinner className="icon" /> : active}
         />
         <StatCard
           title="รอตรวจสอบ"
-          value={isLoadingTitles ? <LoadingSpinner className="icon" /> : reviewing}
+          value={isLoadingTitles ? <LoadingSpinner className="icon" /> : notverifyCount}
         />
       </div>
 
@@ -581,7 +575,6 @@ export default function UserProfilePage() {
                   <th>ที่ตั้ง</th>
                   <th>ขนาด</th>
                   <th>สถานะ</th>
-                  <th>การดำเนินการ</th>
                 </tr>
               </thead>
               <tbody>
@@ -596,9 +589,15 @@ export default function UserProfilePage() {
                   <tr>
                     <td colSpan={6} className="empty-cell">
                       <div style={{ color: '#dc2626', marginBottom: '8px' }}>⚠️ {titlesError}</div>
-                      <Button variant="outline" onClick={() => window.location.reload()}>
-                        ลองใหม่
-                      </Button>
+                      {titlesError?.includes("Wallet") ? (
+                        <Button variant="primary" onClick={connectWallet}>
+                          เชื่อมต่อ MetaMask
+                        </Button>
+                      ) : (
+                        <Button variant="outline" onClick={() => window.location.reload()}>
+                          ลองใหม่
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ) : (
@@ -618,22 +617,6 @@ export default function UserProfilePage() {
                         <td>{t.area || '-'}</td>
                         <td>
                           <StatusPill status={t.status || 'under_review'} />
-                        </td>
-                        <td>
-                          <div className="actions">
-                            <Button variant="outline" className="btn-sm" onClick={() => navigate(`/titles/${t.tokenId}`)}>
-                              รายละเอียด
-                            </Button>
-                            <Button variant="outline" className="btn-sm" onClick={() => navigate(`/listings/new?tokenId=${t.tokenId}`)}>
-                              ประกาศขาย
-                            </Button>
-                            {t.contract && (
-                              <div className="inline-actions">
-                                <ExplorerLink txOrContract={t.contract} label="Explorer" />
-                                <Copyable text={t.contract} />
-                              </div>
-                            )}
-                          </div>
                         </td>
                       </tr>
                     ))}
@@ -694,39 +677,22 @@ export default function UserProfilePage() {
           />
         </CardContent>
       </Card>
-
-      {/* 6) QUICK LINKS */}
-      <div className="grid-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <Banknote className="icon" />
-              ประกาศขาย
-            </CardTitle>
-            <CardDescription>จัดการประกาศขายที่ดินของคุณ</CardDescription>
-          </CardHeader>
-          <CardContent className="quicklink-content">
-            <Button className="w-full" onClick={() => navigate("/listings")}>
-              ไปที่หน้า ประกาศขาย
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <MessageSquare className="icon" />
-              ข้อความ
-            </CardTitle>
-            <CardDescription>ติดต่อผู้ซื้อ ผู้ขาย และเจ้าหน้าที่</CardDescription>
-          </CardHeader>
-          <CardContent className="quicklink-content">
-            <Button className="w-full" onClick={() => navigate("/messages")}>
-              ไปที่หน้า ข้อความ
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }
+// ฟังก์ชันแปลง metaFields จาก blockchain เป็น object ที่ใช้งานง่าย
+function parseMetaFields(metaFields: any) {
+  if (!metaFields || typeof metaFields !== "object") return {};
+  // สมมติ metaFields เป็น array ของ { key, value }
+  if (Array.isArray(metaFields)) {
+    const obj: any = {};
+    metaFields.forEach((item: any) => {
+      if (item && item.key) obj[item.key] = item.value;
+    });
+    return obj;
+  }
+  // ถ้าเป็น object อยู่แล้ว
+  return metaFields;
+}
+
+
