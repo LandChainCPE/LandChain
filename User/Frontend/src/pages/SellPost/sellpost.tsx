@@ -336,7 +336,7 @@ const SellPost = () => {
     provinceName: string;
     districtName: string;
     subdistrictName: string;
-    landId: string;
+    land_id: string;
   } | null>(null);
 
   // Enhanced CSS styles using the color scheme
@@ -471,18 +471,18 @@ const handleSelectLand = async (tokenID: string) => {
   // ดึง land_id ที่แท้จริงจาก backend
   try {
     const res = await getLandtitleIdByTokenId(tokenID);
-    const landId = res?.land_id ? String(res.land_id) : tokenID; 
+    const land_id = res?.land_id ? String(res.land_id) : tokenID;
 
     // หาข้อมูล metadata ของโฉนดที่เลือก
     const selectedLandData = landMetadata.find(land => land.tokenID === tokenID);
-    
+
     // Debug: ดูข้อมูลใน console
     console.log("🔍 Selected Token ID:", tokenID);
     console.log("📋 Selected Land Data:", selectedLandData);
     console.log("🏛️ All Provinces:", provinces);
     console.log("🏘️ All Districts:", districts);
     console.log("🏞️ All Subdistricts:", subdistricts);
-    
+
     if (selectedLandData?.meta) {
       const provinceName = selectedLandData.meta["Province"] || "";
       const districtName = selectedLandData.meta["District"] || "";
@@ -493,7 +493,7 @@ const handleSelectLand = async (tokenID: string) => {
       // คำนวณพิกัดและ zoom level สำหรับแผนที่
       const locationData = getLocationCoordinates(provinceName, districtName, subdistrictName);
       console.log("📍 Calculated location data:", locationData);
-      
+
       // อัปเดตพิกัดและ zoom level ของแผนที่
       setMapCenter(locationData.center);
       setMapZoom(locationData.zoom);
@@ -503,11 +503,11 @@ const handleSelectLand = async (tokenID: string) => {
         provinceName,
         districtName,
         subdistrictName,
-        landId
+        land_id
       });
 
       // หา ID ของจังหวัดจากชื่อ
-      const foundProvince = provinces.find(p => 
+      const foundProvince = provinces.find(p =>
         p.name_th?.toLowerCase().includes(provinceName.toLowerCase()) ||
         provinceName.toLowerCase().includes(p.name_th?.toLowerCase())
       );
@@ -517,11 +517,11 @@ const handleSelectLand = async (tokenID: string) => {
 
       if (foundProvince) {
         console.log("✅ Found province:", foundProvince);
-        
+
         // เซ็ตจังหวัดและรีเซ็ตอำเภอ/ตำบล
         setFormData((prev) => ({
           ...prev,
-          land_id: landId,
+          land_id: land_id,
           province_id: String(foundProvince.ID),
           district_id: "",
           subdistrict_id: ""
@@ -530,7 +530,7 @@ const handleSelectLand = async (tokenID: string) => {
         console.log("Province not found:", provinceName);
         setFormData((prev) => ({
           ...prev,
-          land_id: landId,
+          land_id: land_id,
           province_id: "",
           district_id: "",
           subdistrict_id: ""
@@ -540,11 +540,11 @@ const handleSelectLand = async (tokenID: string) => {
       setPendingLocationData(null);
       setFormData((prev) => ({
         ...prev,
-        land_id: landId
+        land_id: land_id
       }));
     }
 
-    console.log("Selected land token:", tokenID, "Mapped land_id:", landId);
+    console.log("Selected land token:", tokenID, "Mapped land_id:", land_id);
   } catch (err) {
     setPendingLocationData(null);
     setFormData((prev) => ({
@@ -874,7 +874,7 @@ useEffect(() => {
         district_id: Number(formData.district_id),
         subdistrict_id: Number(formData.subdistrict_id),
         tag_id: formData.tag_id,        
-  land_id: Number(formData.land_id), 
+        land_id: Number(formData.land_id), 
         user_id: Number(userId),
         locations: mapCoords.map((c, i) => ({
           sequence: i + 1,
@@ -1161,8 +1161,10 @@ useEffect(() => {
     <div style={{ 
       minHeight: "100vh", 
       background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
-      fontFamily: "'Inter', sans-serif"
+      fontFamily: "'Inter', sans-serif",
+      position: "relative"
     }}>
+      {/* Loading overlay removed as requested */}
       {/* Header */}
       <div style={{ 
         background: "linear-gradient(135deg, #2b423a 0%, #1f3b33 100%)",

@@ -94,7 +94,7 @@ async function CreateLandPost(data: any) {
     .catch((e) => e.response);
 }
 
-// ดึง landtitle_id จาก token_id
+// ดึง land_id จาก token_id
 async function getLandtitleIdByTokenId(tokenId: string) {
   return await axios
     .get(`${apiUrl}/landtitle/by-token/${tokenId}`, requestOptions)
