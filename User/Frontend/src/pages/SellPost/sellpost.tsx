@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Select, Upload, message, Form, Button, Card, Row, Col, Typography } from "antd";
+import { Select, Upload, message, Button, Card, Row, Col, Typography } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { Check, Phone, User, DollarSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -56,27 +56,11 @@ type ProvinceDTO = { ID: number; name_th: string; name_en?: string };
 type DistrictDTO = { ID: number; name_th: string; province_id: number; name_en?: string };
 type SubdistrictDTO = { ID: number; name_th: string; district_id: number; name_en?: string };
 
-type Tag = {
-  id: number;
-  Tag: string;
-  icon: string;
-};
-
-// // แปลงเป็น checksum (ถ้าไม่ถูกต้องจะคืน "")
-// const toChecksum = (addr?: string) => {
-//   try { return ethers.getAddress(addr ?? ""); } catch { return ""; }
-// };
-
-// // ย่อ address สำหรับแสดงผล
-// const truncate = (addr?: string, head = 6, tail = 4) =>
-//   addr ? `${addr.slice(0, head)}…${addr.slice(-tail)}` : "";
-
 // เช็ค zero address โดยไม่ hard-code
 const isZeroAddress = (addr?: string) => {
   try { return ethers.getAddress(addr ?? "") === ethers.ZeroAddress; } catch { return false; }
 };
 
-//const ZERO_ADDR = "0xf55988edca178d5507454107945a0c96f3af628c";
 
 function normalizeMetaFields(raw: string = ""): string {
   return raw.trim().replace(/^"/, "").replace(/";?$/, "").trim();
@@ -352,7 +336,7 @@ const SellPost = () => {
     provinceName: string;
     districtName: string;
     subdistrictName: string;
-    landtitleId: string;
+    landId: string;
   } | null>(null);
 
   // Enhanced CSS styles using the color scheme
@@ -484,10 +468,10 @@ const SellPost = () => {
 const handleSelectLand = async (tokenID: string) => {
   setSelectedLand(tokenID);
 
-  // ดึง landtitle_id ที่แท้จริงจาก backend
+  // ดึง land_id ที่แท้จริงจาก backend
   try {
     const res = await getLandtitleIdByTokenId(tokenID);
-    const landtitleId = res?.land_id ? String(res.land_id) : tokenID; // fallback เป็น tokenID ถ้าไม่เจอ
+    const landId = res?.land_id ? String(res.land_id) : tokenID; 
 
     // หาข้อมูล metadata ของโฉนดที่เลือก
     const selectedLandData = landMetadata.find(land => land.tokenID === tokenID);
@@ -519,7 +503,7 @@ const handleSelectLand = async (tokenID: string) => {
         provinceName,
         districtName,
         subdistrictName,
-        landtitleId
+        landId
       });
 
       // หา ID ของจังหวัดจากชื่อ
@@ -537,7 +521,7 @@ const handleSelectLand = async (tokenID: string) => {
         // เซ็ตจังหวัดและรีเซ็ตอำเภอ/ตำบล
         setFormData((prev) => ({
           ...prev,
-          landtitle_id: landtitleId,
+          land_id: landId,
           province_id: String(foundProvince.ID),
           district_id: "",
           subdistrict_id: ""
@@ -546,7 +530,7 @@ const handleSelectLand = async (tokenID: string) => {
         console.log("Province not found:", provinceName);
         setFormData((prev) => ({
           ...prev,
-          landtitle_id: landtitleId,
+          land_id: landId,
           province_id: "",
           district_id: "",
           subdistrict_id: ""
@@ -556,11 +540,11 @@ const handleSelectLand = async (tokenID: string) => {
       setPendingLocationData(null);
       setFormData((prev) => ({
         ...prev,
-        landtitle_id: landtitleId
+        land_id: landId
       }));
     }
 
-    console.log("Selected land token:", tokenID, "Mapped landtitle_id:", landtitleId);
+    console.log("Selected land token:", tokenID, "Mapped land_id:", landId);
   } catch (err) {
     setPendingLocationData(null);
     setFormData((prev) => ({
@@ -884,14 +868,19 @@ useEffect(() => {
         last_name: formData.lastName,
         phone_number: formData.phoneNumber,
         name: formData.name,
-        images,// image: formData.image,
+        images,
         price: Number(formData.price),
         province_id: Number(formData.province_id),
         district_id: Number(formData.district_id),
         subdistrict_id: Number(formData.subdistrict_id),
-        tag_id: formData.tag_id,        // ✅ ส่ง array ของตัวเลข
-        land_id: Number(formData.land_id),
+        tag_id: formData.tag_id,        
+  land_id: Number(formData.land_id), 
         user_id: Number(userId),
+        locations: mapCoords.map((c, i) => ({
+          sequence: i + 1,
+          latitude: c.lat,
+          longitude: c.lng,
+          })),
       };
 
       // 1) สร้างโพสต์
@@ -1212,7 +1201,7 @@ useEffect(() => {
       </div>
 
       {/* Progress Steps ข้างบน*/}
-      <div style={{ maxWidth: "1024px", padding: "2rem 1.5rem" }}>
+      <div style={{ maxWidth: "1500px", padding: "1rem 1rem" }}>
         <div style={{
           display: "flex", 
           justifyContent: "space-between", 
@@ -1278,15 +1267,14 @@ useEffect(() => {
             </div>
           ))}
         </div>
+      </div>
 
-            {/* Step 1: Land Selection ขนาด */}
-            {currentStep === 1 && (
+      {/* Step 1: Land Selection ขนาด */}
+      {currentStep === 1 && (
               <div style={{ 
                 ...styles.card, 
-                padding: "3rem",
-                marginTop: "1rem",
-                minWidth: "95vw",
-                marginLeft: "0px"
+                  padding: "3rem",
+                  marginTop: "1rem"
               }}>
                 
                 <h2 style={{ 
@@ -1535,30 +1523,18 @@ useEffect(() => {
 
                 {/* Land Tokens Grid */}
                 <div className="land-tokens-section">
-                  <div className="grid-3">
-                    {landTokens.map((tokenId: string) => {
-                      const isSelected = selectedLand === String(tokenId);
-                      return (
-                        <div
-                          key={tokenId}
-                          className={`land-token-card${isSelected ? " selected" : ""}`}
-                          onClick={() => handleSelectLand(String(tokenId))}
-                          style={{
-                            cursor: "pointer",
-                            border: isSelected ? "2px solid #1677ff" : "1px solid #e0e0e0",
-                            borderRadius: 8,
-                            boxShadow: isSelected ? "0 4px 12px rgba(22,119,255,.2)" : "0 1px 4px rgba(0,0,0,.06)",
-                            background: "#fff",
-                            marginBottom: "1rem"
-                          }}
-                        >
-                          <div style={{ padding: 12 }}>
-                            {isSelected && <span style={{ color: "#1677ff" }}>คุณเลือกโฉนดนี้</span>}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  {/* Show selected deed number only once above the grid */}
+                  {selectedLand && (() => {
+                    const land = landMetadata.find((l: any) => String(l.tokenID) === String(selectedLand));
+                    const deedNo = land?.meta?.["Deed No"] || land?.meta?.["DeedNo"] || "-";
+                    return (
+                      <div style={{ marginBottom: 12, textAlign: "center" }}>
+                        <span style={{ color: "#1677ff", fontWeight: 600, fontSize: "1.1rem" }}>
+                          คุณเลือกโฉนด{deedNo}
+                        </span>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Empty State */}
@@ -1613,10 +1589,7 @@ useEffect(() => {
                   </button>
                 </div>
               </div>
-            )}
-          </div>
-
-
+      )}
       {/* Continue from Step 2: Personal Information */}
       {currentStep === 2 && (
         <div style={{ 
