@@ -150,7 +150,8 @@ async function GetUserinfoByID(userId: string) {
   return { response, result };
 }
 
-async function GetLandtitlesByUserID(userId: string) {
+/** ดึง landtitle ของ user ที่ login (ใช้ token ใน localStorage) */
+async function GetLandtitlesByUser(userId: string) {
   const response = await fetch(`${apiUrl}/landtitles/${userId}`, {
     method: "GET",
     headers: getAuthHeaders(),
@@ -158,6 +159,7 @@ async function GetLandtitlesByUserID(userId: string) {
   const result = await response.json();
   return { response, result };
 }
+
 
 export {
   getAuthHeaders,
@@ -170,5 +172,5 @@ export {
   GetDistrict,
   GetSubdistrict,
   GetUserinfoByID,
-  GetLandtitlesByUserID,
+  GetLandtitlesByUser,
 };

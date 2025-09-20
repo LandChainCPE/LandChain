@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
+import { GetLandtitlesByUser } from '../../service/https/garfield/http';
+import { GetAllProvinces, GetDistrict, GetSubdistrict } from '../../service/https/garfield/http';
 import { Upload, FileText, MapPin, User, CheckCircle, AlertCircle, Loader2, Shield, Hash } from 'lucide-react';
 import { Container } from 'react-bootstrap';
 import './VerifyLand.css';   // ✅ import CSS แยกไฟล์
@@ -22,38 +25,105 @@ interface LandDeed {
 }
 
 const VerifyLand: React.FC = () => {
+  const [provinces, setProvinces] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<any[]>([]);
+  const [subdistricts, setSubdistricts] = useState<any[]>([]);
+  
+  // โหลดข้อมูล lookup จังหวัด อำเภอ ตำบล
+  useEffect(() => {
+    const fetchLookups = async () => {
+      try {
+        const prov = await GetAllProvinces();
+        setProvinces(Array.isArray(prov) ? prov : []);
+        // ดึงอำเภอและตำบลทั้งหมด (ตัวอย่าง: provinceId=2, districtId=53)
+        const dist = await GetDistrict(2);
+        setDistricts(Array.isArray(dist) ? dist : []);
+        const subdist = await GetSubdistrict(53);
+        setSubdistricts(Array.isArray(subdist) ? subdist : []);
+      } catch {}
+    };
+    fetchLookups();
+  }, []);
   const [selectedDeed, setSelectedDeed] = useState<LandDeed | null>(null);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
   const [transactionHash, setTransactionHash] = useState<string>('');
 
-  const verifiedDeeds: LandDeed[] = [
-    {
-      id: 'LD-001',
-      title: 'โฉนดที่ดินเลขที่ 12345',
-      area: 400,
-      location: 'ตำบลในเมือง อำเภอเมือง จังหวดนครราชสีมา',
-      owner: 'นายสมชาย ใจดี',
-      issueDate: '2020-03-15',
-      expiryDate: '2045-03-15',
-      verified: true,
-      verificationDate: '2024-12-01',
-      coordinates: { lat: 14.9799, lng: 102.0977 },
-      documentHash: '0x1a2b3c4d5e6f7890abcdef1234567890abcdef12'
-    },
-    {
-      id: 'LD-002',
-      title: 'โฉนดที่ดินเลขที่ 67890',
-      area: 800,
-      location: 'ตำบลปากช่อง อำเภอปากช่อง จังหวดนครราชสีมา',
-      owner: 'นางสาววิมล รักดี',
-      issueDate: '2018-07-22',
-      expiryDate: '2043-07-22',
-      verified: true,
-      verificationDate: '2024-11-28',
-      coordinates: { lat: 14.6307, lng: 101.3784 },
-      documentHash: '0x9876543210fedcba0987654321fedcba09876543'
+  const [verifiedDeeds, setVerifiedDeeds] = useState<LandDeed[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // ฟังก์ชันแปลงข้อมูลจาก backend ให้ตรงกับ LandDeed interface
+  const mapLandDeed = (raw: any): LandDeed => ({
+    id: String(raw.ID ?? raw.id ?? ''),
+    title: raw.title_deed_number || raw.title || '',
+    area: Number(raw.rai ?? raw.area ?? 0),
+      location:
+        (() => {
+          // province
+          let provinceName = '';
+          if (raw.Province?.name_th) provinceName = raw.Province.name_th;
+          else if (raw.Province?.Name) provinceName = raw.Province.Name;
+          else if (raw.ProvinceID && provinces.length > 0) {
+            const found = provinces.find((p) => Number(p.ID ?? p.id) === Number(raw.ProvinceID));
+            provinceName = found?.name_th || found?.Name || '';
+          }
+          // district
+          let districtName = '';
+          if (raw.District?.name_th) districtName = raw.District.name_th;
+          else if (raw.District?.Name) districtName = raw.District.Name;
+          else if (raw.DistrictID && districts.length > 0) {
+            const found = districts.find((d) => Number(d.ID ?? d.id) === Number(raw.DistrictID));
+            districtName = found?.name_th || found?.Name || '';
+          }
+          // subdistrict
+          let subdistrictName = '';
+          if (raw.Subdistrict?.name_th) subdistrictName = raw.Subdistrict.name_th;
+          else if (raw.Subdistrict?.Name) subdistrictName = raw.Subdistrict.Name;
+          else if (raw.SubdistrictID && subdistricts.length > 0) {
+            const found = subdistricts.find((s) => Number(s.ID ?? s.id) === Number(raw.SubdistrictID));
+            subdistrictName = found?.name_th || found?.Name || '';
+          }
+          // fallback เป็น ID เฉพาะกรณี lookup ยังไม่โหลดหรือไม่พบข้อมูล
+          return `ตำบล${subdistrictName || raw.SubdistrictID || ''} อำเภอ${districtName || raw.DistrictID || ''} จังหวัด${provinceName || raw.ProvinceID || ''}`;
+        })(),
+    owner: raw.User?.Firstname ? `${raw.User.Firstname} ${raw.User.Lastname}` : '',
+    issueDate: raw.CreatedAt ? new Date(raw.CreatedAt).toISOString().slice(0, 10) : '',
+    expiryDate: raw.UpdatedAt ? new Date(raw.UpdatedAt).toISOString().slice(0, 10) : '',
+    verified: !!raw.Status_verify,
+    verificationDate: raw.UpdatedAt ? new Date(raw.UpdatedAt).toISOString().slice(0, 10) : '',
+    coordinates: { lat: 0, lng: 0 }, // ปรับตามข้อมูลจริงถ้ามี
+    documentHash: raw.Uuid || '',
+  });
+
+  useEffect(() => {
+    const userId = localStorage.getItem('user_id');
+    const token = localStorage.getItem('token');
+    if (userId && token) {
+      const fetchLandDeeds = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const { result } = await GetLandtitlesByUser(userId);
+          if (Array.isArray(result)) {
+            setVerifiedDeeds(result.map(mapLandDeed));
+          } else {
+            setVerifiedDeeds([]);
+            setError('ไม่พบข้อมูลโฉนดที่ดิน');
+          }
+        } catch (err) {
+          setError('เกิดข้อผิดพลาดในการดึงข้อมูล');
+          setVerifiedDeeds([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchLandDeeds();
+    } else {
+      setError('กรุณาเข้าสู่ระบบก่อน');
+      setVerifiedDeeds([]);
+      setLoading(false);
     }
-  ];
+  }, []);
 
   const handleUploadToBlockchain = async () => {
     if (!selectedDeed) return;
@@ -116,33 +186,41 @@ const VerifyLand: React.FC = () => {
                 </div>
 
                 <div className="deed-list">
-                  {verifiedDeeds.map((deed) => (
-                    <div
-                      key={deed.id}
-                      onClick={() => setSelectedDeed(deed)}
-                      className={`deed-item-modern ${selectedDeed?.id === deed.id ? 'active' : ''}`}
-                    >
-                      <div className="deed-card-shine"></div>
-                      <div className="deed-item-header">
-                        <h3>{deed.title}</h3>
-                        <div className="verified-badge">
-                          <CheckCircle className="icon-green" />
-                          <span>ยืนยันแล้ว</span>
+                  {loading ? (
+                    <div className="deed-item-modern">กำลังโหลดข้อมูล...</div>
+                  ) : error ? (
+                    <div className="deed-item-modern" style={{ color: 'red' }}>{error}</div>
+                  ) : verifiedDeeds.length === 0 ? (
+                    <div className="deed-item-modern">ไม่พบข้อมูลโฉนดที่ดิน</div>
+                  ) : (
+                    verifiedDeeds.map((deed) => (
+                      <div
+                        key={deed.id}
+                        onClick={() => setSelectedDeed(deed)}
+                        className={`deed-item-modern ${selectedDeed?.id === deed.id ? 'active' : ''}`}
+                      >
+                        <div className="deed-card-shine"></div>
+                        <div className="deed-item-header">
+                          <h3>{deed.title}</h3>
+                          <div className="verified-badge">
+                            <CheckCircle className="icon-green" />
+                            <span>ยืนยันแล้ว</span>
+                          </div>
                         </div>
+                        <div className="deed-info-grid">
+                          <div className="deed-info-item">
+                            <User className="icon-small" />
+                            <span>{deed.owner}</span>
+                          </div>
+                          <div className="deed-info-item">
+                            <MapPin className="icon-small" />
+                            <span>{formatArea(deed.area)}</span>
+                          </div>
+                        </div>
+                        <div className="deed-location">{deed.location}</div>
                       </div>
-                      <div className="deed-info-grid">
-                        <div className="deed-info-item">
-                          <User className="icon-small" />
-                          <span>{deed.owner}</span>
-                        </div>
-                        <div className="deed-info-item">
-                          <MapPin className="icon-small" />
-                          <span>{formatArea(deed.area)}</span>
-                        </div>
-                      </div>
-                      <div className="deed-location">{deed.location}</div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
             </div>

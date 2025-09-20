@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { GetDataUserVerification, GetUserinfoByID } from "../../service/https/garfield/http";
+import { GetDataUserVerification, GetUserinfoByID, GetLandtitlesByUser } from "../../service/https/garfield/http";
 import { Table, Tag, Card as AntCard, Row, Col, Statistic, Empty } from "antd";
 import {
   FileTextOutlined,
@@ -12,7 +12,6 @@ import {
 import { GetAllPetition } from "../../service/https/jib/jib";
 import { UserCheck, CheckSquare } from "react-feather"; // Assuming 'react-feather' contains the User and Home icons
 import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";
-import { GetLandtitlesByUserID } from "../../service/https/garfield/http";
 import "./UserDashboard.css";
 
 
@@ -407,8 +406,8 @@ export default function UserProfilePage() {
           setIsLoadingTitles(false);
           return;
         }
-        const { result } = await GetLandtitlesByUserID(user_id);
-        console.log("API landtitle result:", result); // Debug API response
+        const { result } = await GetLandtitlesByUser(user_id);
+        console.log("landtitle result:", result); // Debug API response
         if (Array.isArray(result)) {
           const processedTitles = result.map(processLandTitleData);
           setTitles(processedTitles);

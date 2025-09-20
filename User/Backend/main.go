@@ -206,7 +206,7 @@ func main() {
 		// CONTROLLER RegisterLand
 		authorized.POST("/user/userregisland", controller.UserRegisLand)
 		authorized.GET("/userinfo/:userId", controller.GetUserinfoByID)
-		authorized.GET("/landtitles/:userid", controller.GetLandtitlesByUserID) //ดึงข้อมูล landtitles
+		authorized.GET("/landtitles/:userId", controller.GetLandtitlesByUser) //ดึงข้อมูล landtitles
 		// authorized.GET("/land_verification/:userid", controller.GetLandVerificationByUserID) //ดึงข้อมูล land_verification
 	}
 

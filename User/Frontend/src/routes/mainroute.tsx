@@ -39,6 +39,7 @@ const History = Loadable(lazy(() => import("../pages/Landhistory/landhistory.tsx
 const CheckLandowner = Loadable(lazy(() => import("../pages/RequestSell/Checklandowner.tsx")));
 const AppointmentStatus = Loadable(lazy(() => import("../pages/appointmentstatus/appointmentstatus")));
 
+const Testland = Loadable(lazy(() => import("../pages/VerifyLand/testland.tsx")));
 
 // Component สำหรับป้องกันหน้าที่ต้อง login
 const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
@@ -241,6 +242,14 @@ const UserRoutes = (): RouteObject[] => [
         element: (
           <ProtectedRoute>
             <AppointmentStatus />
+          </ProtectedRoute>
+        ) 
+      },
+      { 
+        path: "testland", 
+        element: (
+          <ProtectedRoute>
+            <Testland />
           </ProtectedRoute>
         ) 
       },
