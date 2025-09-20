@@ -3,6 +3,8 @@ import { Search, MapPin, Grid3X3, List} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GetAllPostLandData } from "../../service/https/jib/jib";
 import "./sellpostmain.css";
+import Loader from "../../component/third-patry/Loader";
+import "../../component/third-patry/Loader.css";
 
 type Land = {
   ID: number;
@@ -142,23 +144,7 @@ const SellPostMain = () => {
   }, [lands, searchTerm, sortBy]);
 
   if (loading) {
-    return (
-      <div className="regis-land-container">
-        <div className="floating-shapes">
-          <div className="shape-1"></div>
-          <div className="shape-2"></div>
-          <div className="shape-3"></div>
-          <div className="shape-4"></div>
-        </div>
-        <div className="loading-overlay">
-          <div className="loading-spinner"></div>
-          <div style={{ marginLeft: 24 }}>
-            <h3 style={{ fontSize: 24, fontWeight: 700, color: '#172E25' }}>กำลังโหลดข้อมูลที่ดิน</h3>
-            <p style={{ color: '#3F5658' }}>โปรดรอสักครู่...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
@@ -264,7 +250,6 @@ const SellPostMain = () => {
                   <div
                     key={land.ID}
                     className="glass-card land-card-grid"
-                    onClick={() => navigate(`/user/landdetail/${land.ID}`)}
                   >
                     <div className="land-card-image-container">
                       <img
@@ -309,6 +294,13 @@ const SellPostMain = () => {
                           )}
                         </div>
                       )}
+                      <button
+                        className="btn-modern"
+                        style={{ marginTop: 16, width: '100%' }}
+                        onClick={() => navigate(`/user/landdetail/${land.ID}`)}
+                      >
+                        รายละเอียด
+                      </button>
                     </div>
                   </div>
                 );
@@ -322,7 +314,6 @@ const SellPostMain = () => {
                   <div
                     key={land.ID}
                     className="glass-card land-card-list"
-                    onClick={() => navigate(`/user/landdetail/${land.ID}`)}
                   >
                     <div className="land-card-list-image-container">
                       <img
@@ -357,6 +348,13 @@ const SellPostMain = () => {
                           ))}
                         </div>
                       )}
+                      <button
+                        className="btn-modern"
+                        style={{ marginTop: 16, width: '100%' }}
+                        onClick={() => navigate(`/user/landdetail/${land.ID}`)}
+                      >
+                        รายละเอียด
+                      </button>
                     </div>
                     {land.Price != null && (
                       <div className="land-card-list-price">

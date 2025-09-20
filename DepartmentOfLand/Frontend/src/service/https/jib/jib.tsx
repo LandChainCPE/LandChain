@@ -31,26 +31,23 @@ async function GetAllPetition() {
   return await res.json();
 }
 
-async function UpdatePetition(id: string, data: any) {
-  const res = await fetch(`${apiUrl}/petitions/${id}`, getRequestOptions("PUT", data));
+async function GetAllStates() {
+  const res = await fetch(`${apiUrl}/states`, getRequestOptions());
   return await res.json();
 }
 
-async function UpdatePetitionState(id: string, stateId: number) {
-  const res = await fetch(`${apiUrl}/petitions/${id}/state`, getRequestOptions("PATCH", { state_id: stateId }));
-  if (!res.ok) throw new Error("Update failed");
-  return res.json();
-}
-
-async function GetAllStates() {
-  const res = await fetch(`${apiUrl}/states`, getRequestOptions());
+// อัปเดตสถานะคำร้อง (admin เปลี่ยนสถานะ)
+async function UpdatePetitionStatus(id: string | number, state_id: number) {
+  const res = await fetch(
+    `${apiUrl}/petitions/${id}/status`,
+    getRequestOptions("PUT", { state_id })
+  );
   return await res.json();
 }
 
 export {
   getQueueByDate,
   GetAllPetition,
-  UpdatePetition,
-  UpdatePetitionState,
+  UpdatePetitionStatus,
   GetAllStates,
 };

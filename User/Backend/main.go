@@ -118,6 +118,8 @@ func main() {
 		admin.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
 		admin.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)
 		admin.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
+		admin.PUT("/petitions/:id/status", controller.UpdatePetitionStatus)
+
 	}
 
 
@@ -153,7 +155,7 @@ func main() {
 	authorized.Use(middlewares.Authorizes())
 	{
 		authorized.POST("/requestbuysell", controller.CreateRequestBuySellHandler)
-		authorized.PATCH("/petitions/:id/state", controller.UpdatePetitionState)
+		//authorized.PATCH("/petitions/:id/state", controller.UpdatePetitionState)
 		authorized.GET("/petition/:user_id", controller.GetAllPetition)
 		authorized.GET("/petitions", controller.GetAllPetition)
 		authorized.POST("/petitions", controller.CreatePetition)

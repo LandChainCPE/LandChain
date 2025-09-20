@@ -894,7 +894,6 @@ useEffect(() => {
       }
 
       message.success("✅ โพสต์ขายที่ดินสำเร็จ!");
-      setCurrentStep(2);
 
       setTimeout(() => {
         navigate("/user/sellpostmain");

@@ -1,3 +1,5 @@
+import Loader from "../../component/third-patry/Loader";
+import "../../component/third-patry/Loader.css";
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { MapPin, Phone, User, Home, Calendar, Ruler, Map, MessageCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -510,14 +512,7 @@ const handleBuy = async () => {
   //const pricePerRai = useMemo(() => calcPricePerRai(land?.Price, land?.Landtitle), [land]);
 
   if (loading) {
-    return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F9FAFB" }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ width: 48, height: 48, borderRadius: "9999px", border: "3px solid #2563EB", borderTopColor: "transparent", margin: "0 auto", animation: "spin 1s linear infinite" }} />
-          <p style={{ marginTop: 16, color: "#4B5563" }}>กำลังโหลดรายละเอียด...</p>
-        </div>
-      </div>
-    );
+    return <Loader />;
   }
 
   if (!land) {

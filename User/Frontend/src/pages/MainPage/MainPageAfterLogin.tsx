@@ -346,7 +346,7 @@ const MainPageAfterLogin = (): JSX.Element => {
             </p>
           </div>
 
-          <Link to="/user/dashboard" style={{ textDecoration: 'none' }}>
+          <Link to="/user/petition" style={{ textDecoration: 'none' }}>
             <div className="service-card">
               <div className="service-icon">
                 <CopyOutlined />

@@ -27,22 +27,6 @@ async function CreatePetition(data: any) {
     .catch((e) => e.response);
 }
 
-//อัปเดตคำร้องทั้งหมด
-async function UpdatePetition(id: string, data: any) {
-  return await axios
-    .put(`${apiUrl}/petitions/${id}`, data, requestOptions)
-    .then((res) => res.data)
-    .catch((e) => e.response);
-}
-
-//อัปเดตเฉพาะสถานะ
-async function UpdatePetitionState(id: string, state_id: number) {
-  return await axios
-    .patch(`${apiUrl}/petitions/${id}/state`, { state_id }, requestOptions)
-    .then((res) => res.data)
-    .catch((e) => e.response);
-}
-
 async function GetAllStates() {
   return await axios
     .get(`${apiUrl}/states`, requestOptions)
@@ -116,11 +100,11 @@ async function CreateRequestBuySell(data: any) {
     .catch((e) => e.response);
 }
 
+
+
 export { 
   GetAllPetition, 
   CreatePetition, 
-  UpdatePetition, 
-  UpdatePetitionState,
   GetAllStates,
   GetAllPostLandData,
   GetTags,

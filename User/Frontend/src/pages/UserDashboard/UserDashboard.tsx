@@ -334,7 +334,7 @@ export default function UserProfilePage() {
     switch (state?.name) {
       case "รอตรวจสอบ":
         return <ClockCircleOutlined />;
-      case "อนุมัติแล้ว":
+      case "เสร็จสิ้น":
         return <CheckCircleOutlined />;
       case "กำลังดำเนินการ":
         return <ExclamationCircleOutlined />;
@@ -687,7 +687,7 @@ export default function UserProfilePage() {
               </Col>
               <Col xs={24} sm={6}>
                 <AntCard style={{ borderRadius: 12, textAlign: "center" }}>
-                  <Statistic title="อนุมัติแล้ว" value={petitions.filter(p => p.State?.name === "อนุมัติแล้ว").length} prefix={<CheckCircleOutlined style={{ color: "#52c41a" }} />} valueStyle={{ color: "#52c41a", fontWeight: 700 }} />
+                  <Statistic title="เสร็จสิ้น" value={petitions.filter(p => p.State?.name === "เสร็จสิ้น").length} prefix={<CheckCircleOutlined style={{ color: "#52c41a" }} />} valueStyle={{ color: "#52c41a", fontWeight: 700 }} />
                 </AntCard>
               </Col>
             </Row>
