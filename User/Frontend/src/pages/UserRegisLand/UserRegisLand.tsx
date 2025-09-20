@@ -23,6 +23,7 @@ const UserRegisLand: React.FC = () => {
     province_id: "",
     district_id: "",
     subdistrict_id: "",
+    status: "รอตรวจสอบ", // เพิ่มค่า default
   });
 
   const [image, setImage] = useState<File | null>(null);
@@ -74,6 +75,7 @@ const UserRegisLand: React.FC = () => {
         province_id: formData.province_id,
         district_id: formData.district_id,
         subdistrict_id: formData.subdistrict_id,
+        status: formData.status,
         userid: userid,
       };
       console.log("payload", payload);
@@ -110,6 +112,7 @@ const UserRegisLand: React.FC = () => {
       province_id: "",
       district_id: "",
       subdistrict_id: "",
+      status: "รอตรวจสอบ",
     });
     setImage(null);
     setImagePreview("");

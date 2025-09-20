@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { GetLandtitlesByUser } from '../../service/https/garfield/http';
-import { GetAllProvinces, GetDistrict, GetSubdistrict } from '../../service/https/garfield/http';
 import { Upload, FileText, MapPin, User, CheckCircle, AlertCircle, Loader2, Shield, Hash } from 'lucide-react';
 import { Container } from 'react-bootstrap';
 import './VerifyLand.css';   // ✅ import CSS แยกไฟล์
@@ -10,7 +9,10 @@ import './VerifyLand.css';   // ✅ import CSS แยกไฟล์
 interface LandDeed {
   id: string;
   title: string;
-  area: number;
+  rai: number;
+  ngan: number;
+  square_wa: number;
+  area: number; // รวมเป็นตารางวา (ถ้ามี)
   location: string;
   owner: string;
   issueDate: string;
@@ -21,29 +23,11 @@ interface LandDeed {
     lat: number;
     lng: number;
   };
+  land_verification_id?: string; // Add this property if it exists in the data
   documentHash: string;
 }
 
 const VerifyLand: React.FC = () => {
-  const [provinces, setProvinces] = useState<any[]>([]);
-  const [districts, setDistricts] = useState<any[]>([]);
-  const [subdistricts, setSubdistricts] = useState<any[]>([]);
-  
-  // โหลดข้อมูล lookup จังหวัด อำเภอ ตำบล
-  useEffect(() => {
-    const fetchLookups = async () => {
-      try {
-        const prov = await GetAllProvinces();
-        setProvinces(Array.isArray(prov) ? prov : []);
-        // ดึงอำเภอและตำบลทั้งหมด (ตัวอย่าง: provinceId=2, districtId=53)
-        const dist = await GetDistrict(2);
-        setDistricts(Array.isArray(dist) ? dist : []);
-        const subdist = await GetSubdistrict(53);
-        setSubdistricts(Array.isArray(subdist) ? subdist : []);
-      } catch {}
-    };
-    fetchLookups();
-  }, []);
   const [selectedDeed, setSelectedDeed] = useState<LandDeed | null>(null);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
   const [transactionHash, setTransactionHash] = useState<string>('');
@@ -56,48 +40,56 @@ const VerifyLand: React.FC = () => {
   const mapLandDeed = (raw: any): LandDeed => ({
     id: String(raw.ID ?? raw.id ?? ''),
     title: raw.title_deed_number || raw.title || '',
-    area: Number(raw.rai ?? raw.area ?? 0),
-      location:
-        (() => {
-          // province
-          let provinceName = '';
-          if (raw.Province?.name_th) provinceName = raw.Province.name_th;
-          else if (raw.Province?.Name) provinceName = raw.Province.Name;
-          else if (raw.ProvinceID && provinces.length > 0) {
-            const found = provinces.find((p) => Number(p.ID ?? p.id) === Number(raw.ProvinceID));
-            provinceName = found?.name_th || found?.Name || '';
-          }
-          // district
-          let districtName = '';
-          if (raw.District?.name_th) districtName = raw.District.name_th;
-          else if (raw.District?.Name) districtName = raw.District.Name;
-          else if (raw.DistrictID && districts.length > 0) {
-            const found = districts.find((d) => Number(d.ID ?? d.id) === Number(raw.DistrictID));
-            districtName = found?.name_th || found?.Name || '';
-          }
-          // subdistrict
-          let subdistrictName = '';
-          if (raw.Subdistrict?.name_th) subdistrictName = raw.Subdistrict.name_th;
-          else if (raw.Subdistrict?.Name) subdistrictName = raw.Subdistrict.Name;
-          else if (raw.SubdistrictID && subdistricts.length > 0) {
-            const found = subdistricts.find((s) => Number(s.ID ?? s.id) === Number(raw.SubdistrictID));
-            subdistrictName = found?.name_th || found?.Name || '';
-          }
-          // fallback เป็น ID เฉพาะกรณี lookup ยังไม่โหลดหรือไม่พบข้อมูล
-          return `ตำบล${subdistrictName || raw.SubdistrictID || ''} อำเภอ${districtName || raw.DistrictID || ''} จังหวัด${provinceName || raw.ProvinceID || ''}`;
-        })(),
+    rai: Number(raw.rai ?? 0),
+    ngan: Number(raw.ngan ?? 0),
+    square_wa: Number(raw.square_wa ?? 0),
+    area: Number(raw.area ?? 0),
+    location:
+      (raw.Subdistrict?.name_th
+        ? `ตำบล${raw.Subdistrict.name_th} `
+        : raw.Subdistrict?.Name
+          ? `ตำบล${raw.Subdistrict.Name} `
+          : raw.SubdistrictID
+            ? `ตำบลID:${raw.SubdistrictID} `
+            : '') +
+      (raw.District?.name_th
+        ? `อำเภอ${raw.District.name_th} `
+        : raw.District?.Name
+          ? `อำเภอ${raw.District.Name} `
+          : raw.DistrictID
+            ? `อำเภอID:${raw.DistrictID} `
+            : '') +
+      (raw.Province?.name_th
+        ? `จังหวัด${raw.Province.name_th}`
+        : raw.Province?.Name
+          ? `จังหวัด${raw.Province.Name}`
+          : raw.ProvinceID
+            ? `จังหวัดID:${raw.ProvinceID}`
+            : ''),
     owner: raw.User?.Firstname ? `${raw.User.Firstname} ${raw.User.Lastname}` : '',
     issueDate: raw.CreatedAt ? new Date(raw.CreatedAt).toISOString().slice(0, 10) : '',
     expiryDate: raw.UpdatedAt ? new Date(raw.UpdatedAt).toISOString().slice(0, 10) : '',
     verified: !!raw.Status_verify,
     verificationDate: raw.UpdatedAt ? new Date(raw.UpdatedAt).toISOString().slice(0, 10) : '',
     coordinates: { lat: 0, lng: 0 }, // ปรับตามข้อมูลจริงถ้ามี
+    land_verification_id: raw.land_verification_id || raw.LandVerification?.ID || '',
     documentHash: raw.Uuid || '',
   });
 
   useEffect(() => {
+    console.log('ss', location)
     const userId = localStorage.getItem('user_id');
     const token = localStorage.getItem('token');
+    console.log('DEBUG user_id:', userId);
+    console.log('DEBUG token:', token);
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('DEBUG token payload:', payload);
+      } catch (e) {
+        console.log('DEBUG token decode error:', e);
+      }
+    }
     if (userId && token) {
       const fetchLandDeeds = async () => {
         setLoading(true);
@@ -139,7 +131,9 @@ const VerifyLand: React.FC = () => {
     }
   };
 
-  const formatArea = (area: number) => `${area.toLocaleString()} ตารางวา`;
+  const formatArea = (rai: number, ngan: number, square_wa: number) => {
+    return `${rai} ไร่ ${ngan} งาน ${square_wa} ตารางวา`;
+  };
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -202,10 +196,12 @@ const VerifyLand: React.FC = () => {
                         <div className="deed-card-shine"></div>
                         <div className="deed-item-header">
                           <h3>{deed.title}</h3>
-                          <div className="verified-badge">
-                            <CheckCircle className="icon-green" />
-                            <span>ยืนยันแล้ว</span>
-                          </div>
+                          {deed.land_verification_id ? (
+                            <div className="verified-badge">
+                              <CheckCircle className="icon-green" />
+                              <span>ยืนยันแล้ว</span>
+                            </div>
+                          ) : null}
                         </div>
                         <div className="deed-info-grid">
                           <div className="deed-info-item">
@@ -214,7 +210,7 @@ const VerifyLand: React.FC = () => {
                           </div>
                           <div className="deed-info-item">
                             <MapPin className="icon-small" />
-                            <span>{formatArea(deed.area)}</span>
+                            <span>{formatArea(deed.rai, deed.ngan, deed.square_wa)}</span>
                           </div>
                         </div>
                         <div className="deed-location">{deed.location}</div>
@@ -252,7 +248,7 @@ const VerifyLand: React.FC = () => {
                     <div className="deed-info-cards">
                       <div className="info-card">
                         <label>เลขที่โฉนด</label>
-                        <p>{selectedDeed.id}</p>
+                        <p>{selectedDeed.title}</p>
                       </div>
                       <div className="info-card">
                         <label>เจ้าของ</label>
@@ -260,7 +256,7 @@ const VerifyLand: React.FC = () => {
                       </div>
                       <div className="info-card">
                         <label>เนื้อที่</label>
-                        <p>{formatArea(selectedDeed.area)}</p>
+                        <p>{formatArea(selectedDeed.rai, selectedDeed.ngan, selectedDeed.square_wa)}</p>
                       </div>
                       <div className="info-card">
                         <label>วันที่ออกโฉนด</label>
