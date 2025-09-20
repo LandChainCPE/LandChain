@@ -19,8 +19,7 @@ type Users struct {
 	RoleID uint // :point_left: FK ไปยัง role.id
 	Role   Role `gorm:"foreignKey:RoleID"` // :point_left: optional: preload ได้
 
-	Landtitle    []Landtitle    `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
-	Roomchat     []Roomchat     `gorm:"foreignKey:UserID"`
+	Landtitle    []Landtitle    `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationshipUserID"`
 	Landsalepost []Landsalepost `gorm:"foreignKey:UserID"` // 👈 One-to-Many relationship
 
 	UserVerificationID *uint            // :point_left: FK ไปยัง role.id
@@ -36,4 +35,7 @@ type Users struct {
 	RequestBuySell    []RequestBuySell `gorm:"foreignKey:LandID"`
 
 	LandOwnership    []LandOwnership `gorm:"foreignKey:UserID"`
+
+	RoomChatsAsUser1 []Roomchat `gorm:"foreignKey:User1ID"` // ห้องที่ user เป็น User1
+	RoomChatsAsUser2 []Roomchat `gorm:"foreignKey:User2ID"` // ห้องที่ user เป็น User2
 }

@@ -28,11 +28,7 @@ type Landsalepost struct {
 
 	// StateID uint  `json:"state_id"`
 	// States  State `gorm:"foreignKey:StateID"`
-
-	Roomchat []Roomchat  `gorm:"foreignKey:LandsalepostID"`
 	Photoland []Photoland  `gorm:"foreignKey:LandsalepostID"`
 	Location []Location `gorm:"foreignKey:LandsalepostID"` // One-to-One relationship with Location
 	Tags []Tag `gorm:"many2many:landsalepost_tag;"`
-
 }
-
