@@ -344,62 +344,55 @@ func parseDateFromDB(dateStr string) (time.Time, error) {
 
 // ฟังก์ชันหลักสำหรับลบการจองที่หมดอายุ (ปรับปรุงใหม่)
 func DeleteExpiredBookingsInternal() (int64, error) {
-	// ใช้ timezone ที่ตรงกับฐานข้อมูล (Asia/Bangkok)
+	// ใช้ timezone Asia/Bangkok
 	loc, err := time.LoadLocation("Asia/Bangkok")
 	if err != nil {
-		loc = time.Local // fallback to local time
+		loc = time.Local // fallback
 	}
 	now := time.Now().In(loc)
-	
+
 	log.Printf("Current time (Bangkok): %s", now.Format("2006-01-02 15:04:05"))
-	
-	// Query เพื่อหาการจองที่หมดอายุ
-	var expiredBookings []struct {
-		ID uint
+
+	// Query booking ทั้งหมด (ไม่สน status)
+	var allBookings []struct {
+		ID          uint
 		DateBooking string
-		Timework string
-		UserID uint
-		BranchID uint
-		Status string
+		Timework    string
+		UserID      uint
+		BranchID    uint
+		Status      string
 	}
-	
+
 	err = config.DB().
 		Table("bookings").
 		Select("bookings.id, bookings.date_booking, times.timework, bookings.user_id, bookings.branch_id, bookings.status").
 		Joins("JOIN times ON bookings.time_id = times.id").
-		Where("bookings.status IN (?)", []string{"pending", "success"}). // เฉพาะการจองที่ active
-		Find(&expiredBookings).Error
-	
+		Find(&allBookings).Error
+
 	if err != nil {
 		log.Printf("Error finding bookings: %v", err)
 		return 0, err
 	}
 
 	var expiredIDs []uint
-	
-	// ตรวจสอบแต่ละการจองว่าหมดอายุหรือไม่
-	for _, booking := range expiredBookings {
-		// ใช้ฟังก์ชันช่วยในการแปลงวันที่
+
+	// ตรวจสอบว่าเกินเวลาหรือยัง
+	for _, booking := range allBookings {
 		parsedDate, err := parseDateFromDB(booking.DateBooking)
 		if err != nil {
 			log.Printf("Error parsing date for booking %d (%s): %v", booking.ID, booking.DateBooking, err)
 			continue
 		}
-		
-		// แยกเวลาเริ่มต้นจาก timework
+
 		startTime := extractStartTime(booking.Timework)
-		
-		// รวมวันที่และเวลา
 		fullTimeStr := fmt.Sprintf("%s %s", parsedDate.Format("2006-01-02"), startTime)
-		
-		// แปลงเป็น time.Time ในเขต Asia/Bangkok
+
 		fullTime, err := time.ParseInLocation("2006-01-02 15:04", fullTimeStr, loc)
 		if err != nil {
 			log.Printf("Error parsing time for booking %d: %v", booking.ID, err)
 			continue
 		}
-		
-		// ตรวจสอบว่าเวลาผ่านมาแล้วหรือไม่
+
 		if now.After(fullTime) {
 			expiredIDs = append(expiredIDs, booking.ID)
 			log.Printf("Found expired booking: ID=%d, DateTime=%s, Status=%s", booking.ID, fullTimeStr, booking.Status)
@@ -411,9 +404,9 @@ func DeleteExpiredBookingsInternal() (int64, error) {
 		return 0, nil
 	}
 
-	// ลบการจองที่หมดอายุ
+	// ลบ booking ที่หมดอายุทั้งหมด
 	result := config.DB().Where("id IN ?", expiredIDs).Delete(&entity.Booking{})
-	
+
 	if result.Error != nil {
 		log.Printf("Error deleting expired bookings: %v", result.Error)
 		return 0, result.Error
@@ -422,6 +415,7 @@ func DeleteExpiredBookingsInternal() (int64, error) {
 	log.Printf("Successfully deleted %d expired bookings (IDs: %v)", result.RowsAffected, expiredIDs)
 	return result.RowsAffected, nil
 }
+
 
 // ฟังก์ชันสำหรับลบการจองที่หมดอายุ (เรียกใช้ผ่าน API)
 func DeleteExpiredBookingsManual(c *gin.Context) {

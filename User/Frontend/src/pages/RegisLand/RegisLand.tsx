@@ -5,6 +5,7 @@ import { GetBranches, GetProvinces, GetTimeSlots, CreateBooking, GetServiceTypes
 import type { BookingInterface } from "../../interfaces/Booking";
 import dayjs from "dayjs";
 import "./RegisLand.css";
+import Navbar from "../../component/user/Navbar";
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -229,7 +230,7 @@ const BookingCalendar = () => {
       case 'cancelled':
         return 'ยกเลิกแล้ว';
       default:
-        return 'ไม่ทราบสถานะ';
+        return 'ปฏิเสธ';
     }
   };
 
@@ -341,11 +342,13 @@ const BookingCalendar = () => {
   };
 
   return (
-    <div className="regis-land-container">
-      <div className="floating-shapes">
-        <div className="shape-1"></div>
-        <div className="shape-2"></div>
-        <div className="shape-3"></div>
+    <>
+      <Navbar />
+      <div className="regis-land-container">
+        <div className="floating-shapes">
+          <div className="shape-1"></div>
+          <div className="shape-2"></div>
+          <div className="shape-3"></div>
         <div className="shape-4"></div>
       </div>
 
@@ -750,7 +753,8 @@ const BookingCalendar = () => {
         <Paragraph style={{ fontSize: "1.1rem", marginTop: 16 }}>{errorMessage}</Paragraph>
       </Modal>
 
-    </div>
+      </div>
+    </>
   );
 };
 
