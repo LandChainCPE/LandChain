@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState  } from "react";
 import { Container, Card, Button, Modal, Form } from "react-bootstrap";
-import { GetInfoUserByToken, GetLandMetadataByWallet, GetRequestBuybyLandID, DeleteRequestBuy, CreateTransation } from "../../service/https/bam/bam";
+import { GetInfoUserByToken, GetLandMetadataByWallet, GetRequestBuybyLandID, DeleteRequestBuy, CreateTransation, CreateNewRoom,  } from "../../service/https/bam/bam";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Loader from "../../component/third-patry/Loader";
@@ -39,26 +39,44 @@ function RequestSell() {
   const [loading, setLoading] = useState(true);
   const [showAcceptModal, setShowAcceptModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [userID, setUserID] = useState<number | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const userInfo = await GetInfoUserByToken();
-        setTokenData(userInfo);
-        const metadata = await GetLandMetadataByWallet();
-        setLandMetadata((metadata.metadata || []).map((item: any) => ({
-          ...item,
-          parsedFields: parseMetaFields(item.metaFields)
-        })));
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const fetchData = async () => {
+    try {
+      const userInfo = await GetInfoUserByToken();
+      setTokenData(userInfo);
+      setUserID(userInfo.id); // <-- ใช้ id จาก userInfo
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchData();
+}, []);
+
+  useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const userInfo = await GetInfoUserByToken();
+      setTokenData(userInfo);
+      setUserID(userInfo.id); // <-- เพิ่มตรงนี้
+      console.log(userInfo.id);
+      const metadata = await GetLandMetadataByWallet();
+      setLandMetadata((metadata.metadata || []).map((item: any) => ({
+        ...item,
+        parsedFields: parseMetaFields(item.metaFields)
+      })));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchData();
+}, []);
 
   function parseMetaFields(metaString: string) {
     const obj: Record<string, string> = {};
@@ -82,7 +100,7 @@ function RequestSell() {
       });
       return;
     }
-
+    console.log(tokenID)
     setSelectedLand(tokenID);
     try {
       const res = await GetRequestBuybyLandID(Number(tokenID));
@@ -138,6 +156,30 @@ function RequestSell() {
     if (land.buyer === "0x0000000000000000000000000000000000000000") return { text: "พร้อมขาย", color: "success", icon: "✅" };
     return { text: "ขายแล้ว", color: "secondary", icon: "✔️" };
   };
+
+  const handleContact = async (req: BuyRequest) => {
+  if (!userID || !req.Buyer?.ID) {
+    console.error("User ID or Buyer ID not loaded yet");
+    return;
+  }
+
+  try {
+    const res: any = await CreateNewRoom(userID, req.Buyer.ID);
+    const roomID = res.room_id;
+
+    if (!roomID) {
+      console.error("Room ID not returned from backend.");
+      return;
+    }
+
+    console.log("Room created:", roomID);
+    navigate(`/user/chat/${roomID}`);
+  } catch (err) {
+    console.error("Failed to go to chat:", err);
+  }
+};
+
+
 
   if (loading) return <Loader />;
 
@@ -244,7 +286,7 @@ function RequestSell() {
                   
                   <div className="land-card-header">
                     <div className="land-title-section">
-                      <h4 className="land-title-text">โฉนด #{land.parsedFields?.Map || land.tokenID}</h4>
+                      <h4 className="land-title-text">โฉนด #{ land.parsedFields?.["Deed No"]  || land.tokenID}</h4>
                       <div className={`land-status-badge ${status.color}`}>
                         <span className="status-icon">{status.icon}</span>
                         <span>{status.text}</span>
@@ -303,7 +345,7 @@ function RequestSell() {
                 <span>คำขอซื้อ</span>
               </div>
               <h2 className="section-title-modern">
-                <span className="gradient-text">คำขอซื้อโฉนด #{selectedLandData?.parsedFields?.Map || selectedLand}</span>
+                <span className="gradient-text">คำขอซื้อโฉนด #{selectedLandData?.parsedFields?.["Deed No"] || selectedLand}</span>
               </h2>
               <p className="section-subtitle-modern">
                 พบคำขอทั้งหมด <span className="highlight-number">{requestBuyData.length}</span> รายการ
@@ -345,7 +387,18 @@ function RequestSell() {
 
                       <div className="request-card-body">
                         <div className="request-actions-modern">
-                          
+
+                          <Button 
+                            className="btn-modern btn-reject-modern"
+                            onClick={() => handleContact(req)}
+                          >
+                            <div className="btn-content-modern">
+                              <span className="btn-icon-modern"></span>
+                              <span>ติดต่อ</span>
+                              <div className="btn-arrow-modern"></div>
+                            </div>
+                          </Button>
+
                           <Button 
                             className="btn-modern btn-reject-modern"
                             onClick={() => handleRejectRequest(req)}
@@ -377,7 +430,7 @@ function RequestSell() {
                 <div className="empty-icon-modern">📭</div>
                 <h3 className="empty-title-modern">ไม่มีคำขอซื้อ</h3>
                 <p className="empty-message-modern">
-                  ยังไม่มีคำขอซื้อสำหรับโฉนด #{selectedLandData?.parsedFields?.Map || selectedLand}
+                  ยังไม่มีคำขอซื้อสำหรับโฉนด #{selectedLandData?.parsedFields?.["Deed No"] || selectedLand}
                 </p>
                 <Button 
                   className="btn-secondary-modern" 

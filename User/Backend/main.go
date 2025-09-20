@@ -23,8 +23,11 @@ func main() {
 
 	config.ConnectDatabase()
 	config.SetupDatabase()
+	db := config.DB()
 	r := gin.Default()
-	hub := websocket.NewHub()
+	hub := websocket.NewHub(db)
+	go hub.Run()
+	controller.SetHub(hub)
 	controller.InitContract()
 	r.Use(CORSMiddleware())
 
@@ -147,12 +150,21 @@ func main() {
 		authorized.DELETE("/user/lands/delete/transactionallrequest/:id", controller.DeleteTransactionandAllrequest)
 		authorized.GET("/lands/check-owner", controller.CheckOwnerHandler)
 		authorized.POST("/user/userregisland", controller.UserRegisLand)
+		authorized.GET("/chat/get/userid", controller.GetUserIDByWalletAddress)
+		authorized.POST("/chat/create-room", controller.CreateNewRoom)
+		authorized.GET("/chat/messages/:roomID", controller.GetRoomMessages)
+		authorized.GET("/chat/allroom/:id", controller.GetAllRoomMessagesByUserID)
+		authorized.POST("/upload/:roomID/:userID", controller.UploadImage)
+		authorized.GET("/user/info/:id", controller.GetUserinfoByUserID)
+
 	}
 
-	// 🌐 Public routes
-	r.GET("/user/chat/:id", controller.GetAllLandDatabyID)
-	r.GET("/user/:id", controller.GetUserByID)
-	r.GET("/ws/transactions", controller.TransactionWS(hub))
+
+	r.GET("/ws/notification/:userID", controller.NotificationWS)
+	r.POST("/notification/send", controller.BroadcastNotification)
+
+	r.GET("/ws/chat/:roomID/:userID", controller.Websocket)
+	r.Static("/uploads", "./uploads")
 
 	r.Run(":8080")
 }

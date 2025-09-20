@@ -1,286 +1,540 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Navbar from "../../component/user/Navbar";
-import "./chat.css";
-import "./picture.css";
-import axios from "axios";
-import Picture from "../../assets/Land-shape-for-buy.jpg";
-import { GetMessagesByLandPostID } from "../../service/https/jo/index";
+import "./Chat.css";
+import {
+  GetAllRoomMessagesByUserID,
+  GetUserIDByWalletAddress,
+  GetRoomMessages,
+  UploadImage,
+} from "../../service/https/bam/bam";
+import { useParams } from "react-router-dom";
 
-type MessageWithUser = {
-  message_id: number;
-  message: string;
-  roomchat_id: number;
-  user_id: number;
-  user_name: string;
-};
-
-type Land = {
+interface Message {
   ID: number;
-  Name: string;
-  AdressLandplot: string;
-  PhoneNumber: string;
-  Price: number;
-  NumOfLandTitle: number;
-};
+  SenderID: number;
+  Content: any;
+  RoomID?: number;
+  Type?: "text" | "image" | "file";
+  CreatedAt?: string;
+}
 
-function Chat({ roomId, onNewMessage }) {
-  const [landPosts, setLandPosts] = useState<Land[]>([]);
-  const [selectedLandId, setSelectedLandId] = useState<number | null>(null);
-  const userId = 1;
+interface Room {
+  ID: number;
+  User1ID: number;
+  User2ID: number;
+  User1: { Firstname: string; Lastname: string };
+  User2: { Firstname: string; Lastname: string };
+}
 
-  const [messages, setMessages] = useState<MessageWithUser[]>([]);
-  const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  const [message, setMessage] = useState("");
+const MESSAGES_LIMIT = 20;
+const MAX_FILE_SIZE_MB = 5;
+
+const Chat = () => {
+  const [contacts, setContacts] = useState<Room[]>([]);
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [userID, setUserID] = useState<number | null>(null);
+  const [newMessage, setNewMessage] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [roomOffsets, setRoomOffsets] = useState<{ [roomID: number]: number }>({});
+  const [unreadMessages, setUnreadMessages] = useState<{ [key: string]: number }>({});
+  const { roomID } = useParams<{ roomID: string }>();
+  const wsRef = useRef<WebSocket | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const uniqueUsers = Array.from(
-  new Set(messages.map((msg) => msg.user_name))
-).filter(name => name !== "คุณ");
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
+  // Load selected room messages when roomID or contacts change
   useEffect(() => {
-    const fetchLands = async () => {
+    if (!roomID || contacts.length === 0) return;
+    const room = contacts.find((r) => r.ID === Number(roomID));
+    if (room) {
+      setSelectedRoom(room);
+      loadMessages(room.ID, false, 0);
+      setUnreadMessages((prev) => ({ ...prev, [room.ID]: 0 }));
+    }
+  }, [roomID, contacts]);
+
+  // Fetch userID and all rooms
+  useEffect(() => {
+    const fetchUserIDAndRooms = async () => {
       try {
-        const res = await axios.get<Land[]>(
-          `http://localhost:8080/user/chat/${userId}`
-        );
-        setLandPosts(res.data);
-      } catch (error) {
-        console.error("Error loading lands", error);
+        const userRes = await GetUserIDByWalletAddress();
+        const id = userRes?.user_id;
+        if (!id) throw new Error("User ID not found");
+        setUserID(id);
+
+        const roomRes = await GetAllRoomMessagesByUserID(id);
+        setContacts(roomRes.messages || []);
+      } catch (err) {
+        console.error(err);
       }
     };
-
-    fetchLands();
+    fetchUserIDAndRooms();
   }, []);
 
+  // Notification WebSocket
   useEffect(() => {
-  async function fetchMessages() {
-    if (!selectedLandId) return;
+    if (!userID) return;
 
+    const ws = new WebSocket(`ws://192.168.1.173:8080/ws/notification/${userID}`);
+
+    ws.onmessage = (event) => {
+      const msg: Message = JSON.parse(event.data);
+      const roomIDFromMsg = msg.RoomID ?? null;
+
+      if (selectedRoom && roomIDFromMsg === selectedRoom.ID) {
+        return;
+      }
+
+      setUnreadMessages(prev => {
+        const key = roomIDFromMsg ? roomIDFromMsg.toString() : "global";
+        const prevCount = prev[key] || 0;
+        return { ...prev, [key]: prevCount + 1 };
+      });
+    };
+
+    ws.onclose = () => console.log("Notification WS closed");
+    ws.onerror = (err) => console.error("Notification WS error", err);
+
+    return () => ws.close();
+  }, [userID, selectedRoom]);
+
+  // Chat WebSocket
+  useEffect(() => {
+    if (!selectedRoom || !userID) return;
+
+    if (wsRef.current) wsRef.current.close();
+
+    const ws = new WebSocket(
+      `ws://192.168.1.173:8080/ws/chat/${selectedRoom.ID}/${userID}`
+    );
+
+    ws.onopen = () => console.log("Connected to Chat WS");
+
+    ws.onmessage = (event) => {
+      let newMsg: Message;
+      try {
+        newMsg = JSON.parse(event.data);
+        if (!newMsg.ID) newMsg.ID = Date.now() + Math.floor(Math.random() * 1000);
+        if (!newMsg.Type) {
+          if (typeof newMsg.Content === "string") {
+            if (
+              newMsg.Content.startsWith("http") &&
+              /\.(jpg|jpeg|png|gif|webp)$/i.test(newMsg.Content)
+            ) {
+              newMsg.Type = "image";
+            } else if (newMsg.Content.startsWith("http")) {
+              newMsg.Type = "file";
+            } else {
+              newMsg.Type = "text";
+            }
+          } else {
+            newMsg.Type = "text";
+          }
+        }
+      } catch {
+        newMsg = {
+          ID: Date.now() + Math.floor(Math.random() * 1000),
+          SenderID: 0,
+          Content: event.data,
+          RoomID: selectedRoom.ID,
+          Type: "text",
+        };
+      }
+
+      if (newMsg.SenderID === userID) return;
+
+      setMessages(prev => {
+        if (prev.some(m => m.ID === newMsg.ID)) return prev;
+        return [...prev, newMsg];
+      });
+      scrollToBottom();
+    };
+
+    ws.onerror = (err) => console.error("Chat WS error:", err);
+    ws.onclose = () => console.log("Chat WS closed");
+
+    wsRef.current = ws;
+    return () => ws.close();
+  }, [selectedRoom, userID]);
+
+  // Load messages with pagination
+  const loadMessages = async (
+    roomID: number,
+    appendTop = false,
+    offsetParam?: number
+  ) => {
+    if (loading) return;
     setLoading(true);
-    setError(null);
+    const offsetToUse = offsetParam ?? roomOffsets[roomID] ?? 0;
     try {
-      const rawData = await GetMessagesByLandPostID(
-        selectedLandId.toString()
+      const res = await GetRoomMessages(roomID, MESSAGES_LIMIT, offsetToUse);
+      const fetchedMessages: Message[] = res.messages || [];
+      if (fetchedMessages.length < MESSAGES_LIMIT) setHasMore(false);
+
+      const container = messagesContainerRef.current;
+      const scrollHeightBefore = container?.scrollHeight || 0;
+
+      setMessages((prev) =>
+        appendTop ? [...fetchedMessages, ...prev] : [...prev, ...fetchedMessages]
       );
 
-      if (rawData.length === 0) {
-        // ไม่มีคนแชทเลย รีเซ็ตข้อความและ user ที่เลือก
-        setMessages([]);
-        setSelectedUser(null);
-      } else {
-        const formatted = rawData.map((msg: any) => ({
-          message_id: msg.message_id,
-          message: msg.message,
-          roomchat_id: msg.roomchat_id,
-          user_id: msg.UserID,
-          user_name: msg.name,
-        }));
-        setMessages(formatted);
+      setRoomOffsets((prev) => ({
+        ...prev,
+        [roomID]: offsetToUse + fetchedMessages.length,
+      }));
 
-        // ถ้า user ที่เลือกปัจจุบัน ไม่มีในรายชื่อใหม่ รีเซ็ต selectedUser
-        const userNames: string[] = Array.from(new Set(formatted.map((m: MessageWithUser) => m.user_name)));
-        if (!userNames.includes(selectedUser ?? "")) {
-          setSelectedUser(null);
-        }
+      if (appendTop && container) {
+        setTimeout(() => {
+          container.scrollTop = container.scrollHeight - scrollHeightBefore;
+        }, 50);
+      } else {
+        setTimeout(scrollToBottom, 50);
       }
     } catch (err) {
-      setError("ไม่สามารถดึงข้อมูลได้");
-      setMessages([]);
-      setSelectedUser(null);
+      console.error(err);
     } finally {
       setLoading(false);
     }
-  }
-
-  fetchMessages();
-}, [selectedLandId]);
-
-
-// Websocket
-  const [ws, setWs] = useState<WebSocket | null>(null);
-  const [input, setInput] = useState("");
-  const wsRef = useRef<WebSocket | null>(null);
-
-    useEffect(() => {
-    if (!selectedLandId) {
-      if (wsRef.current) {
-        wsRef.current.close();
-        wsRef.current = null;
-      }
-      return;
-    }
-
-    const socket = new WebSocket(
-      `ws://localhost:8080/ws/roomchat/${selectedLandId}`
-    );
-
-    socket.onopen = () => {
-      console.log("WebSocket connected");
-    };
-
-    socket.onmessage = (event) => {
-      // สมมุติข้อมูลที่รับมาเป็น JSON ของ message
-      const data = JSON.parse(event.data) as MessageWithUser;
-
-      // เพิ่มข้อความใหม่เข้า messages
-      setMessages((prev) => [...prev, data]);
-
-      // ถ้า user ใหม่ ให้เพิ่ม user list และเลือก user อัตโนมัติ (optional)
-      if (!uniqueUsers.includes(data.user_name)) {
-        setSelectedUser(data.user_name);
-      }
-    };
-
-    socket.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
-
-    socket.onerror = (error) => {
-      console.error("WebSocket error", error);
-    };
-
-    wsRef.current = socket;
-
-    return () => {
-      socket.close();
-      wsRef.current = null;
-    };
-  }, [selectedLandId]); // เมื่อเปลี่ยน LandId ให้รีเซ็ต WS
-
-  // ฟังก์ชันส่งข้อความผ่าน WebSocket
-  const sendMessage = () => {
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-      alert("WebSocket ยังไม่เชื่อมต่อ");
-      return;
-    }
-    if (message.trim() === "") return;
-
-    // สร้าง object ข้อความที่ต้องการส่ง (คุณอาจต้องปรับให้ตรงกับ backend)
-    const msgToSend = {
-      message: message.trim(),
-      roomchat_id: selectedLandId,
-      user_id: userId,
-      user_name: "คุณ", // หรือดึงจาก user login จริง
-    };
-
-    wsRef.current.send(JSON.stringify(msgToSend));
-
-    // เคลียร์ input หลังส่ง
-    setMessage("");
   };
 
+  const handleSelectRoom = async (room: Room) => {
+    setSelectedRoom(room);
+    setMessages([]);
+    setHasMore(true);
+    await loadMessages(room.ID, false, 0);
+    setUnreadMessages((prev) => ({ ...prev, [room.ID]: 0, global: 0 }));
+  };
 
-  
+  const handleSendMessage = async () => {
+    if (!wsRef.current || !selectedRoom || !userID) return;
 
+    const messagesToSend: Message[] = [];
+
+    if (selectedFile) {
+      try {
+        const res = await UploadImage(selectedRoom.ID, userID, selectedFile);
+        if (!res?.url) throw new Error("Upload failed");
+
+        messagesToSend.push({
+          ID: Date.now() + Math.floor(Math.random() * 1000),
+          SenderID: userID,
+          Content: res.url,
+          RoomID: selectedRoom.ID,
+          Type: res.type || "file",
+        });
+      } catch (err) {
+        console.error("File upload error:", err);
+      }
+    }
+
+    if (newMessage.trim()) {
+      messagesToSend.push({
+        ID: Date.now() + Math.floor(Math.random() * 1000),
+        SenderID: userID,
+        Content: newMessage,
+        RoomID: selectedRoom.ID,
+        Type: "text",
+      });
+    }
+
+    const targetUserID =
+      selectedRoom.User1ID === userID ? selectedRoom.User2ID : selectedRoom.User1ID;
+
+    for (const msg of messagesToSend) {
+      wsRef.current.send(JSON.stringify(msg));
+      setMessages((prev) => [...prev, msg]);
+
+      try {
+        await fetch("http://192.168.1.173:8080/notification/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            targetUserID,
+            message: msg.Type === "file" ? `[File] ${msg.Content}` : msg.Content,
+            senderID: userID,
+            roomID: selectedRoom.ID,
+            type: msg.Type === "text" ? "chat_message" : msg.Type,
+          }),
+        });
+      } catch (err) {
+        console.error("BroadcastNotification failed:", err);
+      }
+    }
+
+    setNewMessage("");
+    setSelectedFile(null);
+    setTimeout(scrollToBottom, 50);
+  };
+
+  const handleFileChange = (file: File | null) => {
+    if (!file) {
+      setSelectedFile(null);
+      return;
+    }
+    const fileSizeMB = file.size / (1024 * 1024);
+    if (fileSizeMB > MAX_FILE_SIZE_MB) {
+      alert(`File too large! Max ${MAX_FILE_SIZE_MB}MB`);
+      return;
+    }
+    setSelectedFile(file);
+  };
+
+  const handleScroll = () => {
+    if (!messagesContainerRef.current || !selectedRoom) return;
+    if (messagesContainerRef.current.scrollTop === 0 && hasMore && !loading) {
+      loadMessages(selectedRoom.ID, true);
+    }
+  };
+
+  const renderMessageContent = (msg: Message) => {
+    if (msg.Type === "image") {
+      return (
+        <img
+          src={msg.Content}
+          alt="sent"
+        />
+      );
+    }
+
+    if (msg.Type === "file") {
+      const fileName = msg.Content.split("/").pop();
+      return (
+        <a href={msg.Content} target="_blank" rel="noopener noreferrer">
+          📎 {fileName}
+        </a>
+      );
+    }
+
+    if (typeof msg.Content === "string") {
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const parts = msg.Content.split(urlRegex);
+
+      return parts.map((part, index) => {
+        if (urlRegex.test(part)) {
+          return (
+            <a
+              key={index}
+              href={part}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {part}
+            </a>
+          );
+        } else {
+          return <span key={index}>{part}</span>;
+        }
+      });
+    }
+
+    return msg.Content;
+  };
+
+  const getContactInitials = (contact: { Firstname: string; Lastname: string }) => {
+    return `${contact.Firstname.charAt(0)}${contact.Lastname.charAt(0)}`.toUpperCase();
+  };
+
+  const getSelectedUserInitials = () => {
+    if (!selectedRoom || !userID) return "";
+    const contactUser = selectedRoom.User1ID === userID ? selectedRoom.User2 : selectedRoom.User1;
+    return getContactInitials(contactUser);
+  };
 
   return (
-    <>
+    <div className="chat-container">
+      <div className="chat-floating-shapes">
+        <div className="shape-1"></div>
+        <div className="shape-2"></div>
+        <div className="shape-3"></div>
+      </div>
+      
       <Navbar />
-      <div className="MainStyle">
-        <div className="MassageRooms">
-          <h3>รายการที่ดินของคุณ</h3>
-          <select
-            className="land-select"
-            value={selectedLandId ?? ""}
-            onChange={(e) => {
-              setSelectedLandId(Number(e.target.value));
-              setSelectedUser(null); // reset user when switch land
-            }}
-          >
-            <option value="">เลือกที่ดินของคุณ</option>
-            {landPosts.map((land) => (
-              <option key={land.ID} value={land.ID}>
-                {land.AdressLandplot} - {land.NumOfLandTitle}
-              </option>
-            ))}
-          </select>
-          <div className="post-detail">
-            <img src={Picture} alt="รูปที่ดิน" className="land-image" />
-          </div>
 
-          {selectedLandId && (
-            <>
-              <h6>
-                <strong>หมายเลขที่ดิน:</strong>{" "}
-                {landPosts.find((land) => land.ID === selectedLandId)
-                  ?.NumOfLandTitle ?? "ไม่พบข้อมูล"}
-              </h6>
-              <h6>
-                <strong>ราคา:</strong>{" "}
-                {landPosts.find((land) => land.ID === selectedLandId)?.Price ??
-                  "ไม่พบข้อมูล"}
-              </h6>
-              <hr />
-              <div className="user-list">
-                <h5>เลือกผู้ใช้เพื่อดูข้อความ</h5>
-                {uniqueUsers.length === 0 ? (
-                  <p>ไม่มีคนแชท</p>
-                ) : (
-                  <ul>
-                    {uniqueUsers.map((name, index) => (
-                      <li
-                        key={index}
-                        onClick={() => setSelectedUser(name)}
-                        style={{
-                          cursor: "pointer",
-                          fontWeight: selectedUser === name ? "bold" : "normal",
-                          color: selectedUser === name ? "#0066cc" : "black",
-                        }}
-                      >
-                        {name}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </>
+      <div className="chat-main-layout">
+        {/* Contacts Sidebar */}
+        <div className="chat-contacts">
+          <div className="contacts-header">
+            <h3 className="contacts-title">Messages</h3>
+            <p className="contacts-subtitle">Your conversations</p>
+          </div>
+          
+          {contacts.length > 0 ? (
+            contacts.map((room) => {
+              const contactUser = room.User1ID === userID ? room.User2 : room.User1;
+              const unreadCount = unreadMessages[room.ID] || 0;
+              
+              return (
+                <div
+                  key={room.ID}
+                  onClick={() => handleSelectRoom(room)}
+                  className={`contact-item ${selectedRoom?.ID === room.ID ? "active" : ""}`}
+                >
+                  <div className="contact-info">
+                    <div className="contact-avatar">
+                      {getContactInitials(contactUser)}
+                    </div>
+                    <div className="contact-details">
+                      <div className="contact-name">
+                        {contactUser.Firstname} {contactUser.Lastname}
+                      </div>
+                    </div>
+                  </div>
+                  {unreadCount > 0 && (
+                    <div className="unread-badge">
+                      {unreadCount}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          ) : (
+            <div className="no-contacts">No contacts found.</div>
           )}
         </div>
 
-        <div className="MassageChat">
-          <h2>ห้องแชท</h2>
-          {selectedLandId ? (
+        {/* Chat Room */}
+        <div className="chat-room">
+          {selectedRoom ? (
             <>
-              <div className="chat-window">
-                {loading && <p>กำลังโหลดข้อความ...</p>}
-                {error && <p style={{ color: "red" }}>{error}</p>}
-                {!selectedUser && <p>กรุณาเลือกผู้ใช้เพื่อดูข้อความ</p>}
-                {selectedUser &&
-                 messages
-                  .filter(msg => msg.roomchat_id === selectedLandId)
-                  .map(msg => (
-                    <div
-                      key={msg.message_id}
-                      className={`chat-message ${msg.user_id === userId ? "from-me" : "from-user"}`}
-                    >
-                      <div className="bubble">
-                        <strong>{msg.user_name}</strong>: {msg.message}
-                      </div>
-                    </div>
-                  ))}
+              <div className="chat-header">
+                <div className="chat-header-content">
+                  <div className="chat-avatar-large">
+                    {getSelectedUserInitials()}
+                  </div>
+                  <div className="chat-user-info">
+                    <h4>
+                      {selectedRoom.User1ID === userID
+                        ? `${selectedRoom.User2.Firstname} ${selectedRoom.User2.Lastname}`
+                        : `${selectedRoom.User1.Firstname} ${selectedRoom.User1.Lastname}`}
+                    </h4>
+                    
+                  </div>
+                </div>
               </div>
 
+              <div
+                ref={messagesContainerRef}
+                onScroll={handleScroll}
+                className="chat-messages"
+              >
+                <div className="chat-messages-content">
+                  {messages.length > 0 ? (
+                    messages.map((msg, index) => (
+                      <div
+                        key={`${msg.ID}-${index}`}
+                        className={`message-wrapper ${msg.SenderID === userID ? "own" : "other"}`}
+                      >
+                        <div className="message-bubble">
+                          <div className="message-content">
+                            {renderMessageContent(msg)}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="no-messages">
+                      No messages yet. Start the conversation!
+                    </div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+              </div>
+
+              {/* Input Area */}
               <div className="chat-input-area">
-                <input
-                  type="text"
-                  placeholder="พิมพ์ข้อความ..."
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") sendMessage();
-                  }}
-                />
-                <button onClick={sendMessage}>ส่ง</button>
+                {selectedFile && (
+                  <div className="file-preview">
+                    {/\.(jpg|jpeg|png|gif|webp)$/i.test(selectedFile.name) ? (
+                      <img
+                        src={URL.createObjectURL(selectedFile)}
+                        alt="preview"
+                        onClick={() => window.open(URL.createObjectURL(selectedFile))}
+                      />
+                    ) : (
+                      <a
+                        href={URL.createObjectURL(selectedFile)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        📎 {selectedFile.name}
+                      </a>
+                    )}
+                    <button
+                      onClick={() => setSelectedFile(null)}
+                      className="remove-file-btn"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+
+                <div className="input-controls">
+                  <textarea
+                    placeholder="Type your message..."
+                    value={newMessage}
+                    maxLength={200}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                    className="message-input"
+                  />
+                  
+                  <div className="input-meta">
+                    <div className="char-count">
+                      {newMessage.length} / 200
+                    </div>
+                    
+                    <div className="file-input-wrapper">
+                      <input
+                        type="file"
+                        onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
+                        className="file-input"
+                      />
+                      <div className="file-size-limit">
+                        Max {MAX_FILE_SIZE_MB}MB
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <button
+                    onClick={handleSendMessage}
+                    disabled={!newMessage.trim() && !selectedFile}
+                    className="send-btn"
+                  >
+                    Send
+                  </button>
+                </div>
               </div>
             </>
           ) : (
-            <p>กรุณาเลือกที่ดินเพื่อเริ่มแชท</p>
+            <div className="chat-empty-state">
+              <div className="empty-state-icon">💬</div>
+              <h3 className="empty-state-title">Select a conversation</h3>
+              <p className="empty-state-message">
+                Choose from your existing conversations, or start a new one.
+                {unreadMessages.global > 0 && (
+                  <span className="global-unread">
+                    {unreadMessages.global}
+                  </span>
+                )}
+              </p>
+            </div>
           )}
         </div>
       </div>
-    </>
+    </div>
   );
-}
+};
 
 export default Chat;

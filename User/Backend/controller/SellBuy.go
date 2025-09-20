@@ -112,8 +112,8 @@ func CreateTransaction(c *gin.Context) {
 
 	// เซ็ตค่าเริ่มต้น Transaction
 	transaction.TypetransactionID = 1
-	transaction.BuyerAccepted = true
-	transaction.SellerAccepted = false
+	transaction.BuyerAccepted = false
+	transaction.SellerAccepted = true
 	transaction.MoneyChecked = false
 	transaction.LandDepartmentApproved = false
 	transaction.Expire = time.Now().Add(72 * time.Hour) // 3 วัน
@@ -434,15 +434,26 @@ func DeleteAllRequestBuyByLandID(c *gin.Context) {
 }
 
 func GetRequestBuybyLandID(c *gin.Context) {
-	var request []entity.RequestBuySell
-	landID := c.Param("id")
+	tokenID := c.Param("id")
 	db := config.DB()
 
-	// ดึงข้อความห้องแชทพร้อมเรียงเวลาข้อความ
-	if err := db.Where("land_id = ?", landID).Preload("Seller").Preload("Buyer").Preload("RequestBuySellType").Find(&request).Error; err != nil {
+	// หา Landtitle ที่มี tokenID
+	var land entity.Landtitle
+	if err := db.Where("token_id = ?", tokenID).First(&land).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบที่ดิน"})
+		return
+	}
+
+	// ดึง RequestBuySell ตาม land_id
+	var requests []entity.RequestBuySell
+	if err := db.Where("land_id = ?", land.ID).
+		Preload("Seller").
+		Preload("Buyer").
+		Preload("RequestBuySellType").
+		Find(&requests).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลผู้ใช้ได้"})
 		return
 	}
 
-	c.JSON(http.StatusOK, request)
+	c.JSON(http.StatusOK, requests)
 }

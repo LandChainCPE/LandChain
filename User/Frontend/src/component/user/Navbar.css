@@ -422,3 +422,26 @@
 .navbar-landchain {
   animation: fadeInDown 0.6s ease-out;
 }
+
+
+.notification-dropdown, .user-dropdown {
+  position: relative;
+  z-index: 1000; /* ให้สูงกว่า element อื่น */
+}
+
+.dropdown-menu-notification,
+.dropdown-menu-landchain {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  min-width: 200px;
+  z-index: 1100; /* ให้สูงกว่า parent */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.notification-bell,
+.user-dropdown-toggle {
+  cursor: pointer;
+}

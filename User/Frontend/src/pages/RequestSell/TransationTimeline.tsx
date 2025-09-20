@@ -16,27 +16,27 @@ function TransactionTimeline() {
     const [showModal, setShowModal] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
 
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        const wsUrl = `ws://localhost:8080/ws/transactions?token=${token}`;
-        const socket = new WebSocket(wsUrl);
+    // useEffect(() => {
+    //     const token = localStorage.getItem("token");
+    //     const wsUrl = `ws://192.168.1.173:8080/ws/transactions?token=${token}`;
+    //     const socket = new WebSocket(wsUrl);
 
-        socket.onopen = () => setConnectionStatus('connected');
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            setTransactions((prev) => {
-                const updated = [...prev];
-                const index = updated.findIndex((tx) => tx.ID === data.ID);
-                if (index >= 0) updated[index] = data;
-                else updated.push(data);
-                return updated;
-            });
-        };
-        socket.onclose = () => setConnectionStatus('disconnected');
-        socket.onerror = () => setConnectionStatus('disconnected');
+    //     socket.onopen = () => setConnectionStatus('connected');
+    //     socket.onmessage = (event) => {
+    //         const data = JSON.parse(event.data);
+    //         setTransactions((prev) => {
+    //             const updated = [...prev];
+    //             const index = updated.findIndex((tx) => tx.ID === data.ID);
+    //             if (index >= 0) updated[index] = data;
+    //             else updated.push(data);
+    //             return updated;
+    //         });
+    //     };
+    //     socket.onclose = () => setConnectionStatus('disconnected');
+    //     socket.onerror = () => setConnectionStatus('disconnected');
 
-        return () => socket.close();
-    }, []);
+    //     return () => socket.close();
+    // }, []);
 
     const fetchTransactions = async () => {
     try {
@@ -720,134 +720,6 @@ const openETHModalForTransaction = (tx: any) => {
                             </div>
                         )}
 
-
-                            {/* modal ร่างสํญญา */}
-                            <Modal show={showSaleModal} onHide={closeSaleModal} centered>
-                                <Modal.Header closeButton>
-                                    <Modal.Title>ยืนยันการร่างสัญญาโอนโฉนด</Modal.Title>
-                                </Modal.Header>
-                                <Modal.Body>
-                                    <p>คุณกำลังจะร่างสัญญาโอนโฉนดสำหรับธุรกรรมนี้</p>
-                                    <div className="transaction-summary">
-                                    <div className="summary-item">
-                                        <span>Token ID:</span>
-                                        <span>{selectedTransaction?.Landtitle?.TokenID}</span>
-                                    </div>
-                                    <div className="summary-item">
-                                        <span>ผู้ซื้อ:</span>
-                                        <span>{selectedTransaction?.Buyer?.Firstname}</span>
-                                    </div>
-                                    <div className="summary-item">
-                                        <span>จำนวนเงิน:</span>
-                                        <span>฿{formatAmount(selectedTransaction?.Amount)}</span>
-                                    </div>
-                                    </div>
-                                    <p className="text-danger mt-2">
-                                    ⚠️ การร่างสัญญาจะไม่สามารถแก้ไขได้ กรุณาตรวจสอบข้อมูลให้ถูกต้อง
-                                    </p>
-                                </Modal.Body>
-                                <Modal.Footer>
-                                    <Button variant="secondary" onClick={closeSaleModal}>ยกเลิก</Button>
-                                    <Button 
-                                        variant="primary" 
-                                        onClick={confirmDraftSale}
-                                        disabled={loadingMetamask}
-                                        >
-                                        {loadingMetamask ? (
-                                            <>
-                                            <span className="spinner-border spinner-border-sm me-2"></span>
-                                            กำลังเชื่อมต่อ Metamask...
-                                            </>
-                                        ) : (
-                                            "ยืนยันร่างสัญญา"
-                                        )}
-                                        </Button>
-                                </Modal.Footer>
-                                </Modal>
-
-                        
-                    <Modal show={showDeleteModal} onHide={handleCloseDeleteModal} centered>
-                        <Modal.Header closeButton>
-                            <Modal.Title>ยืนยันการลบธุรกรรม</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                            คุณแน่ใจหรือไม่ว่าต้องการลบธุรกรรมนี้? การลบจะไม่สามารถกู้คืนได้
-                        </Modal.Body>
-                        <Modal.Footer>
-                            <Button variant="secondary" onClick={handleCloseDeleteModal}>
-                            ยกเลิก
-                            </Button>
-                            <Button variant="danger" onClick={handleConfirmDelete}>
-                            ลบธุรกรรม
-                            </Button>
-                        </Modal.Footer>
-                        </Modal>
-
-
-                        {/* modal  โอน ETH */}
-                        <Modal show={showETHModal} onHide={() => setShowETHModal(false)} centered>
-                        <Modal.Header closeButton>
-                            <Modal.Title>ยืนยันการโอน ETH</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                            {ethTransaction ? (
-                            <div>
-                                <p>คุณกำลังจะโอน ETH ดังนี้:</p>
-                                <div className="transaction-summary">   
-                                <div className="summary-item">
-                                    <span>ผู้ส่ง(คุณ):</span>
-                                    <span>{ethTransaction.toAddress}</span>
-                                </div>
-                                <div className="summary-item">
-                                    <span>จำนวนเงิน (ETH):</span>
-                                    <span>
-                                    {ethTransaction.amountWei
-                                        ? Number(ethers.formatEther(ethTransaction.amountWei))
-                                        : "N/A"}
-                                    </span>
-                                </div>
-                                <div className="summary-item">
-                                    <span>Token ID:</span>
-                                    <span>{ethTransaction.tokenId || "-"}</span>
-                                </div>
-                                </div>
-                                <p className="text-danger mt-2">
-                                ⚠️ การโอน ETH จะไม่สามารถย้อนกลับได้ กรุณาตรวจสอบข้อมูลให้ถูกต้อง
-                                </p>
-                            </div>
-                            ) : (
-                            <p>กำลังเตรียมข้อมูล...</p>
-                            )}
-                        </Modal.Body>
-                        <Modal.Footer>
-                            <Button
-                            variant="secondary"
-                            onClick={() => setShowETHModal(false)}
-                            disabled={loadingETH}
-                            >
-                            ยกเลิก
-                            </Button>
-                            <Button
-                            variant="primary"
-                            onClick={() => confirmBuyLand(ethTransaction?.tokenId ?? "", ethTransaction?.transactionId ?? 0 )}
-                            disabled={loadingETH}
-                            >
-                            {loadingETH ? (
-                                <>
-                                <span className="spinner-border spinner-border-sm me-2"></span>
-                                กำลังโอน ETH...
-                                </>
-                            ) : (
-                                "ยืนยันโอน ETH"
-                            )}
-                            </Button>
-                        </Modal.Footer>
-                        </Modal>
-
-
-
-
-
                 </div>
             </div>
         );
@@ -860,15 +732,23 @@ const openETHModalForTransaction = (tx: any) => {
                 {/* Header */}
                 <div className="page-header">
                     <div className="header-content">
-                        <h1>Transaction Timeline</h1>
+                        <h1>ระบบจัดการธุรกรรมโฉนด</h1>
+                        <div className={`connection-status status-${connectionStatus}`}>
+                            <div className="status-dot"></div>
+                            <span>
+                                {connectionStatus === 'connected' && 'เชื่อมต่อแล้ว'}
+                                {connectionStatus === 'connecting' && 'กำลังเชื่อมต่อ...'}
+                                {connectionStatus === 'disconnected' && 'การเชื่อมต่อขาด'}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
                 {/* Buyer Transactions */}
                 <section className="transaction-section">
                     <div className="section-header">
-                        <h2>รายการที่คุณเป็นผู้ซื้อ</h2>
-                        <span className="transaction-count">({buyerTransactions.length} รายการ)</span>
+                        <h2>📈 รายการที่คุณเป็นผู้ซื้อ</h2>
+                        <span className="transaction-count">{buyerTransactions.length} รายการ</span>
                     </div>
                     <div className="transaction-list">
                         {buyerTransactions.length > 0 ? (
@@ -885,8 +765,8 @@ const openETHModalForTransaction = (tx: any) => {
                 {/* Seller Transactions */}
                 <section className="transaction-section">
                     <div className="section-header">
-                        <h2>รายการที่คุณเป็นผู้ขาย</h2>
-                        <span className="transaction-count">({sellerTransactions.length} รายการ)</span>
+                        <h2>📊 รายการที่คุณเป็นผู้ขาย</h2>
+                        <span className="transaction-count">{sellerTransactions.length} รายการ</span>
                     </div>
                     <div className="transaction-list">
                         {sellerTransactions.length > 0 ? (
@@ -900,6 +780,7 @@ const openETHModalForTransaction = (tx: any) => {
                     </div>
                 </section>
 
+                {/* Modals */}
                 {/* Confirmation Modal */}
                 <Modal 
                     show={showModal} 
@@ -911,7 +792,7 @@ const openETHModalForTransaction = (tx: any) => {
                         <Modal.Title>ยืนยันการดำเนินการ</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        <p>คุณต้องการยืนยันการยอมรับของผู้ขายหรือไม่?</p>
+                        <p>คุณต้องการยืนยันการยอมรับของผู้ซายหรือไม่?</p>
                         <div className="transaction-summary">
                             <div className="summary-item">
                                 <span>จำนวนเงิน:</span>
@@ -929,6 +810,128 @@ const openETHModalForTransaction = (tx: any) => {
                         </Button>
                         <Button variant="primary" onClick={confirmAccept}>
                             ยืนยัน
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+
+                {/* Sale Modal */}
+                <Modal show={showSaleModal} onHide={closeSaleModal} centered>
+                    <Modal.Header closeButton>
+                        <Modal.Title>ยืนยันการร่างสัญญาโอนโฉนด</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p>คุณกำลังจะร่างสัญญาโอนโฉนดสำหรับธุรกรรมนี้</p>
+                        <div className="transaction-summary">
+                            <div className="summary-item">
+                                <span>Token ID:</span>
+                                <span>{selectedTransaction?.Landtitle?.TokenID}</span>
+                            </div>
+                            <div className="summary-item">
+                                <span>ผู้ซื้อ:</span>
+                                <span>{selectedTransaction?.Buyer?.Firstname}</span>
+                            </div>
+                            <div className="summary-item">
+                                <span>จำนวนเงิน:</span>
+                                <span>฿{formatAmount(selectedTransaction?.Amount)}</span>
+                            </div>
+                        </div>
+                        <p className="text-danger mt-2">
+                            ⚠️ การร่างสัญญาจะไม่สามารถแก้ไขได้ กรุณาตรวจสอบข้อมูลให้ถูกต้อง
+                        </p>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={closeSaleModal}>ยกเลิก</Button>
+                        <Button 
+                            variant="primary" 
+                            onClick={confirmDraftSale}
+                            disabled={loadingMetamask}
+                        >
+                            {loadingMetamask ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2"></span>
+                                    กำลังเชื่อมต่อ Metamask...
+                                </>
+                            ) : (
+                                "ยืนยันร่างสัญญา"
+                            )}
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+
+                {/* Delete Modal */}
+                <Modal show={showDeleteModal} onHide={handleCloseDeleteModal} centered>
+                    <Modal.Header closeButton>
+                        <Modal.Title>ยืนยันการลบธุรกรรม</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p>คุณแน่ใจหรือไม่ว่าต้องการลบธุรกรรมนี้? การลบจะไม่สามารถกู้คืนได้</p>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleCloseDeleteModal}>
+                            ยกเลิก
+                        </Button>
+                        <Button variant="danger" onClick={handleConfirmDelete}>
+                            ลบธุรกรรม
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+
+                {/* ETH Transfer Modal */}
+                <Modal show={showETHModal} onHide={() => setShowETHModal(false)} centered>
+                    <Modal.Header closeButton>
+                        <Modal.Title>ยืนยันการโอน ETH</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {ethTransaction ? (
+                            <div>
+                                <p>คุณกำลังจะโอน ETH ดังนี้:</p>
+                                <div className="transaction-summary">   
+                                    <div className="summary-item">
+                                        <span>ผู้ส่ง (คุณ):</span>
+                                        <span>{ethTransaction.toAddress}</span>
+                                    </div>
+                                    <div className="summary-item">
+                                        <span>จำนวนเงิน (ETH):</span>
+                                        <span>
+                                            {ethTransaction.amountWei
+                                                ? Number(ethers.formatEther(ethTransaction.amountWei))
+                                                : "N/A"}
+                                        </span>
+                                    </div>
+                                    <div className="summary-item">
+                                        <span>Token ID:</span>
+                                        <span>{ethTransaction.tokenId || "-"}</span>
+                                    </div>
+                                </div>
+                                <p className="text-danger mt-2">
+                                    ⚠️ การโอน ETH จะไม่สามารถย้อนกลับได้ กรุณาตรวจสอบข้อมูลให้ถูกต้อง
+                                </p>
+                            </div>
+                        ) : (
+                            <p>กำลังเตรียมข้อมูล...</p>
+                        )}
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button
+                            variant="secondary"
+                            onClick={() => setShowETHModal(false)}
+                            disabled={loadingETH}
+                        >
+                            ยกเลิก
+                        </Button>
+                        <Button
+                            variant="primary"
+                            onClick={() => confirmBuyLand(ethTransaction?.tokenId ?? "", ethTransaction?.transactionId ?? 0)}
+                            disabled={loadingETH}
+                        >
+                            {loadingETH ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2"></span>
+                                    กำลังโอน ETH...
+                                </>
+                            ) : (
+                                "ยืนยันโอน ETH"
+                            )}
                         </Button>
                     </Modal.Footer>
                 </Modal>
