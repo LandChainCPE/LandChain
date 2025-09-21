@@ -32,7 +32,7 @@ func main() {
 	r.Use(CORSMiddleware())
 
 	// เริ่มต้น Scheduler สำหรับลบการจองที่หมดอายุ
-	controller.StartBookingCleanupScheduler()
+	//controller.StartBookingCleanupScheduler()
 
 	//อ่านค่าการตอบกลับจาก Smartcontract (ควรใช้ go routine)
 	go controller.ListenSmartContractEvents()
@@ -143,7 +143,7 @@ func main() {
 	userToken.Use(middlewares.Authorizes())
 	userToken.Use(middlewares.CheckTokenOwnership())
 	{
-		userToken.GET("/getdatauserverification/:userid", controller.GetDataUserVerification)
+		userToken.GET("/getdatauserverification/:userid", controller.GetDataUserVerification) //ดึงข้อมูล user_verification
 		//555userToken.GET("/user/info/", controller.GetInfoUserByWalletID)
 		//555userToken.GET("/user/lands", controller.GetLandTitleInfoByWallet)
 		//555userToken.GET("/user/info", controller.GetInfoUserByToken)
@@ -216,6 +216,9 @@ func main() {
 		authorized.POST("/upload/:roomID/:userID", controller.UploadImage)
 		authorized.GET("/user/info/:id", controller.GetUserinfoByUserID)
 
+		authorized.GET("/userinfo/:userId", controller.GetUserinfoByID)
+		authorized.GET("/landtitles/:userId", controller.GetLandtitlesByUser) //ดึงข้อมูล landtitles
+		// authorized.GET("/land_verification/:userid", controller.GetLandVerificationByUserID) //ดึงข้อมูล land_verification
 	}
 
 	r.GET("/ws/notification/:userID", controller.NotificationWS)

@@ -1,17 +1,17 @@
-.body{
-    font-family: 'Inter', sans-serif;
+.body {
+    font-family: 'Kanit', system-ui, sans-serif;
 }
 
 .navbar {
     width: 100%;
-    position: fixed; 
+    position: fixed;
     top: 0;
     left: 0;
     z-index: 999;
 }
 
 /* รูปทั้งหมดในหน้า */
-.picturecontainer{
+.picturecontainer {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -24,47 +24,60 @@
     height: auto;
     object-fit: cover;
 }
+
 /*  */
 
 
 /* รายละเอียดราคาและขนาดที่ดิน */
- .land-detail-area-price{
+.land-detail-area-price {
     display: flex;
     justify-content: space-between;
     margin-left: 6%;
     margin-right: 6%;
     margin-bottom: 2%;
- }
+}
 
 /* stlye ราคา */
 .land-detail-price {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Kanit', system-ui, sans-serif;
     font-weight: bold;
     font-size: 24px;
-    border: 2px solid red;      /* กรอบสีแดง */
-    padding: 10px 8px;           /* ระยะห่างภายในกรอบ */
-    border-radius: 6px;         /* มุมโค้งนิดๆ */
-    font-weight: bold;          /* ตัวหนา */
-    color: red;                 /* สีข้อความ */
-    background-color: #ffe5e5;  /* พื้นหลังชมพูอ่อน (ไม่บังคับ) */
+    border: 2px solid red;
+    /* กรอบสีแดง */
+    padding: 10px 8px;
+    /* ระยะห่างภายในกรอบ */
+    border-radius: 6px;
+    /* มุมโค้งนิดๆ */
+    font-weight: bold;
+    /* ตัวหนา */
+    color: red;
+    /* สีข้อความ */
+    background-color: #ffe5e5;
+    /* พื้นหลังชมพูอ่อน (ไม่บังคับ) */
 }
- 
-.land-detail-area{
-    font-family: 'Inter', sans-serif;
+
+.land-detail-area {
+    font-family: 'Kanit', system-ui, sans-serif;
     display: block;
     font-weight: bold;
     font-size: 22px;
 }
 
-.land-detail-tag{
-    font-family: 'Inter', sans-serif;
+.land-detail-tag {
+    font-family: 'Kanit', system-ui, sans-serif;
     font-size: 16px;
-    border: 2px solid blue;      /* กรอบสีแดง */
-    padding: 3px 8px;           /* ระยะห่างภายในกรอบ */
-    border-radius: 6px;         /* มุมโค้งนิดๆ */
-    font-weight: bold;          /* ตัวหนา */
-    color: blue;                 /* สีข้อความ */
-    background-color: #fff;  /* พื้นหลังชมพูอ่อน (ไม่บังคับ) */
+    border: 2px solid blue;
+    /* กรอบสีแดง */
+    padding: 3px 8px;
+    /* ระยะห่างภายในกรอบ */
+    border-radius: 6px;
+    /* มุมโค้งนิดๆ */
+    font-weight: bold;
+    /* ตัวหนา */
+    color: blue;
+    /* สีข้อความ */
+    background-color: #fff;
+    /* พื้นหลังชมพูอ่อน (ไม่บังคับ) */
 }
 
 hr {
@@ -74,7 +87,8 @@ hr {
     margin-right: 5%;
     margin-bottom: 2%;
     justify-content: center;
-    align-items: center; 
-    
+    align-items: center;
+
 }
- /*  */
+
+/*  */

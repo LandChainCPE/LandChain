@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
 import "./verifyuser.css";
+import React, { useEffect, useState } from "react";
 import { GetDataUserVerification } from "../../service/https/garfield/http";
 import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';
@@ -17,21 +17,7 @@ const SafetyCertificateOutlined = ({ className = "", style }: { className?: stri
     <path d="m9 12 2 2 4-4" />
   </svg>
 );
-const KeyOutlined = ({ className = "" }) => (
-  <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4l-2.3-2.3a1 1 0 0 0-1.4 0l-2.1 2.1a1 1 0 0 0 0 1.4Z" />
-    <path d="m6.5 17.5-5-5a1 1 0 0 1 0-1.4l8.5-8.5a1 1 0 0 1 1.4 0l5 5" />
-    <path d="m10 16 2 2" />
-  </svg>
-);
-const SwapRightOutlined = ({ className = "" }) => (
-  <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M8 3 4 7l4 4" />
-    <path d="M4 7h16" />
-    <path d="m16 21 4-4-4-4" />
-    <path d="M20 17H4" />
-  </svg>
-);
+
 const CopyIcon = ({ className = "" }) => (
   <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
@@ -44,15 +30,6 @@ const CopyIcon = ({ className = "" }) => (
    ======================= */
 const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <div className={`card ${className}`}>{children}</div>
-);
-const CardTitle = ({ children }: { children: React.ReactNode }) => (
-  <h2 className="card-title">{children}</h2>
-);
-const CardDescription = ({ children }: { children: React.ReactNode }) => (
-  <p className="card-description">{children}</p>
-);
-const CardContent = ({ children }: { children: React.ReactNode }) => (
-  <div className="card-content">{children}</div>
 );
 
 const Button = ({
@@ -178,7 +155,22 @@ function VerifyUser() {
       </div>
 
       <div className="hero-section">
-        <Container>
+        <div className="hero-content">
+          <div className="hero-badge">
+            <span>🏛️ Blockchain User Verification</span>
+          </div>
+          <h1 className="hero-title">
+            <span className="gradient-text">ยืนยันตัวตนบน Blockchain</span>
+          </h1>
+          <p className="hero-subtitle">
+            ตรวจสอบข้อมูล Wallet และ Digital Signature ที่เซ็นโดยระบบ
+            <br />
+          </p>
+        </div>
+      </div>
+
+      {/* <div className="hero-section-bg">
+        <div className="hero-section">
           <div className="hero-content">
             <div className="hero-badge">
               <span>🔐 Blockchain Verification</span>
@@ -189,17 +181,15 @@ function VerifyUser() {
             <p className="hero-subtitle">
               ตรวจสอบข้อมูล Wallet และ Digital Signature ที่เซ็นโดยระบบ
               <br />
-              
             </p>
           </div>
-        </Container>
-      </div>
+        </div>
+      </div> */}
 
       <Container className="main-container">
         {/* Connection Section */}
         <div className="connection-section">
           <Card className="glass-card connection-card">
-            <div className="card-glow"></div>
             <div className="connection-card-body">
               <div className="connection-header">
                 <div className="connection-icon">
@@ -326,7 +316,6 @@ function VerifyUser() {
         {wallet && signature && nameHash && (
           <div className="transaction-section">
             <Card className="glass-card transaction-card">
-              <div className="card-glow"></div>
               <div className="transaction-card-body">
                 <div className="transaction-header">
                   <div className="transaction-icon">

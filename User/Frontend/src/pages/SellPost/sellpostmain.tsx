@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Search, MapPin, Grid3X3, List} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GetAllPostLandData } from "../../service/https/jib/jib";
+
 import "./sellpostmain.css";
 import Loader from "../../component/third-patry/Loader";
 import "../../component/third-patry/Loader.css";
+
 
 type Land = {
   ID: number;
@@ -88,7 +90,7 @@ function addressText(land: Land) {
     .join(", ");
 }
 
-const SellPostMain = () => { 
+const SellPostMain = () => {
   const [lands, setLands] = useState<Land[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -117,7 +119,7 @@ const SellPostMain = () => {
   const filteredLands = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
     let filtered = lands;
-    
+
     if (term) {
       filtered = lands.filter((land) => {
         const name = land.Name?.toLowerCase() ?? "";
@@ -148,6 +150,7 @@ const SellPostMain = () => {
   }
 
   return (
+
     <div className="regis-land-container">
       <div className="floating-shapes">
         <div className="shape-1"></div>
@@ -155,6 +158,7 @@ const SellPostMain = () => {
         <div className="shape-3"></div>
         <div className="shape-4"></div>
       </div>
+
 
       {/* Hero Section */}
       <div className="hero-section">
@@ -403,7 +407,7 @@ const SellPostMain = () => {
               color: '#6b7280',
               marginBottom: '24px'
             }}>
-              {searchTerm 
+              {searchTerm
                 ? `ไม่พบที่ดินที่ตรงกับ "${searchTerm}"`
                 : "ยังไม่มีประกาศขายที่ดิน"
               }
@@ -489,7 +493,7 @@ const SellPostMain = () => {
                         e.currentTarget.style.transform = 'scale(1)';
                       }}
                     />
-                    
+
                     {/* Price Badge */}
                     {land.Price != null && (
                       <div style={{

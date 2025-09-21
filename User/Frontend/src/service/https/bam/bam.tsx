@@ -1,6 +1,8 @@
 import axios from "axios";
 
+
 const apiUrl = "http://10.1.63.218:8080";
+
 
 // สร้าง instance ของ axios
 const api = axios.create({
@@ -228,12 +230,12 @@ export async function GetAllRequestSellByUserIDAndDelete() {
 export async function CreateTransation(sellerID: number, buyerID: number, amount: number, landID: string | number) {
   try {
     const res = await api.post(`/user/lands/transation?landID=${landID}&sellerID=${sellerID}&buyerID=${buyerID}&amount=${amount}`, {
-    Amount: amount,
-    BuyerAccepted: true,
-    SellerAccepted: false,
-    MoneyChecked: true,
-    LandDepartmentApproved: false
-  });
+      Amount: amount,
+      BuyerAccepted: true,
+      SellerAccepted: false,
+      MoneyChecked: true,
+      LandDepartmentApproved: false
+    });
     return res.data;
   } catch (e: any) {
     if (e.response) return e.response.data;

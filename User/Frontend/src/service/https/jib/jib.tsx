@@ -1,6 +1,8 @@
 import axios from "axios";
 
+
 const apiUrl = "http://10.1.63.218:8080";
+
 const Authorization = localStorage.getItem("token");
 const Bearer = localStorage.getItem("token_type");
 
@@ -105,11 +107,12 @@ async function CreateRequestBuySell(data: any) {
 export { 
   GetAllPetition, 
   CreatePetition, 
+
   GetAllStates,
   GetAllPostLandData,
   GetTags,
   GetAllProvinces,
-  GetDistrict, 
+  GetDistrict,
   GetSubdistrict,
   CreateLandPost,
   getLandtitleIdByTokenId,
