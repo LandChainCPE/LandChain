@@ -1,7 +1,7 @@
 	package entity
 
 	import (
-		"time"
+		//"time"
 
 		"gorm.io/gorm"
 	)
@@ -12,9 +12,9 @@
 		Amount                 float64
 		BuyerAccepted          bool
 		SellerAccepted         bool
-		MoneyChecked           bool
+		//MoneyChecked           bool
 		LandDepartmentApproved bool
-		Expire                 time.Time
+		//Expire                 time.Time
 
 		TypetransactionID uint            // 👈 FK ไปยัง role.id
 		Typetransaction   Typetransaction `gorm:"foreignKey:TypetransactionID"`
@@ -27,4 +27,6 @@
 
 		LandID    uint      // 👈 FK ไปยัง role.id
 		Landtitle Landtitle `gorm:"foreignKey:LandID"`
+		
+		TxHash      *string
 	}

@@ -200,6 +200,12 @@ func ListenSmartContractEvents() {
 				fmt.Println("buyer:", buyer.Hex())
 				fmt.Println("owner:", owner.Hex())
 				fmt.Println("TxHash:", vLog.TxHash.Hex())
+				//เอา tokenId ไปหาว่า ตรงกับ landtitleID ไหน
+				// ไปหา Transaction ที่ landtitleID  and buyer and owner and TypeTransaction == on-chain 
+				//ทำการ ใส่ TxHash  +  TypeTransaction เซตเป็น onchain 
+				
+				// ณ เวลาใดๆ  ต้องมี Transaction ที่เป็น TypeTransaction == on-chain  แค่ 1 row ต่อโฉนดเท่านั้น
+
 
 			case "LandTitleBought":
 				// tokenId (indexed) = vLog.Topics[1]

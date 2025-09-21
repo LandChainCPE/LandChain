@@ -314,6 +314,7 @@ func SetupDatabase() {
 		db.Create(&entity.Typetransaction{StatusNameTh: "ถูกยกเลิกโดยผู้ซื้อหรือผู้ขาย", StatusNameEn: "cancelled"})
 		db.Create(&entity.Typetransaction{StatusNameTh: "รอการชำระเงิน", StatusNameEn: "money_clear"})
 		db.Create(&entity.Typetransaction{StatusNameTh: "หมดอายุ", StatusNameEn: "expired"})
+		db.Create(&entity.Typetransaction{StatusNameTh: "อยู่บนเชน", StatusNameEn: "on-chain"})
 
 		db.Create(&entity.RequestBuySellType{StatusNameTh: "เจ้าของโฉลดสร้างคำขอขาย", StatusNameEn: "pending"})
 		db.Create(&entity.RequestBuySellType{StatusNameTh: "ตกลงซื้อขาย", StatusNameEn: "accepted"})
@@ -485,26 +486,28 @@ func SetupDatabase() {
 			Amount:                 1500,
 			BuyerAccepted:          true,
 			SellerAccepted:         false,
-			MoneyChecked:           false,
+			//MoneyChecked:           false,
 			LandDepartmentApproved: false,
-			Expire:                 time.Now().AddDate(0, 0, 7),
+			//Expire:                 time.Now().AddDate(0, 0, 7),
 			TypetransactionID:      1,
-			BuyerID:                4,
+			BuyerID:                3,
 			SellerID:               2,
 			LandID:                 2,
+			TxHash: 				nil,
 		})
 
 		db.Create(&entity.Transaction{
 			Amount:                 15000,
 			BuyerAccepted:          true,
 			SellerAccepted:         true,
-			MoneyChecked:           true,
+			//MoneyChecked:           true,
 			LandDepartmentApproved: true,
-			Expire:                 time.Now().AddDate(0, 0, 7),
+			//Expire:                 time.Now().AddDate(0, 0, 7),
 			TypetransactionID:      2,
 			BuyerID:                2,
-			SellerID:               4,
+			SellerID:               3,
 			LandID:                 2,
+			TxHash: 				nil,
 		})
 		// 🔸 สร้าง Roomchat หลังจากสร้าง Landsalepost แล้ว
 		createRoomchatsAndMessages()
