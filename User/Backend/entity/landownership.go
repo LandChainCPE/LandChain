@@ -18,7 +18,7 @@ type LandOwnership struct {
 	TxHash string
 
 	FromDate time.Time   //วันที่เป็นเจ้าของที่ดิน 
-	ToDate   time.Time	// วันสิ้นสุดเป็นเจ้าของที่ดิน ถ้าเป็น Null แสดงว่าเป็นเจ้าของ ปัจจุบัน
+	ToDate   *time.Time	// วันสิ้นสุดเป็นเจ้าของที่ดิน ถ้าเป็น Null แสดงว่าเป็นเจ้าของ ปัจจุบัน
 
 
 }

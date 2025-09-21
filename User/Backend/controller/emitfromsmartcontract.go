@@ -13,6 +13,7 @@ import (
 	"math/big"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -69,9 +70,6 @@ func ListenSmartContractEvents() {
 			}
 			switch event.Name {
 			case "LandMinted":
-				// tokenId (indexed) = vLog.Topics[1]
-				// owner (indexed) = vLog.Topics[2]
-				// metaFields (not indexed) = vLog.Data
 				tokenId := new(big.Int).SetBytes(vLog.Topics[1].Bytes())
 				owner := common.HexToAddress(vLog.Topics[2].Hex())
 				var metaFields string
@@ -100,15 +98,15 @@ func ListenSmartContractEvents() {
 				if uuid == "" {
 					log.Println("UUID not found in metaFields")
 					break
-				}
+				}   //แค่ปริ้น ข้อมูลที่รับมาออก
 
-				db := config.DB()
+				db := config.DB()    //หาว่า uuid ตรงกับ Landtitle ไหน 
 				var landtitle entity.Landtitle
 				if err := db.Where("uuid = ?", uuid).First(&landtitle).Error; err != nil {
 					log.Println("Landtitle not found for UUID:", uuid)
 					break
 				}
-				// Update TokenID
+				//เอา tokenId ไปใส่ใน Landtitle นั้น
 				tokenIDUint := uint(tokenId.Uint64())
 				landtitle.TokenID = &tokenIDUint
 				if err := db.Save(&landtitle).Error; err != nil {
@@ -117,7 +115,7 @@ func ListenSmartContractEvents() {
 					log.Println("Landtitle TokenID updated for UUID:", uuid)
 				}
 
-				// Update LandVerification.Status_onchain
+				// Entity landtitle ทำการ Update Status_onchain เป็น true
 				if landtitle.LandVerificationID != nil {
 					var landVerif entity.LandVerification
 					if err := db.First(&landVerif, *landtitle.LandVerificationID).Error; err != nil {
@@ -134,18 +132,41 @@ func ListenSmartContractEvents() {
 					log.Println("Landtitle.LandVerificationID is nil for UUID:", uuid)
 				}
 
+				//หาว่า metamaskaddress ตรงกับ Userคนไหน
+				var user entity.Users
+				ownerLower := strings.ToLower(owner.Hex())
+				if err := db.Where("metamaskaddress = ?", ownerLower).First(&user).Error; err != nil {
+					log.Println("User not found for wallet:", ownerLower)
+					break
+				}
+				
+				landID := landtitle.ID
+				// นำ UserID  LandID มาใส่ใน landOwnership
+				landOwnership := entity.LandOwnership{
+					UserID:   user.ID,
+					LandID:   landID,
+					TxHash:   vLog.TxHash.Hex(),   //รวมถึง Transaction Hash ด้วย 
+					FromDate: time.Now(),
+					ToDate:   nil, 
+				}
+				if err := db.Create(&landOwnership).Error; err != nil {
+					log.Println("Failed to create LandOwnership:", err)
+				} else {
+					log.Println("LandOwnership created for UserID:", user.ID, "LandID:", landID)
+				}
+				/// จบ LandMinted
+
 			case "OwnerRegistered":
-				// wallet (indexed) = vLog.Topics[1]
-				// nameHash (indexed) = vLog.Topics[2]
+
 				wallet := common.HexToAddress(vLog.Topics[1].Hex())
 				nameHash := vLog.Topics[2].Hex()
 				fmt.Println("--- OwnerRegistered Event ---")
 				fmt.Println("wallet:", wallet.Hex())
 				fmt.Println("nameHash:", nameHash)
 				fmt.Println("TxHash:", vLog.TxHash.Hex())
+				// แค่ปริ้นออก
 
-				// อัพเดต Status ใน user_verification เป็น on-chain
-				// ต้อง import "landchain/config" และ "landchain/entity"
+				//หาว่า wallet ตรงกับ UserVerification ไหน
 				db := config.DB()
 				var userVerif entity.UserVerification
 				walletLower := strings.ToLower(wallet.Hex())
@@ -153,11 +174,15 @@ func ListenSmartContractEvents() {
 					log.Println("user_verification not found for wallet:", walletLower)
 					break
 				}
+				//userVerif.Status_onchain = true
+				// Update UserVerification Status_onchain  เป็น true
 				userVerif.Status_onchain = true
+				txHash := vLog.TxHash.Hex()
+				userVerif.TxHash = &txHash
 				if err := db.Save(&userVerif).Error; err != nil {
-					log.Println("failed to update user_verification status:", err)
+					log.Println("failed to update user_verification status or TxHash:", err)
 				} else {
-					log.Println("user_verification status updated to on-chain for wallet:", walletLower)
+					log.Println("user_verification status updated to on-chain and TxHash saved for wallet:", walletLower)
 				}
 
 			case "SaleInfoSet":
@@ -188,6 +213,12 @@ func ListenSmartContractEvents() {
 				fmt.Println("seller:", seller.Hex())
 				fmt.Println("buyer:", buyer.Hex())
 				fmt.Println("TxHash:", vLog.TxHash.Hex())
+				//หากเกิดการซื้อ ให้ทำการ 
+				//เอา tokenId ไปหาว่าเป็นของ landtitleid ไหน
+				//เอา buyer ไปหาว่าตรงกับ userid ไหน 
+				//ทำการหาว่า ใน LandOwnerShip   มี landtitleid and  userid  and Todate=NULL
+				//ทำการ เซต Todate เป็นเวลาปัจจุบัน 
+				//ทำการสร้างข้อมูลใหม่ โดยใส่ข้อมูลเข้าไปใน LandOwnerShip ให้เป็นข้อมูลคนปัจจุบัน
 			}
 		}
 	}
