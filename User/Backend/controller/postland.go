@@ -99,7 +99,7 @@ func GetAllPostLandData(c *gin.Context) {
 		}).
 		Preload("Tags"). // ✅ ดึงข้อมูล Tags ด้วย (many-to-many)
 		Preload("Landtitle").
-		Preload("Roomchat").
+		//Preload("Roomchat").
 		Preload("Photoland").
 		Preload("Location").
 		Find(&postlands).Error

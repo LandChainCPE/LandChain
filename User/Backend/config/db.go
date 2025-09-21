@@ -512,8 +512,10 @@ func SetupDatabase() {
 		db.Create(&entity.Message{Content: "Hello", RoomID: 2, SenderID: 3})
 		db.Create(&entity.Message{Content: "Hi", RoomID: 1, SenderID: 2})
 
-		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
-		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
+		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
+		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
+		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2})
+		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3})
 		// 🔸 สร้าง Roomchat หลังจากสร้าง Landsalepost แล้ว
 		createRoomchatsAndMessages()
 	}

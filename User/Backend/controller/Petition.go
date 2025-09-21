@@ -22,8 +22,10 @@ func GetAllPetition(c *gin.Context) {
 
 	// กรณี State เป็น null (state_id ไม่ตรงกับ states.id) ให้เติม State = nil
 	for i := range petitions {
-		if petitions[i].State == nil {
-			petitions[i].State = nil
+		// สมมติว่า State เป็น struct ไม่ใช่ pointer ให้เช็ค ID แทน
+		if petitions[i].State.ID == 0 {
+			// สามารถกำหนด State เป็น struct ว่าง หรือข้ามได้
+			// petitions[i].State = entity.State{} // หรือไม่ต้องทำอะไร
 		}
 	}
 

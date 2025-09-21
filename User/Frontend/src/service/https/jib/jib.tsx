@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const apiUrl = "http://192.168.1.173:8080";
+const apiUrl = "http://10.1.63.218:8080";
 const Authorization = localStorage.getItem("token");
 const Bearer = localStorage.getItem("token_type");
 

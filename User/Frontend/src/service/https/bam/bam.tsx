@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const apiUrl = "http://192.168.1.173:8080";
+const apiUrl = "http://10.1.63.218:8080";
 
 // สร้าง instance ของ axios
 const api = axios.create({

@@ -30,6 +30,7 @@ type LandDetailType = {
   Subdistrict?: { NameTH?: string };
   Landtitle?: { Rai?: number; Ngan?: number; SquareWa?: number; TitleDeedNumber?: string };
   Location?: { Sequence: number; Latitude: number; Longitude: number }[];
+  user_id?: number;
 };
 
 /** ---------------- Utils ---------------- */
@@ -49,7 +50,7 @@ const areaText = (lt?: LandDetailType["Landtitle"]) => {
 };
 
 /** ---------------- Normalize Data ---------------- */
-function normalizeDetail(item: any): LandDetailType {
+function normalizeDetail(item: any): LandDetailType & { user_id?: number } {
   const provinceObj = item.province ?? item.Province ?? undefined;
   const districtObj = item.district ?? item.District ?? undefined;
   const subdistrictObj = item.subdistrict ?? item.Subdistrict ?? undefined;
@@ -129,6 +130,7 @@ function normalizeDetail(item: any): LandDetailType {
           .filter((l) => typeof l.Latitude === "number" && typeof l.Longitude === "number")
           .sort((a, b) => (a.Sequence ?? 0) - (b.Sequence ?? 0))
       : [],
+  user_id: item.user_id ?? item.UserID ?? item.userId ?? item.userid, // รองรับทุกแบบ
   };
 }
 
@@ -477,6 +479,13 @@ const LandDetail = () => {
 const handleBuy = async () => {
   if (!userId) {
     msgApi.error("กรุณาเข้าสู่ระบบก่อนทำรายการซื้อ");
+    return;
+  }
+  // DEBUG log ตรวจสอบค่าจริง
+  console.log('userId:', userId, 'land.user_id:', land?.user_id, 'land:', land);
+  // เช็คว่า userId เป็นเจ้าของโพสต์หรือไม่
+  if (userId === land?.user_id) {
+    msgApi.error("ไม่สามารถซื้อโพสต์ของตัวเองได้");
     return;
   }
   try {

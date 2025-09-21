@@ -38,7 +38,7 @@ const Navbar = () => {
   useEffect(() => {
 
     if (!isLoggedIn || !user?.id) return;
-    const ws = new WebSocket(`ws://192.168.1.173:8080/ws/notification/${user?.id}`);
+    const ws = new WebSocket(`ws://10.1.63.218:8080/ws/notification/${user?.id}`);
 
     ws.onmessage = (event) => {
       try {
