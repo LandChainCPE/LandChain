@@ -82,7 +82,7 @@ const Chat = () => {
   useEffect(() => {
     if (!userID) return;
 
-    const ws = new WebSocket(`ws://10.1.63.218:8080/ws/notification/${userID}`);
+    const ws = new WebSocket(`ws://localhost:8080/ws/notification/${userID}`);
 
 
     ws.onmessage = (event) => {
@@ -114,7 +114,7 @@ const Chat = () => {
 
     const ws = new WebSocket(
 
-      `ws://10.1.63.218:8080/ws/chat/${selectedRoom.ID}/${userID}`
+      `ws://localhost:8080/ws/chat/${selectedRoom.ID}/${userID}`
 
     );
 
@@ -256,7 +256,7 @@ const Chat = () => {
 
       try {
 
-        await fetch("http://10.1.63.218:8080/notification/send", {
+        await fetch("http://localhost:8080/notification/send", {
 
           method: "POST",
           headers: { "Content-Type": "application/json" },

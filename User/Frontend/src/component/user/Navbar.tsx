@@ -39,7 +39,7 @@ const Navbar = () => {
 
     if (!isLoggedIn || !user?.id) return;
 
-    const ws = new WebSocket(`ws://10.1.63.218:8080/ws/notification/${user?.id}`);
+    const ws = new WebSocket(`ws://localhost:8080/ws/notification/${user?.id}`);
 
 
     ws.onmessage = (event) => {
