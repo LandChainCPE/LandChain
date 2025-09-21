@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import Navbar from "../../component/user/Navbar";
 import { Search, MapPin, Grid3X3, List} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GetAllPostLandData } from "../../service/https/jib/jib";
@@ -150,8 +151,9 @@ const SellPostMain = () => {
   }
 
   return (
-
-    <div className="regis-land-container">
+    <>
+      <Navbar />
+      <div className="regis-land-container">
       <div className="floating-shapes">
         <div className="shape-1"></div>
         <div className="shape-2"></div>
@@ -375,7 +377,8 @@ const SellPostMain = () => {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
         {filteredLands.length === 0 ? (
           /* Empty State */

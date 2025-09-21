@@ -1245,24 +1245,33 @@ const handleBuy = async () => {
                   ส่งข้อความ
                 </button>
 
-      <button
-        style={styles.contactBtn("ghost")}
-        onClick={showModal}
-        disabled={confirmLoading}
-      >
-        {confirmLoading ? "กำลังดำเนินการ..." : "ซื้อ"}
-      </button>
-      <Modal
-        title="ยืนยันการซื้อที่ดิน"
-        open={isModalOpen}
-        onOk={handleOk}
-        confirmLoading={confirmLoading}
-        onCancel={handleCancel}
-        okText="ยืนยัน"
-        cancelText="ยกเลิก"
-      >
-        คุณต้องการยืนยันการซื้อที่ดินนี้ใช่หรือไม่?
-      </Modal>
+      {/* Buy button: block if user is owner */}
+      {userId === land.user_id ? (
+        <button style={{ ...styles.contactBtn("ghost"), background: '#fef2f2', color: '#dc2626', cursor: 'not-allowed' }} disabled>
+          ไม่สามารถซื้อโฉนดที่ดินของตัวเองได้
+        </button>
+      ) : (
+        <>
+          <button
+            style={styles.contactBtn("ghost")}
+            onClick={showModal}
+            disabled={confirmLoading}
+          >
+            {confirmLoading ? "กำลังดำเนินการ..." : "ซื้อ"}
+          </button>
+          <Modal
+            title="ยืนยันการซื้อที่ดิน"
+            open={isModalOpen}
+            onOk={handleOk}
+            confirmLoading={confirmLoading}
+            onCancel={handleCancel}
+            okText="ยืนยัน"
+            cancelText="ยกเลิก"
+          >
+            คุณต้องการยืนยันการซื้อที่ดินนี้ใช่หรือไม่?
+          </Modal>
+        </>
+      )}
               </div>
 
               <div style={styles.warn}>
