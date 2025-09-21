@@ -17,9 +17,11 @@ const App: React.FC = () => {
 
 
   return (
-    <NotificationProvider userID={userID}>
-      <ConfigRoutes />
-    </NotificationProvider>
+    userID !== null ? (
+      <NotificationProvider userID={userID}>
+        <ConfigRoutes />
+      </NotificationProvider>
+    ) : null
   );
 };
 
