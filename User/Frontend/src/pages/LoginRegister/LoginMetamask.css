@@ -52,7 +52,7 @@ html {
     radial-gradient(circle at 80% 20%, rgba(63, 86, 88, 0.1) 0%, transparent 50%),
     linear-gradient(135deg, #D0E2E6 0%, #FFFFFF 70%);
   overflow-x: hidden;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Kanit', system-ui, sans-serif;
 }
 
 /* Floating Background Shapes */
@@ -363,7 +363,7 @@ html {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: var(--shadow-soft);
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Kanit', system-ui, sans-serif;
 }
 
 .connectButton:hover {

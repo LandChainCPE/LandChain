@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Search, MapPin, Grid3X3, List, Filter, SortAsc } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GetAllPostLandData } from "../../service/https/jib/jib";
+import Navbar from "../../component/user/Navbar";
 
 type Land = {
   ID: number;
@@ -85,7 +86,7 @@ function addressText(land: Land) {
     .join(", ");
 }
 
-const SellPostMain = () => { 
+const SellPostMain = () => {
   const [lands, setLands] = useState<Land[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -114,7 +115,7 @@ const SellPostMain = () => {
   const filteredLands = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
     let filtered = lands;
-    
+
     if (term) {
       filtered = lands.filter((land) => {
         const name = land.Name?.toLowerCase() ?? "";
@@ -200,12 +201,14 @@ const SellPostMain = () => {
       minHeight: '100vh',
       background: 'linear-gradient(to bottom right, #dbeafe, #e0e7ff, #f3e8ff)'
     }}>
+      <Navbar />
       {/* Enhanced Header */}
       <div style={{
         position: 'relative',
         background: 'linear-gradient(to right, #172E25, #3F5658, #6F969B)',
         color: 'white',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        paddingTop: '72px' // Add top padding to avoid Navbar overlap
       }}>
         {/* Background Pattern */}
         <div style={{
@@ -218,7 +221,7 @@ const SellPostMain = () => {
           inset: '0',
           background: 'linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent)'
         }}></div>
-        
+
         <div style={{
           position: 'relative',
           maxWidth: '1280px',
@@ -521,7 +524,7 @@ const SellPostMain = () => {
               color: '#6b7280',
               marginBottom: '24px'
             }}>
-              {searchTerm 
+              {searchTerm
                 ? `ไม่พบที่ดินที่ตรงกับ "${searchTerm}"`
                 : "ยังไม่มีประกาศขายที่ดิน"
               }
@@ -607,7 +610,7 @@ const SellPostMain = () => {
                         e.currentTarget.style.transform = 'scale(1)';
                       }}
                     />
-                    
+
                     {/* Price Badge */}
                     {land.Price != null && (
                       <div style={{

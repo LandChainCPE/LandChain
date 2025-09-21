@@ -117,7 +117,7 @@ function LandToBlockchain() {
         {/* Back Button */}
         <div className="back-button-container">
           <button 
-            onClick={() => navigate('/landcardlist')}
+            onClick={() => navigate('/user/landcardlist')}
             className="back-button"
           >
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">

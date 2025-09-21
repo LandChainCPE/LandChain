@@ -243,13 +243,13 @@ const Navbar = () => {
           <div className="mobile-menu-header">
 
             <div className="navbar-brand-section">
-              <span
-                className="navbar-brand-text"
-                onClick={scrollToTop}
-                style={{ cursor: 'pointer' }}
-              >
-                LANDCHAIN
-              </span>
+              <img
+              src={LogoBlack}
+              alt="LandChain Logo"
+              className="header-logo header-logo-black"
+              onClick={scrollToTop}
+              style={{ cursor: 'pointer' }}
+              />
             </div>
             <button className="mobile-close" onClick={toggleMobileMenu}>
               <FaTimes />
@@ -274,13 +274,18 @@ const Navbar = () => {
               </Link>
             </li>
             <li className="mobile-nav-item">
-              <Link to="/appointment" className="mobile-nav-link">
+              <Link to="/user/regisland" className="mobile-nav-link">
                 นัดหมายกรมที่ดิน
               </Link>
             </li>
             <li className="mobile-nav-item">
-              <Link to="/news" className="mobile-nav-link">
-                ข่าวสาร
+              <Link to="/user/sellpostmain" className="mobile-nav-link">
+                ประกาศขายที่ดิน
+              </Link>
+            </li>
+            <li className="mobile-nav-item">
+              <Link to="/user/userdashboard" className="mobile-nav-link">
+                โปรไฟล์
               </Link>
             </li>
 
