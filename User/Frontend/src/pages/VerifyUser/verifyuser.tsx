@@ -154,7 +154,22 @@ function VerifyUser() {
         <div className="shape-4"></div>
       </div>
 
-      <div className="hero-section-bg">
+      <div className="hero-section">
+        <div className="hero-content">
+          <div className="hero-badge">
+            <span>🏛️ Blockchain User Verification</span>
+          </div>
+          <h1 className="hero-title">
+            <span className="gradient-text">ยืนยันตัวตนบน Blockchain</span>
+          </h1>
+          <p className="hero-subtitle">
+            ตรวจสอบข้อมูล Wallet และ Digital Signature ที่เซ็นโดยระบบ
+            <br />
+          </p>
+        </div>
+      </div>
+
+      {/* <div className="hero-section-bg">
         <div className="hero-section">
           <div className="hero-content">
             <div className="hero-badge">
@@ -169,7 +184,7 @@ function VerifyUser() {
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <Container className="main-container">
         {/* Connection Section */}

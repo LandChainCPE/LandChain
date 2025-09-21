@@ -174,23 +174,21 @@ const VerifyLand: React.FC = () => {
         <div className="shape-3"></div>
         <div className="shape-4"></div>
       </div>
-      <Navbar />
+
       <div className="hero-section">
-        <Container >
-          <div className="hero-content">
-            <div className="hero-badge">
-              <span>🏛️ Blockchain Land Verification</span>
-            </div>
-            <h1 className="hero-title">
-              <span className="gradient-text">อัปโหลดโฉนดสู่ Blockchain</span>
-            </h1>
-            <p className="hero-subtitle">
-              นำโฉนดที่ดินที่ผ่านการตรวจสอบแล้วขึ้นสู่ระบบ Blockchain
-              <br />
-              เพื่อความปลอดภัยและความโปร่งใสสูงสุด
-            </p>
+        <div className="hero-content">
+          <div className="hero-badge">
+            <span>🏛️ Blockchain Land Verification</span>
           </div>
-        </Container>
+          <h1 className="hero-title">
+            <span className="gradient-text">อัปโหลดโฉนดสู่ Blockchain</span>
+          </h1>
+          <p className="hero-subtitle">
+            นำโฉนดที่ดินที่ผ่านการตรวจสอบแล้วขึ้นสู่ระบบ Blockchain
+            <br />
+            เพื่อความปลอดภัยและความโปร่งใสสูงสุด
+          </p>
+        </div>
       </div>
 
       <Container className="main-container">

@@ -28,7 +28,7 @@
 }
 
 .nav-button {
-    font-family: Kanit;
+    font-family: 'Kanit', system-ui, sans-serif;
     font-size: 18px;
     font-weight: 500;
     padding: 8px 20px;

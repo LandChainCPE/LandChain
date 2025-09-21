@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Select, Card, Typography, Spin, message, DatePicker, Modal, Row, Col, Divider, Space, Badge, Timeline, Empty, Button } from "antd";
 import { CalendarOutlined, EnvironmentOutlined, ClockCircleOutlined, FileTextOutlined, CheckCircleOutlined, ExclamationCircleOutlined, StopOutlined, HistoryOutlined, ReloadOutlined } from "@ant-design/icons";
 import { GetBranches, GetProvinces, GetTimeSlots, CreateBooking, GetServiceTypes, GetAvailableSlots, GetBookingStatus, GetUserBookings } from "../../service/https/jo/index";
 import type { BookingInterface } from "../../interfaces/Booking";
 import dayjs from "dayjs";
 import "./RegisLand.css";
+import Navbar from "../../component/user/Navbar";
+
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -148,37 +150,7 @@ const BookingCalendar = () => {
     checkUserBookingStatus();
   }, [selectedDate, selectedBranch, currentUserId]);
 
-  const getCardStyle = (timeSlotId: number, isSelected: boolean, isFull: boolean) => {
-    const bookingStatus = bookingStatusMap[timeSlotId];
-
-    let background = "#ffffff";
-    let borderColor = "#d9d9d9";
-    let boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
-
-    if (isFull) {
-      background = "linear-gradient(135deg, #ffccc7 0%, #ff7875 100%)";
-      borderColor = "#ff4d4f";
-    } else if (isSelected) {
-      background = "linear-gradient(135deg, #e6f7ff 0%, #91d5ff 100%)";
-      borderColor = "#1677ff";
-      boxShadow = "0 4px 12px rgba(22, 119, 255, 0.3)";
-    } else if (bookingStatus === "pending") {
-      background = "linear-gradient(135deg, #fff7e6 0%, #ffd666 100%)";
-      borderColor = "#faad14";
-    } else if (bookingStatus === "success") {
-      background = "linear-gradient(135deg, #f6ffed 0%, #b7eb8f 100%)";
-      borderColor = "#52c41a";
-    }
-
-    return {
-      background,
-      borderColor,
-      boxShadow,
-      border: `2px solid ${borderColor}`,
-      borderRadius: "12px",
-      transition: "all 0.3s ease",
-    };
-  };
+  // Removed unused function 'getCardStyle' as its value was never read.
 
   const getStatusBadge = (timeSlotId: number, available: number) => {
     const bookingStatus = bookingStatusMap[timeSlotId];
@@ -349,7 +321,9 @@ const BookingCalendar = () => {
         <div className="shape-4"></div>
       </div>
 
-      <div className="hero-section">
+      <Navbar />
+
+      <div className="hero-section" style={{ marginTop: '72px' }}>
         <div className="hero-content">
           <h1 className="hero-title">
             <span className="gradient-text">จองการติดต่อกรมที่ดิน</span>

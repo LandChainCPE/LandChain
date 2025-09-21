@@ -47,7 +47,7 @@ body {
   margin: 0 auto;
   padding: 24px;
   min-height: 100vh;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Kanit', system-ui, sans-serif;
   overflow-x: hidden;
   margin-top: 72px;
   /* ปรับตามความสูง Navbar ถ้า Navbar สูงกว่านี้ให้เพิ่ม */
