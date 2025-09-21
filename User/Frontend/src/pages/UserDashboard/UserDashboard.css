@@ -23,16 +23,17 @@ body {
   min-height: 100vh;
 }
 
-.card-header.user-header {
+/* Card Header Variants */
+.lcCardHeader.userHeader {
   background: var(--gradient-dark);
 }
 
-.card-header.land-header {
+.lcCardHeader.landHeader {
   background: var(--gradient-dark);
 }
 
 /* Row for two cards side by side */
-.card-row {
+.lcCardRow {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 24px;
@@ -40,14 +41,16 @@ body {
 }
 
 /* Container */
-.container {
+.lcContainer {
   position: relative;
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px;
   min-height: 100vh;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Kanit', system-ui, sans-serif;
   overflow-x: hidden;
+  margin-top: 72px;
+  /* ปรับตามความสูง Navbar ถ้า Navbar สูงกว่านี้ให้เพิ่ม */
 }
 
 /* Full-width Background */
@@ -157,7 +160,8 @@ body {
 }
 
 /* Glass Card Effects */
-.card {
+
+.lcCard {
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -171,12 +175,12 @@ body {
   z-index: 1;
 }
 
-.card:hover {
-  transform: translateY(-4px);
+.lcCard:hover {
+  /* ไม่ขยับขึ้นเมื่อ hover */
   box-shadow: var(--shadow-medium);
 }
 
-.card-header {
+.lcCardHeader {
   padding: 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   background: var(--gradient-dark);
@@ -185,7 +189,7 @@ body {
   overflow: hidden;
 }
 
-.card-header::before {
+.lcCardHeader::before {
   content: '';
   position: absolute;
   top: 0;
@@ -196,7 +200,7 @@ body {
     url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E");
 }
 
-.card-title {
+.lcCardTitle {
   font-size: 24px;
   font-weight: 600;
   margin: 0 0 8px 0;
@@ -207,7 +211,7 @@ body {
   z-index: 2;
 }
 
-.card-description {
+.lcCardDescription {
   font-size: 16px;
   opacity: 0.9;
   margin: 0;
@@ -215,7 +219,7 @@ body {
   z-index: 2;
 }
 
-.card-content {
+.lcCardContent {
   padding: 24px;
   position: relative;
   z-index: 1;
@@ -429,7 +433,8 @@ body {
 }
 
 /* Enhanced Stats Cards */
-.stat-card {
+
+.lcStatCard {
   text-align: center;
   margin-bottom: 0;
   background: rgba(255, 255, 255, 0.9);
@@ -441,7 +446,7 @@ body {
   overflow: hidden;
 }
 
-.stat-card::before {
+.lcStatCard::before {
   content: '';
   position: absolute;
   top: 0;
@@ -453,35 +458,35 @@ body {
   transition: opacity 0.3s ease;
 }
 
-.stat-card:hover {
-  transform: translateY(-4px);
+.lcStatCard:hover {
+  /* ไม่ขยับขึ้นเมื่อ hover */
   box-shadow: var(--shadow-medium);
 }
 
-.stat-card:hover::before {
+.lcStatCard:hover::before {
   opacity: 1;
 }
 
-.stat-card .card-content {
+.lcStatCard .lcCardContent {
   position: relative;
   z-index: 2;
 }
 
-.stat-title {
+.lcStatTitle {
   font-size: 14px;
   color: var(--primary-medium);
   margin: 0;
   font-weight: 500;
 }
 
-.stat-value {
+.lcStatValue {
   font-size: 32px;
   font-weight: 700;
   color: var(--primary-dark);
   margin: 8px 0;
 }
 
-.stat-sub {
+.lcStatSub {
   font-size: 12px;
   color: var(--primary-light);
 }

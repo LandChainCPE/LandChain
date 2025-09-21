@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&display=swap');
 
 body {
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Kanit', system-ui, sans-serif;
 }
 
 .main-container {
@@ -67,26 +67,29 @@ body {
 
 .custom-label {
   color: white;
-  font-family: 'Kanit';
+  font-family: 'Kanit', system-ui, sans-serif;
 }
 
 .custom-step .ant-steps-item-description {
   color: white !important;
   border-color: white !important;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Kanit', system-ui, sans-serif;
 }
 
 .ant-steps .ant-steps-item-title {
   color: white !important;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Kanit', system-ui, sans-serif;
 }
+
 .ant-steps .ant-steps-item-icon {
   background-color: #424f5e !important;
   color: white !important;
 }
+
 .ant-steps .ant-steps-icon {
   color: white !important;
 }
+
 .ant-steps-item-tail::after {
   background-color: white !important;
 }

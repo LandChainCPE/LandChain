@@ -7,7 +7,7 @@ import { getAllLocations, getLocationsByLandSalePostId } from '../../service/htt
 // Set Mapbox token
 mapboxgl.accessToken = 'pk.eyJ1Ijoiam9oYXJ0MjU0NiIsImEiOiJjbWVmZ3YzMGcwcTByMm1zOWRkdjJkNTd0In0.DBDjy1rBDmc8A4PN3haQ4A';
 
-const apiUrl = "http://192.168.1.173:8080";
+const apiUrl = "http://10.1.189.185:8080";
 
 interface Coordinate {
   lng: number;
@@ -72,7 +72,7 @@ const Map: React.FC = () => {
         localStorage.removeItem("token_type");
         window.location.href = "/login";
       }
-      
+
       let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
       try {
         const errorData = await response.json();
@@ -82,7 +82,7 @@ const Map: React.FC = () => {
       } catch (e) {
         // ถ้า parse JSON ไม่ได้ ใช้ error message เดิม
       }
-      
+
       throw new Error(errorMessage);
     }
 
@@ -114,130 +114,130 @@ const Map: React.FC = () => {
 
   // 🔧 ปรับปรุงฟังก์ชันสำหรับดึงข้อมูลจาก database และแสดงผล
   // ปรับปรุงฟังก์ชันสำหรับดึงข้อมูลจาก database และแสดงผล
-const loadLocationData = async (landSalePostId?: number) => {
-  setLoadingData(true);
-  setSaveStatus({ loading: false, success: false, error: null });
-  
-  try {
-    console.log('Loading location data...');
-    
-    let locations: Location[] = [];
-    
-    if (landSalePostId) {
-      // ดึงข้อมูลเฉพาะ land sale post id ที่กำหนด
-      console.log(`Loading locations for land sale post id: ${landSalePostId}`);
-      locations = await getLocationsByLandSalePostId(landSalePostId);
-    } else {
-      // ดึงข้อมูลทั้งหมด
-      console.log('Loading all locations...');
-      locations = await getAllLocations();
-    }
-    
-    console.log('Raw locations from API:', locations);
+  const loadLocationData = async (landSalePostId?: number) => {
+    setLoadingData(true);
+    setSaveStatus({ loading: false, success: false, error: null });
 
-    // เช็คว่าข้อมูลที่ได้มาเป็น array หรือมี error
-    if (locations && Array.isArray(locations) && locations.length > 0) {
-      // ปรับปรุง: รองรับทั้ง field names ตัวใหญ่และตัวเล็ก
-      const sortedLocations = locations
-        .filter(location => {
-          // รองรับทั้ง field names แบบตัวใหญ่ (Sequence, Latitude, Longitude) 
-          // และแบบตัวเล็ก (sequence, latitude, longitude)
-          const seq = location.sequence !== undefined ? location.sequence : (location as any).Sequence;
+    try {
+      console.log('Loading location data...');
+
+      let locations: Location[] = [];
+
+      if (landSalePostId) {
+        // ดึงข้อมูลเฉพาะ land sale post id ที่กำหนด
+        console.log(`Loading locations for land sale post id: ${landSalePostId}`);
+        locations = await getLocationsByLandSalePostId(landSalePostId);
+      } else {
+        // ดึงข้อมูลทั้งหมด
+        console.log('Loading all locations...');
+        locations = await getAllLocations();
+      }
+
+      console.log('Raw locations from API:', locations);
+
+      // เช็คว่าข้อมูลที่ได้มาเป็น array หรือมี error
+      if (locations && Array.isArray(locations) && locations.length > 0) {
+        // ปรับปรุง: รองรับทั้ง field names ตัวใหญ่และตัวเล็ก
+        const sortedLocations = locations
+          .filter(location => {
+            // รองรับทั้ง field names แบบตัวใหญ่ (Sequence, Latitude, Longitude) 
+            // และแบบตัวเล็ก (sequence, latitude, longitude)
+            const seq = location.sequence !== undefined ? location.sequence : (location as any).Sequence;
+            const lat = location.latitude !== undefined ? location.latitude : (location as any).Latitude;
+            const lng = location.longitude !== undefined ? location.longitude : (location as any).Longitude;
+
+            return seq !== undefined && lat !== undefined && lng !== undefined;
+          })
+          .sort((a, b) => {
+            const seqA = a.sequence !== undefined ? a.sequence : (a as any).Sequence;
+            const seqB = b.sequence !== undefined ? b.sequence : (b as any).Sequence;
+            return seqA - seqB;
+          });
+
+        console.log('Sorted locations:', sortedLocations);
+
+        // แปลงเป็น Coordinate format โดยรองรับทั้งสอง format
+        const sortedCoordinates: Coordinate[] = sortedLocations.map((location) => {
           const lat = location.latitude !== undefined ? location.latitude : (location as any).Latitude;
           const lng = location.longitude !== undefined ? location.longitude : (location as any).Longitude;
-          
-          return seq !== undefined && lat !== undefined && lng !== undefined;
-        })
-        .sort((a, b) => {
-          const seqA = a.sequence !== undefined ? a.sequence : (a as any).Sequence;
-          const seqB = b.sequence !== undefined ? b.sequence : (b as any).Sequence;
-          return seqA - seqB;
+
+          return {
+            lat: lat,
+            lng: lng,
+          };
         });
-      
-      console.log('Sorted locations:', sortedLocations);
 
-      // แปลงเป็น Coordinate format โดยรองรับทั้งสอง format
-      const sortedCoordinates: Coordinate[] = sortedLocations.map((location) => {
-        const lat = location.latitude !== undefined ? location.latitude : (location as any).Latitude;
-        const lng = location.longitude !== undefined ? location.longitude : (location as any).Longitude;
-        
-        return {
-          lat: lat,
-          lng: lng,
-        };
-      });
+        console.log('Converted coordinates:', sortedCoordinates);
 
-      console.log('Converted coordinates:', sortedCoordinates);
+        // อัพเดท state
+        setCoordinates(sortedCoordinates);
+        setAllLocationsData(sortedLocations);
 
-      // อัพเดท state
-      setCoordinates(sortedCoordinates);
-      setAllLocationsData(sortedLocations);
+        // ถ้ามีข้อมูลมากกว่า 2 จุด ให้สร้าง polygon อัตโนมัติ
+        if (sortedCoordinates.length >= 3) {
+          console.log('Creating polygon from loaded data...');
+          // รอให้ map โหลดเสร็จก่อน
+          setTimeout(() => {
+            createPolygonFromCoordinates(sortedCoordinates);
+          }, 500);
+        } else if (sortedCoordinates.length > 0) {
+          // ถ้ามีข้อมูลน้อยกว่า 3 จุด แค่แสดง markers
+          setTimeout(() => {
+            updateMarkersOnly(sortedCoordinates);
+          }, 500);
+        }
 
-      // ถ้ามีข้อมูลมากกว่า 2 จุด ให้สร้าง polygon อัตโนมัติ
-      if (sortedCoordinates.length >= 3) {
-        console.log('Creating polygon from loaded data...');
-        // รอให้ map โหลดเสร็จก่อน
+        // ถ้ามีข้อมูล ให้ zoom ไปยังพื้นที่นั้น
+        if (map.current && sortedCoordinates.length > 0) {
+          fitMapToBounds(sortedCoordinates);
+        }
+
+        console.log(`Loaded ${sortedCoordinates.length} points successfully`);
+
+        setSaveStatus({
+          loading: false,
+          success: true,
+          error: null
+        });
+
+        // Clear success message after 3 seconds
         setTimeout(() => {
-          createPolygonFromCoordinates(sortedCoordinates);
-        }, 500);
-      } else if (sortedCoordinates.length > 0) {
-        // ถ้ามีข้อมูลน้อยกว่า 3 จุด แค่แสดง markers
-        setTimeout(() => {
-          updateMarkersOnly(sortedCoordinates);
-        }, 500);
+          setSaveStatus(prev => ({ ...prev, success: false }));
+        }, 3000);
+
+      } else if (locations && (locations as any).error) {
+        // กรณีที่ API ส่ง error กลับมา
+        console.log('API returned error:', (locations as any).error);
+        setCoordinates([]);
+        setAllLocationsData([]);
+        setSaveStatus({
+          loading: false,
+          success: false,
+          error: (locations as any).error
+        });
+      } else {
+        console.log('No location data found');
+        setCoordinates([]);
+        setAllLocationsData([]);
+        setSaveStatus({
+          loading: false,
+          success: false,
+          error: null
+        });
       }
-
-      // ถ้ามีข้อมูล ให้ zoom ไปยังพื้นที่นั้น
-      if (map.current && sortedCoordinates.length > 0) {
-        fitMapToBounds(sortedCoordinates);
-      }
-
-      console.log(`Loaded ${sortedCoordinates.length} points successfully`);
-      
-      setSaveStatus({
-        loading: false,
-        success: true,
-        error: null
-      });
-
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setSaveStatus(prev => ({ ...prev, success: false }));
-      }, 3000);
-
-    } else if (locations && (locations as any).error) {
-      // กรณีที่ API ส่ง error กลับมา
-      console.log('API returned error:', (locations as any).error);
+    } catch (error) {
+      console.error("Error loading location data:", error);
       setCoordinates([]);
       setAllLocationsData([]);
       setSaveStatus({
         loading: false,
         success: false,
-        error: (locations as any).error
+        error: `ไม่สามารถดึงข้อมูลได้: ${error instanceof Error ? error.message : 'Unknown error'}`
       });
-    } else {
-      console.log('No location data found');
-      setCoordinates([]);
-      setAllLocationsData([]);
-      setSaveStatus({
-        loading: false,
-        success: false,
-        error: null
-      });
+    } finally {
+      setLoadingData(false);
     }
-  } catch (error) {
-    console.error("Error loading location data:", error);
-    setCoordinates([]);
-    setAllLocationsData([]);
-    setSaveStatus({
-      loading: false,
-      success: false,
-      error: `ไม่สามารถดึงข้อมูลได้: ${error instanceof Error ? error.message : 'Unknown error'}`
-    });
-  } finally {
-    setLoadingData(false);
-  }
-};
+  };
   // ฟังก์ชันสำหรับ update markers เฉพาะ (ไม่สร้าง polygon)
   const updateMarkersOnly = (coords: Coordinate[]) => {
     if (!map.current || !map.current.getSource('markers')) return;
@@ -280,7 +280,7 @@ const loadLocationData = async (landSalePostId?: number) => {
       coords.forEach(coord => {
         bounds.extend([coord.lng, coord.lat]);
       });
-      
+
       map.current.fitBounds(bounds, {
         padding: 50,
         maxZoom: 18
@@ -337,7 +337,7 @@ const loadLocationData = async (landSalePostId?: number) => {
 
     const polygonsSource = map.current.getSource('polygons') as mapboxgl.GeoJSONSource;
     const shadowSource = map.current.getSource('polygon-shadow') as mapboxgl.GeoJSONSource;
-    
+
     if (polygonsSource && shadowSource) {
       // ล้างข้อมูลเก่าก่อน แล้วใส่ polygon ใหม่
       polygonsSource.setData({
@@ -350,7 +350,7 @@ const loadLocationData = async (landSalePostId?: number) => {
         type: 'FeatureCollection',
         features: [shadowFeature]
       });
-      
+
       setCurrentPolygonId(polygonId);
       console.log(`Polygon created successfully. Area: ${area.toLocaleString()} ตร.ม.`);
     } else {
@@ -546,96 +546,96 @@ const loadLocationData = async (landSalePostId?: number) => {
 
   // บันทึกข้อมูลลง database
   // บันทึกข้อมูลลง database
-// บันทึกข้อมูลลง database
-const saveCoordinatesToDatabase = async () => {
-  if (coordinates.length === 0) {
-    alert('ไม่มีข้อมูลตำแหน่งให้บันทึก');
-    return;
-  }
-
-  if (coordinates.length < 3) {
-    alert('ต้องมีอย่างน้อย 3 จุดเพื่อสร้างพื้นที่');
-    return;
-  }
-
-  setSaveStatus({ loading: true, success: false, error: null });
-
-  try {
-    const locations = coordinates.map((coord, index) => ({
-      sequence: index + 1,
-      latitude: coord.lat,
-      longitude: coord.lng,
-      landsalepost_id: currentLandSalePostId
-    }));
-
-    console.log('Sending locations data:', locations);
-
-    const response = await makeApiCall('/location', {
-      method: 'POST',
-      body: JSON.stringify(locations)
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to save locations: ${response.statusText}`);
+  // บันทึกข้อมูลลง database
+  const saveCoordinatesToDatabase = async () => {
+    if (coordinates.length === 0) {
+      alert('ไม่มีข้อมูลตำแหน่งให้บันทึก');
+      return;
     }
 
-    const responseData = await response.json();
-    console.log('Save response:', responseData);
+    if (coordinates.length < 3) {
+      alert('ต้องมีอย่างน้อย 3 จุดเพื่อสร้างพื้นที่');
+      return;
+    }
 
-    setSaveStatus({
-      loading: false,
-      success: true,
-      error: null
-    });
+    setSaveStatus({ loading: true, success: false, error: null });
 
-    console.log('All coordinates saved successfully!');
-    alert(`บันทึกตำแหน่ง ${coordinates.length} จุด สำเร็จ!`);
+    try {
+      const locations = coordinates.map((coord, index) => ({
+        sequence: index + 1,
+        latitude: coord.lat,
+        longitude: coord.lng,
+        landsalepost_id: currentLandSalePostId
+      }));
 
-    // Clear จุดที่มาร์คไว้เพื่อให้พร้อมสำหรับการมาร์คครั้งใหม่
-    setCoordinates([]);
-    setIsDrawing(false); // หยุด drawing mode
-    setCurrentPolygonId(null);
-    
-    // เคลียร์ markers บนแผนที่ที่เป็นจุดที่พึ่งมาร์ค (ยกเว้น polygon ที่บันทึกแล้ว)
-    if (map.current) {
-      const markersSource = map.current.getSource('markers') as mapboxgl.GeoJSONSource;
-      if (markersSource) {
-        markersSource.setData({
-          type: 'FeatureCollection',
-          features: []
-        });
+      console.log('Sending locations data:', locations);
+
+      const response = await makeApiCall('/location', {
+        method: 'POST',
+        body: JSON.stringify(locations)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to save locations: ${response.statusText}`);
       }
+
+      const responseData = await response.json();
+      console.log('Save response:', responseData);
+
+      setSaveStatus({
+        loading: false,
+        success: true,
+        error: null
+      });
+
+      console.log('All coordinates saved successfully!');
+      alert(`บันทึกตำแหน่ง ${coordinates.length} จุด สำเร็จ!`);
+
+      // Clear จุดที่มาร์คไว้เพื่อให้พร้อมสำหรับการมาร์คครั้งใหม่
+      setCoordinates([]);
+      setIsDrawing(false); // หยุด drawing mode
+      setCurrentPolygonId(null);
+
+      // เคลียร์ markers บนแผนที่ที่เป็นจุดที่พึ่งมาร์ค (ยกเว้น polygon ที่บันทึกแล้ว)
+      if (map.current) {
+        const markersSource = map.current.getSource('markers') as mapboxgl.GeoJSONSource;
+        if (markersSource) {
+          markersSource.setData({
+            type: 'FeatureCollection',
+            features: []
+          });
+        }
+      }
+
+      // โหลดข้อมูลกลับมาแสดงผลเป็น polygon จากฐานข้อมูล
+      await loadLocationData(currentLandSalePostId);
+
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setSaveStatus(prev => ({ ...prev, success: false }));
+      }, 3000);
+
+    } catch (error: any) {
+      console.error('Error saving coordinates:', error);
+
+      let errorMessage = 'เกิดข้อผิดพลาดในการบันทึกข้อมูล';
+      if (error instanceof Error && error.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = error.message;
+      }
+
+      setSaveStatus({
+        loading: false,
+        success: false,
+        error: errorMessage
+      });
+
+      alert(`เกิดข้อผิดพลาด: ${errorMessage}`);
     }
-
-    // โหลดข้อมูลกลับมาแสดงผลเป็น polygon จากฐานข้อมูล
-    await loadLocationData(currentLandSalePostId);
-
-    // Clear success message after 3 seconds
-    setTimeout(() => {
-      setSaveStatus(prev => ({ ...prev, success: false }));
-    }, 3000);
-
-  } catch (error: any) {
-    console.error('Error saving coordinates:', error);
-
-    let errorMessage = 'เกิดข้อผิดพลาดในการบันทึกข้อมูล';
-    if (error instanceof Error && error.message) {
-      errorMessage = error.message;
-    } else if (typeof error === 'string') {
-      errorMessage = error;
-    } else if (error && typeof error === 'object' && 'message' in error) {
-      errorMessage = error.message;
-    }
-
-    setSaveStatus({
-      loading: false,
-      success: false,
-      error: errorMessage
-    });
-
-    alert(`เกิดข้อผิดพลาด: ${errorMessage}`);
-  }
-};
+  };
   // Create polygon (สำหรับปุ่มสร้าง polygon แบบ manual)
   const createPolygon = () => {
     if (coordinates.length >= 3) {
@@ -708,19 +708,70 @@ const saveCoordinatesToDatabase = async () => {
 
   // เปลี่ยน Land Sale Post ID
   // เปลี่ยน Land Sale Post ID
-const changeLandSalePostId = () => {
-  const newId = prompt('กรุณาใส่ Land Sale Post ID:', currentLandSalePostId.toString());
-  if (newId && !isNaN(parseInt(newId))) {
-    const parsedId = parseInt(newId);
-    if (parsedId > 0) {
-      // Clear ข้อมูลเก่าทั้งหมดก่อนเปลี่ยน ID
+  const changeLandSalePostId = () => {
+    const newId = prompt('กรุณาใส่ Land Sale Post ID:', currentLandSalePostId.toString());
+    if (newId && !isNaN(parseInt(newId))) {
+      const parsedId = parseInt(newId);
+      if (parsedId > 0) {
+        // Clear ข้อมูลเก่าทั้งหมดก่อนเปลี่ยน ID
+        setCoordinates([]);
+        setIsDrawing(false);
+        setCurrentPolygonId(null);
+        setAllLocationsData([]);
+        setSaveStatus({ loading: false, success: false, error: null });
+
+        // Clear markers และ polygons บนแผนที่
+        if (map.current) {
+          const markersSource = map.current.getSource('markers') as mapboxgl.GeoJSONSource;
+          const polygonsSource = map.current.getSource('polygons') as mapboxgl.GeoJSONSource;
+          const shadowSource = map.current.getSource('polygon-shadow') as mapboxgl.GeoJSONSource;
+
+          if (markersSource) {
+            markersSource.setData({
+              type: 'FeatureCollection',
+              features: []
+            });
+          }
+
+          if (polygonsSource) {
+            polygonsSource.setData({
+              type: 'FeatureCollection',
+              features: []
+            });
+          }
+
+          if (shadowSource) {
+            shadowSource.setData({
+              type: 'FeatureCollection',
+              features: []
+            });
+          }
+        }
+
+        // เปลี่ยน ID (จะทำให้ useEffect โหลดข้อมูลใหม่อัตโนมัติ)
+        setCurrentLandSalePostId(parsedId);
+
+        console.log(`Changed to Land Sale Post ID: ${parsedId}, cleared all existing data`);
+      } else {
+        alert('กรุณาใส่เลขที่มากกว่า 0');
+      }
+    }
+  };
+
+  // เพิ่มฟังก์ชันสำหรับสร้าง Land Sale Post ID ใหม่อัตโนมัติ
+  const createNewLandSalePost = () => {
+    if (window.confirm('คุณต้องการสร้าง Land Sale Post ใหม่หรือไม่? ข้อมูลปัจจุบันจะถูกล้าง')) {
+      // สร้าง ID ใหม่จาก timestamp
+      const newId = Math.floor(Date.now() / 1000); // ใช้ Unix timestamp
+
+      // Clear ข้อมูลเก่าทั้งหมด
       setCoordinates([]);
       setIsDrawing(false);
       setCurrentPolygonId(null);
       setAllLocationsData([]);
       setSaveStatus({ loading: false, success: false, error: null });
-      
-      // Clear markers และ polygons บนแผนที่
+
+      // Clear แผนที่
       if (map.current) {
         const markersSource = map.current.getSource('markers') as mapboxgl.GeoJSONSource;
         const polygonsSource = map.current.getSource('polygons') as mapboxgl.GeoJSONSource;
@@ -747,65 +798,14 @@ const changeLandSalePostId = () => {
           });
         }
       }
-      
-      // เปลี่ยน ID (จะทำให้ useEffect โหลดข้อมูลใหม่อัตโนมัติ)
-      setCurrentLandSalePostId(parsedId);
-      
-      console.log(`Changed to Land Sale Post ID: ${parsedId}, cleared all existing data`);
-    } else {
-      alert('กรุณาใส่เลขที่มากกว่า 0');
+
+      // ตั้ง ID ใหม่
+      setCurrentLandSalePostId(newId);
+
+      alert(`สร้าง Land Sale Post ID ใหม่: ${newId}`);
+      console.log(`Created new Land Sale Post ID: ${newId}`);
     }
-  }
-};
-
-// เพิ่มฟังก์ชันสำหรับสร้าง Land Sale Post ID ใหม่อัตโนมัติ
-const createNewLandSalePost = () => {
-  if (window.confirm('คุณต้องการสร้าง Land Sale Post ใหม่หรือไม่? ข้อมูลปัจจุบันจะถูกล้าง')) {
-    // สร้าง ID ใหม่จาก timestamp
-    const newId = Math.floor(Date.now() / 1000); // ใช้ Unix timestamp
-    
-    // Clear ข้อมูลเก่าทั้งหมด
-    setCoordinates([]);
-    setIsDrawing(false);
-    setCurrentPolygonId(null);
-    setAllLocationsData([]);
-    setSaveStatus({ loading: false, success: false, error: null });
-    
-    // Clear แผนที่
-    if (map.current) {
-      const markersSource = map.current.getSource('markers') as mapboxgl.GeoJSONSource;
-      const polygonsSource = map.current.getSource('polygons') as mapboxgl.GeoJSONSource;
-      const shadowSource = map.current.getSource('polygon-shadow') as mapboxgl.GeoJSONSource;
-
-      if (markersSource) {
-        markersSource.setData({
-          type: 'FeatureCollection',
-          features: []
-        });
-      }
-
-      if (polygonsSource) {
-        polygonsSource.setData({
-          type: 'FeatureCollection',
-          features: []
-        });
-      }
-
-      if (shadowSource) {
-        shadowSource.setData({
-          type: 'FeatureCollection',
-          features: []
-        });
-      }
-    }
-    
-    // ตั้ง ID ใหม่
-    setCurrentLandSalePostId(newId);
-    
-    alert(`สร้าง Land Sale Post ID ใหม่: ${newId}`);
-    console.log(`Created new Land Sale Post ID: ${newId}`);
-  }
-};
+  };
 
   return (
     <div style={{ width: '100%', height: '100vh', position: 'relative' }}>

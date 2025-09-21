@@ -25,7 +25,7 @@
   min-height: 100vh;
   overflow-x: hidden;
   padding: 0;
-  font-family: 'Kanit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Kanit', system-ui, sans-serif;
 }
 
 /* Floating Background Shapes */
@@ -359,7 +359,7 @@
 .container {
   min-height: 100vh;
   padding: 20px;
-  font-family: 'Kanit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Kanit', system-ui, sans-serif;
 }
 
 .wrapper {
