@@ -170,6 +170,7 @@ func VerifyWalletID(c *gin.Context) {
 		Signature:      sigHex,
 		Status_onchain: false,
 		RandomSalt:     salt,
+		TxHash: 		nil,
 	}
 	if err := tx.Create(&uv).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user_verification: " + err.Error()})

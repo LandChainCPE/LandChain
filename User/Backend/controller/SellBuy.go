@@ -5,7 +5,7 @@ import (
 	"landchain/entity" // แก้ชื่อ module ให้ตรงกับโปรเจกต์คุณ
 	"landchain/services"
 	"strings"
-	"time"
+	//"time"
 
 	"log"
 	"net/http"
@@ -112,12 +112,14 @@ func CreateTransaction(c *gin.Context) {
 
 	// เซ็ตค่าเริ่มต้น Transaction
 	transaction.TypetransactionID = 1
-	transaction.BuyerAccepted = false
-	transaction.SellerAccepted = true
-	transaction.MoneyChecked = false
-	transaction.LandDepartmentApproved = false
-	transaction.Expire = time.Now().Add(72 * time.Hour) // 3 วัน
 
+	transaction.BuyerAccepted = true
+	transaction.SellerAccepted = false
+	//transaction.MoneyChecked = false
+
+	transaction.LandDepartmentApproved = false
+	//transaction.Expire = time.Now().Add(72 * time.Hour) // 3 วัน
+	transaction.TxHash = nil
 	// สร้าง Transaction
 	if err := db.Create(&transaction).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถสร้างธุรกรรมได้"})
