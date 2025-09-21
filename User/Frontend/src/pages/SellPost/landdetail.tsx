@@ -47,7 +47,7 @@ const areaText = (lt?: LandDetailType["Landtitle"]) => {
   const ngan = lt.Ngan ?? 0;
   const sq = lt.SquareWa ?? 0;
   return `${rai} ไร่ ${ngan} งาน ${sq} ตร.วา`;
-};
+};//
 
 /** ---------------- Normalize Data ---------------- */
 function normalizeDetail(item: any): LandDetailType & { user_id?: number } {
