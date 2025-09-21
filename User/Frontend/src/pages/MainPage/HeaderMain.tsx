@@ -70,7 +70,7 @@ const HeaderMain = (): JSX.Element => {
                     <nav className="header-nav-section">
                         <ul className="header-nav-list">
                             <li className="header-nav-item">
-                                <a href="/" className="header-nav-link" onClick={(e) => { e.preventDefault(); goToHome(); }}>
+                                <a href="/" className="header-nav-link" onClick={(e) => { e.preventDefault(); scrollToTop(); }}>
                                     <Home size={18} />
                                     หน้าแรก
                                 </a>

@@ -3,7 +3,7 @@
 
 /* Base Layout */
 .main-page-container {
-  font-family: 'Kanit', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Kanit', system-ui, sans-serif;
   padding-top: 100px;
   /* Space for fixed header */
   min-height: 100vh;
@@ -700,18 +700,18 @@ body {
 
 .custom-label {
   color: white;
-  font-family: 'Kanit';
+  font-family: 'Kanit', system-ui, sans-serif;
 }
 
 .custom-step .ant-steps-item-description {
   color: white !important;
   border-color: white !important;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Kanit', system-ui, sans-serif;
 }
 
 .ant-steps .ant-steps-item-title {
   color: white !important;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Kanit', system-ui, sans-serif;
 }
 
 .ant-steps .ant-steps-item-icon {

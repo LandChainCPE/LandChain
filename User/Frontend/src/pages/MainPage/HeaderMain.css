@@ -23,7 +23,7 @@
 
 /* Main Header Container */
 .header-main {
-    font-family: 'Kanit', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Kanit', system-ui, sans-serif;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: var(--backdrop-blur);
     border: none;

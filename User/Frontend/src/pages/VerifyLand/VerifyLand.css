@@ -93,13 +93,14 @@
 }
 
 /* Hero Section */
+
+/* Hero Section */
 .hero-section {
   position: relative;
   background: var(--gradient-dark);
-  color: var(--white);
-  padding-top: 3rem;
-  padding-bottom: 2rem;
-  z-index: 1;
+  padding: 6rem 0 4rem;
+  margin-bottom: 0;
+  overflow: hidden;
 }
 
 .hero-section::before {
@@ -109,30 +110,22 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E");
-  z-index: -1;
-}
-
-.hero-section::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--gradient-primary);
+  background:
+    url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 .hero-content {
-  text-align: center;
   position: relative;
   z-index: 2;
-  animation: fadeIn 1s ease-out;
+  text-align: center;
+  color: var(--white);
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem;
 }
 
 .hero-badge {
-  display: inline-flex;
-  align-items: center;
+  display: inline-block;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -141,13 +134,15 @@
   margin-bottom: 2rem;
   font-size: 0.9rem;
   font-weight: 500;
+  animation: slideInDown 0.8s ease-out;
 }
 
 .hero-title {
-  font-size: 3.5rem;
-  font-weight: 700;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 800;
   margin-bottom: 1.5rem;
   line-height: 1.2;
+  animation: slideInUp 0.8s ease-out 0.2s both;
 }
 
 .gradient-text {
@@ -215,7 +210,7 @@
 }
 
 /* Glass Card */
-.glass-card {
+.verifyCard {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -444,11 +439,9 @@
   transition: all 0.3s ease;
 }
 
-.info-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-soft);
-  background: var(--white);
-}
+
+/* Rename generic card classes to avoid ecosystem conflicts and ensure camelCase naming */
+/* If you have .card-header, .card-title, .card-description, .card in your CSS, rename them to .verifyCardHeader, .verifyCardTitle, .verifyCardDescription, .verifyCard, and update the JSX accordingly. */
 
 .info-card.full-width {
   grid-column: 1 / -1;
