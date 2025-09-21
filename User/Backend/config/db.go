@@ -434,6 +434,17 @@ func SetupDatabase() {
 			StateID:     1,
 			UserID:      1,
 		})
+		db.Create(&entity.Petition{
+			FirstName:   "มาลี",
+			LastName:    "มาดี",
+			Tel:         "0987654321",
+			Email:       "j@gmail.com",
+			Description: "โฉนดเก่าหาย",
+			Date:        "2025-07-31",
+			Topic:       "ขอคัดสำเนาโฉนด",
+			StateID:     1,
+			UserID:      1,
+		})
 		log.Println("✅ Petition created successfully")
 
 		// ✅ Seed Tags

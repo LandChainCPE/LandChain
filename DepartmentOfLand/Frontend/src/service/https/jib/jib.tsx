@@ -26,24 +26,50 @@ async function getQueueByDate() {
   return await res.json();
 }
 
+// async function GetAllPetition() {
+//   const res = await fetch(`${apiUrl}/petitions`, getRequestOptions());
+//   return await res.json();
+// }
+
 async function GetAllPetition() {
-  const res = await fetch(`${apiUrl}/petitions`, getRequestOptions());
-  return await res.json();
-}
+    const requestOptions = {
+        method: "GET",
+        headers: getAuthHeaders(),
+    };
+
+    let response = await fetch(`${apiUrl}/petitions`, requestOptions)
+    const result = await response.json();
+    //console.log("result", result);
+    return { response, result };
+};
+
 
 async function GetAllStates() {
-  const res = await fetch(`${apiUrl}/states`, getRequestOptions());
-  return await res.json();
-}
+    const requestOptions = {
+        method: "GET",
+        headers: getAuthHeaders(),
+    };
 
-// อัปเดตสถานะคำร้อง (admin เปลี่ยนสถานะ)
+    let response = await fetch(`${apiUrl}/states`, requestOptions)
+    const result = await response.json();
+    console.log("GetAllStates", result);
+    return { response, result };
+};
+
+
 async function UpdatePetitionStatus(id: string | number, state_id: number) {
-  const res = await fetch(
-    `${apiUrl}/petitions/${id}/status`,
-    getRequestOptions("PUT", { state_id })
-  );
-  return await res.json();
-}
+  const requestOptions = {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ id, state_id }),
+  };
+  console.log("id", id);
+  console.log("state_id", state_id);
+
+  let response = await fetch(`${apiUrl}/updatepetitions`, requestOptions);
+  const result = await response.json();
+  return { response, result };
+};
 
 export {
   getQueueByDate,

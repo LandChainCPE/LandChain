@@ -121,7 +121,7 @@ func main() {
 		admin.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
 		admin.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)
 		admin.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
-		admin.PUT("/petitions/:id/status", controller.UpdatePetitionStatus)
+		admin.POST("/updatepetitions", controller.UpdatePetitionStatus)
 
 	}
 
