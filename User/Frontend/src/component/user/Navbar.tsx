@@ -17,28 +17,28 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const location = useLocation();
-  const [user, setUser] = useState<any | null>(null); 
+  const [user, setUser] = useState<any | null>(null);
 
-  
+
   useEffect(() => {
-  async function fetchUser() {
-    try {
-      const userInfo = await GetInfoUserByWalletID();
-      console.log("userInfo", userInfo);
-      setUser(userInfo);
-      
-    } catch (err) {
-      console.error("Error fetching user:", err);
+    async function fetchUser() {
+      try {
+        const userInfo = await GetInfoUserByWalletID();
+        console.log("userInfo", userInfo);
+        setUser(userInfo);
+
+      } catch (err) {
+        console.error("Error fetching user:", err);
+      }
     }
-  }
-  fetchUser();
-}, []);
+    fetchUser();
+  }, []);
 
   // Connect WebSocket สำหรับ notification
   useEffect(() => {
 
     if (!isLoggedIn || !user?.id) return;
-    const ws = new WebSocket(`ws://192.168.1.173:8080/ws/notification/${user?.id}`);
+    const ws = new WebSocket(`ws://10.1.189.185:8080/ws/notification/${user?.id}`);
 
     ws.onmessage = (event) => {
       try {
@@ -179,7 +179,7 @@ const Navbar = () => {
                   >
                     จัดการข้อมูล
                   </a>
-                   <a
+                  <a
                     href="/user/chat"
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}
@@ -207,15 +207,15 @@ const Navbar = () => {
                   >
                     คำขอซื้อ/ขายที่ดิน
                   </a>
-                  <a 
-                    href="/user/appointmentstatus" 
+                  <a
+                    href="/user/appointmentstatus"
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}
                   >
                     สถานะการจองนัดหมาย
                   </a>
-                  <a 
-                    href="/user/landhistory" 
+                  <a
+                    href="/user/landhistory"
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}
                   >
@@ -244,11 +244,11 @@ const Navbar = () => {
 
             <div className="navbar-brand-section">
               <img
-              src={LogoBlack}
-              alt="LandChain Logo"
-              className="header-logo header-logo-black"
-              onClick={scrollToTop}
-              style={{ cursor: 'pointer' }}
+                src={LogoBlack}
+                alt="LandChain Logo"
+                className="header-logo header-logo-black"
+                onClick={scrollToTop}
+                style={{ cursor: 'pointer' }}
               />
             </div>
             <button className="mobile-close" onClick={toggleMobileMenu}>

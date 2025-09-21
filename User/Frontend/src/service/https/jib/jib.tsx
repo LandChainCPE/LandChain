@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const apiUrl = "http://192.168.1.173:8080";
+const apiUrl = "http://10.1.189.185:8080";
 const Authorization = localStorage.getItem("token");
 const Bearer = localStorage.getItem("token_type");
 
@@ -109,16 +109,16 @@ async function GetPetitionsByUserID(userId: string) {
     .catch((e) => e.response);
 }
 
-export { 
-  GetAllPetition, 
-  CreatePetition, 
-  UpdatePetition, 
+export {
+  GetAllPetition,
+  CreatePetition,
+  UpdatePetition,
   UpdatePetitionState,
   GetAllStates,
   GetAllPostLandData,
   GetTags,
   GetAllProvinces,
-  GetDistrict, 
+  GetDistrict,
   GetSubdistrict,
   CreateLandPost,
   getLandtitleIdByTokenId,
