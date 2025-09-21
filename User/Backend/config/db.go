@@ -240,7 +240,6 @@ func SetupDatabase() {
 		&entity.Subdistrict{},
 		&entity.Nonce{},
 		&entity.LandOwnership{},
-		
 	); err != nil {
 		log.Fatal("❌ AutoMigrate failed:", err)
 	}
@@ -268,11 +267,9 @@ func SetupDatabase() {
 
 		RefRole := uint(1)
 
-
 		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0x81c7a15ae0b72cade82d428844cff477f6e364b5", RoleID: RefRole}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
 		db.Create(&entity.Users{Firstname: "Panachai", Lastname: "Potisuwan", Email: "Panachai@gmail.com", Phonenumber: "0555555554", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f4444", RoleID: RefRole})
 		db.Create(&entity.Users{Firstname: "Noth", Lastname: "Potisuwan", Email: "Noth@gmail.com", Phonenumber: "0555555556", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f6666", RoleID: RefRole})
-
 
 		// //RefServiceType := uint(1)
 		// db.Create(&entity.Users{Name: "Jo", Password: "jo123456", Land: "12กท85", RoleID: RefRole,})
@@ -419,9 +416,9 @@ func SetupDatabase() {
 		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
 
 		// ✅ Seed States
-		db.Create(&entity.State{ Name:  "รอตรวจสอบ", Color: "orange",})
-		db.Create(&entity.State{ Name:  "กำลังดำเนินการ", Color: "blue",})
-		db.Create(&entity.State{ Name:  "เสร็จสิ้น", Color: "green",})
+		db.Create(&entity.State{Name: "รอตรวจสอบ", Color: "orange"})
+		db.Create(&entity.State{Name: "กำลังดำเนินการ", Color: "blue"})
+		db.Create(&entity.State{Name: "เสร็จสิ้น", Color: "green"})
 
 		log.Println("✅ States have been seeded successfully")
 
@@ -509,12 +506,22 @@ func SetupDatabase() {
 			LandID:                 2,
 			TxHash: 				nil,
 		})
+
+		db.Create(&entity.Roomchat{User1ID: 3, User2ID: 1})
+		db.Create(&entity.Roomchat{User1ID: 3, User2ID: 2})
+
+		db.Create(&entity.Message{Content: "สวัสดี", RoomID: 1, SenderID: 3})
+		db.Create(&entity.Message{Content: "ดีคับ", RoomID: 1, SenderID: 1})
+		db.Create(&entity.Message{Content: "Hello", RoomID: 2, SenderID: 3})
+		db.Create(&entity.Message{Content: "Hi", RoomID: 1, SenderID: 2})
+
+		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
+		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
 		// 🔸 สร้าง Roomchat หลังจากสร้าง Landsalepost แล้ว
 		createRoomchatsAndMessages()
 	}
 
 	log.Println("✅ Database Migrated & Seeded Successfully")
-
 
 } // <<<<<<<<<<<<<< ปิดฟังก์ชัน SetupDatabase()
 // แยกการสร้าง Roomchat และ Message ออกมาเป็น function แยก

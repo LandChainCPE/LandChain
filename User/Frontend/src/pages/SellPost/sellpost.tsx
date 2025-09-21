@@ -22,7 +22,7 @@ async function saveLocations(
   const API_BASE =
     opts?.apiBase ??
     (import.meta as any)?.env?.VITE_API_BASE_URL ??
-    "http://localhost:8080";
+    "http://192.168.1.173:8080";
 
   const token = opts?.token ?? localStorage.getItem("token") ?? "";
   const tokenType = opts?.tokenType ?? localStorage.getItem("token_type") ?? "Bearer";
@@ -161,7 +161,13 @@ function getLocationCoordinates(provinceName: string, districtName?: string, sub
         "ตำบลขุหลุ": [104.2817, 15.3206],
         "ตำบลตระการพืชผล": [104.2956, 15.3134]
       }
-    }
+    },
+    "ปราจีนบุรี": {
+      "กบินทร์บุรี": {
+        "กบินทร์": [101.721485252, 13.9922231707],
+        "ตำบลแจระแม": [104.8567, 15.2289]
+      }
+  },
   };
 
   // พิกัดประมาณของจังหวัดต่างๆ ในประเทศไทย (สำหรับ fallback)

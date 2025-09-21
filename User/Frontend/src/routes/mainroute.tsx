@@ -22,7 +22,7 @@ const SellPostMain = Loadable(lazy(() => import("../pages/SellPost/sellpostmain.
 const LandDetail = Loadable(lazy(() => import("../pages/SellPost/landdetail.tsx")));
 const FullMapView = Loadable(lazy(() => import("../pages/SellPost/FullMapView.tsx")));
 
-const Chat = Loadable(lazy(() => import("../pages/ChatPage/chat")));
+const Chat = Loadable(lazy(() => import("../pages/ChatPage/chat.tsx")));
 
 const CreateAccount = Loadable(lazy(() => import("../pages/CreateUser/CreateAccount")));
 const ConnectMetamask = Loadable(lazy(() => import("../pages/CreateUser/ConnectMetamask")));
@@ -134,7 +134,16 @@ const UserRoutes = (): RouteObject[] => [
         path: "chat",
         element: (
           <ProtectedRoute>
-            <Chat roomId={null} onNewMessage={() => { }} />
+
+            <Chat   />
+          </ProtectedRoute>
+        ) 
+      },
+      { 
+        path: "chat/:roomID", 
+        element: (
+          <ProtectedRoute>
+            <Chat   />
           </ProtectedRoute>
         )
       },
@@ -241,6 +250,14 @@ const UserRoutes = (): RouteObject[] => [
         element: (
           <ProtectedRoute>
             <AppointmentStatus />
+          </ProtectedRoute>
+        ) 
+      },
+      { 
+        path: "landhistory", 
+        element: (
+          <ProtectedRoute>
+            <History />
           </ProtectedRoute>
         ) 
       },

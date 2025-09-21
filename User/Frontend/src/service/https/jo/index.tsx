@@ -1,4 +1,4 @@
-const apiUrl = "http://localhost:8080";
+const apiUrl = "http://192.168.1.173:8080";
 import axios from "axios";
 import type { BookingInterface } from "../../../interfaces/Booking";
 import type { AvailableSlotsResponse } from "../../../interfaces/types";
@@ -147,7 +147,7 @@ export async function GetAvailableSlots(
 }
 
 export const GetBookingStatus = async (
-userID: number, selectedDate: string, branchID: number, selectedServiceType: number, date: string) => {
+userID: number, branchID: number, date: string) => {
   try {
     const response = await api.get("/bookings/status", {
       params: {

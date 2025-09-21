@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const apiUrl = "http://localhost:8080";
+const apiUrl = "http://192.168.1.173:8080";
 
 // สร้าง instance ของ axios
 const api = axios.create({
@@ -357,6 +357,19 @@ export async function DeleteAllRequestBuyByLandID(landID: string | number) {
   }
 }
 
+export async function DeleteTransactionandAllrequest(id: string | number) {
+  try {
+    const res = await api.delete(`/user/lands/delete/transactionallrequest/`, {
+      params: { id },
+    });
+    return res.data;
+  } catch (e: any) {
+    if (e.response) return e.response.data;
+    return { error: "เกิดข้อผิดพลาดในการลบคำขอซื้อ" };
+  }
+}
+
+
 
 interface CheckOwnerResponse {
   message: string;
@@ -387,9 +400,81 @@ export async function CheckOwner(
   }
 }
 
-export async function DeleteTransactionandAllrequest(id: number | string) {
+
+export async function GetUserIDByWalletAddress() {
   try {
-    const res = await api.delete(`/user/lands/delete/transactionallrequest/${id}`); // ✅ แทนค่า id จริง
+    const res = await api.get(`/chat/get/userid`)
+    return res.data;
+  } catch (e: any) {
+    if (e.response) return e.response.data;
+    return { error: "เกิดข้อผิดพลาด" };
+  }
+}
+
+export async function GetAllRoomMessagesByUserID(id: number | string) {
+  try {
+    const res = await api.get(`/chat/allroom/${id}`); // ✅ แทนค่า id จริง
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function GetRoomMessages(
+  roomID: number | string,
+  limit: number = 20,
+  offset: number = 0
+) {
+  try {
+    const res = await api.get(`/chat/messages/${roomID}`, {
+      params: { limit, offset }, // ส่ง query params ไปด้วย
+    });
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function UploadImage(
+  roomID: number | string,
+  userID: number | string,
+  file: File
+) {
+  try {
+    const formData = new FormData();
+    formData.append("file", file); // ใช้ชื่อเดียว ไม่ต้อง image/file แยกกัน
+
+    const res = await api.post(`/upload/${roomID}/${userID}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function CreateNewRoom(user1ID: number, user2ID: number) {
+  try {
+    const res = await api.post("/chat/create-room", {
+      user1_id: user1ID,
+      user2_id: user2ID,
+    });
+    return res.data; // { room_id: number, message: string }
+  } catch (e: any) {
+    if (e.response) return e.response.data;
+    return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function GetUserinfoByUserID(id: number | string) {
+  try {
+    const res = await api.get(`/user/info/${id}`); // ✅ แทนค่า id จริง
     return res.data;
   } catch (e) {
     const err = e as any;
