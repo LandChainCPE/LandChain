@@ -6,54 +6,9 @@ import (
 
 	"landchain/config"
 	"landchain/entity"
-	"landchain/websocket" // เปลี่ยน path ตาม project
 
 	"github.com/gin-gonic/gin"
-	gorillaWs "github.com/gorilla/websocket"
 )
-
-var upgrader = gorillaWs.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
-}
-
-func TransactionWS(hub *websocket.Hub) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-		if err != nil {
-			return
-		}
-
-		walletValue, exists := c.Get("wallet")
-		if !exists {
-			conn.WriteJSON(map[string]string{"error": "wallet not found"})
-			conn.Close()
-			return
-		}
-
-		userWallet, ok := walletValue.(string)
-		if !ok || userWallet == "" {
-			conn.WriteJSON(map[string]string{"error": "wallet invalid"})
-			conn.Close()
-			return
-		}
-
-		client := &websocket.Client{
-			Wallet: userWallet,
-			Conn:   conn,
-			Send:   make(chan websocket.Transaction, 10),
-		}
-
-		hub.Register(client)
-
-		// ส่ง transaction ล่าสุด
-		// transactions, _ := GetTransactionsByWallet(userWallet)
-		// conn.WriteJSON(transactions)
-
-		// run read / write pump
-		go client.WritePump()
-		go client.ReadPump(hub)
-	}
-}
 
 func GetTransationByUserID(c *gin.Context) {
 
@@ -144,52 +99,52 @@ func DeleteTransaction(c *gin.Context) {
 }
 
 func DeleteTransactionandAllrequest(c *gin.Context) {
-    transactionIDStr := c.Param("id")
+	transactionIDStr := c.Param("id")
 
-    if transactionIDStr == "" {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "ต้องระบุ transactionID"})
-        return
-    }
+	if transactionIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ต้องระบุ transactionID"})
+		return
+	}
 
-    transactionID, err := strconv.Atoi(transactionIDStr)
-    if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "transactionID ต้องเป็นตัวเลข"})
-        return
-    }
+	transactionID, err := strconv.Atoi(transactionIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "transactionID ต้องเป็นตัวเลข"})
+		return
+	}
 
-    db := config.DB()
+	db := config.DB()
 
-    // 1️⃣ หา transaction เพื่อดึง LandID
-    var tx entity.Transaction
-    if err := db.First(&tx, transactionID).Error; err != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบ transaction", "detail": err.Error()})
-        return
-    }
+	// 1️⃣ หา transaction เพื่อดึง LandID
+	var tx entity.Transaction
+	if err := db.First(&tx, transactionID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบ transaction", "detail": err.Error()})
+		return
+	}
 
-    landID := tx.LandID // ✅ ใช้ LandID จาก transaction
+	landID := tx.LandID // ✅ ใช้ LandID จาก transaction
 
-    // 2️⃣ Update typetransaction_id ก่อน
-    if err := db.Model(&entity.Transaction{}).
-        Where("id = ?", transactionID).
-        Update("typetransaction_id", 2).
-        Error; err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถอัปเดตได้", "detail": err.Error()})
-        return
-    }
+	// 2️⃣ Update typetransaction_id ก่อน
+	if err := db.Model(&entity.Transaction{}).
+		Where("id = ?", transactionID).
+		Update("typetransaction_id", 2).
+		Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถอัปเดตได้", "detail": err.Error()})
+		return
+	}
 
-    // 3️⃣ Delete transaction
-    if err := db.Where("id = ?", transactionID).Delete(&entity.Transaction{}).Error; err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถลบ transaction ได้", "detail": err.Error()})
-        return
-    }
+	// 3️⃣ Delete transaction
+	if err := db.Where("id = ?", transactionID).Delete(&entity.Transaction{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถลบ transaction ได้", "detail": err.Error()})
+		return
+	}
 
-    // 4️⃣ Delete all requests by LandID
-    if landID != 0 {
-        if err := db.Where("land_id = ?", landID).Delete(&entity.RequestBuySell{}).Error; err != nil {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถลบ requests ได้", "detail": err.Error()})
-            return
-        }
-    }
+	// 4️⃣ Delete all requests by LandID
+	if landID != 0 {
+		if err := db.Where("land_id = ?", landID).Delete(&entity.RequestBuySell{}).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถลบ requests ได้", "detail": err.Error()})
+			return
+		}
+	}
 
-    c.JSON(http.StatusOK, gin.H{"message": "ลบ transaction และ request ทั้งหมดเรียบร้อย"})
+	c.JSON(http.StatusOK, gin.H{"message": "ลบ transaction และ request ทั้งหมดเรียบร้อย"})
 }

@@ -59,4 +59,6 @@ type Landtitle struct {
 	Transaction    []Transaction    `gorm:"foreignKey:LandID"`
 	RequestBuySell []RequestBuySell `gorm:"foreignKey:LandID"`
 
+	LandOwnership []LandOwnership `gorm:"foreignKey:LandID"`
+
 }

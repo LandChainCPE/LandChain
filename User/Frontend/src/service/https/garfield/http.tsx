@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const apiUrl = "http://localhost:8080";
+const apiUrl = "http://192.168.1.173:8080";
 
 /** ใส่เฉพาะ Authorization (อย่าใส่ Content-Type ที่นี่) */
 function getAuthHeaders(): Record<string, string> {
