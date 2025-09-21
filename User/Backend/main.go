@@ -121,6 +121,8 @@ func main() {
 		admin.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
 		admin.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)
 		admin.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
+		admin.PUT("/petitions/:id/status", controller.UpdatePetitionStatus)
+
 	}
 
 	userOwnership := r.Group("")
@@ -157,6 +159,8 @@ func main() {
 	authorized := r.Group("")
 	authorized.Use(middlewares.Authorizes())
 	{
+		authorized.POST("/requestbuysell", controller.CreateRequestBuySellHandler)
+		//authorized.PATCH("/petitions/:id/state", controller.UpdatePetitionState)
 		authorized.GET("/petition/:user_id", controller.GetAllPetition)
 
 		authorized.GET("/petitions", controller.GetAllPetition)
@@ -232,10 +236,10 @@ func CORSMiddleware() gin.HandlerFunc {
 		// รองรับ User Frontend และ Department Frontend
 		origin := c.Request.Header.Get("Origin")
 		allowedOrigins := []string{
-			"http://192.168.1.173:5173", // User Frontend (Vite default)
-			"http://192.168.1.173:5174", // Department Frontend (Vite port 2)
-			"http://192.168.1.173:3000", // React default (ถ้ามี)
-			"http://192.168.1.173:3001", // React port 2 (ถ้ามี)
+			"http://10.1.63.218:5173", // User Frontend (Vite default)
+			"http://10.1.63.218:5174", // Department Frontend (Vite port 2)
+			"http://10.1.63.218:3000", // React default (ถ้ามี)
+			"http://10.1.63.218:3001", // React port 2 (ถ้ามี)
 		}
 
 		// ตรวจสอบว่า origin อยู่ในรายการที่อนุญาตไหม

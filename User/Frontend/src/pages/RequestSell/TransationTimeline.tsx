@@ -18,7 +18,9 @@ function TransactionTimeline() {
 
     // useEffect(() => {
     //     const token = localStorage.getItem("token");
-    //     const wsUrl = `ws://10.1.189.185:8080/ws/transactions?token=${token}`;
+
+    //     const wsUrl = `ws://10.1.63.218:8080/ws/transactions?token=${token}`;
+
     //     const socket = new WebSocket(wsUrl);
 
     //     socket.onopen = () => setConnectionStatus('connected');

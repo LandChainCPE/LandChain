@@ -16,6 +16,6 @@ type RequestBuySell struct {
 	LandID    uint
 	Landtitle Landtitle `gorm:"foreignKey:LandID;references:ID"`
 
-	RequestBuySellTypeID uint
-	RequestBuySellType   RequestBuySellType `gorm:"foreignKey:RequestBuySellTypeID;references:ID"`
+	// RequestBuySellTypeID uint
+	// RequestBuySellType   RequestBuySellType `gorm:"foreignKey:RequestBuySellTypeID;references:ID"`
 }

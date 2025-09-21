@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Select, Upload, message, Form, Button, Card, Row, Col, Typography } from "antd";
+import { Select, Upload, message, Button, Card, Row, Col, Typography } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { Check, Phone, User, DollarSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +9,6 @@ import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByToken } 
 import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield/http";
 import MapPicker from "../../components/MapPicker";
 
-// ---- Helpers for saving polygon to backend ----
 type Coordinate = { lng: number; lat: number };
 
 async function saveLocations(
@@ -22,7 +21,9 @@ async function saveLocations(
   const API_BASE =
     opts?.apiBase ??
     (import.meta as any)?.env?.VITE_API_BASE_URL ??
-    "http://10.1.189.185:8080";
+
+    "http://10.1.63.218:8080";
+
 
   const token = opts?.token ?? localStorage.getItem("token") ?? "";
   const tokenType = opts?.tokenType ?? localStorage.getItem("token_type") ?? "Bearer";
@@ -57,27 +58,11 @@ type ProvinceDTO = { ID: number; name_th: string; name_en?: string };
 type DistrictDTO = { ID: number; name_th: string; province_id: number; name_en?: string };
 type SubdistrictDTO = { ID: number; name_th: string; district_id: number; name_en?: string };
 
-type Tag = {
-  id: number;
-  Tag: string;
-  icon: string;
-};
-
-// แปลงเป็น checksum (ถ้าไม่ถูกต้องจะคืน "")
-const toChecksum = (addr?: string) => {
-  try { return ethers.getAddress(addr ?? ""); } catch { return ""; }
-};
-
-// ย่อ address สำหรับแสดงผล
-const truncate = (addr?: string, head = 6, tail = 4) =>
-  addr ? `${addr.slice(0, head)}…${addr.slice(-tail)}` : "";
-
 // เช็ค zero address โดยไม่ hard-code
 const isZeroAddress = (addr?: string) => {
   try { return ethers.getAddress(addr ?? "") === ethers.ZeroAddress; } catch { return false; }
 };
 
-//const ZERO_ADDR = "0xf55988edca178d5507454107945a0c96f3af628c";
 
 function normalizeMetaFields(raw: string = ""): string {
   return raw.trim().replace(/^"/, "").replace(/";?$/, "").trim();
@@ -324,8 +309,7 @@ const SellPost = () => {
   const [districts, setDistricts] = useState<DistrictDTO[]>([]);
   const [subdistricts, setSubdistricts] = useState<SubdistrictDTO[]>([]);
   const [images, setImages] = useState<string[]>([]); // เปลี่ยนจาก image เดี่ยวเป็น array
-  const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
+  const [messageApi] = message.useMessage();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [tokenData, setTokenData] = useState<any | null>(null);
   const [landTokens, setLandTokens] = useState<any[]>([]);
@@ -351,8 +335,10 @@ const SellPost = () => {
     province_id: "",
     district_id: "",
     subdistrict_id: "",
-    landtitle_id: "",
-    user_id: "",
+
+    land_id: "",
+      user_id: "",
+
   });
 
   // สำหรับเก็บข้อมูลที่อยู่ที่รอการประมวลผล
@@ -360,16 +346,16 @@ const SellPost = () => {
     provinceName: string;
     districtName: string;
     subdistrictName: string;
-    landtitleId: string;
+    land_id: string;
   } | null>(null);
 
   // Enhanced CSS styles using the color scheme
   const styles = {
     card: {
-      background: "linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.9))",
+      background: "linear-gradient(135deg, #ffffff, #f8fafc)",
       borderRadius: "20px",
-      boxShadow: "0 12px 32px rgba(23, 46, 37, 0.1)",
-      border: "1px solid rgba(111, 150, 155, 0.2)",
+      boxShadow: "0 12px 32px rgba(43, 66, 58, 0.1)",
+      border: "1px solid rgba(31, 54, 51, 0.2)",
       backdropFilter: "blur(10px)",
       transition: "all 0.3s ease"
     },
@@ -377,13 +363,13 @@ const SellPost = () => {
       background: "linear-gradient(135deg, #ffffff, #f8fafc)",
       borderRadius: "16px",
       padding: "1.5rem",
-      boxShadow: "0 8px 24px rgba(23, 46, 37, 0.08)",
-      border: "1px solid #e2e8f0",
+      boxShadow: "0 8px 24px rgba(43, 66, 58, 0.08)",
+      border: "1px solid rgba(31, 54, 51, 0.2)",
       transition: "all 0.3s ease"
     },
     button: {
       primary: {
-        background: "linear-gradient(135deg, #6F969B, #3F5658)",
+        background: "linear-gradient(135deg, #2b423a, #1f3b33)",
         color: "#ffffff",
         border: "none",
         borderRadius: "12px",
@@ -392,12 +378,12 @@ const SellPost = () => {
         fontSize: "1rem",
         cursor: "pointer",
         transition: "all 0.3s ease",
-        boxShadow: "0 4px 12px rgba(111, 150, 155, 0.3)"
+        boxShadow: "0 4px 12px rgba(43, 66, 58, 0.3)"
       },
       secondary: {
         background: "linear-gradient(135deg, #f1f5f9, #e2e8f0)",
-        color: "#172E25",
-        border: "1px solid #cbd5e1",
+        color: "#2b423a",
+        border: "1px solid rgba(43, 66, 58, 0.2)",
         borderRadius: "12px",
         padding: "0.875rem 2rem",
         fontWeight: "600",
@@ -486,85 +472,78 @@ const SellPost = () => {
       }
     };
 
-    connectWalletAndFetchUser();
-  }, [navigate]);
+
+  // ดึง land_id ที่แท้จริงจาก backend
+  try {
+    const res = await getLandtitleIdByTokenId(tokenID);
+    const land_id = res?.land_id ? String(res.land_id) : tokenID;
+
+    // หาข้อมูล metadata ของโฉนดที่เลือก
+    const selectedLandData = landMetadata.find(land => land.tokenID === tokenID);
+
+    // Debug: ดูข้อมูลใน console
+    console.log("🔍 Selected Token ID:", tokenID);
+    console.log("📋 Selected Land Data:", selectedLandData);
+    console.log("🏛️ All Provinces:", provinces);
+    console.log("🏘️ All Districts:", districts);
+    console.log("🏞️ All Subdistricts:", subdistricts);
+
+    if (selectedLandData?.meta) {
+      const provinceName = selectedLandData.meta["Province"] || "";
+      const districtName = selectedLandData.meta["District"] || "";
+      const subdistrictName = selectedLandData.meta["Subdistrict"] || "";
+
+      console.log("🎯 Found location data:", { provinceName, districtName, subdistrictName });
+
+      // คำนวณพิกัดและ zoom level สำหรับแผนที่
+      const locationData = getLocationCoordinates(provinceName, districtName, subdistrictName);
+      console.log("📍 Calculated location data:", locationData);
+
+      // อัปเดตพิกัดและ zoom level ของแผนที่
+      setMapCenter(locationData.center);
+      setMapZoom(locationData.zoom);
+
+      // บันทึกข้อมูลสำหรับการค้นหา
+      setPendingLocationData({
+        provinceName,
+        districtName,
+        subdistrictName,
+        land_id
+      });
+
+      // หา ID ของจังหวัดจากชื่อ
+      const foundProvince = provinces.find(p =>
+        p.name_th?.toLowerCase().includes(provinceName.toLowerCase()) ||
+        provinceName.toLowerCase().includes(p.name_th?.toLowerCase())
+      );
+
 
   const handleSelectLand = async (tokenID: string) => {
     setSelectedLand(tokenID);
 
-    // ดึง landtitle_id ที่แท้จริงจาก backend
-    try {
-      const res = await getLandtitleIdByTokenId(tokenID);
-      const landtitleId = res?.landtitle_id ? String(res.landtitle_id) : tokenID; // fallback เป็น tokenID ถ้าไม่เจอ
 
-      // หาข้อมูล metadata ของโฉนดที่เลือก
-      const selectedLandData = landMetadata.find(land => land.tokenID === tokenID);
+      if (foundProvince) {
+        console.log("✅ Found province:", foundProvince);
 
-      // Debug: ดูข้อมูลใน console
-      console.log("🔍 Selected Token ID:", tokenID);
-      console.log("📋 Selected Land Data:", selectedLandData);
-      console.log("🏛️ All Provinces:", provinces);
-      console.log("🏘️ All Districts:", districts);
-      console.log("🏞️ All Subdistricts:", subdistricts);
+        // เซ็ตจังหวัดและรีเซ็ตอำเภอ/ตำบล
+        setFormData((prev) => ({
+          ...prev,
+          land_id: land_id,
+          province_id: String(foundProvince.ID),
+          district_id: "",
+          subdistrict_id: ""
+        }));
 
-      if (selectedLandData?.meta) {
-        const provinceName = selectedLandData.meta["Province"] || "";
-        const districtName = selectedLandData.meta["District"] || "";
-        const subdistrictName = selectedLandData.meta["Subdistrict"] || "";
-
-        console.log("🎯 Found location data:", { provinceName, districtName, subdistrictName });
-
-        // คำนวณพิกัดและ zoom level สำหรับแผนที่
-        const locationData = getLocationCoordinates(provinceName, districtName, subdistrictName);
-        console.log("📍 Calculated location data:", locationData);
-
-        // อัปเดตพิกัดและ zoom level ของแผนที่
-        setMapCenter(locationData.center);
-        setMapZoom(locationData.zoom);
-
-        // บันทึกข้อมูลสำหรับการค้นหา
-        setPendingLocationData({
-          provinceName,
-          districtName,
-          subdistrictName,
-          landtitleId
-        });
-
-        // หา ID ของจังหวัดจากชื่อ
-        const foundProvince = provinces.find(p =>
-          p.name_th?.toLowerCase().includes(provinceName.toLowerCase()) ||
-          provinceName.toLowerCase().includes(p.name_th?.toLowerCase())
-        );
-
-        console.log("🔍 Province search result:", foundProvince);
-        console.log("🔍 Province search criteria:", provinceName);
-
-        if (foundProvince) {
-          console.log("✅ Found province:", foundProvince);
-
-          // เซ็ตจังหวัดและรีเซ็ตอำเภอ/ตำบล
-          setFormData((prev) => ({
-            ...prev,
-            landtitle_id: landtitleId,
-            province_id: String(foundProvince.ID),
-            district_id: "",
-            subdistrict_id: ""
-          }));
-        } else {
-          console.log("Province not found:", provinceName);
-          setFormData((prev) => ({
-            ...prev,
-            landtitle_id: landtitleId,
-            province_id: "",
-            district_id: "",
-            subdistrict_id: ""
-          }));
-        }
       } else {
         setPendingLocationData(null);
         setFormData((prev) => ({
           ...prev,
-          landtitle_id: landtitleId
+
+          land_id: land_id,
+          province_id: "",
+          district_id: "",
+          subdistrict_id: ""
+
         }));
       }
 
@@ -573,24 +552,31 @@ const SellPost = () => {
       setPendingLocationData(null);
       setFormData((prev) => ({
         ...prev,
-        landtitle_id: tokenID // fallback
+
+        land_id: land_id
+
       }));
       console.error("Error mapping landtitle_id:", err);
     }
   };
 
-  // ฟังก์ชันอัปโหลดรูปหลายรูป
-  const handleUpload = (file: File) => {
-    const isImage = file.type.startsWith("image/");
-    if (!isImage) {
-      messageApi.error("กรุณาอัปโหลดเฉพาะไฟล์รูปภาพเท่านั้น");
-      return false;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      setImages((prev) => [...prev, reader.result as string]);
-    };
-    reader.readAsDataURL(file);
+    console.log("Selected land token:", tokenID, "Mapped land_id:", land_id);
+  } catch (err) {
+    setPendingLocationData(null);
+    setFormData((prev) => ({
+      ...prev,
+      land_id: tokenID // fallback
+    }));
+    console.error("Error mapping land_id:", err);
+  }
+};
+
+// ฟังก์ชันอัปโหลดรูปหลายรูป
+const handleUpload = (file: File) => {
+  const isImage = file.type.startsWith("image/");
+  if (!isImage) {
+    messageApi.error("กรุณาอัปโหลดเฉพาะไฟล์รูปภาพเท่านั้น");
+
     return false;
   };
 
@@ -892,14 +878,19 @@ const SellPost = () => {
         last_name: formData.lastName,
         phone_number: formData.phoneNumber,
         name: formData.name,
-        images,// image: formData.image,
+        images,
         price: Number(formData.price),
         province_id: Number(formData.province_id),
         district_id: Number(formData.district_id),
         subdistrict_id: Number(formData.subdistrict_id),
-        tag_id: formData.tag_id,        // ✅ ส่ง array ของตัวเลข
-        landtitle_id: Number(formData.landtitle_id),
+        tag_id: formData.tag_id,        
+        land_id: Number(formData.land_id), 
         user_id: Number(userId),
+        locations: mapCoords.map((c, i) => ({
+          sequence: i + 1,
+          latitude: c.lat,
+          longitude: c.lng,
+          })),
       };
 
       // 1) สร้างโพสต์
@@ -913,7 +904,6 @@ const SellPost = () => {
       }
 
       message.success("✅ โพสต์ขายที่ดินสำเร็จ!");
-      setCurrentStep(2);
 
       setTimeout(() => {
         navigate("/user/sellpostmain");
@@ -1177,95 +1167,94 @@ const SellPost = () => {
           cursor: not-allowed;
         }
       `}</style>
-      <div style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
-        fontFamily: "'Inter', sans-serif"
+
+    <div style={{ 
+      minHeight: "100vh", 
+      background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
+      fontFamily: "'Inter', sans-serif",
+      position: "relative"
+    }}>
+      {/* Loading overlay removed as requested */}
+      {/* Header */}
+      <div style={{ 
+        background: "linear-gradient(135deg, #2b423a 0%, #1f3b33 100%)",
+        boxShadow: "0 4px 6px -1px rgba(23, 46, 37, 0.1)", 
+        backdropFilter: "blur(8px)",
+        borderBottom: "1px solid rgba(255, 255, 255, 0.1)"
       }}>
-        {/* Header */}
-        <div style={{
-          backgroundColor: "#FFFFFF",
-          boxShadow: "0 4px 6px -1px rgba(23, 46, 37, 0.1)",
-          backdropFilter: "blur(8px)",
-          borderBottom: "1px solid #e2e8f0"
-        }}>
-          <div style={{ maxWidth: "1024px", margin: "0 auto", padding: "2rem 1.5rem" }}>
-            <h1 style={{
-              fontSize: "2.5rem",
-              fontWeight: "800",
-              color: "#172E25",
-              display: "flex",
-              alignItems: "center",
-              gap: "1rem",
-              margin: 0,
-              textShadow: "0 2px 4px rgba(23, 46, 37, 0.1)"
-            }}>
-              <span style={{
-                background: "linear-gradient(135deg, #6F969B, #3F5658)",
-                borderRadius: "16px",
-                padding: "12px",
-                fontSize: "2rem"
-              }}>🏡</span>
-              ประกาศขายที่ดิน
-            </h1>
-            <p style={{
-              color: "#3F5658",
-              fontSize: "1.1rem",
-              margin: "8px 0 0 0",
-              fontWeight: "500"
-            }}>
-              โพสต์ขายที่ดินของคุณอย่างง่ายดายและปลอดภัย
-            </p>
-          </div>
+        <div style={{ maxWidth: "1024px", margin: "0 auto", padding: "2rem 1.5rem" }}>
+          <h1 style={{ 
+            fontSize: "2.5rem", 
+            fontWeight: "800", 
+            color: "#ffffff", 
+            display: "flex", 
+            alignItems: "center", 
+            gap: "1rem",
+            margin: 0,
+            textShadow: "0 2px 4px rgba(0, 0, 0, 0.2)"
+          }}>
+            <span style={{ 
+              background: "linear-gradient(135deg, #6F969B, #3F5658)",
+              borderRadius: "16px",
+              padding: "12px",
+              fontSize: "2rem"
+            }}>🏡</span>
+            ประกาศขายที่ดิน
+          </h1>
+          <p style={{ 
+            color: "rgba(255, 255, 255, 0.9)", 
+            fontSize: "1.1rem", 
+            margin: "8px 0 0 0",
+            fontWeight: "500"
+          }}>
+            โพสต์ขายที่ดินของคุณอย่างง่ายดายและปลอดภัย
+          </p>
+
         </div>
 
-        {/* Progress Steps */}
-        <div style={{ maxWidth: "1024px", margin: "0 auto", padding: "2rem 1.5rem" }}>
-          <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "3rem",
-            background: "rgba(255, 255, 255, 0.8)",
-            borderRadius: "20px",
-            padding: "2rem",
-            backdropFilter: "blur(10px)",
-            boxShadow: "0 8px 32px rgba(23, 46, 37, 0.1)"
-          }}>
-            {steps.map((step, index) => (
-              <div key={step.number} style={{ display: "flex", alignItems: "center" }}>
-                <div style={{ textAlign: "center", color: currentStep >= step.number ? "#6F969B" : "#94a3b8" }}>
-                  <div
-                    style={{
-                      width: "4rem",
-                      height: "4rem",
-                      borderRadius: "50%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      fontSize: "1.5rem",
-                      marginBottom: "0.75rem",
-                      background: currentStep >= step.number
-                        ? "linear-gradient(135deg, #6F969B, #3F5658)"
-                        : "linear-gradient(135deg, #f1f5f9, #e2e8f0)",
-                      color: currentStep >= step.number ? "#ffffff" : "#64748b",
-                      border: currentStep >= step.number ? "3px solid #172E25" : "3px solid #e2e8f0",
-                      boxShadow: currentStep >= step.number
-                        ? "0 8px 24px rgba(111, 150, 155, 0.3)"
-                        : "0 4px 12px rgba(148, 163, 184, 0.2)",
-                      transition: "all 0.3s ease",
-                      transform: currentStep >= step.number ? "scale(1.05)" : "scale(1)"
-                    }}
-                  >
-                    {step.icon}
-                  </div>
-                  <span style={{
-                    fontSize: "0.9rem",
-                    fontWeight: "600",
-                    color: currentStep >= step.number ? "#172E25" : "#64748b"
-                  }}>
-                    {step.title}
-                  </span>
+
+      {/* Progress Steps ข้างบน*/}
+      <div style={{ maxWidth: "1500px", padding: "1rem 1rem" }}>
+        <div style={{
+          display: "flex", 
+          justifyContent: "space-between", 
+          alignItems: "center", 
+          marginBottom: "3rem",
+          marginLeft:"100px",
+          marginRight:"100px",
+          background: "rgba(255, 255, 255, 0.8)",
+          borderRadius: "20px",
+          padding: "2rem",
+          backdropFilter: "blur(10px)",
+          boxShadow: "0 8px 32px rgba(23, 46, 37, 0.1)"
+        }}>
+          {steps.map((step, index) => (
+            <div key={step.number} style={{ display: "flex", alignItems: "center" }}>
+              <div style={{ textAlign: "center", color: currentStep >= step.number ? "#6F969B" : "#94a3b8" }}>
+                <div
+                  style={{
+                    width: "4rem",
+                    height: "4rem",
+                    borderRadius: "50%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    fontSize: "1.5rem",
+                    marginBottom: "0.75rem",
+                    background: currentStep >= step.number 
+                      ? "linear-gradient(135deg, #6F969B, #3F5658)" 
+                      : "linear-gradient(135deg, #f1f5f9, #e2e8f0)",
+                    color: currentStep >= step.number ? "#ffffff" : "#64748b",
+                    border: currentStep >= step.number ? "3px solid #172E25" : "3px solid #e2e8f0",
+                    boxShadow: currentStep >= step.number 
+                      ? "0 8px 24px rgba(111, 150, 155, 0.3)" 
+                      : "0 4px 12px rgba(148, 163, 184, 0.2)",
+                    transition: "all 0.3s ease",
+                    transform: currentStep >= step.number ? "scale(1.05)" : "scale(1)"
+                  }}
+                >
+                  {step.icon}
+
                 </div>
                 {index < steps.length - 1 && (
                   <div
@@ -1282,18 +1271,43 @@ const SellPost = () => {
                   ></div>
                 )}
               </div>
-            ))}
-          </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "2rem" }}>
-            {/* Main Content */}
-            <div style={{ gridColumn: "span 2" }}>
-              {/* Step 1: Land Selection */}
-              {currentStep === 1 && (
-                <div style={{
-                  ...styles.card,
+              {index < steps.length - 1 && (
+                <div
+                  style={{
+                    width: "6rem",
+                    height: "4px",
+                    margin: "0 1.5rem",
+                    background: currentStep > step.number 
+                      ? "linear-gradient(90deg, #6F969B, #3F5658)" 
+                      : "linear-gradient(90deg, #e2e8f0, #cbd5e1)",
+                    borderRadius: "2px",
+                    transition: "all 0.3s ease"
+                  }}
+                ></div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Step 1: Land Selection ขนาด */}
+      {currentStep === 1 && (
+              <div style={{ 
+                ...styles.card, 
                   padding: "3rem",
                   marginTop: "1rem"
+              }}>
+                
+                <h2 style={{ 
+                  fontSize: "2rem", 
+                  fontWeight: "800", 
+                  color: "#172E25", 
+                  marginBottom: "1rem", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: "1rem"
+
                 }}>
 
                   <h2 style={{
@@ -1592,152 +1606,134 @@ const SellPost = () => {
                     </div>
                   </div>
 
-                  <div style={{ marginTop: "3rem", display: "flex", justifyContent: "flex-end" }}>
-                    <button
-                      onClick={() => setCurrentStep(2)}
-                      style={{
-                        ...styles.button.primary,
-                        fontSize: "1.1rem",
-                        padding: "1rem 2.5rem"
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = "translateY(-2px)";
-                        e.currentTarget.style.boxShadow = "0 8px 24px rgba(111, 150, 155, 0.4)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.boxShadow = "0 4px 12px rgba(111, 150, 155, 0.3)";
-                      }}
-                    >
-                      ถัดไป →
-                    </button>
-                  </div>
+                {/* Land Tokens Grid */}
+                <div className="land-tokens-section">
+                  {/* Show selected deed number only once above the grid */}
+                  {selectedLand && (() => {
+                    const land = landMetadata.find((l: any) => String(l.tokenID) === String(selectedLand));
+                    const deedNo = land?.meta?.["Deed No"] || land?.meta?.["DeedNo"] || "-";
+                    return (
+                      <div style={{ marginBottom: 12, textAlign: "center" }}>
+                        <span style={{ color: "#1677ff", fontWeight: 600, fontSize: "1.1rem" }}>
+                          คุณเลือกโฉนด{deedNo}
+                        </span>
+                      </div>
+                    );
+                  })()}
+
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Continue from Step 2: Personal Information */}
-        {currentStep === 2 && (
-          <div style={{
-            ...styles.card,
-            padding: "3rem",
-            marginTop: "1rem"
-          }}>
-            <h2 style={{
-              fontSize: "2rem",
-              fontWeight: "800",
-              color: "#172E25",
-              marginBottom: "1rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "1rem"
-            }}>
-              <span style={{
-                background: "linear-gradient(135deg, #6F969B, #3F5658)",
-                borderRadius: "16px",
-                padding: "12px",
-                fontSize: "1.5rem",
-                color: "#fff"
-              }}>👤</span>
-              ข้อมูลส่วนตัว
-            </h2>
-            <p style={{
-              color: "#3F5658",
-              marginBottom: "2rem",
-              fontSize: "1.1rem",
-              lineHeight: "1.6",
-              fontWeight: "500"
-            }}>
-              กรอกข้อมูลการติดต่อของคุณเพื่อให้ผู้สนใจสามารถติดต่อได้
-            </p>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
-              <div>
-                <label style={{
-                  fontSize: "1rem",
-                  fontWeight: "600",
-                  color: "#172E25",
-                  marginBottom: "0.75rem",
-                  display: "block"
-                }}>
-                  ชื่อ
-                </label>
-                <div style={{ position: "relative" }}>
-                  <User style={{
-                    position: "absolute",
-                    left: "1rem",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    width: "1.25rem",
-                    height: "1.25rem",
-                    color: "#6F969B",
-                    zIndex: 1
-                  }} />
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
+                <div style={{ marginTop: "3rem", display: "flex", justifyContent: "flex-end" }}>
+                  <button
+                    onClick={() => selectedLand && setCurrentStep(2)}
+                    disabled={!selectedLand}
                     style={{
-                      ...styles.input,
-                      paddingLeft: "3.5rem"
+                      ...styles.button.primary,
+                      fontSize: "1.1rem",
+                      padding: "1rem 2.5rem",
+                      opacity: !selectedLand ? 0.5 : 1,
+                      cursor: !selectedLand ? "not-allowed" : "pointer"
                     }}
-                    placeholder="กรอกชื่อ"
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = "#6F969B";
-                      e.currentTarget.style.boxShadow = "0 0 0 3px rgba(111, 150, 155, 0.1)";
+                    onMouseEnter={(e) => {
+                      if (selectedLand) {
+                        e.currentTarget.style.transform = "translateY(-2px)";
+                        e.currentTarget.style.boxShadow = "0 8px 24px rgba(111, 150, 155, 0.4)";
+                      }
                     }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = "#e2e8f0";
-                      e.currentTarget.style.boxShadow = "none";
+                    onMouseLeave={(e) => {
+                      if (selectedLand) {
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.boxShadow = "0 4px 12px rgba(111, 150, 155, 0.3)";
+                      }
                     }}
-                  />
+                  >
+                    {selectedLand ? "ถัดไป →" : "เลือกโฉนดที่ดินก่อน"}
+                  </button>
                 </div>
               </div>
+      )}
+      {/* Continue from Step 2: Personal Information */}
+      {currentStep === 2 && (
+        <div style={{ 
+          ...styles.card, 
+          padding: "3rem",
+          marginTop: "1rem"
+        }}>
+          <h2 style={{ 
+            fontSize: "2rem", 
+            fontWeight: "800", 
+            color: "#172E25", 
+            marginBottom: "1rem", 
+            display: "flex", 
+            alignItems: "center", 
+            gap: "1rem"
+          }}>
+            <span style={{
+              background: "linear-gradient(135deg, #6F969B, #3F5658)",
+              borderRadius: "16px",
+              padding: "12px",
+              fontSize: "1.5rem",
+              color: "#fff"
+            }}>👤</span>
+            ข้อมูลส่วนตัว
+          </h2>
+          <p style={{ 
+            color: "#3F5658", 
+            marginBottom: "2rem", 
+            fontSize: "1.1rem",
+            lineHeight: "1.6",
+            fontWeight: "500"
+          }}>
+            กรอกข้อมูลการติดต่อของคุณเพื่อให้ผู้สนใจสามารถติดต่อได้
+          </p>
+          
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
+            <div>
+              <label style={{ 
+                fontSize: "1rem", 
+                fontWeight: "600", 
+                color: "#172E25", 
+                marginBottom: "0.75rem",
+                display: "block"
+              }}>
+                ชื่อ
+              </label>
+              <div style={{ position: "relative" }}>
+                <User style={{ 
+                  position: "absolute", 
+                  left: "1rem", 
+                  top: "50%", 
+                  transform: "translateY(-50%)",
+                  width: "1.25rem", 
+                  height: "1.25rem", 
+                  color: "#6F969B",
+                  zIndex: 1
+                }} />
+                <input
+                  type="text"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  style={{
+                    ...styles.input,
+                    paddingLeft: "3.5rem"
+                  }}
+                  placeholder="กรอกชื่อ"
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = "#6F969B";
+                    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(111, 150, 155, 0.1)";
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = "#e2e8f0";
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
+                />
 
-              <div>
-                <label style={{
-                  fontSize: "1rem",
-                  fontWeight: "600",
-                  color: "#172E25",
-                  marginBottom: "0.75rem",
-                  display: "block"
-                }}>
-                  นามสกุล
-                </label>
-                <div style={{ position: "relative" }}>
-                  <User style={{
-                    position: "absolute",
-                    left: "1rem",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    width: "1.25rem",
-                    height: "1.25rem",
-                    color: "#6F969B",
-                    zIndex: 1
-                  }} />
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    style={{
-                      ...styles.input,
-                      paddingLeft: "3.5rem"
-                    }}
-                    placeholder="กรอกนามสกุล"
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = "#6F969B";
-                      e.currentTarget.style.boxShadow = "0 0 0 3px rgba(111, 150, 155, 0.1)";
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = "#e2e8f0";
-                      e.currentTarget.style.boxShadow = "none";
-                    }}
-                  />
-                </div>
               </div>
 
               <div style={{ gridColumn: "1 / -1" }}>

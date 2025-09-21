@@ -58,8 +58,10 @@
 ## การทดสอบ
 
 ### Postman Testing
-1. **ขอ nonce**: `GET http://10.1.189.185:8080/nonce/0x123...`
-2. **Login**: `POST http://10.1.189.185:8080/login` พร้อม body ที่ต้องการ
+
+1. **ขอ nonce**: `GET http://10.1.63.218:8080/nonce/0x123...`
+2. **Login**: `POST http://10.1.63.218:8080/login` พร้อม body ที่ต้องการ
+
 
 ### Browser Testing
 1. เปิดหน้า login
