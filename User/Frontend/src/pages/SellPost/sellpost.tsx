@@ -1754,7 +1754,7 @@ useEffect(() => {
               }}>
                 เบอร์โทรศัพท์
               </label>
-              <div style={{ position: "relative" }}>
+              <div style={{ position: "relative", maxWidth: "330px", width: "100%" }}>
                 <Phone style={{ 
                   position: "absolute", 
                   left: "1rem", 
@@ -1772,7 +1772,8 @@ useEffect(() => {
                   onChange={handleChange}
                   style={{
                     ...styles.input,
-                    paddingLeft: "3.5rem"
+                    paddingLeft: "3.5rem",
+                    width: "100%"
                   }}
                   placeholder="กรอกเบอร์โทรศัพท์"
                   onFocus={(e) => {
