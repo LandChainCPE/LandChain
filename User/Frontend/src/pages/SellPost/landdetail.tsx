@@ -10,6 +10,8 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { CreateNewRoom } from "../../service/https/bam/bam";
 
+
+
 type LandDetailType = {
   ID: number | string;
   Name?: string;
@@ -461,11 +463,6 @@ const LandDetail = () => {
     }
     if (userId === land.user_id) {
       setMessageState({ type: 'error', content: "ไม่สามารถส่งข้อความหาตัวเองได้" });
-      return;
-    }
-    // ถ้า land ถูกโพสต์ขายแล้ว (มีโพสต์นี้อยู่แล้ว) ไม่ให้ส่งข้อความ
-    if (land?.ID && land?.ID !== undefined) {
-      setMessageState({ type: 'error', content: "ที่ดินนี้ถูกโพสต์ขายแล้ว ไม่สามารถส่งข้อความได้" });
       return;
     }
     try {
@@ -1279,45 +1276,38 @@ const handleBuy = async () => {
                   <button style={styles.contactBtn("ghost")}>โทรศัพท์ไม่พบ</button>
                 )}
 
-                {/* แสดงปุ่มส่งข้อความและส่งคำขอซื้อ เฉพาะถ้าไม่ใช่เจ้าของโพสต์ และที่ดินยังไม่ถูกโพสต์ขาย */}
-                {userId !== land.user_id && land?.ID && (
-                  <>
-                    <button style={styles.contactBtn("msg")} onClick={handleCreateRoom}>
-                      <MessageCircle style={{ width: 20, height: 20 }} />
-                      ส่งข้อความ
-                    </button>
-                    <button
-                      style={styles.contactBtn("ghost")}
-                      onClick={showModal}
-                      disabled={confirmLoading}
-                    >
-                      {confirmLoading ? "กำลังดำเนินการ..." : "ส่งคำขอซื้อ"}
-                    </button>
-                    <Modal
-                      title="ยืนยันการซื้อที่ดิน"
-                      open={isModalOpen}
-                      onOk={handleOk}
-                      confirmLoading={confirmLoading}
-                      onCancel={handleCancel}
-                      okText="ยืนยัน"
-                      cancelText="ยกเลิก"
-                    >
-                      คุณต้องการยืนยันการซื้อที่ดินนี้ใช่หรือไม่?
-                    </Modal>
-                  </>
-                )}
-                {/* ถ้าที่ดินถูกโพสต์ขายแล้ว (มีโพสต์นี้อยู่แล้ว) ให้ disable ปุ่ม */}
-                {userId !== land.user_id && !land?.ID && (
-                  <>
-                    <button style={{ ...styles.contactBtn("msg"), opacity: 0.5, cursor: "not-allowed" }} disabled>
-                      <MessageCircle style={{ width: 20, height: 20 }} />
-                      ส่งข้อความ (ที่ดินนี้ถูกโพสต์ขายแล้ว)
-                    </button>
-                    <button style={{ ...styles.contactBtn("ghost"), opacity: 0.5, cursor: "not-allowed" }} disabled>
-                      ส่งคำขอซื้อ (ที่ดินนี้ถูกโพสต์ขายแล้ว)
-                    </button>
-                  </>
-                )}
+                <button style={styles.contactBtn("msg")} onClick={handleCreateRoom}>
+                  <MessageCircle style={{ width: 20, height: 20 }} />
+                  ส่งข้อความ
+                </button>
+
+      {/* Buy button: block if user is owner */}
+      {userId === land.user_id ? (
+        <button style={{ ...styles.contactBtn("ghost"), background: '#fef2f2', color: '#dc2626', cursor: 'not-allowed' }} disabled>
+          ไม่สามารถซื้อโฉนดที่ดินของตัวเองได้
+        </button>
+      ) : (
+        <>
+          <button
+            style={styles.contactBtn("ghost")}
+            onClick={showModal}
+            disabled={confirmLoading}
+          >
+            {confirmLoading ? "กำลังดำเนินการ..." : "ส่งคำขอซื้อ"}
+          </button>
+          <Modal
+            title="ยืนยันการซื้อที่ดิน"
+            open={isModalOpen}
+            onOk={handleOk}
+            confirmLoading={confirmLoading}
+            onCancel={handleCancel}
+            okText="ยืนยัน"
+            cancelText="ยกเลิก"
+          >
+            คุณต้องการยืนยันการซื้อที่ดินนี้ใช่หรือไม่?
+          </Modal>
+        </>
+      )}
               </div>
 
               <div style={styles.warn}>

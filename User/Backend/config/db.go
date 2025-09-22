@@ -447,37 +447,37 @@ func SetupDatabase() {
 		log.Println("✅ Tags have been inserted successfully")
 
 		// ✅ Seed Landpost
-		post := entity.Landsalepost{
-			FirstName:     "มาลี",
-			LastName:      "มาดี",
-			PhoneNumber:   "0987654321",
-			Name:          "สวนคุณตา",
-			Price:         120000,
-			ProvinceID:    12,
-			DistrictID:    144,
-			SubdistrictID: 1077,
-			LandID:        1,
-			UserID:        1,
-		}
-		db.Create(&post)
-
-		// เพิ่มรูปภาพ (Photoland)
-		// photos := []entity.Photoland{
-		// 	{Path: "https://backside.legardy.com/uploads/1_3bf04b6ebb.png", LandsalepostID: 1},
-		// 	{Path: "https://backside.legardy.com/uploads/2_abc123.png", LandsalepostID: 1},
+		// post := entity.Landsalepost{
+		// 	FirstName:     "มาลี",
+		// 	LastName:      "มาดี",
+		// 	PhoneNumber:   "0987654321",
+		// 	Name:          "สวนคุณตา",
+		// 	Price:         120000,
+		// 	ProvinceID:    12,
+		// 	DistrictID:    144,
+		// 	SubdistrictID: 1077,
+		// 	LandID:        1,
+		// 	UserID:        1,
 		// }
-		// for _, photo := range photos {
-		// 	db.Create(&photo)
-		// }
+		// db.Create(&post)
 
-		var tags []entity.Tag
-		if err := db.Where("id IN ?", []uint{1, 4, 5}).Find(&tags).Error; err != nil {
-			log.Fatal("❌ Failed to find tags:", err)
-		}
-		if err := db.Model(&post).Association("Tags").Replace(&tags); err != nil {
-			log.Fatal("❌ Failed to associate tags:", err)
-		}
-		log.Println("✅ Landpost with tags created successfully")
+		// // เพิ่มรูปภาพ (Photoland)
+		// // photos := []entity.Photoland{
+		// // 	{Path: "https://backside.legardy.com/uploads/1_3bf04b6ebb.png", LandsalepostID: 1},
+		// // 	{Path: "https://backside.legardy.com/uploads/2_abc123.png", LandsalepostID: 1},
+		// // }
+		// // for _, photo := range photos {
+		// // 	db.Create(&photo)
+		// // }
+
+		// var tags []entity.Tag
+		// if err := db.Where("id IN ?", []uint{1, 4, 5}).Find(&tags).Error; err != nil {
+		// 	log.Fatal("❌ Failed to find tags:", err)
+		// }
+		// if err := db.Model(&post).Association("Tags").Replace(&tags); err != nil {
+		// 	log.Fatal("❌ Failed to associate tags:", err)
+		// }
+		// log.Println("✅ Landpost with tags created successfully")
 
 		db.Create(&entity.Transaction{
 			Amount:                 1500,
