@@ -39,7 +39,7 @@ export const NotificationProvider: React.FC<Props> = ({ userID, children }) => {
 
     if (wsRef.current) wsRef.current.close();
 
-    const ws = new WebSocket(`ws://192.168.1.173:8080/ws/notification/${userID}`);
+    const ws = new WebSocket(`ws://localhost:8080/ws/notification/${userID}`);
     wsRef.current = ws;
 
     ws.onopen = () => console.log("Notification WS connected");

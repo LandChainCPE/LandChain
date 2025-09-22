@@ -24,7 +24,6 @@ const Navbar = () => {
   async function fetchUser() {
     try {
       const userInfo = await GetInfoUserByWalletID();
-      console.log("userInfo", userInfo);
       setUser(userInfo);
       
     } catch (err) {
@@ -38,7 +37,7 @@ const Navbar = () => {
   useEffect(() => {
 
     if (!isLoggedIn || !user?.id) return;
-    const ws = new WebSocket(`ws://192.168.1.173:8080/ws/notification/${user?.id}`);
+    const ws = new WebSocket(`ws://localhost:8080/ws/notification/${user?.id}`);
 
     ws.onmessage = (event) => {
       try {

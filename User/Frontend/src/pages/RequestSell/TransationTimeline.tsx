@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { GetTransationByUserID, GetInfoUserByToken, UpdateTransactionBuyerAccept, SetSellInfoHandler, DeleteTransaction, GetSaleInfoHandler, GetUserAddressLand, BuyLandHandler, DeleteTransactionandAllrequest } from "../../service/https/bam/bam";
+import { GetTransationByUserID, GetInfoUserByToken, UpdateTransactionBuyerAccept, SetSellInfoHandler, DeleteTransactionTodelete, GetSaleInfoHandler, DeleteLandsalepostByLandIDandUserID, BuyLandHandler, DeleteTransactionandAllrequest, DeleteTransactionToscucess } from "../../service/https/bam/bam";
 import './TransactionTimeline.css';
 import Navbar from "../../component/user/Navbar";
 import { Modal, Button } from "react-bootstrap";
@@ -18,7 +18,7 @@ function TransactionTimeline() {
 
     // useEffect(() => {
     //     const token = localStorage.getItem("token");
-    //     const wsUrl = `ws://192.168.1.173:8080/ws/transactions?token=${token}`;
+    //     const wsUrl = `ws://localhost:8080/ws/transactions?token=${token}`;
     //     const socket = new WebSocket(wsUrl);
 
     //     socket.onopen = () => setConnectionStatus('connected');
@@ -79,26 +79,52 @@ function TransactionTimeline() {
     }, [transactions]);
 
 
+
+
 const handleSellerAccept = async (transaction: any) => {
     try {
-        // เรียก API backend
         await UpdateTransactionBuyerAccept({
             sellerID: transaction.SellerID,
             buyerID: transaction.BuyerID,
-            landID: transaction.LandID
+            landID: transaction.LandID,
         });
 
-        // อัปเดต state ของ transaction
+        // อัปเดต state ถ้าสำเร็จ
         setTransactions((prev) =>
             prev.map((tx) =>
                 tx.ID === transaction.ID ? { ...tx, BuyerAccepted: true } : tx
             )
         );
 
-    } catch (err) {
+    } catch (err: any) {
+        if (err.response) {
+            if (err.response.status === 403) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "การยืนยันล้มเหลว",
+                    text: "คุณไม่ใช่เจ้าของที่ดินนี้",
+                    confirmButtonColor: "#e74c3c",
+                });
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "เกิดข้อผิดพลาด",
+                    text: err.response.data.error || "ไม่ทราบสาเหตุ",
+                    confirmButtonColor: "#e74c3c",
+                });
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "การเชื่อมต่อล้มเหลว",
+                text: "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้",
+                confirmButtonColor: "#e74c3c",
+            });
+        }
         console.error("เกิดข้อผิดพลาดในการยืนยันการยอมรับของผู้ขาย", err);
     }
 };
+
 
 // ฟังก์ชันเช็ค balance
 const checkWalletBalance = async (requiredEth: number): Promise<boolean> => {
@@ -309,7 +335,7 @@ const handleCloseDeleteModal = () => {
 const handleConfirmDelete = async () => {
   if (!selectedTransaction) return;
   try {
-    await DeleteTransaction(selectedTransaction);
+    await DeleteTransactionTodelete(selectedTransaction);
 
     setTransactions((prev) => prev.filter((tx) => tx.ID !== selectedTransaction));
 
@@ -459,8 +485,9 @@ if (!txInfo) {
 
     // ลบ transaction และ sale info
 
-    await DeleteTransaction(transactionId);
+    await DeleteTransactionToscucess(transactionId);
     await DeleteTransactionandAllrequest(transactionId);
+    await DeleteLandsalepostByLandIDandUserID(tokenId);
 
 
     await fetchTransactions();
@@ -515,7 +542,7 @@ const openETHModalForTransaction = (tx: any) => {
     };
 
     const isTransactionCompleted = (tx: any) => {
-        return [tx.BuyerAccepted, tx.SellerAccepted, tx.MoneyChecked, tx.LandDepartmentApproved].every(Boolean);
+        return [tx.BuyerAccepted, tx.SellerAccepted, tx.LandDepartmentApproved].every(Boolean);
     };
 
     const formatDate = (dateString: string) => {
@@ -561,6 +588,7 @@ const openETHModalForTransaction = (tx: any) => {
         );
     }
 
+    
     const buyerTransactions = transactions.filter(tx => tx.BuyerID === userId);
     const sellerTransactions = transactions.filter(tx => tx.SellerID === userId);
 
@@ -657,24 +685,31 @@ const openETHModalForTransaction = (tx: any) => {
                         </div>
                     )}
 
-                    {userType === "buyer" && tx.BuyerAccepted && tx.SellerAccepted && tx.LandDepartmentApproved && (
+                    {userType === "buyer" && tx.TypetransactionID === 6 && (
                         <div className="card-actions">
+                            {tx.BuyerAccepted && tx.SellerAccepted && tx.LandDepartmentApproved ? (
                             <button 
-                            className="btn btn-success"
-                            onClick={() => openETHModalForTransaction(tx)} // ✅ เปิด Modal
-                            disabled={processingTxId === tx.ID || loadingETH} // disable ขณะทำรายการ
+                                className="btn btn-success"
+                                onClick={() => openETHModalForTransaction(tx)} 
+                                disabled={processingTxId === tx.ID || loadingETH}
                             >
-                            {processingTxId === tx.ID || loadingETH ? (
+                                {processingTxId === tx.ID || loadingETH ? (
                                 <>
-                                <span className="spinner-border spinner-border-sm me-2"></span>
-                                กำลังโอนโฉนด...
+                                    <span className="spinner-border spinner-border-sm me-2"></span>
+                                    กำลังโอนโฉนด...
                                 </>
-                            ) : (
+                                ) : (
                                 "ดำเนินการโอนโฉนด"
-                            )}
+                                )}
                             </button>
+                            ) : (
+                            <span className="text-warning fw-bold">
+                                ⏳ กำลังดำเนินการร่างสัญญา
+                            </span>
+                            )}
                         </div>
                         )}
+
 
                     {userType === "buyer" && !tx.BuyerAccepted && (
                         <div className="card-actions">
@@ -695,30 +730,32 @@ const openETHModalForTransaction = (tx: any) => {
                         </div>
                         )}
 
+
                         {userType === "seller" && tx.BuyerAccepted && tx.SellerAccepted && tx.LandDepartmentApproved && (
                             <div className="card-actions">
-                                {!saleInfos[tx.ID] ? ( // ✅ ใช้ saleInfos แทน tx.LandTransferDrafted
+                                {saleInfos[tx.ID] && saleInfos[tx.ID].price !== "0" ? (
+                                    <span className="text-success fw-bold">✅ ร่างสัญญาเรียบร้อยแล้ว</span>
+                                    ) : (
                                     <button 
                                         className="btn btn-warning"
-                                        onClick={() => openSaleModal(tx)} // เรียก Modal แทน
-                                        disabled={processingTxId === tx.ID || loadingMetamask} // disable ขณะทำรายการหรือโหลด metamask
+                                        onClick={() => openSaleModal(tx)}
+                                        disabled={processingTxId === tx.ID || loadingMetamask}
                                     >
                                         {processingTxId === tx.ID || loadingMetamask ? (
-                                            <>
-                                                <span className="spinner-border spinner-border-sm me-2"></span>
-                                                กำลังร่างสัญญาโอนโฉนด...
-                                            </>
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2"></span>
+                                            กำลังร่างสัญญาโอนโฉนด...
+                                        </>
                                         ) : (
-                                            "ร่างสัญญาโอนโฉนด"
+                                        "ร่างสัญญาโอนโฉนด"
                                         )}
                                     </button>
-                                ) : (
-                                    <button className="btn btn-success" disabled>
-                                        ✅ ร่างสัญญาเรียบร้อยแล้ว
-                                    </button>
-                                )}
+                                    )}
                             </div>
-                        )}
+                            )}
+
+
+
 
                 </div>
             </div>

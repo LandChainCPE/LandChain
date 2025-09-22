@@ -1,12 +1,14 @@
 package controller
 
 import (
+	"math/big"
 	"net/http"
 	"strconv"
 
 	"landchain/config"
 	"landchain/entity"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/gin-gonic/gin"
 )
 
@@ -35,35 +37,111 @@ func GetTransationByUserID(c *gin.Context) {
 }
 
 func UpdateTransactionBuyerAccept(c *gin.Context) {
-	// รับ ID ของธุรกรรมจาก URL parameter
 	sellerId := c.Query("sellerID")
 	buyerId := c.Query("buyerID")
 	landId := c.Query("landID")
 
-	// เชื่อมต่อกับฐานข้อมูล
+	if sellerId == "" || buyerId == "" || landId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "sellerID, buyerID และ landID จำเป็น"})
+		return
+	}
+
 	db := config.DB()
 
-	// ค้นหาธุรกรรมที่ต้องการอัปเดต
+	// --- ดึง walletAddress ของ Seller ---
+	var seller entity.Users
+	if err := db.First(&seller, "id = ?", sellerId).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบผู้ขาย"})
+		return
+	}
+	walletAddress := common.HexToAddress(seller.Metamaskaddress)
+
+	// --- ดึง tokenID ของ Land จาก LandTitle ---
+	var land entity.Landtitle
+	if err := db.First(&land, "id = ?", landId).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบที่ดิน"})
+		return
+	}
+
+	tokenId := new(big.Int)
+	if _, ok := tokenId.SetString(strconv.Itoa(int(*land.TokenID)), 10); !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid tokenId"})
+		return
+	}
+
+	// --- ตรวจสอบ owner ใน Smart Contract ---
+	if ContractInstance == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "contract not initialized"})
+		return
+	}
+
+	owner, err := ContractInstance.Contract.OwnerOf(&ContractInstance.CallOpts, tokenId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถตรวจสอบเจ้าของที่ดินได้", "detail": err.Error()})
+		return
+	}
+
+	if owner != walletAddress {
+		c.JSON(http.StatusForbidden, gin.H{"error": "seller ไม่ใช่เจ้าของที่ดินนี้"})
+		return
+	}
+
+	// --- ถ้าเป็นเจ้าของจริง ค่อย Update Transaction ---
 	var existingTransaction entity.Transaction
-	if err := db.First(&existingTransaction, "seller_id = ? AND buyer_id = ? AND land_id = ?", sellerId, buyerId, landId).Error; err != nil {
+	if err := db.First(&existingTransaction, "seller_id = ? AND buyer_id = ? AND land_id = ? AND deteted_at IS NOT NULL", sellerId, buyerId, landId).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบธุรกรรมที่ต้องการอัปเดต"})
 		return
 	}
 
-	// ตั้งค่า SellerAccepted เป็น true โดยตรง
 	existingTransaction.BuyerAccepted = true
 
-	// บันทึกการอัปเดตในฐานข้อมูล
 	if err := db.Save(&existingTransaction).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถอัปเดตธุรกรรมได้"})
 		return
 	}
 
-	// ส่งคืนข้อมูลธุรกรรมที่อัปเดตแล้ว
-	c.JSON(http.StatusOK, gin.H{"transaction": existingTransaction})
+	c.JSON(http.StatusOK, gin.H{
+		"message":     "อัปเดตธุรกรรมเรียบร้อย",
+		"transaction": existingTransaction,
+	})
 }
 
-func DeleteTransaction(c *gin.Context) {
+func DeleteTransactionTodelete(c *gin.Context) {
+	transactionIDStr := c.Param("id")
+
+	if transactionIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ต้องระบุ transactionID"})
+		return
+	}
+
+	transactionID, err := strconv.Atoi(transactionIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "transactionID ต้องเป็นตัวเลข"})
+		return
+	}
+
+	db := config.DB()
+
+	// 1️⃣ Update typetransaction_id ก่อน
+	if err := db.Model(&entity.Transaction{}).
+		Where("id = ?", transactionID).
+		Update("typetransaction_id", 3).
+		Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถอัปเดตได้", "detail": err.Error()})
+		return
+	}
+
+	// 2️⃣ Delete record หลังจาก update
+	if err := db.Where("id = ?", transactionID).
+		Delete(&entity.Transaction{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถลบข้อมูลได้", "detail": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "อัปเดต typetransaction และลบข้อมูลเรียบร้อย"})
+}
+
+func DeleteTransactionToscucess(c *gin.Context) {
 	transactionIDStr := c.Param("id")
 
 	if transactionIDStr == "" {

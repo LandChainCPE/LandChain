@@ -480,31 +480,31 @@ func SetupDatabase() {
 		log.Println("✅ Landpost with tags created successfully")
 
 		db.Create(&entity.Transaction{
-			Amount:                 1500,
-			BuyerAccepted:          true,
-			SellerAccepted:         false,
+			Amount:         1500,
+			BuyerAccepted:  true,
+			SellerAccepted: false,
 			//MoneyChecked:           false,
 			LandDepartmentApproved: false,
 			//Expire:                 time.Now().AddDate(0, 0, 7),
-			TypetransactionID:      1,
-			BuyerID:                3,
-			SellerID:               2,
-			LandID:                 2,
-			TxHash: 				nil,
+			TypetransactionID: 1,
+			BuyerID:           3,
+			SellerID:          2,
+			LandID:            2,
+			TxHash:            nil,
 		})
 
 		db.Create(&entity.Transaction{
-			Amount:                 15000,
-			BuyerAccepted:          true,
-			SellerAccepted:         true,
+			Amount:         15000,
+			BuyerAccepted:  true,
+			SellerAccepted: true,
 			//MoneyChecked:           true,
 			LandDepartmentApproved: true,
 			//Expire:                 time.Now().AddDate(0, 0, 7),
-			TypetransactionID:      2,
-			BuyerID:                2,
-			SellerID:               3,
-			LandID:                 2,
-			TxHash: 				nil,
+			TypetransactionID: 2,
+			BuyerID:           2,
+			SellerID:          3,
+			LandID:            2,
+			TxHash:            nil,
 		})
 
 		db.Create(&entity.Roomchat{User1ID: 3, User2ID: 1})
