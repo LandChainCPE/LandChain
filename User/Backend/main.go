@@ -189,6 +189,7 @@ func main() {
 
 		// CONTROLLER Public Land Data
 		authorized.GET("/user/landinfo/:id", controller.GetLandInfoByTokenID)
+		authorized.GET("/landsalepost/check", controller.CheckLandsalepostByLandID)
 		authorized.GET("/user/info", controller.GetInfoUserByToken)
 
 		authorized.GET("/user/lands/requestbuy/:id", controller.GetRequestBuybyLandID)

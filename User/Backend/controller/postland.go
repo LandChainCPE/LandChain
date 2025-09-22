@@ -18,9 +18,23 @@ type PostLandRequest struct {
 }
 
 func CreateLandPost(c *gin.Context) {
+
 	var req PostLandRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ไม่สามารถอ่านข้อมูลได้"})
+		return
+	}
+
+	// ตรวจสอบว่า land_id นี้ถูกโพสต์ไปแล้วหรือยัง (1:1)
+	var count int64
+	if err := config.DB().Model(&entity.Landsalepost{}).
+		Where("land_id = ?", req.Landsalepost.LandID).
+		Count(&count).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ตรวจสอบโพสต์ที่ดินล้มเหลว"})
+		return
+	}
+	if count > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ที่ดินนี้ถูกโพสต์ขายแล้ว ไม่สามารถโพสต์ซ้ำได้"})
 		return
 	}
 
@@ -110,4 +124,21 @@ func GetAllPostLandData(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, postlands)
+}
+
+// CheckLandsalepostByLandID ตรวจสอบว่า land_id นี้ถูกโพสต์ขายแล้วหรือยัง
+func CheckLandsalepostByLandID(c *gin.Context) {
+	landID := c.Query("land_id")
+	if landID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "land_id is required"})
+		return
+	}
+
+	var post entity.Landsalepost
+	if err := config.DB().Where("land_id = ?", landID).First(&post).Error; err == nil {
+		// Found a post for this land_id
+		c.JSON(http.StatusOK, gin.H{"exists": true, "post": post})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"exists": false})
 }
