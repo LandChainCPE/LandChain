@@ -40,6 +40,7 @@
     "react-toastify": "^11.0.5",
     "styled-components": "^6.1.19",
     "sweetalert2": "^11.23.0",
+    "sweetalert2-react-content": "^5.1.0",
     "tailwindcss": "^4.1.12",
     "web3": "^4.16.0"
   },

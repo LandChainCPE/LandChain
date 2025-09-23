@@ -1352,3 +1352,14 @@ func (_Smartcontract *SmartcontractFilterer) WatchTransfer(opts *bind.WatchOpts,
 	}), nil
 }
 
+// ParseTransfer is a log parse operation binding the contract event 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef.
+//
+// Solidity: event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)
+func (_Smartcontract *SmartcontractFilterer) ParseTransfer(log types.Log) (*SmartcontractTransfer, error) {
+	event := new(SmartcontractTransfer)
+	if err := _Smartcontract.contract.UnpackLog(event, "Transfer", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}

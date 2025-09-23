@@ -62,9 +62,11 @@ function RequestSell() {
     try {
       const userInfo = await GetInfoUserByToken();
       setTokenData(userInfo);
+      console.log("TOken data:", userInfo);
       setUserID(userInfo.id); // <-- เพิ่มตรงนี้
       console.log(userInfo.id);
       const metadata = await GetLandMetadataByWallet();
+      console.log(metadata);
       setLandMetadata((metadata.metadata || []).map((item: any) => ({
         ...item,
         parsedFields: parseMetaFields(item.metaFields)
