@@ -121,6 +121,8 @@ func main() {
 		admin.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
 		admin.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)
 		admin.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
+		admin.POST("/updatepetitions", controller.UpdatePetitionStatus)
+
 	}
 
 	userOwnership := r.Group("")
@@ -141,7 +143,7 @@ func main() {
 	userToken.Use(middlewares.Authorizes())
 	userToken.Use(middlewares.CheckTokenOwnership())
 	{
-		userToken.GET("/getdatauserverification/:userid", controller.GetDataUserVerification)
+		userToken.GET("/getdatauserverification/:userid", controller.GetDataUserVerification) //ดึงข้อมูล user_verification
 		//555userToken.GET("/user/info/", controller.GetInfoUserByWalletID)
 		//555userToken.GET("/user/lands", controller.GetLandTitleInfoByWallet)
 		//555userToken.GET("/user/info", controller.GetInfoUserByToken)
@@ -157,6 +159,8 @@ func main() {
 	authorized := r.Group("")
 	authorized.Use(middlewares.Authorizes())
 	{
+		authorized.POST("/requestbuysell", controller.CreateRequestBuySellHandler)
+		//authorized.PATCH("/petitions/:id/state", controller.UpdatePetitionState)
 		authorized.GET("/petition/:user_id", controller.GetAllPetition)
 
 		authorized.GET("/petitions", controller.GetAllPetition)
@@ -212,7 +216,12 @@ func main() {
 		authorized.GET("/chat/allroom/:id", controller.GetAllRoomMessagesByUserID)
 		authorized.POST("/upload/:roomID/:userID", controller.UploadImage)
 		authorized.GET("/user/info/:id", controller.GetUserinfoByUserID)
+
 		authorized.DELETE("/user/lands/post/:landid", controller.DeleteLandsalepostByLandIDandUserID)
+
+		authorized.GET("/userinfo/:userId", controller.GetUserinfoByID)
+		authorized.GET("/landtitles/:userId", controller.GetLandtitlesByUser) //ดึงข้อมูล landtitles
+		// authorized.GET("/land_verification/:userid", controller.GetLandVerificationByUserID) //ดึงข้อมูล land_verification
 	}
 
 	r.GET("/ws/notification/:userID", controller.NotificationWS)

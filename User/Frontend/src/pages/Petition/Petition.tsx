@@ -94,7 +94,8 @@ const Petition: React.FC = () => {
       minHeight: "100vh", 
       background: "linear-gradient(135deg, rgba(23, 46, 37, 0.05) 0%, rgba(63, 86, 88, 0.08) 50%, rgba(111, 150, 155, 0.1) 100%)", 
       padding: "2rem",
-      position: "relative"
+      position: "relative",
+      fontFamily: "'Kanit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
     }}>
       {/* Background Pattern */}
       <div style={{
@@ -134,7 +135,7 @@ const Petition: React.FC = () => {
             
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", zIndex: 10 }}>
               <div>
-                <Title level={2} style={{ 
+                <h4 style={{ 
                   margin: 0, 
                   color: "#ffffff",
                   fontSize: "2.5rem",
@@ -143,7 +144,7 @@ const Petition: React.FC = () => {
                   letterSpacing: "0.02em"
                 }}>
                   📝 ยื่นคำร้องขอคัดโฉนดที่ดิน
-                </Title>
+                </h4>
               </div>
               <Button 
                 icon={<ArrowLeftOutlined />} 
@@ -652,6 +653,11 @@ const Petition: React.FC = () => {
 
       {/* Enhanced CSS Animations */}
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600;700;800&display=swap');
+        html, body, * {
+          font-family: 'Kanit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+        }
+
         @keyframes pulse {
           0%, 100% {
             opacity: 1;

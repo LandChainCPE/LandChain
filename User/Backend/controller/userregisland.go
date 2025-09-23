@@ -122,7 +122,7 @@ func GetLandtitleIdByTokenId(c *gin.Context) {
 	}
 
     c.JSON(http.StatusOK, gin.H{
-        "landtitle_id": landtitle.ID, // แก้ให้ตรงกับชื่อที่มีใน struct
+        "land_id": landtitle.ID, // แก้ให้ตรงกับชื่อที่มีใน struct
         "token_id":     landtitle.TokenID,
     })
 }

@@ -17,21 +17,22 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const location = useLocation();
-  const [user, setUser] = useState<any | null>(null); 
+  const [user, setUser] = useState<any | null>(null);
 
-  
+
   useEffect(() => {
-  async function fetchUser() {
-    try {
-      const userInfo = await GetInfoUserByWalletID();
-      setUser(userInfo);
-      
-    } catch (err) {
-      console.error("Error fetching user:", err);
+
+    async function fetchUser() {
+      try {
+        const userInfo = await GetInfoUserByWalletID();
+        setUser(userInfo);
+
+      } catch (err) {
+        console.error("Error fetching user:", err);
+      }
     }
-  }
-  fetchUser();
-}, []);
+    fetchUser();
+  }, []);
 
   // Connect WebSocket สำหรับ notification
   useEffect(() => {
@@ -178,7 +179,7 @@ const Navbar = () => {
                   >
                     จัดการข้อมูล
                   </a>
-                   <a
+                  <a
                     href="/user/chat"
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}
@@ -206,15 +207,15 @@ const Navbar = () => {
                   >
                     คำขอซื้อ/ขายที่ดิน
                   </a>
-                  <a 
-                    href="/user/appointmentstatus" 
+                  <a
+                    href="/user/appointmentstatus"
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}
                   >
                     สถานะการจองนัดหมาย
                   </a>
-                  <a 
-                    href="/user/landhistory" 
+                  <a
+                    href="/user/landhistory"
                     className="dropdown-item-landchain"
                     onClick={() => setShowDropdown(false)}
                   >
@@ -242,13 +243,13 @@ const Navbar = () => {
           <div className="mobile-menu-header">
 
             <div className="navbar-brand-section">
-              <span
-                className="navbar-brand-text"
+              <img
+                src={LogoBlack}
+                alt="LandChain Logo"
+                className="header-logo header-logo-black"
                 onClick={scrollToTop}
                 style={{ cursor: 'pointer' }}
-              >
-                LANDCHAIN
-              </span>
+              />
             </div>
             <button className="mobile-close" onClick={toggleMobileMenu}>
               <FaTimes />
@@ -273,13 +274,18 @@ const Navbar = () => {
               </Link>
             </li>
             <li className="mobile-nav-item">
-              <Link to="/appointment" className="mobile-nav-link">
+              <Link to="/user/regisland" className="mobile-nav-link">
                 นัดหมายกรมที่ดิน
               </Link>
             </li>
             <li className="mobile-nav-item">
-              <Link to="/news" className="mobile-nav-link">
-                ข่าวสาร
+              <Link to="/user/sellpostmain" className="mobile-nav-link">
+                ประกาศขายที่ดิน
+              </Link>
+            </li>
+            <li className="mobile-nav-item">
+              <Link to="/user/userdashboard" className="mobile-nav-link">
+                โปรไฟล์
               </Link>
             </li>
 

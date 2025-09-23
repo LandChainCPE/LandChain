@@ -113,6 +113,7 @@ const Chat = () => {
 
     const ws = new WebSocket(
       `ws://localhost:8080/ws/chat/${selectedRoom.ID}/${userID}`
+
     );
 
     ws.onopen = () => console.log("Connected to Chat WS");
@@ -253,6 +254,7 @@ const Chat = () => {
 
       try {
         await fetch("http://localhost:8080/notification/send", {
+
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -354,7 +356,7 @@ const Chat = () => {
         <div className="shape-2"></div>
         <div className="shape-3"></div>
       </div>
-      
+
       <Navbar />
 
       <div className="chat-main-layout">
@@ -364,12 +366,12 @@ const Chat = () => {
             <h3 className="contacts-title">Messages</h3>
             <p className="contacts-subtitle">Your conversations</p>
           </div>
-          
+
           {contacts.length > 0 ? (
             contacts.map((room) => {
               const contactUser = room.User1ID === userID ? room.User2 : room.User1;
               const unreadCount = unreadMessages[room.ID] || 0;
-              
+
               return (
                 <div
                   key={room.ID}
@@ -414,7 +416,7 @@ const Chat = () => {
                         ? `${selectedRoom.User2.Firstname} ${selectedRoom.User2.Lastname}`
                         : `${selectedRoom.User1.Firstname} ${selectedRoom.User1.Lastname}`}
                     </h4>
-                    
+
                   </div>
                 </div>
               </div>
@@ -489,12 +491,12 @@ const Chat = () => {
                     }}
                     className="message-input"
                   />
-                  
+
                   <div className="input-meta">
                     <div className="char-count">
                       {newMessage.length} / 200
                     </div>
-                    
+
                     <div className="file-input-wrapper">
                       <input
                         type="file"
@@ -506,7 +508,7 @@ const Chat = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <button
                     onClick={handleSendMessage}
                     disabled={!newMessage.trim() && !selectedFile}

@@ -1,6 +1,8 @@
 import axios from "axios";
 
+
 const apiUrl = "http://localhost:8080";
+
 
 /** ใส่เฉพาะ Authorization (อย่าใส่ Content-Type ที่นี่) */
 function getAuthHeaders(): Record<string, string> {
@@ -76,34 +78,6 @@ function LogoutWallet() {
   localStorage.removeItem("isLogin");
 }
 
-/** บันทึกข้อมูลที่ดิน (multipart/form-data) */
-// async function RegisterLand(
-//   DataCreateLand: Record<string, any>,
-//   imageFile?: File
-// ) {
-//   const formData = new FormData();
-//   Object.entries(DataCreateLand).forEach(([key, value]) => {
-//     formData.append(key, value != null ? String(value) : "");
-//   });
-//   if (imageFile) formData.append("deed_image", imageFile);
-
-//   // debug + ensure header แนบจริง
-//   const headers = { ...getAuthHeaders() };
-//   console.log("RegisterLand -> auth headers:", headers);
-
-//   try {
-//     // ส่ง explicit headers (axios จะไม่ override multipart Content-Type)
-//     const res = await api.post("/user/userregisland", formData, { headers });
-//     return { result: res.data, response: res };
-//   } catch (err: any) {
-//     const resp = err?.response;
-//     let result: any = null;
-//     try { result = resp?.data ?? null } catch { result = null }
-//     return { result, response: resp ?? err };
-//   }
-// }
-
-
 async function RegisterLand(payload: any) {
   const requestOptions = {
     method: "POST",
@@ -119,8 +93,10 @@ async function RegisterLand(payload: any) {
 
 /** ดึงจังหวัด (รองรับ AbortSignal) */
 async function GetAllProvinces(signal?: AbortSignal) {
+  const config: any = {};
+  if (signal) config.signal = signal;
   return await api
-    .get("/province", { signal })
+    .get("/province", config)
     .then((res) => res.data)
     .catch((e) => e.response);
 }
@@ -128,13 +104,18 @@ async function GetAllProvinces(signal?: AbortSignal) {
 /** ดึงอำเภอตาม province id */
 async function GetDistrict(provinceId: number, signal?: AbortSignal) {
   try {
-    const resA = await api.get(`/district/${provinceId}`, { signal });
+    const config: any = {};
+    if (signal) config.signal = signal;
+    const resA = await api.get(`/district/${provinceId}`, config);
     if (Array.isArray(resA.data) && resA.data.length) return resA.data;
-    if (Array.isArray(resA.data?.result) && resA.data.result.length) return resA.data.result;
+    const resAData: any = resA.data;
+    if (Array.isArray(resAData?.result) && resAData.result.length) return resAData.result;
   } catch (_) { }
 
-  const resB = await api.get(`/district`, { params: { province_id: provinceId }, signal });
-  const dataB = resB.data;
+  const configB: any = { params: { province_id: provinceId } };
+  if (signal) configB.signal = signal;
+  const resB = await api.get(`/district`, configB);
+  const dataB: any = resB.data;
   if (Array.isArray(dataB)) return dataB;
   if (Array.isArray(dataB?.result)) return dataB.result;
   if (Array.isArray(dataB?.data)) return dataB.data;
@@ -144,13 +125,18 @@ async function GetDistrict(provinceId: number, signal?: AbortSignal) {
 /** ดึงตำบลตาม district id */
 async function GetSubdistrict(districtId: number, signal?: AbortSignal) {
   try {
-    const resA = await api.get(`/subdistrict/${districtId}`, { signal });
+    const config: any = {};
+    if (signal) config.signal = signal;
+    const resA = await api.get(`/subdistrict/${districtId}`, config);
     if (Array.isArray(resA.data) && resA.data.length) return resA.data;
-    if (Array.isArray(resA.data?.result) && resA.data.result.length) return resA.data.result;
+    const resAData: any = resA.data;
+    if (Array.isArray(resAData?.result) && resAData.result.length) return resAData.result;
   } catch (_) { }
 
-  const resB = await api.get(`/subdistrict`, { params: { district_id: districtId }, signal });
-  const dataB = resB.data;
+  const configB: any = { params: { district_id: districtId } };
+  if (signal) configB.signal = signal;
+  const resB = await api.get(`/subdistrict`, configB);
+  const dataB: any = resB.data;
   if (Array.isArray(dataB)) return dataB;
   if (Array.isArray(dataB?.result)) return dataB.result;
   if (Array.isArray(dataB?.data)) return dataB.data;
@@ -178,6 +164,17 @@ async function GetUserinfoByID(userId: string) {
   return { response, result };
 }
 
+/** ดึง landtitle ของ user ที่ login (ใช้ token ใน localStorage) */
+async function GetLandtitlesByUser(userId: string) {
+  const response = await fetch(`${apiUrl}/landtitles/${userId}`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+  const result = await response.json();
+  return { response, result };
+}
+
+
 export {
   getAuthHeaders,
   CreateAccount,
@@ -189,4 +186,5 @@ export {
   GetDistrict,
   GetSubdistrict,
   GetUserinfoByID,
+  GetLandtitlesByUser,
 };

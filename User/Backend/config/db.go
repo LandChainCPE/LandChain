@@ -352,7 +352,7 @@ func SetupDatabase() {
 			TitleDeedNumber:    "12345",
 			Volume:             "10",
 			Page:               "20",
-			Rai:                5,
+			Rai:                3,
 			Ngan:               2,
 			SquareWa:           50,
 			Status_verify:      false,
@@ -374,7 +374,7 @@ func SetupDatabase() {
 			TitleDeedNumber:    "12345",
 			Volume:             "10",
 			Page:               "20",
-			Rai:                5,
+			Rai:                2,
 			Ngan:               2,
 			SquareWa:           50,
 			Status_verify:      false,
@@ -409,11 +409,11 @@ func SetupDatabase() {
 			Uuid:               uuid.New().String(),
 		})
 
-		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
-		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 3, SellerID: 4, RequestBuySellTypeID: 1})
-		db.Create(&entity.RequestBuySell{LandID: 2, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
-		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
-		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
+		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 2, SellerID: 4})
+		// db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 3, SellerID: 4, RequestBuySellTypeID: 1})
+		// db.Create(&entity.RequestBuySell{LandID: 2, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
+		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
+		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
 
 		// ✅ Seed States
 		db.Create(&entity.State{Name: "รอตรวจสอบ", Color: "orange"})
@@ -423,6 +423,17 @@ func SetupDatabase() {
 		log.Println("✅ States have been seeded successfully")
 
 		// ✅ Seed Petition
+		db.Create(&entity.Petition{
+			FirstName:   "มาลี",
+			LastName:    "มาดี",
+			Tel:         "0987654321",
+			Email:       "j@gmail.com",
+			Description: "โฉนดเก่าหาย",
+			Date:        "2025-07-31",
+			Topic:       "ขอคัดสำเนาโฉนด",
+			StateID:     1,
+			UserID:      1,
+		})
 		db.Create(&entity.Petition{
 			FirstName:   "มาลี",
 			LastName:    "มาดี",
@@ -515,8 +526,10 @@ func SetupDatabase() {
 		db.Create(&entity.Message{Content: "Hello", RoomID: 2, SenderID: 3})
 		db.Create(&entity.Message{Content: "Hi", RoomID: 1, SenderID: 2})
 
-		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
-		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
+		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
+		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
+		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2})
+		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3})
 		// 🔸 สร้าง Roomchat หลังจากสร้าง Landsalepost แล้ว
 		createRoomchatsAndMessages()
 	}

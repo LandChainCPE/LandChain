@@ -110,9 +110,9 @@ func CheckBackendWallet() error {
 	fmt.Println("🔹 Backend wallet address:", address.Hex())
 
 	// เชื่อม RPC
-	rpcURL := os.Getenv("HOLESKY_RPC")
+	rpcURL := os.Getenv("HOODI_RPC")
 	if rpcURL == "" {
-		return fmt.Errorf("HOLESKY_RPC ยังไม่ถูกตั้งค่า")
+		return fmt.Errorf("HOODI_RPC ยังไม่ถูกตั้งค่า")
 	}
 
 	client, err := ethclient.Dial(rpcURL)

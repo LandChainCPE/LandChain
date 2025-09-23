@@ -1,4 +1,6 @@
+
 const apiUrl = "http://localhost:8080";
+
 import axios from "axios";
 import type { BookingInterface } from "../../../interfaces/Booking";
 import type { AvailableSlotsResponse } from "../../../interfaces/types";
@@ -13,17 +15,17 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
     const tokenType = localStorage.getItem("token_type") || "Bearer";
-    
+
     // ตรวจสอบว่า headers มีอยู่หรือไม่ ถ้าไม่มีให้สร้างใหม่
     if (!config.headers) {
       config.headers = {};
     }
-    
+
     if (token) {
       config.headers.Authorization = `${tokenType} ${token}`;
     }
     config.headers["Content-Type"] = "application/json";
-    
+
     return config;
   },
   (error) => {
@@ -147,7 +149,7 @@ export async function GetAvailableSlots(
 }
 
 export const GetBookingStatus = async (
-userID: number, branchID: number, date: string) => {
+  userID: number, branchID: number, date: string) => {
   try {
     const response = await api.get("/bookings/status", {
       params: {
@@ -260,7 +262,7 @@ export async function getAllLocations() {
     return response.data;
   } catch (error: any) {
     console.error("Error fetching all locations:", error);
-    
+
     // ส่งกลับข้อมูลที่มีรูปแบบเดียวกัน
     if (error.response) {
       return error.response.data;
@@ -278,7 +280,7 @@ export async function getLocationsByLandSalePostId(landsalepostId: number) {
     return response.data;
   } catch (error: any) {
     console.error("Error fetching locations by land sale post id:", error);
-    
+
     if (error.response) {
       return error.response.data;
     } else {
