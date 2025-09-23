@@ -18,7 +18,7 @@ const Layout: React.FC = () => {
       
       {/* Sidebar */}
       <div className={`
-        fixed lg:static inset-y-0 left-0 z-50 w-64 
+        fixed inset-y-0 left-0 z-50 w-64 
         transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
         lg:translate-x-0 transition-transform duration-200 ease-in-out
       `}>
@@ -26,7 +26,7 @@ const Layout: React.FC = () => {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
         {/* Mobile header */}
         <div className="lg:hidden bg-white shadow-sm border-b border-gray-200 px-4 py-3">
           <div className="flex items-center justify-between">
