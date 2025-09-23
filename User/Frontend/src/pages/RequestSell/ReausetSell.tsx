@@ -486,6 +486,8 @@ function RequestSell() {
                       value={acceptPriceTHB}
                       onChange={(e) => setAcceptPriceTHB(e.target.value)}
                       className="form-control-glass-modern"
+                      min={10000}        // ราคาขั้นต่ำ
+                      max={1000000}  // ราคาสูงสุด
                     />
                     <div className="input-highlight-modern"></div>
                   </div>
