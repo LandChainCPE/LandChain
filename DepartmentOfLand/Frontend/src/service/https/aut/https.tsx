@@ -74,11 +74,42 @@ async function getAllLandData() {
     return { response, result };
 };
 
+async function getTransactionLand() {
+    const requestOptions = {
+        method: "GET",
+        headers: getAuthHeaders(),
+    };
+
+    let response = await fetch(`${apiUrl}/gettransactionland`, requestOptions)
+    const result = await response.json();
+    // console.log(response);
+    // console.log(result);
+
+    return { result };
+};
+
+
+
+async function DepartmentOfLandVerifyTransaction(transaction_id: number) {
+    const requestOptions = {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ transaction_id }),
+    };
+
+    let response = await fetch(`${apiUrl}/departmentoflandverifytransaction`, requestOptions);
+    const result = await response.json();
+
+    return { result };
+};
+
 
 export {
     getQueueByDate,
     getDataUserForVerify,
     VerifyLandTitle,
     VerifyWalletID,
-    getAllLandData
+    getAllLandData,
+    getTransactionLand,
+    DepartmentOfLandVerifyTransaction
 }

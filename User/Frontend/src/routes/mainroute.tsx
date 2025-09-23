@@ -3,7 +3,7 @@ import { useRoutes, type RouteObject, useNavigate, useLocation } from "react-rou
 import Loadable from "../component/third-patry/Loadable";
 import { CheckVerify } from "../service/https/bam/bam";
 import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
+// import withReactContent from "sweetalert2-react-content";
 
 const Login = Loadable(lazy(() => import("../pages/LoginRegister/LoginMetamask")));
 const MainPage = Loadable(lazy(() => import("../pages/MainPage/MainPage")));
