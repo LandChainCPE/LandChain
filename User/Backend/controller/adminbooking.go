@@ -7,6 +7,7 @@ import (
 	"landchain/entity"
 	"math/rand"
 	"net/http"
+	"os"
 	"strings"
 
 	"golang.org/x/crypto/sha3"
@@ -105,7 +106,7 @@ func VerifyWalletID(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "booking has no user"})
 		return
 	}
-	walletID := strings.TrimSpace(booking.Users.Metamaskaddress)
+	walletID := strings.ToLower(strings.TrimSpace(booking.Users.Metamaskaddress))
 	if walletID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "user has no metamask address"})
 		return
@@ -147,8 +148,8 @@ func VerifyWalletID(c *gin.Context) {
 	finalHash := crypto.Keccak256(msg)
 
 	// 6. sign hash นี้ ด้วย private key ของเซิร์ฟเวอร์ (ตัวอย่าง)
-	privateKeyHex := "11c1f346bfe76f45058d04a7d42ad9a70d51f597b5880bc41ae7af819ab8531d"
-	privateKey, err := crypto.HexToECDSA(privateKeyHex)
+	privateKeyHex := os.Getenv("PRIVATE_KEY")
+	privateKey, err := crypto.HexToECDSA(strings.TrimPrefix(privateKeyHex, "0x"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid server private key"})
 		return
@@ -251,7 +252,7 @@ func VerifyLandtitleID(c *gin.Context) {
 		", Province:" + land.Province.NameTh +
 		", UUID:" + uuidStr
 
-	walletID := land.User.Metamaskaddress
+	walletID := strings.ToLower(land.User.Metamaskaddress)
 	if walletID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User has no wallet address"})
 		return
@@ -270,8 +271,8 @@ func VerifyLandtitleID(c *gin.Context) {
 	ethHash := crypto.Keccak256Hash(msg)
 
 	// เซ็น hash ด้วย private key ของระบบ
-	privateKeyHex := "11c1f346bfe76f45058d04a7d42ad9a70d51f597b5880bc41ae7af819ab8531d"
-	privateKey, err := crypto.HexToECDSA(privateKeyHex)
+	privateKeyHex := os.Getenv("PRIVATE_KEY")
+	privateKey, err := crypto.HexToECDSA(strings.TrimPrefix(privateKeyHex, "0x"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid server private key"})
 		return
