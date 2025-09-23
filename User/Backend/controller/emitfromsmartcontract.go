@@ -31,7 +31,7 @@ const contractABI = `[
 ]`
 
 func ListenSmartContractEvents() {
-	rpcUrl := os.Getenv("HOLESKY_RPC_WWS")
+	rpcUrl := os.Getenv("HOODI_RPC_WWS")
 	contractAddress := os.Getenv("CONTRACT_ADDRESS")
 	if rpcUrl == "" || contractAddress == "" {
 		log.Fatal("Please set RPC_URL and CONTRACT_ADDRESS in environment variables")

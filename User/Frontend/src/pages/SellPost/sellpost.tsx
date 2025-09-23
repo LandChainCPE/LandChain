@@ -21,7 +21,7 @@ async function saveLocations(
   const API_BASE =
     opts?.apiBase ??
     (import.meta as any)?.env?.VITE_API_BASE_URL ??
-    "http://10.1.63.218:8080";
+    "http://localhost:8080";
 
   const token = opts?.token ?? localStorage.getItem("token") ?? "";
   const tokenType = opts?.tokenType ?? localStorage.getItem("token_type") ?? "Bearer";

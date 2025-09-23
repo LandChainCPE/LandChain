@@ -8,7 +8,7 @@ import { getAllLocations, getLocationsByLandSalePostId } from '../../service/htt
 mapboxgl.accessToken = 'pk.eyJ1Ijoiam9oYXJ0MjU0NiIsImEiOiJjbWVmZ3YzMGcwcTByMm1zOWRkdjJkNTd0In0.DBDjy1rBDmc8A4PN3haQ4A';
 
 
-const apiUrl = "http://10.1.63.218:8080";
+const apiUrl = "http://localhost:8080";
 
 
 interface Coordinate {

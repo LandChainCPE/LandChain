@@ -3,10 +3,10 @@ import { Button, Form, Container, Card } from "react-bootstrap";
 import Navbar from "../../component/user/Navbar";
 import { GetLandHistory, GetInfoUsersByWallets } from "../../service/https/bam/bam";
 import "./LandHistory.css";
-import CheckLandowner from "../RequestSell/Checklandowner";
+
 
 interface OwnerInfo {
-  wallet: string;
+
   name?: string;
 }
 
@@ -36,6 +36,7 @@ const LandHistory: React.FC = () => {
       let ownerWallets: string[] = data.owners || [];
       if (ownerWallets.length <= 1) {
         // ไม่มีข้อมูล หรือเหลือแค่คนแรกที่เป็นข้อมูลผิด
+        console.log("owner: " ,ownerWallets)
         setOwners([]);
         return;
       }
@@ -247,7 +248,7 @@ const LandHistory: React.FC = () => {
                     
                     <div className="card-body-modern">
                       <div className="info-grid">
-                        <div className="info-card wallet-info">
+                        {/* <div className="info-card wallet-info">
                           <div className="info-header">
                             <div className="info-icon wallet-icon">
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -268,7 +269,7 @@ const LandHistory: React.FC = () => {
                               </svg>
                             </button>
                           </div>
-                        </div>
+                        </div> */}
 
                         <div className="info-card owner-info">
                           <div className="info-header">
@@ -308,7 +309,7 @@ const LandHistory: React.FC = () => {
           </div>
         )}
       </Container>
-      <CheckLandowner/>
+      
     </div>
   );
 };
