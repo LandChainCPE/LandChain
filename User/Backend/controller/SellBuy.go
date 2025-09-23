@@ -469,7 +469,7 @@ func GetRequestBuybyLandID(c *gin.Context) {
 	c.JSON(http.StatusOK, requests)
 }
 
-func DeleteLandsalepostByLandID(c *gin.Context) {
+func DeleteLandsalepostByLandIDandUserID(c *gin.Context) {
 	tokenID := c.Query("tokenID")
 
 	if tokenID == "" {
