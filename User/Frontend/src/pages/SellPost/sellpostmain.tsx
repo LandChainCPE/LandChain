@@ -1,8 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Search, MapPin, Grid3X3, List, Filter, SortAsc } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import Navbar from "../../component/user/Navbar";
+import { Search, MapPin, Grid3X3, List} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GetAllPostLandData } from "../../service/https/jib/jib";
-import Navbar from "../../component/user/Navbar";
+
+import "./sellpostmain.css";
+import Loader from "../../component/third-patry/Loader";
+import "../../component/third-patry/Loader.css";
+
 
 type Land = {
   ID: number;
@@ -142,358 +147,239 @@ const SellPostMain = () => {
   }, [lands, searchTerm, sortBy]);
 
   if (loading) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(to bottom right, #dbeafe, #e0e7ff, #f3e8ff)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div style={{
-          textAlign: 'center',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '24px'
-        }}>
-          <div style={{
-            position: 'relative',
-            width: '96px',
-            height: '96px',
-            margin: '0 auto'
-          }}>
-            <div style={{
-              position: 'absolute',
-              inset: '0',
-              border: '4px solid #c7d2fe',
-              borderRadius: '50%'
-            }}></div>
-            <div style={{
-              position: 'absolute',
-              inset: '0',
-              border: '4px solid #2563eb',
-              borderRadius: '50%',
-              borderTopColor: 'transparent',
-              animation: 'spin 1s linear infinite'
-            }}></div>
-          </div>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px'
-          }}>
-            <h3 style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              color: '#1f2937'
-            }}>กำลังโหลดข้อมูลที่ดิน</h3>
-            <p style={{
-              color: '#4b5563'
-            }}>โปรดรอสักครู่...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(to bottom right, #dbeafe, #e0e7ff, #f3e8ff)'
-    }}>
+    <>
       <Navbar />
-      {/* Enhanced Header */}
-      <div style={{
-        position: 'relative',
-        background: 'linear-gradient(to right, #172E25, #3F5658, #6F969B)',
-        color: 'white',
-        overflow: 'hidden',
-        paddingTop: '72px' // Add top padding to avoid Navbar overlap
-      }}>
-        {/* Background Pattern */}
-        <div style={{
-          position: 'absolute',
-          inset: '0',
-          background: 'rgba(0, 0, 0, 0.1)'
-        }}></div>
-        <div style={{
-          position: 'absolute',
-          inset: '0',
-          background: 'linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent)'
-        }}></div>
+      <div className="regis-land-container">
+      <div className="floating-shapes">
+        <div className="shape-1"></div>
+        <div className="shape-2"></div>
+        <div className="shape-3"></div>
+        <div className="shape-4"></div>
+      </div>
 
-        <div style={{
-          position: 'relative',
-          maxWidth: '1280px',
-          margin: '0 auto',
-          padding: '40px 24px'
-        }}>
-          <div style={{
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '32px'
-          }}>
-            {/* Title Section */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px'
-            }}>
-              <h1 style={{
-                fontSize: '50px',
-                fontWeight: 'bold',
-                background: 'linear-gradient(to right, white, #dbeafe, #c7d2fe)',
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                color: 'transparent',
-                fontFamily: "kanit"
-              }}>
-                ประกาศขายที่ดิน
-              </h1>
-            </div>
 
-            {/* CTA Button */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center'
-            }}>
-              <button
-                onClick={handlePostLand}
+      {/* Hero Section */}
+      <div className="hero-section">
+        <div className="hero-content">
+          <h1 className="hero-title">
+            <span className="gradient-text">ประกาศขายที่ดิน</span>
+          </h1>
+          <button className="btn-modern" style={{ marginTop: 32 }} onClick={handlePostLand}>
+            <span style={{ fontSize: 24, marginRight: 8 }}>+</span> ประกาศขายที่ดิน
+          </button>
+        </div>
+      </div>
+
+      {/* Search & Filter Bar */}
+      <div className="main-container" style={{ maxWidth: 1200, margin: '0 auto', paddingTop: 0 }}>
+        <div className="glass-card" style={{ margin: '0 auto', maxWidth: 900, padding: 32, marginBottom: 32 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ position: 'relative', flex: 1, minWidth: 260, maxWidth: 400 }}>
+              <Search style={{ position: 'absolute', left: 20, top: 18, width: 22, height: 22, color: '#6F969B', zIndex: 2 }} />
+              <input
+                className="modern-select"
+                type="text"
+                placeholder="ค้นหาที่ดิน, จังหวัด, อำเภอ, ตำบล..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
                 style={{
-                  position: 'relative',
-                  padding: '10px 20px',
-                  background: 'linear-gradient(to right, #10b981, #059669)',
-                  color: 'white',
-                  fontWeight: 'bold',
-                  borderRadius: '24px',
-                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 50px rgba(16, 185, 129, 0.25)',
-                  transition: 'all 0.3s ease',
-                  transform: 'translateY(0) scale(1)',
+                  width: '100%',
+                  padding: '14px 16px 14px 48px',
+                  fontSize: 16,
                   border: 'none',
-                  cursor: 'pointer'
+                  outline: 'none',
+                  background: 'transparent',
+                  color: '#172E25',
+                  fontWeight: 500
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'linear-gradient(to right, #059669, #047857)';
-                  e.currentTarget.style.transform = 'translateY(-4px) scale(1.05)';
+              />
+            </div>
+            <select
+              className="modern-select"
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value as any)}
+              style={{ minWidth: 180 }}
+            >
+              <option value="newest">🕒 ใหม่ล่าสุด</option>
+              <option value="price-low">💰 ราคาต่ำ - สูง</option>
+              <option value="price-high">💎 ราคาสูง - ต่ำ</option>
+            </select>
+            <div style={{ display: 'flex', background: '#F3F4F6', borderRadius: 12, padding: 4 }}>
+              <button
+                className="btn-modern"
+                style={{
+                  background: viewMode === 'grid' ? 'var(--gradient-primary)' : 'transparent',
+                  color: viewMode === 'grid' ? 'white' : '#6F969B',
+                  minWidth: 0, padding: 10, borderRadius: 10, fontSize: 18, boxShadow: 'none', marginRight: 4
                 }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'linear-gradient(to right, #10b981, #059669)';
-                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                }}
+                onClick={() => setViewMode('grid')}
               >
-                <span style={{
-                  position: 'relative',
-                  zIndex: 10,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  fontSize: '18px'
-                }}>
-                  <span style={{ fontSize: '32px' }}>+</span>
-                  ประกาศขายที่ดิน
-                </span>
+                <Grid3X3 style={{ width: 20, height: 20 }} />
+              </button>
+              <button
+                className="btn-modern"
+                style={{
+                  background: viewMode === 'list' ? 'var(--gradient-primary)' : 'transparent',
+                  color: viewMode === 'list' ? 'white' : '#6F969B',
+                  minWidth: 0, padding: 10, borderRadius: 10, fontSize: 18, boxShadow: 'none'
+                }}
+                onClick={() => setViewMode('list')}
+              >
+                <List style={{ width: 20, height: 20 }} />
               </button>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Advanced Search and Filter Bar */}
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.9)',
-        backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid #e5e7eb',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-      }}>
-        <div style={{
-          maxWidth: '1280px',
-          margin: '0 auto',
-          padding: '10px 15px'
-        }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
-            alignItems: 'center'
-          }}>
-            {/* Enhanced Search Bar */}
-            <div style={{
-              position: 'relative',
-              flex: 1,
-              maxWidth: '768px',
-              width: '100%'
-            }}>
-              <div style={{
-                position: 'absolute',
-                top: '0',
-                bottom: '0',
-                left: '0',
-                paddingLeft: '24px',
-                display: 'flex',
-                alignItems: 'center',
-                pointerEvents: 'none'
-              }}>
-                <Search style={{
-                  height: '24px',
-                  width: '24px',
-                  color: '#3b82f6'
-                }} />
+        {/* Main Content */}
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          {filteredLands.length === 0 ? (
+            <div className="glass-card" style={{ textAlign: 'center', padding: 48, margin: '0 auto', maxWidth: 500 }}>
+              <div style={{ width: 80, height: 80, margin: '0 auto 20px', background: 'var(--gradient-light)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Search style={{ width: 40, height: 40, color: '#6F969B' }} />
               </div>
-              <input
-                type="text"
-                placeholder="ค้นหาที่ดิน, จังหวัด, อำเภอ, ตำบล..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  paddingLeft: '64px',
-                  paddingRight: '32px',
-                  paddingTop: '16px',
-                  paddingBottom: '16px',
-                  fontSize: '16px',
-                  color: '#111827',
-                  background: 'white',
-                  border: '2px solid #d1d5db',
-                  borderRadius: '20px',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-                  outline: 'none'
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = '#3b82f6';
-                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(59, 130, 246, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1)';
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1)';
-                }}
-              />
+              <h3 style={{ fontSize: 24, fontWeight: 700, color: '#172E25', marginBottom: 12 }}>ไม่พบผลลัพธ์</h3>
+              <p style={{ fontSize: 16, color: '#3F5658', marginBottom: 24 }}>
+                {searchTerm ? `ไม่พบที่ดินที่ตรงกับ "${searchTerm}"` : "ยังไม่มีประกาศขายที่ดิน"}
+              </p>
+              <button className="btn-modern" onClick={() => setSearchTerm("")}>ดูทั้งหมด</button>
             </div>
-
-            {/* Controls */}
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '12px'
-            }}>
-              {/* Sort Dropdown */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                style={{
-                  padding: '12px 20px',
-                  background: 'white',
-                  border: '2px solid #d1d5db',
-                  borderRadius: '12px',
-                  transition: 'all 0.2s ease',
-                  color: '#374151',
-                  fontWeight: '600',
-                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-                  cursor: 'pointer',
-                  outline: 'none'
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = '#3b82f6';
-                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(59, 130, 246, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1)';
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1)';
-                }}
-              >
-                <option value="newest">🕒 ใหม่ล่าสุด</option>
-                <option value="price-low">💰 ราคาต่ำ - สูง</option>
-                <option value="price-high">💎 ราคาสูง - ต่ำ</option>
-              </select>
-
-              {/* View Toggle */}
-              <div style={{
-                display: 'flex',
-                background: '#f3f4f6',
-                borderRadius: '12px',
-                padding: '6px',
-                boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)'
-              }}>
-                <button
-                  onClick={() => setViewMode("grid")}
-                  style={{
-                    padding: '12px',
-                    borderRadius: '8px',
-                    transition: 'all 0.2s ease',
-                    background: viewMode === "grid" ? '#3b82f6' : 'transparent',
-                    color: viewMode === "grid" ? 'white' : '#6b7280',
-                    boxShadow: viewMode === "grid" ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none',
-                    transform: viewMode === "grid" ? 'scale(1.05)' : 'scale(1)',
-                    border: 'none',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (viewMode !== "grid") {
-                      e.currentTarget.style.color = '#374151';
-                      e.currentTarget.style.background = '#e5e7eb';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (viewMode !== "grid") {
-                      e.currentTarget.style.color = '#6b7280';
-                      e.currentTarget.style.background = 'transparent';
-                    }
-                  }}
-                >
-                  <Grid3X3 style={{ width: '20px', height: '20px' }} />
-                </button>
-                <button
-                  onClick={() => setViewMode("list")}
-                  style={{
-                    padding: '12px',
-                    borderRadius: '8px',
-                    transition: 'all 0.2s ease',
-                    background: viewMode === "list" ? '#3b82f6' : 'transparent',
-                    color: viewMode === "list" ? 'white' : '#6b7280',
-                    boxShadow: viewMode === "list" ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none',
-                    transform: viewMode === "list" ? 'scale(1.05)' : 'scale(1)',
-                    border: 'none',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (viewMode !== "list") {
-                      e.currentTarget.style.color = '#374151';
-                      e.currentTarget.style.background = '#e5e7eb';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (viewMode !== "list") {
-                      e.currentTarget.style.color = '#6b7280';
-                      e.currentTarget.style.background = 'transparent';
-                    }
-                  }}
-                >
-                  <List style={{ width: '20px', height: '20px' }} />
-                </button>
-              </div>
+          ) : viewMode === 'grid' ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 32 }}>
+              {filteredLands.map(land => {
+                const addr = addressText(land);
+                return (
+                  <div
+                    key={land.ID}
+                    className="glass-card land-card-grid"
+                  >
+                    <div className="land-card-image-container">
+                      <img
+                        src={land.Images && land.Images.length > 0 ? land.Images[0] : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='%236b7280'%3E ไม่มีรูปภาพ %3C/text%3E%3C/svg%3E"}
+                        alt={land.Name ?? 'land'}
+                        onError={e => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='%236b7280'%3E ไม่มีรูปภาพ %3C/text%3E%3C/svg%3E";
+                        }}
+                        className="land-card-image"
+                      />
+                      {land.Price != null && (
+                        <div className="land-card-price-badge">
+                          ฿{Number(land.Price).toLocaleString()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="land-card-content">
+                      <h3 className="land-card-title">{land.Name || 'ชื่อที่ดินไม่ระบุ'}</h3>
+                      <div className="land-card-location">
+                        <MapPin className="land-card-location-icon" />
+                        <span className="land-card-location-text">{addr || 'ไม่ระบุที่อยู่'}</span>
+                      </div>
+                      {land.Landtitle && (
+                        <div className="status-badge success land-card-size">
+                          📏 {[
+                            land.Landtitle.Rai && `${land.Landtitle.Rai} ไร่`,
+                            land.Landtitle.Ngan && `${land.Landtitle.Ngan} งาน`,
+                            land.Landtitle.SquareWa && `${land.Landtitle.SquareWa} ตร.วา`,
+                          ].filter(Boolean).join(' ') || 'ไม่ระบุขนาด'}
+                        </div>
+                      )}
+                      {land.Tag && land.Tag.length > 0 && (
+                        <div className="land-card-tags">
+                          {land.Tag.slice(0, 3).map((tag, idx) => (
+                            <span key={idx} className="status-badge pending land-card-tag">{tag}</span>
+                          ))}
+                          {land.Tag.length > 3 && (
+                            <span className="status-badge land-card-tag-more">
+                              +{land.Tag.length - 3} เพิ่มเติม
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      <button
+                        className="btn-modern"
+                        style={{ marginTop: 16, width: '100%' }}
+                        onClick={() => navigate(`/user/landdetail/${land.ID}`)}
+                      >
+                        รายละเอียด
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          </div>
-
-          {/* Results Count */}
-          <div style={{
-            marginTop: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}>
-
-          </div>
+          ) : (
+            <div className="land-card-list-container">
+              {filteredLands.map(land => {
+                const addr = addressText(land);
+                return (
+                  <div
+                    key={land.ID}
+                    className="glass-card land-card-list"
+                  >
+                    <div className="land-card-list-image-container">
+                      <img
+                        src={land.Images && land.Images.length > 0 ? land.Images[0] : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect width='200' height='150' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='14' fill='%236b7280'%3E ไม่มีรูปภาพ %3C/text%3E%3C/svg%3E"}
+                        alt={land.Name ?? 'land'}
+                        onError={e => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect width='200' height='150' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='14' fill='%236b7280'%3E ไม่มีรูปภาพ %3C/text%3E%3C/svg%3E";
+                        }}
+                        className="land-card-list-image"
+                      />
+                    </div>
+                    <div className="land-card-list-content">
+                      <h3 className="land-card-title">{land.Name || 'ชื่อที่ดินไม่ระบุ'}</h3>
+                      <div className="land-card-location">
+                        <MapPin className="land-card-location-icon" />
+                        <span className="land-card-location-text">{addr || 'ไม่ระบุที่อยู่'}</span>
+                      </div>
+                      {land.Landtitle && (
+                        <div className="status-badge success land-card-size">
+                          📏 {[
+                            land.Landtitle.Rai && `${land.Landtitle.Rai} ไร่`,
+                            land.Landtitle.Ngan && `${land.Landtitle.Ngan} งาน`,
+                            land.Landtitle.SquareWa && `${land.Landtitle.SquareWa} ตร.วา`,
+                          ].filter(Boolean).join(' ') || 'ไม่ระบุขนาด'}
+                        </div>
+                      )}
+                      {land.Tag && land.Tag.length > 0 && (
+                        <div className="land-card-tags">
+                          {land.Tag.slice(0, 5).map((tag, idx) => (
+                            <span key={idx} className="status-badge pending land-card-tag">{tag}</span>
+                          ))}
+                        </div>
+                      )}
+                      <button
+                        className="btn-modern"
+                        style={{ marginTop: 16, width: '100%' }}
+                        onClick={() => navigate(`/user/landdetail/${land.ID}`)}
+                      >
+                        รายละเอียด
+                      </button>
+                    </div>
+                    {land.Price != null && (
+                      <div className="land-card-list-price">
+                        <div className="land-card-list-price-value">
+                          ฿{Number(land.Price).toLocaleString()}
+                        </div>
+                        <div className="land-card-list-price-label">ราคาขาย</div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Main Content */}
-      <div style={{
-        maxWidth: '1280px',
-        margin: '0 auto',
-        padding: '48px 24px'
-      }}>
+      </div>
+    </>
+  );
         {filteredLands.length === 0 ? (
           /* Empty State */
           <div style={{
@@ -907,18 +793,8 @@ const SellPostMain = () => {
               );
             })}
           </div>
-        )}
-      </div>
-
-      {/* Add CSS for spin animation
-      <style jsx>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style> */}
-    </div>
-  );
-}
+  )}
+      {/* ...existing code... */}
+    }
 
 export default SellPostMain;

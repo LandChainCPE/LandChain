@@ -24,18 +24,14 @@ import (
 )
 
 var ContractInstance *smartcontract.SmartcontractSession
-
-// type WalletRequest struct {
-//     Wallet string `json:"wallet"`
-// }
-
+// ปรับ InitContract ให้รองรับ Hoodi
 func InitContract() {
-	rpcURL := os.Getenv("HOLESKY_RPC")
+	rpcURL := os.Getenv("HOODI_RPC")
 	contractAddr := os.Getenv("CONTRACT_ADDRESS")
 
 	client, err := ethclient.Dial(rpcURL)
 	if err != nil {
-		log.Fatalf("เชื่อมต่อ Holesky RPC ไม่สำเร็จ: %v", err)
+		log.Fatalf("เชื่อมต่อ Hoodi RPC ไม่สำเร็จ: %v", err)
 	}
 
 	address := common.HexToAddress(contractAddr)
@@ -51,10 +47,8 @@ func InitContract() {
 		log.Fatalf("Invalid private key: %v", err)
 	}
 
-	chainID, err := client.ChainID(context.Background())
-	if err != nil {
-		log.Fatalf("ดึง chain ID ไม่สำเร็จ: %v", err)
-	}
+	// Hoodi RPC ไม่รองรับ eth_chainId ให้ hardcode chainId แทน
+	chainID := big.NewInt(560048) // ใส่ chainId ของ Hoodi ที่ถูกต้อง
 
 	auth, err := bind.NewKeyedTransactorWithChainID(key, chainID)
 	if err != nil {
@@ -63,11 +57,12 @@ func InitContract() {
 
 	// ✅ ตั้ง gas limit และ gas price
 	auth.GasLimit = uint64(300_000)
-	gasPrice, err := client.SuggestGasPrice(context.Background())
-	if err != nil {
-		log.Fatalf("ดึง gas price ไม่สำเร็จ: %v", err)
-	}
-	auth.GasPrice = gasPrice
+	// gasPrice, err := client.SuggestGasPrice(context.Background())
+	// if err != nil {
+	//     log.Fatalf("ดึง gas price ไม่สำเร็จ: %v", err)
+	// }
+	// auth.GasPrice = gasPrice
+	auth.GasPrice = big.NewInt(20000000000) // 20 Gwei
 
 	session := &smartcontract.SmartcontractSession{
 		Contract: contract,

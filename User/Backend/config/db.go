@@ -352,7 +352,7 @@ func SetupDatabase() {
 			TitleDeedNumber:    "12345",
 			Volume:             "10",
 			Page:               "20",
-			Rai:                5,
+			Rai:                3,
 			Ngan:               2,
 			SquareWa:           50,
 			Status_verify:      false,
@@ -374,7 +374,7 @@ func SetupDatabase() {
 			TitleDeedNumber:    "12345",
 			Volume:             "10",
 			Page:               "20",
-			Rai:                5,
+			Rai:                2,
 			Ngan:               2,
 			SquareWa:           50,
 			Status_verify:      false,
@@ -409,11 +409,11 @@ func SetupDatabase() {
 			Uuid:               uuid.New().String(),
 		})
 
-		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
-		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 3, SellerID: 4, RequestBuySellTypeID: 1})
-		db.Create(&entity.RequestBuySell{LandID: 2, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
-		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
-		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
+		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 2, SellerID: 4})
+		// db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 3, SellerID: 4, RequestBuySellTypeID: 1})
+		// db.Create(&entity.RequestBuySell{LandID: 2, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
+		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
+		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
 
 		// ✅ Seed States
 		db.Create(&entity.State{Name: "รอตรวจสอบ", Color: "orange"})
@@ -423,6 +423,17 @@ func SetupDatabase() {
 		log.Println("✅ States have been seeded successfully")
 
 		// ✅ Seed Petition
+		db.Create(&entity.Petition{
+			FirstName:   "มาลี",
+			LastName:    "มาดี",
+			Tel:         "0987654321",
+			Email:       "j@gmail.com",
+			Description: "โฉนดเก่าหาย",
+			Date:        "2025-07-31",
+			Topic:       "ขอคัดสำเนาโฉนด",
+			StateID:     1,
+			UserID:      1,
+		})
 		db.Create(&entity.Petition{
 			FirstName:   "มาลี",
 			LastName:    "มาดี",
@@ -447,64 +458,64 @@ func SetupDatabase() {
 		log.Println("✅ Tags have been inserted successfully")
 
 		// ✅ Seed Landpost
-		post := entity.Landsalepost{
-			FirstName:     "มาลี",
-			LastName:      "มาดี",
-			PhoneNumber:   "0987654321",
-			Name:          "สวนคุณตา",
-			Price:         120000,
-			ProvinceID:    12,
-			DistrictID:    144,
-			SubdistrictID: 1077,
-			LandID:        1,
-			UserID:        1,
-		}
-		db.Create(&post)
-
-		// เพิ่มรูปภาพ (Photoland)
-		// photos := []entity.Photoland{
-		// 	{Path: "https://backside.legardy.com/uploads/1_3bf04b6ebb.png", LandsalepostID: 1},
-		// 	{Path: "https://backside.legardy.com/uploads/2_abc123.png", LandsalepostID: 1},
+		// post := entity.Landsalepost{
+		// 	FirstName:     "มาลี",
+		// 	LastName:      "มาดี",
+		// 	PhoneNumber:   "0987654321",
+		// 	Name:          "สวนคุณตา",
+		// 	Price:         120000,
+		// 	ProvinceID:    12,
+		// 	DistrictID:    144,
+		// 	SubdistrictID: 1077,
+		// 	LandID:        1,
+		// 	UserID:        1,
 		// }
-		// for _, photo := range photos {
-		// 	db.Create(&photo)
-		// }
+		// db.Create(&post)
 
-		var tags []entity.Tag
-		if err := db.Where("id IN ?", []uint{1, 4, 5}).Find(&tags).Error; err != nil {
-			log.Fatal("❌ Failed to find tags:", err)
-		}
-		if err := db.Model(&post).Association("Tags").Replace(&tags); err != nil {
-			log.Fatal("❌ Failed to associate tags:", err)
-		}
-		log.Println("✅ Landpost with tags created successfully")
+		// // เพิ่มรูปภาพ (Photoland)
+		// // photos := []entity.Photoland{
+		// // 	{Path: "https://backside.legardy.com/uploads/1_3bf04b6ebb.png", LandsalepostID: 1},
+		// // 	{Path: "https://backside.legardy.com/uploads/2_abc123.png", LandsalepostID: 1},
+		// // }
+		// // for _, photo := range photos {
+		// // 	db.Create(&photo)
+		// // }
+
+		// var tags []entity.Tag
+		// if err := db.Where("id IN ?", []uint{1, 4, 5}).Find(&tags).Error; err != nil {
+		// 	log.Fatal("❌ Failed to find tags:", err)
+		// }
+		// if err := db.Model(&post).Association("Tags").Replace(&tags); err != nil {
+		// 	log.Fatal("❌ Failed to associate tags:", err)
+		// }
+		// log.Println("✅ Landpost with tags created successfully")
 
 		db.Create(&entity.Transaction{
-			Amount:                 1500,
-			BuyerAccepted:          true,
-			SellerAccepted:         false,
+			Amount:         1500,
+			BuyerAccepted:  true,
+			SellerAccepted: false,
 			//MoneyChecked:           false,
 			LandDepartmentApproved: false,
 			//Expire:                 time.Now().AddDate(0, 0, 7),
-			TypetransactionID:      1,
-			BuyerID:                3,
-			SellerID:               2,
-			LandID:                 2,
-			TxHash: 				nil,
+			TypetransactionID: 1,
+			BuyerID:           3,
+			SellerID:          2,
+			LandID:            2,
+			TxHash:            nil,
 		})
 
 		db.Create(&entity.Transaction{
-			Amount:                 15000,
-			BuyerAccepted:          true,
-			SellerAccepted:         true,
+			Amount:         15000,
+			BuyerAccepted:  true,
+			SellerAccepted: true,
 			//MoneyChecked:           true,
 			LandDepartmentApproved: true,
 			//Expire:                 time.Now().AddDate(0, 0, 7),
-			TypetransactionID:      2,
-			BuyerID:                2,
-			SellerID:               3,
-			LandID:                 2,
-			TxHash: 				nil,
+			TypetransactionID: 2,
+			BuyerID:           2,
+			SellerID:          3,
+			LandID:            2,
+			TxHash:            nil,
 		})
 
 		db.Create(&entity.Roomchat{User1ID: 3, User2ID: 1})
@@ -515,8 +526,10 @@ func SetupDatabase() {
 		db.Create(&entity.Message{Content: "Hello", RoomID: 2, SenderID: 3})
 		db.Create(&entity.Message{Content: "Hi", RoomID: 1, SenderID: 2})
 
-		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
-		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
+		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
+		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
+		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2})
+		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3})
 		// 🔸 สร้าง Roomchat หลังจากสร้าง Landsalepost แล้ว
 		createRoomchatsAndMessages()
 	}

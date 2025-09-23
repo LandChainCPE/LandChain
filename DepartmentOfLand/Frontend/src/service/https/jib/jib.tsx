@@ -1,5 +1,3 @@
-import axios from "axios";
-
 const apiUrl = "http://localhost:8080";
 
 function getAuthHeaders() {
@@ -11,53 +9,71 @@ function getAuthHeaders() {
   };
 }
 
-function getRequestOptions() {
-  return { headers: getAuthHeaders() };
+function getRequestOptions(method = "GET", body?: any) {
+  const options: RequestInit = {
+    method,
+    headers: getAuthHeaders(),
+    credentials: "include",
+  };
+  if (body) {
+    options.body = JSON.stringify(body);
+  }
+  return options;
 }
 
-// ดึง Queue ตามวันที่ (ถ้าจะใช้จริงอาจต้องใส่พารามิเตอร์ date ด้วย)
 async function getQueueByDate() {
-  return await axios
-    .get(`${apiUrl}/queue`, getRequestOptions())
-    .then((res) => res.data)
-    .catch((e) => e.response);
+  const res = await fetch(`${apiUrl}/queue`, getRequestOptions());
+  return await res.json();
 }
 
-// ดึงรายการคำร้อง
+// async function GetAllPetition() {
+//   const res = await fetch(`${apiUrl}/petitions`, getRequestOptions());
+//   return await res.json();
+// }
+
 async function GetAllPetition() {
-  return await axios
-    .get(`${apiUrl}/petitions`, getRequestOptions())
-    .then((res) => res.data)
-    .catch((e) => e.response);
-}
+    const requestOptions = {
+        method: "GET",
+        headers: getAuthHeaders(),
+    };
 
-// อัปเดตคำร้องทั้งหมด
-async function UpdatePetition(id: string, data: any) {
-  return await axios
-    .put(`${apiUrl}/petitions/${id}`, data, getRequestOptions())
-    .then((res) => res.data)
-    .catch((e) => e.response);
-}
+    let response = await fetch(`${apiUrl}/petitions`, requestOptions)
+    const result = await response.json();
+    //console.log("result", result);
+    return { response, result };
+};
 
-// อัปเดตเฉพาะสถานะ
-async function UpdatePetitionState(id: string, state_id: number) {
-  return await axios
-    .patch(`${apiUrl}/petitions/${id}/state`, { state_id }, getRequestOptions())
-    .then((res) => res.data)
-    .catch((e) => e.response);
-}
 
 async function GetAllStates() {
-  return await axios
-    .get(`${apiUrl}/states`, getRequestOptions())
-    .then((res) => res.data)
-    .catch((e) => e.response);
-}
+    const requestOptions = {
+        method: "GET",
+        headers: getAuthHeaders(),
+    };
 
-export { 
+    let response = await fetch(`${apiUrl}/states`, requestOptions)
+    const result = await response.json();
+    console.log("GetAllStates", result);
+    return { response, result };
+};
+
+
+async function UpdatePetitionStatus(id: string | number, state_id: number) {
+  const requestOptions = {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ id, state_id }),
+  };
+  console.log("id", id);
+  console.log("state_id", state_id);
+
+  let response = await fetch(`${apiUrl}/updatepetitions`, requestOptions);
+  const result = await response.json();
+  return { response, result };
+};
+
+export {
   getQueueByDate,
-  GetAllPetition, 
-  UpdatePetition, 
-  UpdatePetitionState,
+  GetAllPetition,
+  UpdatePetitionStatus,
   GetAllStates,
 };

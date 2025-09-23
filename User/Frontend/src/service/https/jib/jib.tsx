@@ -1,6 +1,6 @@
 import axios from "axios";
+const apiUrl = "http://localhost:8080";
 
-const apiUrl = "http://10.1.189.185:8080";
 const Authorization = localStorage.getItem("token");
 const Bearer = localStorage.getItem("token_type");
 
@@ -23,22 +23,6 @@ async function GetAllPetition() {
 async function CreatePetition(data: any) {
   return await axios
     .post(`${apiUrl}/petitions`, data, requestOptions) // ✅ ส่ง data เป็น body
-    .then((res) => res.data)
-    .catch((e) => e.response);
-}
-
-//อัปเดตคำร้องทั้งหมด
-async function UpdatePetition(id: string, data: any) {
-  return await axios
-    .put(`${apiUrl}/petitions/${id}`, data, requestOptions)
-    .then((res) => res.data)
-    .catch((e) => e.response);
-}
-
-//อัปเดตเฉพาะสถานะ
-async function UpdatePetitionState(id: string, state_id: number) {
-  return await axios
-    .patch(`${apiUrl}/petitions/${id}/state`, { state_id }, requestOptions)
     .then((res) => res.data)
     .catch((e) => e.response);
 }
@@ -94,7 +78,7 @@ async function CreateLandPost(data: any) {
     .catch((e) => e.response);
 }
 
-// ดึง landtitle_id จาก token_id
+// ดึง land_id จาก token_id
 async function getLandtitleIdByTokenId(tokenId: string) {
   return await axios
     .get(`${apiUrl}/landtitle/by-token/${tokenId}`, requestOptions)
@@ -109,11 +93,24 @@ async function GetPetitionsByUserID(userId: string) {
     .catch((e) => e.response);
 }
 
-export {
-  GetAllPetition,
-  CreatePetition,
-  UpdatePetition,
-  UpdatePetitionState,
+async function CreateRequestBuySell(data: any) {
+  return await axios
+    .post(`${apiUrl}/requestbuysell`, data, requestOptions)
+    .then((res) => res.data)
+    .catch((e) => e.response);
+}
+
+// เช็ค land_id ว่ามีโพสต์ขายแล้วหรือยัง
+async function checkLandsalepostByLandId(landId: string) {
+  return await axios
+    .get(`${apiUrl}/landsalepost/check?land_id=${landId}`, requestOptions)
+    .then((res) => res.data)
+    .catch((e) => e.response);
+}
+
+export { 
+  GetAllPetition, 
+  CreatePetition, 
   GetAllStates,
   GetAllPostLandData,
   GetTags,
@@ -122,5 +119,8 @@ export {
   GetSubdistrict,
   CreateLandPost,
   getLandtitleIdByTokenId,
-  GetPetitionsByUserID
+  GetPetitionsByUserID,
+  CreateRequestBuySell,
+  checkLandsalepostByLandId,
+
 };
