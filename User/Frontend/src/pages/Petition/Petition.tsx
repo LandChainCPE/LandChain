@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, Form, Input, Button, Space, Typography, Row, Col, message, Steps, Divider } from "antd";
+import { Input, Button, Space, Typography, message, Steps } from "antd";
 import { FileTextOutlined, UserOutlined, PhoneOutlined, MailOutlined, CalendarOutlined, SendOutlined, ReloadOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { CreatePetition } from "../../service/https/jib/jib"; 
 
@@ -12,10 +12,12 @@ const Petition: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
+  // Set date to today (YYYY-MM-DD)
+  const today = new Date().toISOString().slice(0, 10);
   const [formData, setFormData] = useState({
     title: "",
     content: "",
-    date: "",
+    date: today,
     prefix: "",
     firstName: "",
     lastName: "",
@@ -143,7 +145,7 @@ const Petition: React.FC = () => {
                   textShadow: "0 2px 8px rgba(0,0,0,0.3)",
                   letterSpacing: "0.02em"
                 }}>
-                  📝 ยื่นคำร้องขอคัดโฉนดที่ดิน
+                  📝 ยื่นคำร้องคัดเอกสาร
                 </h4>
               </div>
               <Button 
@@ -288,6 +290,8 @@ const Petition: React.FC = () => {
                   type="date"
                   name="date"
                   value={formData.date}
+                  min={today}
+                  max={today}
                   onChange={handleChange}
                   required
                   style={{ 
@@ -560,7 +564,7 @@ const Petition: React.FC = () => {
                   name="content"
                   value={formData.content}
                   onChange={handleChange}
-                  placeholder="กรุณาระบุเหตุผลและรายละเอียดการยื่นคำร้อง เช่น ขอเอกสารเพื่อใช้ในการขายที่ดิน, ขอเอกสารเพื่อการจดทะเบียนสมรส, ฯลฯ"
+                  placeholder="กรุณาระบุเหตุผลและรายละเอียดการยื่นคำร้อง เช่น ขอเอกสารเพื่อใช้ในการขายที่ดิน ฯลฯ"
                   rows={6}
                   style={{ 
                     borderRadius: "1rem",

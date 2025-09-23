@@ -3,7 +3,7 @@ import { Select, Upload, message, Button, Card, Row, Col, Typography } from "ant
 import { UploadOutlined } from "@ant-design/icons";
 import { Check, Phone, User, DollarSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { GetTags,CreateLandPost, getLandtitleIdByTokenId } from "../../service/https/jib/jib";
+import { GetTags,CreateLandPost, getLandtitleIdByTokenId, checkLandsalepostByLandId } from "../../service/https/jib/jib";
 import { ethers } from "ethers";
 import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";
 import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield/http";
@@ -472,12 +472,19 @@ const SellPost = () => {
     }, [navigate]);
 
 const handleSelectLand = async (tokenID: string) => {
-  setSelectedLand(tokenID);
-
   // ดึง land_id ที่แท้จริงจาก backend
   try {
     const res = await getLandtitleIdByTokenId(tokenID);
     const land_id = res?.land_id ? String(res.land_id) : tokenID;
+
+    // เช็คว่ามีโพสต์ขายที่ดินนี้แล้วหรือยัง
+    const checkRes = await checkLandsalepostByLandId(land_id);
+    if (checkRes?.exists) {
+      message.error("ที่ดินนี้ได้ทำการโพสต์ขายไปแล้ว ไม่สามารถเลือกซ้ำได้");
+      return;
+    }
+
+    setSelectedLand(tokenID);
 
     // หาข้อมูล metadata ของโฉนดที่เลือก
     const selectedLandData = landMetadata.find(land => land.tokenID === tokenID);
@@ -1467,56 +1474,74 @@ useEffect(() => {
                                       const isSelected = selectedLand === land.tokenID;
 
                                       return (
-                                        <Card
+                                        <div
                                           key={land.tokenID ?? index}
-                                          title={<span style={{ fontSize: 13, fontWeight: 700 }}>โฉนด #{deedNo}</span>}
-                                          size="small"
-                                          hoverable
-                                          bordered
-                                          onClick={() => handleSelectLand(String(land.tokenID))}
-                                          className="cursor-pointer transition-all"
                                           style={{
+                                            pointerEvents: 'auto',
+                                            opacity: available ? 1 : 0.5,
+                                            filter: available ? 'none' : 'grayscale(0.5)',
                                             marginBottom: 8,
-                                            borderColor: isSelected ? "#1677ff" : undefined,
-                                            boxShadow: isSelected ? "0 4px 12px rgba(22,119,255,.2)" : undefined,
-                                            borderRadius: 6,
-                                            opacity: available ? 1 : 0.7,
                                           }}
-                                          headStyle={{ padding: "8px 10px", minHeight: 0 }}
-                                          bodyStyle={{ padding: "8px 10px" }}
+                                          onClick={() => {
+                                            if (!available) {
+                                              message.warning('ที่ดินนี้เคยโพสต์ไปแล้ว');
+                                            }
+                                          }}
                                         >
-                                          <Row gutter={[12, 6]} style={{ fontSize: 12, lineHeight: 1.4 }}>
-                                            <Col span={12}><Text strong type="secondary">Token ID</Text></Col>
-                                            <Col span={12}>{land.tokenID}</Col>
+                                          <Card
+                                            title={<span style={{ fontSize: 13, fontWeight: 700 }}>โฉนด #{deedNo}</span>}
+                                            size="small"
+                                            hoverable={available}
+                                            bordered
+                                            onClick={available ? () => handleSelectLand(String(land.tokenID)) : undefined}
+                                            className="cursor-pointer transition-all"
+                                            style={{
+                                              borderColor: isSelected ? "#1677ff" : undefined,
+                                              boxShadow: isSelected ? "0 4px 12px rgba(22,119,255,.2)" : undefined,
+                                              borderRadius: 6,
+                                              background: available ? undefined : '#f5f5f5',
+                                            }}
+                                            headStyle={{ padding: "8px 10px", minHeight: 0 }}
+                                            bodyStyle={{ padding: "8px 10px" }}
+                                          >
+                                            <Row gutter={[12, 6]} style={{ fontSize: 12, lineHeight: 1.4 }}>
+                                              <Col span={12}><Text strong type="secondary">Token ID</Text></Col>
+                                              <Col span={12}>{land.tokenID}</Col>
 
-                                            <Col span={12}><Text strong type="secondary">แผนที่ระวาง</Text></Col>
-                                            <Col span={12}>{map}</Col>
+                                              <Col span={12}><Text strong type="secondary">แผนที่ระวาง</Text></Col>
+                                              <Col span={12}>{map}</Col>
 
-                                            <Col span={12}><Text strong type="secondary">เลขที่ดิน</Text></Col>
-                                            <Col span={12}>{landNo}</Col>
+                                              <Col span={12}><Text strong type="secondary">เลขที่ดิน</Text></Col>
+                                              <Col span={12}>{landNo}</Col>
 
-                                            <Col span={12}><Text strong type="secondary">เลขหน้าสำรวจ</Text></Col>
-                                            <Col span={12}>{surveyPage}</Col>
+                                              <Col span={12}><Text strong type="secondary">เลขหน้าสำรวจ</Text></Col>
+                                              <Col span={12}>{surveyPage}</Col>
 
-                                            <Col span={12}><Text strong type="secondary">เล่ม</Text></Col>
-                                            <Col span={12}>{book}</Col>
+                                              <Col span={12}><Text strong type="secondary">เล่ม</Text></Col>
+                                              <Col span={12}>{book}</Col>
 
-                                            <Col span={12}><Text strong type="secondary">หน้า</Text></Col>
-                                            <Col span={12}>{page}</Col>
+                                              <Col span={12}><Text strong type="secondary">หน้า</Text></Col>
+                                              <Col span={12}>{page}</Col>
 
-                                            <Col span={12}><Text strong type="secondary">พื้นที่</Text></Col>
-                                            <Col span={12}>{rai} ไร่ {ngan} งาน {sqwa} ตร.วา</Col>
+                                              <Col span={12}><Text strong type="secondary">พื้นที่</Text></Col>
+                                              <Col span={12}>{rai} ไร่ {ngan} งาน {sqwa} ตร.วา</Col>
 
-                                            <Col span={12}><Text strong type="secondary">จังหวัด</Text></Col>
-                                            <Col span={12}>{province}</Col>
+                                              <Col span={12}><Text strong type="secondary">จังหวัด</Text></Col>
+                                              <Col span={12}>{province}</Col>
 
-                                            <Col span={12}><Text strong type="secondary">อำเภอ</Text></Col>
-                                            <Col span={12}>{district}</Col>
+                                              <Col span={12}><Text strong type="secondary">อำเภอ</Text></Col>
+                                              <Col span={12}>{district}</Col>
 
-                                            <Col span={12}><Text strong type="secondary">ตำบล</Text></Col>
-                                            <Col span={12}>{subdistrict}</Col>
-                                          </Row>
-                                        </Card>
+                                              <Col span={12}><Text strong type="secondary">ตำบล</Text></Col>
+                                              <Col span={12}>{subdistrict}</Col>
+                                            </Row>
+                                            {!available && (
+                                              <div style={{ color: '#b91c1c', fontWeight: 600, marginTop: 8, fontSize: 13 }}>
+                                                ที่ดินนี้ถูกโพสต์ขายแล้ว
+                                              </div>
+                                            )}
+                                          </Card>
+                                        </div>
                                       );
                                     })}
                                   </div>
@@ -1729,7 +1754,7 @@ useEffect(() => {
               }}>
                 เบอร์โทรศัพท์
               </label>
-              <div style={{ position: "relative" }}>
+              <div style={{ position: "relative", maxWidth: "330px", width: "100%" }}>
                 <Phone style={{ 
                   position: "absolute", 
                   left: "1rem", 
@@ -1747,7 +1772,8 @@ useEffect(() => {
                   onChange={handleChange}
                   style={{
                     ...styles.input,
-                    paddingLeft: "3.5rem"
+                    paddingLeft: "3.5rem",
+                    width: "100%"
                   }}
                   placeholder="กรอกเบอร์โทรศัพท์"
                   onFocus={(e) => {

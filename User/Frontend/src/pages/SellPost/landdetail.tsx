@@ -4,11 +4,11 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import { MapPin, Phone, User, Home, Calendar, Ruler, Map, MessageCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { GetAllPostLandData, CreateRequestBuySell } from "../../service/https/jib/jib";
-import { message, Modal } from "antd"; 
+import { Modal } from "antd"; 
 import "leaflet/dist/leaflet.css";
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-
+import { CreateNewRoom } from "../../service/https/bam/bam";
 
 type LandDetailType = {
   ID: number | string;
@@ -443,10 +443,45 @@ const LandDetail = () => {
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLarge, setIsLarge] = useState<boolean>(typeof window !== "undefined" ? window.innerWidth >= 1024 : true);
-  const [msgApi] = message.useMessage();
+  // const [msgApi] = message.useMessage();
+  const [messageState, setMessageState] = useState<{ type: 'error' | 'success'; content: string } | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false); 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const userId = Number(localStorage.getItem("user_id"));
+
+  // ฟังก์ชันสร้างห้องแชทใหม่
+  const handleCreateRoom = async () => {
+    if (!userId) {
+      setMessageState({ type: 'error', content: "กรุณาเข้าสู่ระบบก่อนส่งข้อความ" });
+      return;
+    }
+    if (!land?.user_id) {
+      setMessageState({ type: 'error', content: "ไม่พบเจ้าของที่ดิน" });
+      return;
+    }
+    if (userId === land.user_id) {
+      setMessageState({ type: 'error', content: "ไม่สามารถส่งข้อความหาตัวเองได้" });
+      return;
+    }
+
+    try {
+      const res = await CreateNewRoom(userId, land.user_id);
+      if (res?.room_id) {
+        navigate(`/user/chat/${res.room_id}`);
+      } else {
+        setMessageState({ type: 'error', content: res?.error || res?.message || "เกิดข้อผิดพลาด" });
+      }
+    } catch (e) {
+      setMessageState({ type: 'error', content: "เกิดข้อผิดพลาดในการเชื่อมต่อ" });
+    }
+  };
+  // Show message from state (to avoid calling in render)
+  useEffect(() => {
+    if (messageState) {
+      alert(messageState.content);
+      setMessageState(null);
+    }
+  }, [messageState]);
 
   useEffect(() => {
     const onResize = () => setIsLarge(window.innerWidth >= 1024);
@@ -478,14 +513,14 @@ const LandDetail = () => {
 
 const handleBuy = async () => {
   if (!userId) {
-    msgApi.error("กรุณาเข้าสู่ระบบก่อนทำรายการซื้อ");
+    setMessageState({ type: 'error', content: "กรุณาเข้าสู่ระบบก่อนทำรายการซื้อ" });
     return;
   }
   // DEBUG log ตรวจสอบค่าจริง
   console.log('userId:', userId, 'land.user_id:', land?.user_id, 'land:', land);
   // เช็คว่า userId เป็นเจ้าของโพสต์หรือไม่
   if (userId === land?.user_id) {
-    msgApi.error("ไม่สามารถซื้อโพสต์ของตัวเองได้");
+    setMessageState({ type: 'error', content: "ไม่สามารถซื้อโพสต์ของตัวเองได้" });
     return;
   }
   try {
@@ -494,13 +529,13 @@ const handleBuy = async () => {
       land_id: land?.ID,
     });
     if (res?.error) {
-      msgApi.error(res.error || "เกิดข้อผิดพลาด");
+      setMessageState({ type: 'error', content: res.error || "เกิดข้อผิดพลาด" });
       return;
     }
-    msgApi.success("ส่งคำขอซื้อสำเร็จ");
+    setMessageState({ type: 'success', content: "ส่งคำขอซื้อสำเร็จ" });
     // redirect หรืออัพเดต UI ต่อได้
   } catch (e) {
-    msgApi.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+    setMessageState({ type: 'error', content: "เกิดข้อผิดพลาดในการเชื่อมต่อ" });
   }
 };
 
@@ -1240,38 +1275,45 @@ const handleBuy = async () => {
                   <button style={styles.contactBtn("ghost")}>โทรศัพท์ไม่พบ</button>
                 )}
 
-                <button style={styles.contactBtn("msg")}>
-                  <MessageCircle style={{ width: 20, height: 20 }} />
-                  ส่งข้อความ
-                </button>
-
-      {/* Buy button: block if user is owner */}
-      {userId === land.user_id ? (
-        <button style={{ ...styles.contactBtn("ghost"), background: '#fef2f2', color: '#dc2626', cursor: 'not-allowed' }} disabled>
-          ไม่สามารถซื้อโฉนดที่ดินของตัวเองได้
-        </button>
-      ) : (
-        <>
-          <button
-            style={styles.contactBtn("ghost")}
-            onClick={showModal}
-            disabled={confirmLoading}
-          >
-            {confirmLoading ? "กำลังดำเนินการ..." : "ซื้อ"}
-          </button>
-          <Modal
-            title="ยืนยันการซื้อที่ดิน"
-            open={isModalOpen}
-            onOk={handleOk}
-            confirmLoading={confirmLoading}
-            onCancel={handleCancel}
-            okText="ยืนยัน"
-            cancelText="ยกเลิก"
-          >
-            คุณต้องการยืนยันการซื้อที่ดินนี้ใช่หรือไม่?
-          </Modal>
-        </>
-      )}
+                {/* แสดงปุ่มส่งข้อความและส่งคำขอซื้อ เฉพาะถ้าไม่ใช่เจ้าของโพสต์ และที่ดินยังไม่ถูกโพสต์ขาย */}
+                {userId !== land.user_id && land?.ID && (
+                  <>
+                    <button style={styles.contactBtn("msg")} onClick={handleCreateRoom}>
+                      <MessageCircle style={{ width: 20, height: 20 }} />
+                      ส่งข้อความ
+                    </button>
+                    <button
+                      style={styles.contactBtn("ghost")}
+                      onClick={showModal}
+                      disabled={confirmLoading}
+                    >
+                      {confirmLoading ? "กำลังดำเนินการ..." : "ส่งคำขอซื้อ"}
+                    </button>
+                    <Modal
+                      title="ยืนยันการซื้อที่ดิน"
+                      open={isModalOpen}
+                      onOk={handleOk}
+                      confirmLoading={confirmLoading}
+                      onCancel={handleCancel}
+                      okText="ยืนยัน"
+                      cancelText="ยกเลิก"
+                    >
+                      คุณต้องการยืนยันการซื้อที่ดินนี้ใช่หรือไม่?
+                    </Modal>
+                  </>
+                )}
+                {/* ถ้าที่ดินถูกโพสต์ขายแล้ว (มีโพสต์นี้อยู่แล้ว) ให้ disable ปุ่ม */}
+                {userId !== land.user_id && !land?.ID && (
+                  <>
+                    <button style={{ ...styles.contactBtn("msg"), opacity: 0.5, cursor: "not-allowed" }} disabled>
+                      <MessageCircle style={{ width: 20, height: 20 }} />
+                      ส่งข้อความ (ที่ดินนี้ถูกโพสต์ขายแล้ว)
+                    </button>
+                    <button style={{ ...styles.contactBtn("ghost"), opacity: 0.5, cursor: "not-allowed" }} disabled>
+                      ส่งคำขอซื้อ (ที่ดินนี้ถูกโพสต์ขายแล้ว)
+                    </button>
+                  </>
+                )}
               </div>
 
               <div style={styles.warn}>
