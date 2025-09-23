@@ -4,6 +4,7 @@ import Loadable from "../component/third-patry/Loadable";
 import Layout from "../component/Layout";
 
 const Main = Loadable(lazy(() => import("../pages/Main")));
+const Login = Loadable(lazy(() => import("../pages/Login")));
 const Operations = Loadable(lazy(() => import("../pages/Operations")));
 const VerifyUser = Loadable(lazy(() => import("../pages/VerifyUser")));
 const VerifyLand = Loadable(lazy(() => import("../pages/VerifyLand")));
@@ -34,16 +35,17 @@ const UserRoutes = (): RouteObject[] => [
 
 const MainRoutes = (): RouteObject[] => [
   {
-    path: "/", element: <Main />, 
+    path: "/login", 
+    element: <Login />, 
   },                                          
   {
-    path: "/login",
+    path: "/",
     children: [
-      { index: true, element: <Main /> },
-      { path: "*", element: <Main /> },
+      { index: true, element: <Login /> },
+      { path: "*", element: <Login /> },
     ],
   },
-  { path: "*", element: <Main /> }, 
+  { path: "*", element: <Login /> }, 
 ];
 
 function ConfigRoutes() {
