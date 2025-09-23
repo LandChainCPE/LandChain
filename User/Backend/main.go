@@ -220,11 +220,12 @@ func main() {
 		authorized.POST("/upload/:roomID/:userID", controller.UploadImage)
 		authorized.GET("/user/info/:id", controller.GetUserinfoByUserID)
 
-		authorized.DELETE("/user/lands/post/:landid", controller.DeleteLandsalepostByLandIDandUserID)
+		authorized.DELETE("/user/lands/post/:landid", controller.DeleteLandsalepostByLandID)
 
 		authorized.GET("/userinfo/:userId", controller.GetUserinfoByID)
 		authorized.GET("/landtitles/:userId", controller.GetLandtitlesByUser) //ดึงข้อมูล landtitles
 		// authorized.GET("/land_verification/:userid", controller.GetLandVerificationByUserID) //ดึงข้อมูล land_verification
+		authorized.GET("/user/verify", controller.CheckVerify)
 	}
 
 	r.GET("/ws/notification/:userID", controller.NotificationWS)

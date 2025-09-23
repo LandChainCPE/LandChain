@@ -505,3 +505,14 @@ export async function DeleteLandsalepostByLandIDandUserID(landid: number | strin
     else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
   }
 }
+
+export async function CheckVerify() {
+  try {
+    const res = await api.get(`/user/verify`); // ✅ แทนค่า id จริง
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}

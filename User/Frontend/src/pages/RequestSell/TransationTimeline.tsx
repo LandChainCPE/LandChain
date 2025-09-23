@@ -685,7 +685,7 @@ const openETHModalForTransaction = (tx: any) => {
                         </div>
                     )}
 
-                    {userType === "buyer" && tx.TypetransactionID === 6 && (
+                    {userType === "buyer" && tx.TypetransactionID === 4 && (
                         <div className="card-actions">
                             {tx.BuyerAccepted && tx.SellerAccepted && tx.LandDepartmentApproved ? (
                             <button 

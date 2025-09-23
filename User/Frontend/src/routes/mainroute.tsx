@@ -1,6 +1,9 @@
-import { lazy, useEffect } from "react";
+import { lazy, useEffect, useState } from "react";
 import { useRoutes, type RouteObject, useNavigate, useLocation } from "react-router-dom";
 import Loadable from "../component/third-patry/Loadable";
+import { CheckVerify } from "../service/https/bam/bam";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 
 const Login = Loadable(lazy(() => import("../pages/LoginRegister/LoginMetamask")));
 const MainPage = Loadable(lazy(() => import("../pages/MainPage/MainPage")));
@@ -42,9 +45,12 @@ const AppointmentStatus = Loadable(lazy(() => import("../pages/appointmentstatus
 const Testland = Loadable(lazy(() => import("../pages/VerifyLand/testland.tsx")));
 
 // Component สำหรับป้องกันหน้าที่ต้อง login
+// ✅ ต้องทั้ง login + verify
 const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [loading, setLoading] = useState(true);
+  const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -56,35 +62,90 @@ const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
       return;
     }
 
-    // ตรวจสอบ Token กับ API
     fetch("/api/validate-token", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
-      .then((response) => {
-        if (response.status === 401) {
-          // ลบ Token และ Redirect ไปหน้า Login
+      .then(async (res) => {
+        if (res.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("isLogin");
+          navigate("/login", { replace: true });
+          return;
+        }
+        const verifyRes = await CheckVerify();
+        if (verifyRes?.verified) {
+          setIsVerified(true);
+        } else {
+          Swal.fire({
+            title: "⚠️ Verification Required",
+            text: "คุณต้องยืนยันตัวตนก่อนเข้าใช้งานหน้านี้",
+            icon: "warning",
+            background: "#fefefe",
+            color: "#333",
+            showCancelButton: true,
+            confirmButtonText: "📅 ไปหน้านัดหมาย",
+            cancelButtonText: "✅ ไปยืนยันตัวตน",
+            reverseButtons: true,
+            allowOutsideClick: false,
+            customClass: {
+              popup: "rounded-2xl shadow-lg p-6",
+              confirmButton:
+                "bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded-lg mx-2",
+              cancelButton:
+                "bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg mx-2",
+              title: "text-xl font-bold text-gray-800",
+              htmlContainer: "text-gray-600",
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              navigate("/user/appointmentstatus", { replace: true });
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+              navigate("/user/verifyusertoblockchain", { replace: true });
+            }
+          });
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [navigate, location]);
+
+  if (loading) return <div>Loading...</div>;
+  if (!isVerified) return null;
+  return children;
+};
+
+// ✅ ต้อง login แต่ไม่บังคับ verify
+const SemiProtectedRoute = ({ children }: { children: React.ReactElement }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const isLogin = localStorage.getItem("isLogin") === "true";
+
+    if (!token || !isLogin) {
+      localStorage.setItem("redirectPath", location.pathname);
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    fetch("/api/validate-token", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (res.status === 401) {
           localStorage.removeItem("token");
           localStorage.removeItem("isLogin");
           navigate("/login", { replace: true });
         }
       })
-      .catch((error) => {
-        console.error("Error validating token:", error);
-      });
+      .finally(() => setLoading(false));
   }, [navigate, location]);
 
-  const token = localStorage.getItem("token");
-  const isLogin = localStorage.getItem("isLogin") === "true";
-
-  if (!token || !isLogin) {
-    return null; // หรือจะแสดง loading spinner
-  }
-
+  if (loading) return <div>Loading...</div>;
   return children;
 };
+
 
 const UserRoutes = (): RouteObject[] => [
   {
@@ -159,9 +220,9 @@ const UserRoutes = (): RouteObject[] => [
       {
         path: "sellpostmain",
         element: (
-          <ProtectedRoute>
+          <SemiProtectedRoute>
             <SellPostMain />
-          </ProtectedRoute>
+          </SemiProtectedRoute>
         )
       },
       {
@@ -207,17 +268,17 @@ const UserRoutes = (): RouteObject[] => [
       {
         path: "verifyusertoblockchain",
         element: (
-          <ProtectedRoute>
+          <SemiProtectedRoute>
             <VerifyUser />
-          </ProtectedRoute>
+          </SemiProtectedRoute>
         )
       },
       {
         path: "userdashboard",
         element: (
-          <ProtectedRoute>
+          <SemiProtectedRoute>
             <UserDashboard />
-          </ProtectedRoute>
+          </SemiProtectedRoute>
         )
       },
       {
@@ -249,9 +310,9 @@ const UserRoutes = (): RouteObject[] => [
       { 
         path: "appointmentstatus", 
         element: (
-          <ProtectedRoute>
+          <SemiProtectedRoute>
             <AppointmentStatus />
-          </ProtectedRoute>
+          </SemiProtectedRoute>
         ) 
       },
       { 
