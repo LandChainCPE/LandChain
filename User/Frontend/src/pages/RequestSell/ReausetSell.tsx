@@ -129,6 +129,12 @@ function RequestSell() {
       const res = await GetRequestBuybyLandID(Number(selectedLand));
       setRequestBuyData(res || []);
       setShowAcceptModal(false);
+
+      setLandMetadata(prev =>
+  prev.map(land =>
+    land.tokenID === selectedLand ? { ...land, isLocked: true } : land
+  )
+);
     } catch (err) {
       Swal.fire("ผิดพลาด", "เกิดข้อผิดพลาด", "error");
     }
@@ -258,10 +264,7 @@ function RequestSell() {
         {/* Land Selection Section */}
         <div className="land-selection-section">
           <div className="section-header-modern">
-            <div className="section-badge-modern">
-              <span className="badge-icon">🏞️</span>
-              <span>เลือกที่ดิน</span>
-            </div>
+           
             <h2 className="section-title-modern">
               <span className="gradient-text">รายการที่ดินของคุณ</span>
             </h2>

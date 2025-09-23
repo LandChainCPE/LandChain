@@ -1,6 +1,5 @@
 import axios from "axios";
 
-
 const apiUrl = "http://localhost:8080";
 
 
@@ -300,9 +299,20 @@ export async function GetInfoUsersByWallets(wallets: string[]) {
   }
 }
 
-export async function DeleteTransaction(id: number | string) {
+export async function DeleteTransactionTodelete(id: number | string) {
   try {
     const res = await api.delete(`/user/lands/delete/transaction/${id}`); // ✅ แทนค่า id จริง
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function DeleteTransactionToscucess(id: number | string) {
+  try {
+    const res = await api.delete(`/user/lands/delete/transaction/success/${id}`); // ✅ แทนค่า id จริง
     return res.data;
   } catch (e) {
     const err = e as any;
@@ -477,6 +487,17 @@ export async function CreateNewRoom(user1ID: number, user2ID: number) {
 export async function GetUserinfoByUserID(id: number | string) {
   try {
     const res = await api.get(`/user/info/${id}`); // ✅ แทนค่า id จริง
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function DeleteLandsalepostByLandIDandUserID(landid: number | string) {
+  try {
+    const res = await api.delete(`/user/lands/post/${landid}`); // ✅ แทนค่า id จริง
     return res.data;
   } catch (e) {
     const err = e as any;

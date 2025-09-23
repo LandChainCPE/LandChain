@@ -5,6 +5,7 @@ import (
 	"landchain/entity" // แก้ชื่อ module ให้ตรงกับโปรเจกต์คุณ
 	"landchain/services"
 	"strings"
+
 	//"time"
 
 	"log"
@@ -76,6 +77,17 @@ func CreateTransaction(c *gin.Context) {
 		return
 	}
 
+	// เช็คว่า Land เคยมี Transaction ที่สำเร็จแล้วหรือถูกยกเลิกหรือยัง
+	var lastTransaction entity.Transaction
+	if err := db.Where("land_id = ?", land.ID).
+		Order("id DESC").
+		First(&lastTransaction).Error; err == nil {
+		if lastTransaction.TypetransactionID != 2 && lastTransaction.TypetransactionID != 3 {
+			c.JSON(http.StatusForbidden, gin.H{"error": "ไม่สามารถสร้างธุรกรรมใหม่ได้ เนื่องจากธุรกรรมก่อนหน้ายังไม่เสร็จสิ้นหรือไม่ถูกยกเลิก"})
+			return
+		}
+	}
+
 	// เช็คว่าโฉนดถูกล็อกหรือไม่
 	if land.IsLocked {
 		c.JSON(http.StatusForbidden, gin.H{"error": "โฉนดนี้มี Transaction อยู่แล้ว"})
@@ -112,14 +124,11 @@ func CreateTransaction(c *gin.Context) {
 
 	// เซ็ตค่าเริ่มต้น Transaction
 	transaction.TypetransactionID = 1
-
-	transaction.BuyerAccepted = true
-	transaction.SellerAccepted = false
-	//transaction.MoneyChecked = false
-
+	transaction.BuyerAccepted = false
+	transaction.SellerAccepted = true
 	transaction.LandDepartmentApproved = false
-	//transaction.Expire = time.Now().Add(72 * time.Hour) // 3 วัน
 	transaction.TxHash = nil
+
 	// สร้าง Transaction
 	if err := db.Create(&transaction).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถสร้างธุรกรรมได้"})
@@ -458,4 +467,38 @@ func GetRequestBuybyLandID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, requests)
+}
+
+func DeleteLandsalepostByLandIDandUserID(c *gin.Context) {
+	tokenID := c.Query("tokenID")
+
+	if tokenID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "tokenID จำเป็น"})
+		return
+	}
+
+	db := config.DB()
+
+	// หา landID จาก tokenID
+	var land entity.Landtitle
+	if err := db.First(&land, "token_id = ?", tokenID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบที่ดินตาม tokenID"})
+		return
+	}
+	landID := land.ID
+
+	// หา Landsalepost ของ landID
+	var post entity.Landsalepost
+	if err := db.First(&post, "land_id = ?", landID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบประกาศขายที่ดินนี้"})
+		return
+	}
+
+	// ลบประกาศ (soft delete)
+	if err := db.Delete(&post).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถลบประกาศขายที่ดินได้"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ลบประกาศขายที่ดินเรียบร้อยแล้ว"})
 }

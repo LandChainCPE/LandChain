@@ -84,7 +84,6 @@ const Chat = () => {
 
     const ws = new WebSocket(`ws://localhost:8080/ws/notification/${userID}`);
 
-
     ws.onmessage = (event) => {
       const msg: Message = JSON.parse(event.data);
       const roomIDFromMsg = msg.RoomID ?? null;
@@ -113,7 +112,6 @@ const Chat = () => {
     if (wsRef.current) wsRef.current.close();
 
     const ws = new WebSocket(
-
       `ws://localhost:8080/ws/chat/${selectedRoom.ID}/${userID}`
 
     );
@@ -255,7 +253,6 @@ const Chat = () => {
       setMessages((prev) => [...prev, msg]);
 
       try {
-
         await fetch("http://localhost:8080/notification/send", {
 
           method: "POST",

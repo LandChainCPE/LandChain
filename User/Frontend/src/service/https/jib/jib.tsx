@@ -1,6 +1,4 @@
 import axios from "axios";
-
-
 const apiUrl = "http://localhost:8080";
 
 const Authorization = localStorage.getItem("token");
@@ -102,12 +100,17 @@ async function CreateRequestBuySell(data: any) {
     .catch((e) => e.response);
 }
 
-
+// เช็ค land_id ว่ามีโพสต์ขายแล้วหรือยัง
+async function checkLandsalepostByLandId(landId: string) {
+  return await axios
+    .get(`${apiUrl}/landsalepost/check?land_id=${landId}`, requestOptions)
+    .then((res) => res.data)
+    .catch((e) => e.response);
+}
 
 export { 
   GetAllPetition, 
   CreatePetition, 
-
   GetAllStates,
   GetAllPostLandData,
   GetTags,
@@ -118,5 +121,6 @@ export {
   getLandtitleIdByTokenId,
   GetPetitionsByUserID,
   CreateRequestBuySell,
+  checkLandsalepostByLandId,
 
 };
