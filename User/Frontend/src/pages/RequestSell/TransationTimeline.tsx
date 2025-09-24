@@ -891,7 +891,7 @@ const openETHModalForTransaction = (tx: any) => {
                 {/* Delete Modal */}
                 <Modal show={showDeleteModal} onHide={handleCloseDeleteModal} centered>
                     <Modal.Header closeButton>
-                        <Modal.Title>ยืนยันการลบธุรกรรม</Modal.Title>
+                        <Modal.Title>ยืนยันการยกเลิกการทำธุรกรรม</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <p>คุณแน่ใจหรือไม่ว่าต้องการลบธุรกรรมนี้? การลบจะไม่สามารถกู้คืนได้</p>

@@ -504,5 +504,12 @@ func DeleteLandsalepostByLandIDandUserID(c *gin.Context) {
 		return
 	}
 
+	// อัพเดท IsLocked ใน Landtitle เป็น false
+	land.IsLocked = false
+	if err := db.Save(&land).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ลบประกาศสำเร็จ แต่ไม่สามารถอัพเดทสถานะล็อกที่ดินได้"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "ลบประกาศขายที่ดินเรียบร้อยแล้ว"})
 }
