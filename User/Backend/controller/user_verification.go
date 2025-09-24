@@ -95,6 +95,7 @@ func CheckVerify(c *gin.Context) {
 	fmt.Println("[DEBUG] On-chain owner fetched:", out)
 
 	// 4️⃣ แปลง NameHash ของ DB จาก hex string เป็น [32]byte
+	// 4️⃣ แปลง NameHash ของ DB จาก hex string เป็น [32]byte
 	var dbNameHash [32]byte
 	cleanedNameHash := strings.TrimSpace(user.NameHashSalt)     // ลบช่องว่างและ newline
 	cleanedNameHash = strings.TrimPrefix(cleanedNameHash, "0x") // ลบ prefix 0x ถ้ามี
