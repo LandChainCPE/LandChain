@@ -80,6 +80,8 @@ func main() {
 
 	r.GET("/nonce/:address", controller.GetNonce)
 	r.POST("/nonce/validate", controller.ValidateNonce)
+	r.POST("/checkverifywallet", controller.CheckVerifyWallet)
+
 
 	// 🔧 Debug API เพื่อตรวจสอบข้อมูล user (ชั่วคราว)
 	debugAuth := r.Group("")
@@ -131,6 +133,10 @@ func main() {
 	userOwnership.Use(middlewares.Authorizes())
 	userOwnership.Use(middlewares.CheckOwnershipOrAdmin())
 	{
+			userOwnership.GET("/user/lands/:wallet", controller.GetUserPostLandData)
+		userOwnership.PUT("/user/updatepost", controller.UpdatePost)
+		userOwnership.PUT("/user/location/:location_id", controller.UpdateLocation)
+		userOwnership.PUT("/user/photoland/:photoland_id", controller.UpdatePhotoland)
 		userOwnership.POST("/userbookings", controller.CreateBooking)
 		userOwnership.PUT("/bookings/:id", controller.UpdateBooking)
 		userOwnership.GET("/bookings/:userID", controller.GetUserBookings)
@@ -154,7 +160,6 @@ func main() {
 		userToken.GET("/user/info/", controller.GetInfoUserByWalletID)
 		userToken.GET("/user/lands", controller.GetLandTitleInfoByWallet)
 
-		userToken.GET("/user/lands/requestsellbydelete", controller.GetAllRequestSellByUserIDAndDelete)
 	}
 
 	// 🌐 General authorized routes
@@ -219,8 +224,9 @@ func main() {
 		authorized.GET("/chat/allroom/:id", controller.GetAllRoomMessagesByUserID)
 		authorized.POST("/upload/:roomID/:userID", controller.UploadImage)
 		authorized.GET("/user/info/:id", controller.GetUserinfoByUserID)
+		authorized.GET("/user/lands/requestsellbydelete", controller.GetAllRequestSellByUserIDAndDelete)
 
-		authorized.DELETE("/user/lands/post/:landid", controller.DeleteLandsalepostByLandIDandUserID)
+		authorized.DELETE("/user/lands/post/:id", controller.DeleteLandsalepostByLandIDandUserID)
 
 		authorized.GET("/userinfo/:userId", controller.GetUserinfoByID)
 		authorized.GET("/landtitles/:userId", controller.GetLandtitlesByUser) //ดึงข้อมูล landtitles

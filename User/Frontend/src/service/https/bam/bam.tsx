@@ -382,10 +382,10 @@ export async function BuyLandHandler(tokenId: string, txHash: string) {
   }
 }
 
-export async function DeleteAllRequestBuyByLandID(landID: string | number) {
+export async function DeleteAllRequestBuyByLandID(id: string | number) {
   try {
-    const res = await api.delete(`/user/lands/delete/allrequset/`, {
-      params: { landID },
+    const res = await api.delete(`/user/lands/delete/allrequset/${id}`, {
+
     });
     return res.data;
   } catch (e: any) {
@@ -396,8 +396,7 @@ export async function DeleteAllRequestBuyByLandID(landID: string | number) {
 
 export async function DeleteTransactionandAllrequest(id: string | number) {
   try {
-    const res = await api.delete(`/user/lands/delete/transactionallrequest/`, {
-      params: { id },
+    const res = await api.delete(`/user/lands/delete/transactionallrequest/${id}`, {
     });
     return res.data;
   } catch (e: any) {
@@ -520,9 +519,9 @@ export async function GetUserinfoByUserID(id: number | string) {
   }
 }
 
-export async function DeleteLandsalepostByLandIDandUserID(landid: number | string) {
+export async function DeleteLandsalepostByLandIDandUserID(id: number | string) {
   try {
-    const res = await api.delete(`/user/lands/post/${landid}`); // ✅ แทนค่า id จริง
+    const res = await api.delete(`/user/lands/post/${id}`); // ✅ แทนค่า id จริง
     return res.data;
   } catch (e) {
     const err = e as any;

@@ -98,7 +98,7 @@ func UserRegisLand(c *gin.Context) {
 		DistrictID:         uint(districtID),
 		SubdistrictID:      uint(subdistrictID),
 		UserID:             uint(userID),
-		GeographyID:        nil, // Explicitly setting GeographyID to nil
+
 		LandVerificationID: nil, // Explicitly setting LandVerificationID to nil
 	}
 

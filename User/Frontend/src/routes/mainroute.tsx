@@ -41,7 +41,9 @@ const Transation = Loadable(lazy(() => import("../pages/RequestSell/TransationTi
 const History = Loadable(lazy(() => import("../pages/Landhistory/landhistory.tsx")));
 const CheckLandowner = Loadable(lazy(() => import("../pages/RequestSell/Checklandowner.tsx")));
 const AppointmentStatus = Loadable(lazy(() => import("../pages/appointmentstatus/appointmentstatus")));
+const CheckVerifyWallet = Loadable(lazy(() => import("../pages/CheckVerifyWallet/CheckVerifyWallet.tsx")));
 
+const ManagePost = Loadable(lazy(() => import("../pages/ManagePost/ManagePost.tsx")));
 const Testland = Loadable(lazy(() => import("../pages/VerifyLand/testland.tsx")));
 
 // Component สำหรับป้องกันหน้าที่ต้อง login
@@ -168,11 +170,27 @@ const UserRoutes = (): RouteObject[] => [
           </ProtectedRoute>
         )
       },
+       {
+        path: "checkverifywallet",
+        element: (
+          <ProtectedRoute>
+            <CheckVerifyWallet />
+          </ProtectedRoute>
+        )
+      },
       { 
         path: "sellmainpage", 
         element: (
           <ProtectedRoute>
             <SellMainPage />
+          </ProtectedRoute>
+        )
+      },
+           {
+        path: "managepost",
+        element: (
+          <ProtectedRoute>
+            <ManagePost />
           </ProtectedRoute>
         )
       },

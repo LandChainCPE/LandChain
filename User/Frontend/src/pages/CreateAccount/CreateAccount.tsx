@@ -30,10 +30,10 @@ const CreateAccount = () => {
     event.preventDefault();
 
     // เก็บข้อมูลใน localStorage
-    localStorage.setItem('firstname', firstname);
-    localStorage.setItem('lastname', lastname);
-    localStorage.setItem('phonenumber', phonenumber);
-    localStorage.setItem('email', email);
+    // localStorage.setItem('firstname', firstname);
+    // localStorage.setItem('lastname', lastname);
+    // localStorage.setItem('phonenumber', phonenumber);
+    // localStorage.setItem('email', email);
 
     // แสดงข้อมูลใน console
     console.log('บัญชีผู้ใช้ถูกสร้าง!', {
