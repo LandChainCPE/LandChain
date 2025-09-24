@@ -32,7 +32,9 @@ type Users struct {
 	// RoomchatUser2     []Roomchat    `gorm:"foreignKey:UserID2"`
 	TransactionBuyer  []Transaction    `gorm:"foreignKey:BuyerID"`
 	TransactionSeller []Transaction    `gorm:"foreignKey:SellerID"`
-	RequestBuySell    []RequestBuySell `gorm:"foreignKey:LandID"`
+
+	Buyer    []RequestBuySell `gorm:"foreignKey:BuyerID"`
+	Seller    []RequestBuySell `gorm:"foreignKey:SellerID"`
 
 	LandOwnership    []LandOwnership `gorm:"foreignKey:UserID"`
 

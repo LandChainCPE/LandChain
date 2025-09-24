@@ -295,7 +295,7 @@ func GetRequestBuyByTokenID(c *gin.Context) {
 	if err := db.Preload("Landtitle", "token_id = ?", tokenID).
 		Preload("Seller").
 		Preload("Buyer").
-		Preload("RequestBuySellType").
+		// Preload("RequestBuySellType").
 		Find(&requests).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลคำขอซื้อได้"})
 		return
@@ -460,7 +460,7 @@ func GetRequestBuybyLandID(c *gin.Context) {
 	if err := db.Where("land_id = ?", land.ID).
 		Preload("Seller").
 		Preload("Buyer").
-		Preload("RequestBuySellType").
+		// Preload("RequestBuySellType").
 		Find(&requests).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลผู้ใช้ได้"})
 		return

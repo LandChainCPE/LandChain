@@ -157,9 +157,9 @@ const UserRoutes = (): RouteObject[] => [
       {
         path: "regisland",
         element: (
-          <ProtectedRoute>
+          <SemiProtectedRoute>
             <Regisland />
-          </ProtectedRoute>
+          </SemiProtectedRoute>
         )
       },
       { 
