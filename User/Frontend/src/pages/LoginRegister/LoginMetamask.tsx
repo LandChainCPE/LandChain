@@ -35,8 +35,8 @@ const LoginMetamask = () => {
           if (loginResult.wallet_address) {
             // login สำเร็จ
             localStorage.setItem('isLogin', 'true');
-            localStorage.setItem('walletAddress', loginResult.wallet_address);
-            localStorage.setItem('user_id', loginResult.user_id ? loginResult.user_id.toString() : '');
+            // localStorage.setItem('walletAddress', loginResult.wallet_address);
+            // localStorage.setItem('user_id', loginResult.user_id ? loginResult.user_id.toString() : '');
             if (loginResult.token) {
               localStorage.setItem('token', loginResult.token);
               localStorage.setItem('token_type', loginResult.token_type)
