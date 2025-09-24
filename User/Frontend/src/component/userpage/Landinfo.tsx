@@ -58,7 +58,7 @@ import Alert from '@mui/material/Alert';
 const LandInfoComponent = () => {
     const [loading, setLoading] = useState(false);
     const [userDatas, setUserDatas] = useState<User | null>(null); 
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
      
 

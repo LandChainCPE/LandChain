@@ -17,7 +17,7 @@ function TransactionTimeline() {
     const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
 
     // useEffect(() => {
-    //     const token = localStorage.getItem("token");
+    //     const token = sessionStorage.getItem("token");
     //     const wsUrl = `ws://localhost:8080/ws/transactions?token=${token}`;
     //     const socket = new WebSocket(wsUrl);
 

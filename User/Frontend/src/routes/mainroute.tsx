@@ -55,11 +55,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
   const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const isLogin = localStorage.getItem("isLogin") === "true";
+    const token = sessionStorage.getItem("token");
+    const isLogin = sessionStorage.getItem("isLogin") === "true";
 
     if (!token || !isLogin) {
-      localStorage.setItem("redirectPath", location.pathname);
+      sessionStorage.setItem("redirectPath", location.pathname);
       navigate("/login", { replace: true });
       return;
     }
@@ -69,8 +69,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
     })
       .then(async (res) => {
         if (res.status === 401) {
-          localStorage.removeItem("token");
-          localStorage.removeItem("isLogin");
+          sessionStorage.removeItem("token");
+          sessionStorage.removeItem("isLogin");
           navigate("/login", { replace: true });
           return;
         }
@@ -122,11 +122,11 @@ const SemiProtectedRoute = ({ children }: { children: React.ReactElement }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const isLogin = localStorage.getItem("isLogin") === "true";
+    const token = sessionStorage.getItem("token");
+    const isLogin = sessionStorage.getItem("isLogin") === "true";
 
     if (!token || !isLogin) {
-      localStorage.setItem("redirectPath", location.pathname);
+      sessionStorage.setItem("redirectPath", location.pathname);
       navigate("/login", { replace: true });
       return;
     }
@@ -136,8 +136,8 @@ const SemiProtectedRoute = ({ children }: { children: React.ReactElement }) => {
     })
       .then((res) => {
         if (res.status === 401) {
-          localStorage.removeItem("token");
-          localStorage.removeItem("isLogin");
+          sessionStorage.removeItem("token");
+          sessionStorage.removeItem("isLogin");
           navigate("/login", { replace: true });
         }
       })

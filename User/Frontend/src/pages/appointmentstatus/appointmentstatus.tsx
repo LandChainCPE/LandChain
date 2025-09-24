@@ -60,7 +60,7 @@ const AppointmentStatus: React.FC = () => {
   // Filter states
   const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(null);
 
-  const currentUserId = Number(localStorage.getItem("user_id") || 1);
+  const currentUserId = Number(sessionStorage.getItem("user_id") || 1);
 
   // ฟังก์ชันสำหรับแปลงสถานะเป็นภาษาไทย
   const getStatusText = (status: string) => {

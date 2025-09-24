@@ -447,7 +447,7 @@ const LandDetail = () => {
   const [messageState, setMessageState] = useState<{ type: 'error' | 'success'; content: string } | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false); 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const userId = Number(localStorage.getItem("user_id"));
+  const userId = Number(sessionStorage.getItem("user_id"));
 
   // ฟังก์ชันสร้างห้องแชทใหม่
   const handleCreateRoom = async () => {

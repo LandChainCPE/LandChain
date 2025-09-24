@@ -1,5 +1,5 @@
 // Nonce service for handling replay attack prevention
-const API_BASE_URL = 'http://10.1.189.185:8080';
+const API_BASE_URL = 'http://localhost:8080';
 
 export interface NonceResponse {
   nonce: string;
@@ -136,10 +136,10 @@ export const secureRegis = async (address: string): Promise<LoginResponse> => {
     console.log("Signature:", signature);
     
     // Step 3: Login with nonce and signature
-    const firstname = localStorage.getItem("firstname") || "";
-    const lastname = localStorage.getItem("lastname") || "";
-    const phonenumber = localStorage.getItem("phonenumber") || "";
-    const email = localStorage.getItem("email") || "";
+    const firstname = sessionStorage.getItem("firstname") || "";
+    const lastname = sessionStorage.getItem("lastname") || "";
+    const phonenumber = sessionStorage.getItem("phonenumber") || "";
+    const email = sessionStorage.getItem("email") || "";
 
 
     const loginResult = await RegisWithNonce({

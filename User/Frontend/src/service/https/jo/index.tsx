@@ -6,8 +6,8 @@ import type { BookingInterface } from "../../../interfaces/Booking";
 import type { AvailableSlotsResponse } from "../../../interfaces/types";
 
 function getAuthHeaders() {
-  const token = localStorage.getItem("token");
-  const tokenType = localStorage.getItem("token_type");
+  const token = sessionStorage.getItem("token");
+  const tokenType = sessionStorage.getItem("token_type");
   return {
     "Authorization": `${tokenType} ${token}`,
     "Content-Type": "application/json",
@@ -22,8 +22,8 @@ const api = axios.create({
 // เพิ่ม Authorization header ในทุกคำขอ
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    const tokenType = localStorage.getItem("token_type") || "Bearer";
+    const token = sessionStorage.getItem("token");
+    const tokenType = sessionStorage.getItem("token_type") || "Bearer";
 
     // ตรวจสอบว่า headers มีอยู่หรือไม่ ถ้าไม่มีให้สร้างใหม่
     if (!config.headers) {
@@ -48,8 +48,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Token หมดอายุหรือไม่ถูกต้อง - redirect to login
-      localStorage.removeItem("token");
-      localStorage.removeItem("token_type");
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("token_type");
       window.location.href = "/login";
     }
     return Promise.reject(error);
@@ -242,14 +242,14 @@ export const GetUserBookings = async (userID: number) => {
 
 // 🔧 เพิ่ม utility function สำหรับตรวจสอบ token
 export const isTokenValid = (): boolean => {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   return !!token;
 };
 
 // 🔧 เพิ่ม function สำหรับ logout
 export const logout = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("token_type");
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("token_type");
   window.location.href = "/login";
 };
 

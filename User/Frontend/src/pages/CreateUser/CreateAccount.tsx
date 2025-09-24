@@ -13,30 +13,33 @@ const CreateAccount = () => {
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    const storedFirstname = localStorage.getItem('firstname');
-    const storedLastname = localStorage.getItem('lastname');
-    const storedPhonenumber = localStorage.getItem('phonenumber');
-    const storedEmail = localStorage.getItem('email');
-    const storedUserID = localStorage.getItem('user_id');
+    const storedFirstname = sessionStorage.getItem('firstname');
+    const storedLastname = sessionStorage.getItem('lastname');
+    const storedPhonenumber = sessionStorage.getItem('phonenumber');
+    const storedEmail = sessionStorage.getItem('email');
+    const storedUserID = sessionStorage.getItem('user_id');
 
     if (storedFirstname) setFirstname(storedFirstname);
     if (storedLastname) setLastname(storedLastname);
     if (storedPhonenumber) setPhonenumber(storedPhonenumber);
     if (storedEmail) setEmail(storedEmail);
-    // if (storedUserID) localStorage.setItem('user_id', storedUserID);
+    if (storedUserID) sessionStorage.setItem('user_id', storedUserID);
   }, []);
 
   const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    // localStorage.setItem('firstname', firstname);
-    // localStorage.setItem('lastname', lastname);
-    // localStorage.setItem('phonenumber', phonenumber);
-    // localStorage.setItem('email', email);
-    // localStorage.setItem('user_id', localStorage.getItem('user_id') || '');
+      event.preventDefault();
+  sessionStorage.setItem('firstname', firstname);
+  sessionStorage.setItem('lastname', lastname);
+  sessionStorage.setItem('phonenumber', phonenumber);
+  sessionStorage.setItem('email', email);
+  sessionStorage.setItem('user_id', sessionStorage.getItem('user_id') || '');
 
-    console.log('Account created!', { firstname, lastname, phonenumber, email });
-    navigate('/connectmetamask');
-  };
+  // สมมติว่าคุณนำข้อมูลไปใช้กับ DB ตรงนี้
+  console.log('Account created!', { firstname, lastname, phonenumber, email });
+
+  
+  navigate('/connectmetamask');
+ };
 
   return (
     <div className="create-account-container">

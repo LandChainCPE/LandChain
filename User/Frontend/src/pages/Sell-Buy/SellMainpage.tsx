@@ -12,7 +12,7 @@ function SellMainPage() {
   // ฟังก์ชันไปยังหน้า /user/main
   const gotomainuser = () => {
     setLoading(true);
-    localStorage.setItem("isLogin", "true");
+    sessionStorage.setItem("isLogin", "true");
     setTimeout(() => {
       navigate("/user/main");
     }, 2000);

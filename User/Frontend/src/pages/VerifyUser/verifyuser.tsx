@@ -64,7 +64,7 @@ function VerifyUser() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const userid = localStorage.getItem("user_id");   ///แก้  
+      const userid = sessionStorage.getItem("user_id");   ///แก้  
       console.log();
       if (!userid) return;
       const { response, result } = await GetDataUserVerification(userid);

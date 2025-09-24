@@ -29,7 +29,7 @@ const MainPage = (): JSX.Element => {
     const [isLogin, setIsLogin] = useState(false);
 
     useEffect(() => {
-        const loginStatus = localStorage.getItem("isLogin");
+        const loginStatus = sessionStorage.getItem("isLogin");
         if (loginStatus === "true") {
             setIsLogin(true);
         }
@@ -37,7 +37,7 @@ const MainPage = (): JSX.Element => {
 
     const goToRegisland = () => {
         setLoading(true);
-        localStorage.setItem("isLogin", "true");
+        sessionStorage.setItem("isLogin", "true");
         setTimeout(() => {
             navigate("/user/regisland");
         }, 2000);
@@ -45,14 +45,14 @@ const MainPage = (): JSX.Element => {
 
     const goToPostLand = () => {
         setLoading(true);
-        localStorage.setItem("isLogin", "true");
+        sessionStorage.setItem("isLogin", "true");
         setTimeout(() => {
             navigate("/user/sellpostmain");
         }, 2000);
     };
     const goToVerifyUserToBlockchain = () => {
         setLoading(true);
-        localStorage.setItem("isLogin", "true");
+        sessionStorage.setItem("isLogin", "true");
         setTimeout(() => {
             navigate("/user/verifyusertoblockchain");
         }, 2000);
@@ -72,12 +72,12 @@ const MainPage = (): JSX.Element => {
     };
 
     const handleLogout = () => {
-        // ลบข้อมูลการล็อกอินออกจาก localStorage
-        localStorage.removeItem("isLogin");
-        localStorage.removeItem("user_id");
-        localStorage.removeItem("token");
-        localStorage.removeItem("token_type");
-        localStorage.removeItem("walletAddress");
+        // ลบข้อมูลการล็อกอินออกจาก sessionStorage
+        sessionStorage.removeItem("isLogin");
+        sessionStorage.removeItem("user_id");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("token_type");
+        sessionStorage.removeItem("walletAddress");
         setIsLogin(false);
 
         // ล้างข้อมูลที่เกี่ยวกับ Metamask (ถ้ามี)

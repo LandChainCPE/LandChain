@@ -15,7 +15,7 @@ const MainPage = (): JSX.Element => {
 
   const goToRegisland = () => {
     setLoading(true);
-    localStorage.setItem("isLogin", "true");
+    sessionStorage.setItem("isLogin", "true");
     setTimeout(() => {
       navigate("/user/regisland");
     }, 2000);
