@@ -499,3 +499,61 @@ func CheckOwnerHandler(c *gin.Context) {
 		"isOwner": isOwner,
 	})
 }
+
+func CheckVerifyWallet(c *gin.Context) {
+	if ContractInstance == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "contract not initialized"})
+		return
+	}
+
+	var req struct {
+		Wallet string `json:"wallet"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "detail": err.Error()})
+		return
+	}
+
+	if req.Wallet == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "wallet address is required"})
+		return
+	}
+
+	wallet := common.HexToAddress(strings.ToLower(req.Wallet))
+
+	// Call GetOwnerInfo from contract
+	ownerInfo, err := ContractInstance.Contract.GetOwnerInfo(&ContractInstance.CallOpts, wallet)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot fetch owner info", "detail": err.Error()})
+		return
+	}
+
+	// Convert [32]byte to hex string for readability
+	ownerInfoHex := fmt.Sprintf("0x%x", ownerInfo)
+	fmt.Println("Owner Info (hex):", ownerInfoHex)
+
+	// Compare with user_verification table (force lowercase for DB query)
+	db := config.DB()
+	var userVerif entity.UserVerification
+	walletLower := strings.ToLower(wallet.Hex())
+	result := db.Where("LOWER(wallet) = ?", walletLower).First(&userVerif)
+	if result.Error != nil {
+		log.Printf("[CheckVerifyWallet] DB error: %v", result.Error)
+	} else {
+		log.Printf("[CheckVerifyWallet] DB found: wallet=%s, namehash_salt=%s", walletLower, userVerif.NameHashSalt)
+	}
+	match := false
+	if result.Error == nil {
+		// Compare ownerInfoHex with namehash_salt
+		match = strings.EqualFold(ownerInfoHex, userVerif.NameHashSalt)
+		log.Printf("[CheckVerifyWallet] Compare: ownerInfoHex=%s, namehash_salt=%s, match=%v", ownerInfoHex, userVerif.NameHashSalt, match)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"wallet":        wallet.Hex(),
+		"ownerInfo":     ownerInfoHex,
+		"namehash_salt": userVerif.NameHashSalt,
+		"match":         match,
+		"db_found":      result.Error == nil,
+	})
+}
