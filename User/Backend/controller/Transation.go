@@ -88,7 +88,7 @@ func UpdateTransactionBuyerAccept(c *gin.Context) {
 
 	// --- ถ้าเป็นเจ้าของจริง ค่อย Update Transaction ---
 	var existingTransaction entity.Transaction
-	if err := db.First(&existingTransaction, "seller_id = ? AND buyer_id = ? AND land_id = ? AND deteted_at IS NOT NULL", sellerId, buyerId, landId).Error; err != nil {
+	if err := db.First(&existingTransaction, "seller_id = ? AND buyer_id = ? AND land_id = ? AND deleted_at IS NULL", sellerId, buyerId, landId).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบธุรกรรมที่ต้องการอัปเดต"})
 		return
 	}

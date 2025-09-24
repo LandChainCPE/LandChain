@@ -126,61 +126,7 @@ func CreateLocation(c *gin.Context) {
 }
 
 // UpdateLocation - อัพเดท location เฉพาะจุด (เพิ่มเติม)
-func UpdateLocation(c *gin.Context) {
-    // รับค่า location_id จาก URL parameter
-    locationIDStr := c.Param("location_id")
-    locationID, err := strconv.ParseUint(locationIDStr, 10, 32)
-    if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid location_id format"})
-        return
-    }
 
-    var input struct {
-        Sequence       *int     `json:"sequence,omitempty"`
-        Latitude       *float64 `json:"latitude,omitempty"`
-        Longitude      *float64 `json:"longitude,omitempty"`
-    }
-
-    if err := c.ShouldBindJSON(&input); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input format"})
-        return
-    }
-
-    // ค้นหา location ที่ต้องการอัพเดท
-    var location entity.Location
-    if err := config.DB().First(&location, uint(locationID)).Error; err != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "Location not found"})
-        return
-    }
-
-    // อัพเดทเฉพาะฟิลด์ที่ส่งมา
-    updateData := make(map[string]interface{})
-    if input.Sequence != nil {
-        updateData["sequence"] = *input.Sequence
-    }
-    if input.Latitude != nil {
-        updateData["latitude"] = *input.Latitude
-    }
-    if input.Longitude != nil {
-        updateData["longitude"] = *input.Longitude
-    }
-
-    if len(updateData) == 0 {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "No data to update"})
-        return
-    }
-
-    if err := config.DB().Model(&location).Updates(updateData).Error; err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update location"})
-        return
-    }
-
-    c.JSON(http.StatusOK, gin.H{
-        "status": "success",
-        "message": "Location updated successfully",
-        "location_id": locationID,
-    })
-}
 
 // DeleteLocationsByLandSalePostId - ลบ locations ทั้งหมดของ landsalepost_id
 func DeleteLocationsByLandSalePostId(c *gin.Context) {
