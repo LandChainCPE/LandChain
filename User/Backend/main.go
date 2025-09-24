@@ -140,6 +140,7 @@ func main() {
 	userOwnership.Use(middlewares.Authorizes())
 	userOwnership.Use(middlewares.CheckOwnershipOrAdmin())
 	{
+		userOwnership.GET("/user/GetUserID/:wallet", controller.GetUserIDByWallet)
 		userOwnership.GET("/user/lands/:wallet", controller.GetUserPostLandData)
 		userOwnership.PUT("/user/updatepost", controller.UpdatePost)
 		userOwnership.PUT("/user/location/:location_id", controller.UpdateLocation)
