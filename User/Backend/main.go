@@ -80,6 +80,8 @@ func main() {
 
 	r.GET("/nonce/:address", controller.GetNonce)
 	r.POST("/nonce/validate", controller.ValidateNonce)
+	r.POST("/checkverifywallet", controller.CheckVerifyWallet)
+
 
 	// 🔧 Debug API เพื่อตรวจสอบข้อมูล user (ชั่วคราว)
 	debugAuth := r.Group("")
@@ -131,6 +133,10 @@ func main() {
 	userOwnership.Use(middlewares.Authorizes())
 	userOwnership.Use(middlewares.CheckOwnershipOrAdmin())
 	{
+			userOwnership.GET("/user/lands/:wallet", controller.GetUserPostLandData)
+		userOwnership.PUT("/user/updatepost", controller.UpdatePost)
+		userOwnership.PUT("/user/location/:location_id", controller.UpdateLocation)
+		userOwnership.PUT("/user/photoland/:photoland_id", controller.UpdatePhotoland)
 		userOwnership.POST("/userbookings", controller.CreateBooking)
 		userOwnership.PUT("/bookings/:id", controller.UpdateBooking)
 		userOwnership.GET("/bookings/:userID", controller.GetUserBookings)
