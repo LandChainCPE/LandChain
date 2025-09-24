@@ -1,4 +1,3 @@
-
 const apiUrl = "http://localhost:8080";
 
 import axios from "axios";
@@ -455,6 +454,17 @@ async function GetUserPostLandData (wallet: string) {
   console.log("555555",response);
 }
 
+const getUserIDByWallet = async (wallet: string): Promise<{ user_id?: number; wallet?: string; error?: string }> => {
+  try {
+    const res = await api.get(`/user/GetUserID/${wallet}`);
+    return res.data as { user_id?: number; wallet?: string; error?: string };
+  } catch (error: any) {
+    console.error("getUserIDByWallet Error:", error);
+    if (error.response) return error.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+};
+
 export {
   CreateBooking,
   GetProvinces,
@@ -465,4 +475,5 @@ export {
   GetUserPostLandData,
   updateLocation,
   updatePhotoland,
+  getUserIDByWallet
 };
