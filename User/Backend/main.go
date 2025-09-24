@@ -41,6 +41,14 @@ func main() {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
 
+	// เพิ่ม/ปรับปรุง API จาก managepost.go
+	r.PUT("/managepost/update/:post_id", controller.UpdatePost)
+	r.PUT("/managepost/updatephotoland/:photoland_id", controller.UpdatePhotoland)
+	r.PUT("/managepost/updatelocation/:location_id", controller.UpdateLocation)
+	r.GET("/managepost/userpostland/:wallet", controller.GetUserPostLandData)
+	r.POST("/managepost/photos/:post_id", controller.AddMultiplePhotos)
+	r.PUT("/managepost/photos/replace/:post_id", controller.ReplaceAllPhotos)
+
 	r.POST("/createaccount", controller.CreateAccount)
 	r.POST("/check-wallet", controller.CheckWallet)
 	r.POST("/login", controller.LoginUser)
@@ -133,7 +141,7 @@ func main() {
 	userOwnership.Use(middlewares.Authorizes())
 	userOwnership.Use(middlewares.CheckOwnershipOrAdmin())
 	{
-			userOwnership.GET("/user/lands/:wallet", controller.GetUserPostLandData)
+		userOwnership.GET("/user/lands/:wallet", controller.GetUserPostLandData)
 		userOwnership.PUT("/user/updatepost", controller.UpdatePost)
 		userOwnership.PUT("/user/location/:location_id", controller.UpdateLocation)
 		userOwnership.PUT("/user/photoland/:photoland_id", controller.UpdatePhotoland)
