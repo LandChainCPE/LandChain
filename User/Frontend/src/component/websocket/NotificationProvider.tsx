@@ -41,10 +41,7 @@ export const NotificationProvider: React.FC<Props> = ({ userID, children }) => {
     const ws = new WebSocket(`ws://localhost:8080/ws/notification/${userID}`);
     wsRef.current = ws;
 
-    ws.onopen = () => console.log("Notification WS connected");
-
     ws.onclose = (e) => {
-      console.log("Notification WS closed, reconnecting in 2s", e.reason);
       setTimeout(connectWS, 2000);
     };
 

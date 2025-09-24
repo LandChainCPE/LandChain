@@ -3,11 +3,13 @@ package services
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/big"
+	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
@@ -18,28 +20,54 @@ import (
 // --------------------
 // THB -> ETH
 // --------------------
-func ThbToEth(thb float64) (string, error) {
-	// สมมติว่า fetch ETH price จาก API แล้ว
-	ethPrice := 50000.0 // placeholder
-	eth := thb / ethPrice
-	return fmt.Sprintf("%.6f", eth), nil
-}
 
 // --------------------
 // Sign token sale แบบ Node.js style
 // --------------------
 
+func ThbToEth(thb float64) (float64, error) {
+	// ดึงราคา ETH/THB จาก CoinGecko API
+	resp, err := http.Get("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=thb")
+	if err != nil {
+		return 0, fmt.Errorf("fetch ETH price error: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, fmt.Errorf("read ETH price error: %w", err)
+	}
+
+	var result map[string]map[string]float64
+	if err := json.Unmarshal(body, &result); err != nil {
+		return 0, fmt.Errorf("unmarshal ETH price error: %w", err)
+	}
+
+	ethPrice, ok := result["ethereum"]["thb"]
+	if !ok || ethPrice == 0 {
+		return 0, fmt.Errorf("ETH price not found")
+	}
+
+	eth := thb / ethPrice
+	return eth, nil
+}
+
 func SignLandSalePacked(tokenID int, priceTHB float64, buyer string) (string, string, error) {
-	// 1. THB -> ETH
+	// 1. THB -> ETH (ใช้ float64)
 	priceETH, err := ThbToEth(priceTHB)
 	if err != nil {
 		return "", "", err
 	}
 
-	// 2. ETH -> Wei
-	ethFloat, _ := strconv.ParseFloat(priceETH, 64)
+	// 2. ETH -> Wei (ใช้ big.Float เพื่อความแม่นยำ)
+	ethBig := big.NewFloat(priceETH)
+	weiBig := new(big.Float).Mul(ethBig, big.NewFloat(1e18))
 	priceWei := new(big.Int)
-	priceWei.SetString(fmt.Sprintf("%.0f", ethFloat*1e18), 10)
+	weiBig.Int(priceWei)
+
+	// log ราคาทั้งหมด
+	log.Printf("LandSale: tokenID=%d, priceTHB=%.2f, priceETH=%.8f, priceWei=%s, buyer=%s",
+		tokenID, priceTHB, priceETH, priceWei.String(), buyer)
 
 	// 3. สร้าง bytes ตรงตาม abi.encodePacked(uint256,uint256,address)
 	tokenIDBig := big.NewInt(int64(tokenID))
@@ -47,7 +75,6 @@ func SignLandSalePacked(tokenID int, priceTHB float64, buyer string) (string, st
 	priceBytes := common.LeftPadBytes(priceWei.Bytes(), 32)     // uint256 32 bytes
 	buyerBytes := common.HexToAddress(buyer).Bytes()            // address 20 bytes
 
-	// concat
 	var packed []byte
 	packed = append(packed, tokenIDBytes...)
 	packed = append(packed, priceBytes...)
@@ -94,7 +121,6 @@ func SignLandSalePacked(tokenID int, priceTHB float64, buyer string) (string, st
 
 // CheckBackendWallet ตรวจสอบว่า private key ที่ backend ใช้ตรงกับ wallet ที่มี ETH
 func CheckBackendWallet() error {
-	// โหลด private key
 	privateKey := os.Getenv("PRIVATE_KEY")
 	if privateKey == "" {
 		return fmt.Errorf("PRIVATE_KEY ยังไม่ถูกตั้งค่า")
@@ -105,11 +131,9 @@ func CheckBackendWallet() error {
 		return fmt.Errorf("Invalid private key: %v", err)
 	}
 
-	// หา address จาก private key
 	address := crypto.PubkeyToAddress(key.PublicKey)
 	fmt.Println("🔹 Backend wallet address:", address.Hex())
 
-	// เชื่อม RPC
 	rpcURL := os.Getenv("HOODI_RPC")
 	if rpcURL == "" {
 		return fmt.Errorf("HOODI_RPC ยังไม่ถูกตั้งค่า")
@@ -120,7 +144,6 @@ func CheckBackendWallet() error {
 		return fmt.Errorf("เชื่อมต่อ Holesky RPC ไม่สำเร็จ: %v", err)
 	}
 
-	// ตรวจสอบ balance
 	balance, err := client.BalanceAt(context.Background(), address, nil)
 	if err != nil {
 		return fmt.Errorf("ไม่สามารถดึง balance ได้: %v", err)
@@ -130,7 +153,6 @@ func CheckBackendWallet() error {
 	fmt.Println("🔹 Backend wallet balance (Wei):", balance)
 	fmt.Println("🔹 Backend wallet balance (ETH):", ethBalance)
 
-	// ตรวจสอบว่ามี ETH พอสำหรับ gas (ประมาณ 0.001 ETH เผื่อไว้)
 	minGas := new(big.Int).Mul(big.NewInt(1e15), big.NewInt(1)) // 0.001 ETH
 	if balance.Cmp(minGas) < 0 {
 		return fmt.Errorf("wallet balance น้อยเกินไปสำหรับ gas, ต้องมีอย่างน้อย 0.001 ETH")

@@ -37,6 +37,7 @@ func CreateRequestBuySellHandler(c *gin.Context) {
 		BuyerID:  req.BuyerID,
 		SellerID: landPost.UserID,
 		LandID:   landPost.LandID, // ใช้ ID ของโพสต์   ใช้ LandID  แทน
+
 	}
 
 	if err := config.DB().Create(&request).Error; err != nil {

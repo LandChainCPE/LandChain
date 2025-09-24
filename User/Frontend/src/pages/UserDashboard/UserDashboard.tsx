@@ -338,7 +338,7 @@ export default function UserProfilePage() {
       try {
         const accounts = await (window as any).ethereum.request({ method: "eth_requestAccounts" });
         if (accounts && accounts[0]) {
-          localStorage.setItem("wallet", accounts[0]);
+          // localStorage.setItem("wallet", accounts[0]);
           setWallet(accounts[0]);
           setTitlesError(null);
           fetchLandTitlesFromBlockchain(accounts[0]);
@@ -364,7 +364,7 @@ export default function UserProfilePage() {
         const accounts = await (window as any).ethereum.request({ method: "eth_accounts" });
         walletToUse = accounts[0] || "";
         if (walletToUse) {
-          localStorage.setItem("wallet", walletToUse);
+          // localStorage.setItem("wallet", walletToUse);
           setWallet(walletToUse);
         }
       } catch { }
