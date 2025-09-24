@@ -80,6 +80,8 @@ func main() {
 
 	r.GET("/nonce/:address", controller.GetNonce)
 	r.POST("/nonce/validate", controller.ValidateNonce)
+	r.POST("/checkverifywallet", controller.CheckVerifyWallet)
+
 
 	// 🔧 Debug API เพื่อตรวจสอบข้อมูล user (ชั่วคราว)
 	debugAuth := r.Group("")
@@ -116,6 +118,8 @@ func main() {
 		admin.POST("/verifylandtitleid/:LandtitleID", controller.VerifyLandtitleID)    //กรมที่ดินกดยืนยัน ระบบทำการดึงข้อมูลของที่ดิน รวมเป็น metadata ทำการเซ็นข้อมูล เก็บลง land_verification
 		admin.GET("/getalllanddata", controller.GetAllLandData)                        //ดึงข้อมูล โฉนดมาแสดง ทั้งหมด
 		//admin.GET("getdatauserverification/:userid", controller.GetDataUserVerification)   //เป็นของ User ดึงข้อมูล ผู้ใช้ WalletID  NameHash Signature  เพื่อลงทะเบียนผู้ใช้ลงBlockchain
+		admin.GET("/gettransactionland", controller.GetTransactionLand)
+		admin.POST("/departmentoflandverifytransaction", controller.DepartmentOfLandVerifyTransaction)
 		//จบ----- อรรถ -------
 
 		admin.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
@@ -129,6 +133,10 @@ func main() {
 	userOwnership.Use(middlewares.Authorizes())
 	userOwnership.Use(middlewares.CheckOwnershipOrAdmin())
 	{
+			userOwnership.GET("/user/lands/:wallet", controller.GetUserPostLandData)
+		userOwnership.PUT("/user/updatepost", controller.UpdatePost)
+		userOwnership.PUT("/user/location/:location_id", controller.UpdateLocation)
+		userOwnership.PUT("/user/photoland/:photoland_id", controller.UpdatePhotoland)
 		userOwnership.POST("/userbookings", controller.CreateBooking)
 		userOwnership.PUT("/bookings/:id", controller.UpdateBooking)
 		userOwnership.GET("/bookings/:userID", controller.GetUserBookings)
@@ -223,6 +231,7 @@ func main() {
 		authorized.GET("/userinfo/:userId", controller.GetUserinfoByID)
 		authorized.GET("/landtitles/:userId", controller.GetLandtitlesByUser) //ดึงข้อมูล landtitles
 		// authorized.GET("/land_verification/:userid", controller.GetLandVerificationByUserID) //ดึงข้อมูล land_verification
+		authorized.GET("/user/verify", controller.CheckVerify)
 	}
 
 	r.GET("/ws/notification/:userID", controller.NotificationWS)

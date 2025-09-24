@@ -241,15 +241,15 @@ const handleSetsaleinfo = async (transaction: any) => {
     const priceTHB = transaction.Amount; // THB
     const buyer = transaction.Buyer?.Metamaskaddress;
 
-    if (!tokenId || !buyer || !priceTHB) {
-       Swal.fire({
-                      icon: "error",
-                      title: "ไม่พบ Token ID, buyer หรือราคาขาย",
-                      confirmButtonColor: "#e74c3c",
-                      });
-      console.log(tokenId, buyer, priceTHB);
-      return;
-    }
+    // if (!tokenId || !buyer || !priceTHB) {
+    //    Swal.fire({
+    //                   icon: "error",
+    //                   title: "ไม่พบ Token ID, buyer หรือราคาขาย",
+    //                   confirmButtonColor: "#e74c3c",
+    //                   });
+    //   console.log(tokenId, buyer, priceTHB);
+    //   return;
+    // }
 
     setProcessingTxId(transaction.ID);
 
@@ -685,7 +685,7 @@ const openETHModalForTransaction = (tx: any) => {
                         </div>
                     )}
 
-                    {userType === "buyer" && tx.TypetransactionID === 6 && (
+                    {userType === "buyer" && tx.TypetransactionID === 4 && (
                         <div className="card-actions">
                             {tx.BuyerAccepted && tx.SellerAccepted && tx.LandDepartmentApproved ? (
                             <button 

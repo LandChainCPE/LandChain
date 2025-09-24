@@ -5,6 +5,15 @@ import axios from "axios";
 import type { BookingInterface } from "../../../interfaces/Booking";
 import type { AvailableSlotsResponse } from "../../../interfaces/types";
 
+function getAuthHeaders() {
+  const token = localStorage.getItem("token");
+  const tokenType = localStorage.getItem("token_type");
+  return {
+    "Authorization": `${tokenType} ${token}`,
+    "Content-Type": "application/json",
+  };
+}
+
 // 🔧 แก้ไข: สร้าง axios instance ที่มี interceptor
 const api = axios.create({
   baseURL: apiUrl,
@@ -289,10 +298,110 @@ export async function getLocationsByLandSalePostId(landsalepostId: number) {
   }
 }
 
+
+async function CheckVerifyWallet(wallet: any) {
+  const requestOptions = {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ wallet }),
+  };
+
+  let response = await fetch(`${apiUrl}/checkverifywallet`, requestOptions);
+  const result = await response.json();
+  return { response, result };
+};
+
+// แก้ไข updatePost function ใน index.tsx
+// แก้ไข updatePost function ใน index.tsx
+export async function updatePost(data: any) {
+  try {
+    // Debug log เพื่อตรวจสอบข้อมูลที่ได้รับ
+    console.log('updatePost received data:', data);
+    console.log('data.id:', data.id);
+    
+    if (!data.id) {
+      console.error('Post ID is missing from data:', data);
+      return { response: { ok: false }, result: { error: "Post ID is required" } };
+    }
+
+    const requestData = {
+      post_id: data.id, // ส่ง post_id ใน body
+      name: data.name,
+      price: data.price,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      phone_number: data.phone_number,
+      province_id: data.province_id,
+      district_id: data.district_id,
+      subdistrict_id: data.subdistrict_id,
+      land_id: data.land_id,
+      user_id: data.user_id,
+    };
+
+    console.log('Sending updatePost request with post_id:', requestData);
+
+    // ส่ง PUT request ไปยัง /user/updatepost (ไม่ใส่ post_id ใน URL)
+    const response = await api.put('/user/updatepost', requestData);
+    console.log('UpdatePost API Response:', response);
+    
+    if (response.status === 200) {
+      return { response: { ok: true }, result: response.data };
+    } else {
+      return { response: { ok: false }, result: { error: "เกิดข้อผิดพลาดในการแก้ไขโพสต์" } };
+    }
+  } catch (error: any) {
+    console.error("updatePost Error:", error);
+    if (error.response) {
+      return { response: { ok: false }, result: error.response.data };
+    } else {
+      return { response: { ok: false }, result: { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" } };
+    }
+  }
+}
+
+async function updateLocation(location_id: number, data: any) {
+  const requestOptions = {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  };
+  let response = await fetch(`${apiUrl}/user/location/${location_id}`, requestOptions);
+  const result = await response.json();
+  return { response, result };
+  
+}
+
+
+async function updatePhotoland(photoland_id: number, data: any) {
+  const requestOptions = {
+    method: "PUT",  
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  };
+  let response = await fetch(`${apiUrl}/user/photoland/${photoland_id}`, requestOptions);
+  const result = await response.json();
+  return { response, result };
+}
+
+async function GetUserPostLandData (wallet: string) {
+  const requestOptions = {
+    method: "GET",
+    headers: getAuthHeaders(),
+  };
+  let response = await fetch(`${apiUrl}/user/lands/${wallet}`, requestOptions);
+  const result = await response.json();
+  return { response, result };
+  console.log("555555",response);
+}
+
 export {
   CreateBooking,
   GetProvinces,
   GetBranches,
   GetTimeSlots,
   GetServiceTypes,
+  CheckVerifyWallet,
+  GetUserPostLandData,
+  updateLocation,
+  updatePhotoland
 };

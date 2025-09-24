@@ -21,10 +21,10 @@ const Navbar = () => {
 
 
   useEffect(() => {
-
     async function fetchUser() {
       try {
         const userInfo = await GetInfoUserByWalletID();
+        console.log("userInfo", userInfo);
         setUser(userInfo);
 
       } catch (err) {
@@ -38,7 +38,9 @@ const Navbar = () => {
   useEffect(() => {
 
     if (!isLoggedIn || !user?.id) return;
+
     const ws = new WebSocket(`ws://localhost:8080/ws/notification/${user?.id}`);
+
 
     ws.onmessage = (event) => {
       try {
@@ -139,6 +141,14 @@ const Navbar = () => {
               </li>
               <li className="navbar-nav-item">
                 <a
+                  href="/user/checkverifywallet"
+                  className={`navbar-nav-link ${location.pathname === '/user/checkverifywallet' ? 'active' : ''}`}
+                >
+                  ตรวจสอบการยืนยันกระเป๋าตัง
+                </a>
+              </li>
+              <li className="navbar-nav-item">
+                <a
                   href="/user/sellpostmain"
                   className={`navbar-nav-link ${location.pathname === '/user/sellpostmain' ? 'active' : ''}`}
                 >
@@ -178,6 +188,14 @@ const Navbar = () => {
                     onClick={() => setShowDropdown(false)}
                   >
                     จัดการข้อมูล
+                  </a>
+
+                  <a
+                    href="/user/managepost"
+                    className="dropdown-item-landchain"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    จัดการโพสต์
                   </a>
                   <a
                     href="/user/chat"

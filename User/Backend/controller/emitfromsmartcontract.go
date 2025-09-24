@@ -98,9 +98,9 @@ func ListenSmartContractEvents() {
 				if uuid == "" {
 					log.Println("UUID not found in metaFields")
 					break
-				}   //แค่ปริ้น ข้อมูลที่รับมาออก
+				} //แค่ปริ้น ข้อมูลที่รับมาออก
 
-				db := config.DB()    //หาว่า uuid ตรงกับ Landtitle ไหน 
+				db := config.DB() //หาว่า uuid ตรงกับ Landtitle ไหน
 				var landtitle entity.Landtitle
 				if err := db.Where("uuid = ?", uuid).First(&landtitle).Error; err != nil {
 					log.Println("Landtitle not found for UUID:", uuid)
@@ -139,15 +139,15 @@ func ListenSmartContractEvents() {
 					log.Println("User not found for wallet:", ownerLower)
 					break
 				}
-				
+
 				landID := landtitle.ID
 				// นำ UserID  LandID มาใส่ใน landOwnership
 				landOwnership := entity.LandOwnership{
 					UserID:   user.ID,
 					LandID:   landID,
-					TxHash:   vLog.TxHash.Hex(),   //รวมถึง Transaction Hash ด้วย 
+					TxHash:   vLog.TxHash.Hex(), //รวมถึง Transaction Hash ด้วย
 					FromDate: time.Now(),
-					ToDate:   nil, 
+					ToDate:   nil,
 				}
 				if err := db.Create(&landOwnership).Error; err != nil {
 					log.Println("Failed to create LandOwnership:", err)
@@ -200,12 +200,52 @@ func ListenSmartContractEvents() {
 				fmt.Println("buyer:", buyer.Hex())
 				fmt.Println("owner:", owner.Hex())
 				fmt.Println("TxHash:", vLog.TxHash.Hex())
-				//เอา tokenId ไปหาว่า ตรงกับ landtitleID ไหน
-				// ไปหา Transaction ที่ landtitleID  and buyer and owner and TypeTransaction == on-chain 
-				//ทำการ ใส่ TxHash  +  TypeTransaction เซตเป็น onchain 
-				
-				// ณ เวลาใดๆ  ต้องมี Transaction ที่เป็น TypeTransaction == on-chain  แค่ 1 row ต่อโฉนดเท่านั้น
 
+				db := config.DB()
+				// 1. Find Landtitle by tokenId
+				var landtitle entity.Landtitle
+				tokenIDUint := uint(tokenId.Uint64())
+				if err := db.Where("token_id = ?", tokenIDUint).First(&landtitle).Error; err != nil {
+					log.Println("Landtitle not found for tokenId:", tokenIDUint)
+					break
+				}
+
+				// 2. Find Users by buyer and owner wallet
+				buyerLower := strings.ToLower(buyer.Hex())
+				ownerLower := strings.ToLower(owner.Hex())
+				var buyerUser, ownerUser entity.Users
+				if err := db.Where("metamaskaddress = ?", buyerLower).First(&buyerUser).Error; err != nil {
+					log.Println("Buyer user not found for wallet:", buyerLower)
+					break
+				}
+				if err := db.Where("metamaskaddress = ?", ownerLower).First(&ownerUser).Error; err != nil {
+					log.Println("Owner user not found for wallet:", ownerLower)
+					break
+				}
+
+				// 3. Find Transaction with LandID, buyer, seller, TypeTransactionID=3
+				var transaction entity.Transaction
+				if err := db.Where("land_id = ? AND buyer_id = ? AND seller_id = ? AND typetransaction_id = ?", landtitle.ID, buyerUser.ID, ownerUser.ID, 3).First(&transaction).Error; err != nil {
+					log.Println("Transaction not found for LandID, buyer, seller, TypeTransactionID=3")
+					break
+				}
+
+				// 4. Update TxHash and set TypeTransactionID=4
+				txHash := vLog.TxHash.Hex()
+				transaction.TxHash = &txHash      //ใส่ค่า TxHash
+				transaction.TypetransactionID = 4 // TypetransactionID = 4
+				if err := db.Save(&transaction).Error; err != nil {
+					log.Println("Failed to update Transaction TxHash and TypeTransactionID:", err)
+				} else {
+					log.Println("Transaction updated: TxHash set and TypeTransactionID changed to 4 for LandID:", landtitle.ID)
+				}
+
+				// เขียน Emit ให้หน่อย SaleInfoSet
+				// 1.ต้องการที่จะนำ tokenId ไปหาว่าตรงกับ LandtitleID ไหน
+				// 2.นำ Walletid  ของทั้ง  buyer  และ  owner ไปหาว่าตรงกับ Userid ไหน
+				// 2.ทำการค้นหา Transaction ที่ มีLandtitleID  buyer  owner(seller)  และ Transaction มี TypeTransaction ตรงกับ id = 3
+
+				// ทำการ เอา TxHash ไปใส่ใน transactions และทำการอัพเดต TypeTransactionID เป็น 4
 
 			case "LandTitleBought":
 				// tokenId (indexed) = vLog.Topics[1]
@@ -219,11 +259,84 @@ func ListenSmartContractEvents() {
 				fmt.Println("seller:", seller.Hex())
 				fmt.Println("buyer:", buyer.Hex())
 				fmt.Println("TxHash:", vLog.TxHash.Hex())
-				//หากเกิดการซื้อ ให้ทำการ 
+				db := config.DB()
+				// 1. Find Landtitle by tokenId
+				var landtitle entity.Landtitle
+				tokenIDUint := uint(tokenId.Uint64())
+				if err := db.Where("token_id = ?", tokenIDUint).First(&landtitle).Error; err != nil {
+					log.Println("Landtitle not found for tokenId:", tokenIDUint)
+					break
+				}
+
+				// 2. Find buyer user by wallet address
+				buyerLower := strings.ToLower(buyer.Hex())
+				var buyerUser entity.Users
+				if err := db.Where("metamaskaddress = ?", buyerLower).First(&buyerUser).Error; err != nil {
+					log.Println("Buyer user not found for wallet:", buyerLower)
+					break
+				}
+
+				// 3. Find previous LandOwnership by seller (ToDate == NULL)
+				//หา Row ที่เป็นของเจ้าของก่อน 
+				sellerLower := strings.ToLower(seller.Hex())
+				var sellerUser entity.Users
+				if err := db.Where("metamaskaddress = ?", sellerLower).First(&sellerUser).Error; err != nil {
+					log.Println("Seller user not found for wallet:", sellerLower)
+				} else {
+					var prevOwnership entity.LandOwnership
+					if err := db.Where("land_id = ? AND user_id = ? AND to_date IS NULL", landtitle.ID, sellerUser.ID).First(&prevOwnership).Error; err != nil {
+						log.Println("Previous LandOwnership not found for LandID and SellerID:", landtitle.ID, sellerUser.ID)
+					} else {
+						now := time.Now()
+						prevOwnership.ToDate = &now
+						if err := db.Save(&prevOwnership).Error; err != nil {
+							log.Println("Failed to update previous LandOwnership ToDate:", err)
+						} else {
+							log.Println("Previous LandOwnership ToDate updated for LandID:", landtitle.ID, "SellerID:", sellerUser.ID)
+						}
+					}
+				}
+
+				// 4. Create new LandOwnership for buyer
+				//สร้างข้อมูลใหม่ ให้ เป็นเจ้าของปัจจุบันเป้นผู้ซื้อ 
+				newOwnership := entity.LandOwnership{
+					UserID:   buyerUser.ID,
+					LandID:   landtitle.ID,
+					TxHash:   vLog.TxHash.Hex(),
+					FromDate: time.Now(),
+					ToDate:   nil,
+				}
+				if err := db.Create(&newOwnership).Error; err != nil {
+					log.Println("Failed to create new LandOwnership for buyer:", err)
+				} else {
+					log.Println("New LandOwnership created for buyer UserID:", buyerUser.ID, "LandID:", landtitle.ID)
+				}
+
+				// 5. Update Transaction for this purchase (TypeTransactionID=4)
+				var transaction entity.Transaction
+				if err := db.Where("land_id = ? AND buyer_id = ? AND seller_id = ? AND typetransaction_id = ? AND deleted_at IS NULL", landtitle.ID, buyerUser.ID, sellerUser.ID, 4).First(&transaction).Error; err != nil {
+					log.Println("Transaction not found for LandID, buyer, seller, TypeTransactionID=4")
+				} else {
+					// txHash := vLog.TxHash.Hex()
+					// transaction.TxHash = &txHash
+					transaction.TypetransactionID = 5 // เปลี่ยนเป็น 5
+					if err := db.Save(&transaction).Error; err != nil {
+						log.Println("Failed to update Transaction TxHash and TypeTransactionID for purchase:", err)
+					} else {
+						// Soft delete
+						if err := db.Delete(&transaction).Error; err != nil {
+							log.Println("Failed to soft delete Transaction:", err)
+						} else {
+							log.Println("Transaction updated: TxHash set, TypeTransactionID changed to 5 and soft deleted for LandID:", landtitle.ID, "buyer:", buyerUser.ID, "seller:", sellerUser.ID)
+						}
+					}
+				}
+
+				//หากเกิดการซื้อ ให้ทำการ
 				//เอา tokenId ไปหาว่าเป็นของ landtitleid ไหน
-				//เอา buyer ไปหาว่าตรงกับ userid ไหน 
+				//เอา buyer ไปหาว่าตรงกับ userid ไหน
 				//ทำการหาว่า ใน LandOwnerShip   มี landtitleid and  userid  and Todate=NULL
-				//ทำการ เซต Todate เป็นเวลาปัจจุบัน 
+				//ทำการ เซต Todate Row นั้น เป็นเวลาปัจจุบัน
 				//ทำการสร้างข้อมูลใหม่ โดยใส่ข้อมูลเข้าไปใน LandOwnerShip ให้เป็นข้อมูลคนปัจจุบัน
 			}
 		}

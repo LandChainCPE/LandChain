@@ -307,11 +307,13 @@ func SetupDatabase() {
 		SeedTambons(db)
 
 		db.Create(&entity.Typetransaction{StatusNameTh: "รอผู้ซื้อ/ผู้ขายตกลง", StatusNameEn: "in_progress"})
-		db.Create(&entity.Typetransaction{StatusNameTh: "เสร็จสิ้น", StatusNameEn: "completed"})
 		db.Create(&entity.Typetransaction{StatusNameTh: "ถูกยกเลิกโดยผู้ซื้อหรือผู้ขาย", StatusNameEn: "cancelled"})
-		db.Create(&entity.Typetransaction{StatusNameTh: "รอการชำระเงิน", StatusNameEn: "money_clear"})
-		db.Create(&entity.Typetransaction{StatusNameTh: "หมดอายุ", StatusNameEn: "expired"})
+		// db.Create(&entity.Typetransaction{StatusNameTh: "รอการชำระเงิน", StatusNameEn: "money_clear"})
+		// db.Create(&entity.Typetransaction{StatusNameTh: "หมดอายุ", StatusNameEn: "expired"})
+		db.Create(&entity.Typetransaction{StatusNameTh: "กรมที่ดินตรวจสอบแล้ว", StatusNameEn: "DepartmentOfLand-Verify"})
+
 		db.Create(&entity.Typetransaction{StatusNameTh: "อยู่บนเชน", StatusNameEn: "on-chain"})
+		db.Create(&entity.Typetransaction{StatusNameTh: "เสร็จสิ้น", StatusNameEn: "completed"})
 
 		db.Create(&entity.RequestBuySellType{StatusNameTh: "เจ้าของโฉลดสร้างคำขอขาย", StatusNameEn: "pending"})
 		db.Create(&entity.RequestBuySellType{StatusNameTh: "ตกลงซื้อขาย", StatusNameEn: "accepted"})
@@ -493,7 +495,7 @@ func SetupDatabase() {
 		db.Create(&entity.Transaction{
 			Amount:         1500,
 			BuyerAccepted:  true,
-			SellerAccepted: false,
+			SellerAccepted: true,
 			//MoneyChecked:           false,
 			LandDepartmentApproved: false,
 			//Expire:                 time.Now().AddDate(0, 0, 7),
