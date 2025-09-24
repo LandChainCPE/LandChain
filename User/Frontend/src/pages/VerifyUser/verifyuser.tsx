@@ -64,7 +64,7 @@ function VerifyUser() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const userid = localStorage.getItem("user_id");   ///แก้  
+      const userid = sessionStorage.getItem("user_id");   ///แก้  
       console.log();
       if (!userid) return;
       const { response, result } = await GetDataUserVerification(userid);
@@ -158,9 +158,6 @@ function VerifyUser() {
 
       <div className="hero-section">
         <div className="hero-content">
-          <div className="hero-badge">
-            <span>🏛️ Blockchain User Verification</span>
-          </div>
           <h1 className="hero-title">
             <span className="gradient-text">ยืนยันตัวตนบน Blockchain</span>
           </h1>

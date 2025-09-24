@@ -249,7 +249,7 @@ func VerifyLandtitleID(c *gin.Context) {
 		", SqWa:" + fmt.Sprint(land.SquareWa) +
 		", Subdistrict:" + land.District.NameTH +
 		", District:" + land.District.NameTH +
-		", Province:" + land.Province.NameTh +
+		", Province:" + land.Province.NameTH +
 		", UUID:" + uuidStr
 
 	walletID := strings.ToLower(land.User.Metamaskaddress)
@@ -343,7 +343,7 @@ func GetAllLandData(c *gin.Context) {
 		districtName := ""
 		subdistrictName := ""
 		if l.Province.ID != 0 {
-			provinceName = l.Province.NameTh
+			provinceName = l.Province.NameTH
 		}
 		if l.District.ID != 0 {
 			districtName = l.District.NameTH
@@ -398,7 +398,7 @@ func GetTransactionLand(c *gin.Context) {
 		districtName := ""
 		subdistrictName := ""
 		if land.Province.ID != 0 {
-			provinceName = land.Province.NameTh
+			provinceName = land.Province.NameTH
 		}
 		if land.District.ID != 0 {
 			districtName = land.District.NameTH

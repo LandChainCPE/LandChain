@@ -149,7 +149,7 @@ const ManagePost: React.FC = () => {
   }, []);
 
   const loadUserPosts = async () => {
-    const wallet = localStorage.getItem("wallet");
+    const wallet = sessionStorage.getItem("wallet");
     if (!wallet) {
       setError("ไม่พบ wallet address ในระบบ กรุณาเชื่อมต่อกระเป๋าเงินก่อน");
       setLoading(false);

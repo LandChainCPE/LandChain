@@ -168,7 +168,6 @@ func main() {
 		userToken.GET("/user/info/", controller.GetInfoUserByWalletID)
 		userToken.GET("/user/lands", controller.GetLandTitleInfoByWallet)
 
-		userToken.GET("/user/lands/requestsellbydelete", controller.GetAllRequestSellByUserIDAndDelete)
 	}
 
 	// 🌐 General authorized routes
@@ -233,8 +232,9 @@ func main() {
 		authorized.GET("/chat/allroom/:id", controller.GetAllRoomMessagesByUserID)
 		authorized.POST("/upload/:roomID/:userID", controller.UploadImage)
 		authorized.GET("/user/info/:id", controller.GetUserinfoByUserID)
+		authorized.GET("/user/lands/requestsellbydelete", controller.GetAllRequestSellByUserIDAndDelete)
 
-		authorized.DELETE("/user/lands/post/:landid", controller.DeleteLandsalepostByLandIDandUserID)
+		authorized.DELETE("/user/lands/post/:id", controller.DeleteLandsalepostByLandIDandUserID)
 
 		authorized.GET("/userinfo/:userId", controller.GetUserinfoByID)
 		authorized.GET("/landtitles/:userId", controller.GetLandtitlesByUser) //ดึงข้อมูล landtitles

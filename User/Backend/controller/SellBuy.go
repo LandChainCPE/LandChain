@@ -295,7 +295,7 @@ func GetRequestBuyByTokenID(c *gin.Context) {
 	if err := db.Preload("Landtitle", "token_id = ?", tokenID).
 		Preload("Seller").
 		Preload("Buyer").
-		Preload("RequestBuySellType").
+		// Preload("RequestBuySellType").
 		Find(&requests).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลคำขอซื้อได้"})
 		return
@@ -420,24 +420,29 @@ func GetInfoUsersByWallets(c *gin.Context) {
 }
 
 func DeleteAllRequestBuyByLandID(c *gin.Context) {
-	landIDStr := c.Query("landID")
+	tokenID := c.Param("id")
 
-	if landIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ต้องระบุ landID และ userID"})
-		return
-	}
-
-	landID, err1 := strconv.Atoi(landIDStr)
-
-	if err1 != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "landID และ userID ต้องเป็นตัวเลข"})
+	if tokenID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ต้องระบุ tokenID"})
 		return
 	}
 
 	db := config.DB()
 
+	// 🔎 หา landID จาก tokenID
+	var land entity.Landtitle
+	if err := db.First(&land, "token_id = ?", tokenID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบที่ดินตาม tokenID"})
+		return
+	}
+	landID := land.ID
+
+	// ❌ ลบ request buy sell ตาม landID
 	if err := db.Where("land_id = ?", landID).Delete(&entity.RequestBuySell{}).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถลบข้อมูลได้", "detail": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "ไม่สามารถลบข้อมูลได้",
+			"detail": err.Error(),
+		})
 		return
 	}
 
@@ -460,7 +465,6 @@ func GetRequestBuybyLandID(c *gin.Context) {
 	if err := db.Where("land_id = ?", land.ID).
 		Preload("Seller").
 		Preload("Buyer").
-		Preload("RequestBuySellType").
 		Find(&requests).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลผู้ใช้ได้"})
 		return
@@ -470,7 +474,7 @@ func GetRequestBuybyLandID(c *gin.Context) {
 }
 
 func DeleteLandsalepostByLandIDandUserID(c *gin.Context) {
-	tokenID := c.Query("tokenID")
+	tokenID := c.Param("id")
 
 	if tokenID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tokenID จำเป็น"})

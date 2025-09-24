@@ -163,7 +163,7 @@ export default function UserProfilePage() {
   const [userError, setUserError] = useState<string | null>(null);
   const [titlesError, setTitlesError] = useState<string | null>(null);
   useEffect(() => {
-    const user_id = localStorage.getItem("user_id") || "";
+    const user_id = sessionStorage.getItem("user_id") || "";
     console.log("User id:", user_id);
     if (user_id) {
       setIsLoadingUser(true);
@@ -176,11 +176,11 @@ export default function UserProfilePage() {
             email: result.email || "",
             user_verification_id: result.user_verification_id || 0,
           });
-          // อัปเดต localStorage ให้ตรงกับ backend
-          // localStorage.setItem("firstName", result.firstName || "");
-          // localStorage.setItem("lastName", result.lastName || "");
-          // localStorage.setItem("email", result.email || "");
-          // localStorage.setItem("user_verification_id", result.user_verification_id ? String(result.user_verification_id) : "0");
+          // อัปเดต sessionStorage ให้ตรงกับ backend
+          // sessionStorage.setItem("firstName", result.firstName || "");
+          // sessionStorage.setItem("lastName", result.lastName || "");
+          // sessionStorage.setItem("email", result.email || "");
+          // sessionStorage.setItem("user_verification_id", result.user_verification_id ? String(result.user_verification_id) : "0");
         } else {
           console.log("No user data found or invalid format");
           setUserError("ไม่พบข้อมูลผู้ใช้");
@@ -192,7 +192,7 @@ export default function UserProfilePage() {
         setIsLoadingUser(false);
       });
     } else {
-      console.log("No user_id found in localStorage");
+      console.log("No user_id found in sessionStorage");
       setUserError("ไม่พบ User ID");
       setIsLoadingUser(false);
     }
@@ -203,7 +203,7 @@ export default function UserProfilePage() {
   const [totalLandCount, setTotalLandCount] = useState<number>(0);
 
   useEffect(() => {
-    const user_id = localStorage.getItem("user_id") || "";
+    const user_id = sessionStorage.getItem("user_id") || "";
     if (user_id) {
       GetLandtitlesByUser(user_id).then((res) => {
         if (Array.isArray(res)) {
@@ -223,7 +223,7 @@ export default function UserProfilePage() {
   const [notverifyCount, setNotverifyCount] = useState<number>(0);
 
   useEffect(() => {
-    const user_id = localStorage.getItem("user_id") || "";
+    const user_id = sessionStorage.getItem("user_id") || "";
     if (user_id) {
       GetLandtitlesByUser(user_id).then((res) => {
         let arr = Array.isArray(res) ? res : (res?.result && Array.isArray(res.result) ? res.result : []);
@@ -338,7 +338,7 @@ export default function UserProfilePage() {
       try {
         const accounts = await (window as any).ethereum.request({ method: "eth_requestAccounts" });
         if (accounts && accounts[0]) {
-          localStorage.setItem("wallet", accounts[0]);
+          // sessionStorage.setItem("wallet", accounts[0]);
           setWallet(accounts[0]);
           setTitlesError(null);
           fetchLandTitlesFromBlockchain(accounts[0]);
@@ -352,19 +352,19 @@ export default function UserProfilePage() {
   };
 
   // State สำหรับ wallet address
-  const [wallet, setWallet] = useState<string>(localStorage.getItem("wallet") || "");
+  const [wallet, setWallet] = useState<string>(sessionStorage.getItem("wallet") || "");
 
   // ฟังก์ชันดึงข้อมูลที่ดินจาก blockchain
   const fetchLandTitlesFromBlockchain = async (walletAddr?: string) => {
     setIsLoadingTitles(true);
     setTitlesError(null);
-    let walletToUse = walletAddr || wallet || localStorage.getItem("wallet") || "";
+    let walletToUse = walletAddr || wallet || sessionStorage.getItem("wallet") || "";
     if (!walletToUse && (window as any).ethereum) {
       try {
         const accounts = await (window as any).ethereum.request({ method: "eth_accounts" });
         walletToUse = accounts[0] || "";
         if (walletToUse) {
-          localStorage.setItem("wallet", walletToUse);
+          // sessionStorage.setItem("wallet", walletToUse);
           setWallet(walletToUse);
         }
       } catch { }

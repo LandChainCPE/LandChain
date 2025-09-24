@@ -16,6 +16,14 @@ const ConnectMetamask = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // ลบข้อมูล sessionStorage หลังใช้งาน
+  // sessionStorage.removeItem('firstname');
+  // sessionStorage.removeItem('lastname');
+  // sessionStorage.removeItem('phonenumber');
+  // sessionStorage.removeItem('email');
+  // sessionStorage.removeItem('user_id');
+
+
   const connectMetamaskRegis = async () => {
     if (window.ethereum) {
       try {
@@ -37,14 +45,22 @@ const ConnectMetamask = () => {
 
           if (loginResult.wallet_address) {
             // login สำเร็จ
-            localStorage.setItem('isLogin', 'true');
-            localStorage.setItem('walletAddress', loginResult.wallet_address);
-            localStorage.setItem('user_id', loginResult.user_id ? loginResult.user_id.toString() : '');
+            sessionStorage.setItem('isLogin', 'true');
+            // sessionStorage.setItem('walletAddress', loginResult.wallet_address);
+            // sessionStorage.setItem('user_id', loginResult.user_id ? loginResult.user_id.toString() : '');
             if (loginResult.token) {
-              localStorage.setItem('token', loginResult.token);
-              localStorage.setItem('token_type', loginResult.token_type)
+              sessionStorage.setItem('token', loginResult.token);
+              sessionStorage.setItem('token_type', loginResult.token_type)
+
+              // ลบข้อมูล sessionStorage หลังใช้งาน
+              sessionStorage.removeItem('firstname');
+              sessionStorage.removeItem('lastname');
+              sessionStorage.removeItem('phonenumber');
+              sessionStorage.removeItem('email');
+              sessionStorage.removeItem('user_id');
+
             } else {
-              localStorage.removeItem('token');
+              sessionStorage.removeItem('token');
             }
 
 
@@ -55,10 +71,10 @@ const ConnectMetamask = () => {
 
             // simulate disconnect
             setWalletAddress(null);
-            localStorage.removeItem('isLogin');
-            localStorage.removeItem('walletAddress');
-            localStorage.removeItem('user_id');
-            localStorage.removeItem('token');
+            sessionStorage.removeItem('isLogin');
+            sessionStorage.removeItem('walletAddress');
+            sessionStorage.removeItem('user_id');
+            sessionStorage.removeItem('token');
           }
         }
       } catch (error: any) {
@@ -83,7 +99,7 @@ const ConnectMetamask = () => {
   };
 
   const handleCancel = () => {
-    localStorage.removeItem('walletAddress');
+    sessionStorage.removeItem('walletAddress');
     setWalletAddress(null);
     console.log('การเชื่อมต่อถูกยกเลิก');
     navigate('/');

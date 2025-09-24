@@ -5,6 +5,8 @@
     padding: 6rem 0 4rem;
     margin-bottom: 0;
     overflow: hidden;
+    margin-top: 64px;
+    /* Add spacing below Navbar, adjust px as needed */
 }
 
 .hero-section::before {
@@ -221,11 +223,11 @@ body,
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #A8E6CF 0%, #88D8A3 50%, #7FDBDA 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 30px rgba(168, 230, 207, 0.3);
+    background: linear-gradient(135deg, #A8E6CF 0%, #88D8A3 50%, #7FDBDA 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(168, 230, 207, 0.3);
 }
 
 .toblockchain-text {

@@ -54,8 +54,8 @@ const Map: React.FC = () => {
 
   // Function to make authenticated API calls
   const makeApiCall = async (url: string, options: RequestInit = {}) => {
-    const token = localStorage.getItem("token");
-    const tokenType = localStorage.getItem("token_type") || "Bearer";
+    const token = sessionStorage.getItem("token");
+    const tokenType = sessionStorage.getItem("token_type") || "Bearer";
 
     const headers = {
       'Content-Type': 'application/json',
@@ -70,8 +70,8 @@ const Map: React.FC = () => {
 
     if (!response.ok) {
       if (response.status === 401) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("token_type");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("token_type");
         window.location.href = "/login";
       }
 

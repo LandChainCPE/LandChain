@@ -40,7 +40,7 @@ const Petition: React.FC = () => {
       return;
     }
 
-  const userId = localStorage.getItem("user_id");
+  const userId = sessionStorage.getItem("user_id");
 
     try {
       const payload = {

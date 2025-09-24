@@ -30,13 +30,9 @@ type Landtitle struct {
 	SquareWa      int `json:"square_wa" gorm:"default:0"`       // ตารางวา
 
 	Status_verify   bool
-	
-	// FK ไปยัง Geography / Province / Amphure / District
-	GeographyID *uint
-	Geography   *LandGeographies `gorm:"foreignKey:GeographyID"`
 
 	ProvinceID uint
-	Province   LandProvinces `gorm:"foreignKey:ProvinceID"`
+	Province   Province `gorm:"foreignKey:ProvinceID"`
 
 	DistrictID   uint
 	District     District `gorm:"foreignKey:DistrictID"`
