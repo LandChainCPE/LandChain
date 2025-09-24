@@ -241,15 +241,15 @@ const handleSetsaleinfo = async (transaction: any) => {
     const priceTHB = transaction.Amount; // THB
     const buyer = transaction.Buyer?.Metamaskaddress;
 
-    if (!tokenId || !buyer || !priceTHB) {
-       Swal.fire({
-                      icon: "error",
-                      title: "ไม่พบ Token ID, buyer หรือราคาขาย",
-                      confirmButtonColor: "#e74c3c",
-                      });
-      console.log(tokenId, buyer, priceTHB);
-      return;
-    }
+    // if (!tokenId || !buyer || !priceTHB) {
+    //    Swal.fire({
+    //                   icon: "error",
+    //                   title: "ไม่พบ Token ID, buyer หรือราคาขาย",
+    //                   confirmButtonColor: "#e74c3c",
+    //                   });
+    //   console.log(tokenId, buyer, priceTHB);
+    //   return;
+    // }
 
     setProcessingTxId(transaction.ID);
 

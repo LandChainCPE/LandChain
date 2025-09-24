@@ -311,6 +311,27 @@ func ListenSmartContractEvents() {
 				} else {
 					log.Println("New LandOwnership created for buyer UserID:", buyerUser.ID, "LandID:", landtitle.ID)
 				}
+
+				// 5. Update Transaction for this purchase (TypeTransactionID=4)
+				var transaction entity.Transaction
+				if err := db.Where("land_id = ? AND buyer_id = ? AND seller_id = ? AND typetransaction_id = ? AND deleted_at IS NULL", landtitle.ID, buyerUser.ID, sellerUser.ID, 4).First(&transaction).Error; err != nil {
+					log.Println("Transaction not found for LandID, buyer, seller, TypeTransactionID=4")
+				} else {
+					// txHash := vLog.TxHash.Hex()
+					// transaction.TxHash = &txHash
+					transaction.TypetransactionID = 5 // เปลี่ยนเป็น 5
+					if err := db.Save(&transaction).Error; err != nil {
+						log.Println("Failed to update Transaction TxHash and TypeTransactionID for purchase:", err)
+					} else {
+						// Soft delete
+						if err := db.Delete(&transaction).Error; err != nil {
+							log.Println("Failed to soft delete Transaction:", err)
+						} else {
+							log.Println("Transaction updated: TxHash set, TypeTransactionID changed to 5 and soft deleted for LandID:", landtitle.ID, "buyer:", buyerUser.ID, "seller:", sellerUser.ID)
+						}
+					}
+				}
+
 				//หากเกิดการซื้อ ให้ทำการ
 				//เอา tokenId ไปหาว่าเป็นของ landtitleid ไหน
 				//เอา buyer ไปหาว่าตรงกับ userid ไหน

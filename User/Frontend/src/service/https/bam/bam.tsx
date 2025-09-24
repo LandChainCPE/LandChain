@@ -110,6 +110,31 @@ export async function GetRequestBuybyLandID(id: number | string) {
   }
 }
 
+
+// function getAuthHeaders() {
+//   const token = localStorage.getItem("token");
+//   const tokenType = localStorage.getItem("token_type");
+//   return {
+//     "Authorization": `${tokenType} ${token}`,
+//     "Content-Type": "application/json",
+//   };
+// }
+
+// export async function GetRequestBuybyLandID(id: number | string) {
+//     const requestOptions = {
+//         method: "GET",
+//         headers: getAuthHeaders(),
+//     };
+
+//     let response = await fetch(`${apiUrl}/user/lands/requestbuy/${id}`, requestOptions);
+//     const result = await response.json();
+//     console.log(response);
+//     console.log(result);
+
+//     return { result };
+// };
+
+
 export async function DeleteRequestBuy(userID: number, landID: string | number) {
   try {
     const res = await api.delete(`/user/lands/delete/requestbuy`, {
