@@ -6,6 +6,7 @@ import detectEthereumProvider from '@metamask/detect-provider';
 import { Container } from "react-bootstrap";
 
 import contractABI from "./ContractABI.json";
+import Navbar from "../../component/user/Navbar";
 const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
 
 /* =======================
@@ -147,6 +148,7 @@ function VerifyUser() {
 
   return (
     <div className="verify-user-container">
+      <Navbar/>
       <div className="floating-shapes">
         <div className="shape-1"></div>
         <div className="shape-2"></div>

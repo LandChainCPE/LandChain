@@ -24,6 +24,7 @@ import (
 )
 
 var ContractInstance *smartcontract.SmartcontractSession
+
 // ปรับ InitContract ให้รองรับ Hoodi
 func InitContract() {
 	rpcURL := os.Getenv("HOODI_RPC")
@@ -104,15 +105,17 @@ func GetLandTitleInfoByWallet(c *gin.Context) {
 }
 
 func GetLandMetadataByWallet(c *gin.Context) {
+	// 1️⃣ ดึง wallet จาก context
 	walletAddr, exists := c.Get("wallet")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Wallet not found in token"})
 		return
 	}
+	fmt.Println("Wallet from context:", walletAddr)
 
 	wallet := common.HexToAddress(walletAddr.(string))
 
-	// 1️⃣ ดึง token IDs ของ user จาก contract
+	// 2️⃣ ดึง token IDs ของ user จาก contract
 	tokenIDs, err := ContractInstance.GetLandTitleInfoByWallet(wallet)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -121,24 +124,48 @@ func GetLandMetadataByWallet(c *gin.Context) {
 		})
 		return
 	}
+	fmt.Println("Token IDs from contract:", tokenIDs)
 
-	// 2️⃣ ดึง landtitle จาก database
-	db := config.DB()
-	var lands []entity.Landtitle
-	if err := db.Where("token_id IN ?", tokenIDs).Find(&lands).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot fetch landtitle", "detail": err.Error()})
+	if len(tokenIDs) == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"wallet":   wallet.Hex(),
+			"metadata": []map[string]interface{}{},
+			"note":     "No token IDs found for this wallet",
+		})
 		return
 	}
 
-	// map LandID -> IsLocked
+	// 3️⃣ แปลง tokenIDs เป็น string สำหรับ query DB
+	var tokenStrs []string
+	for _, t := range tokenIDs {
+		tokenStrs = append(tokenStrs, t.String())
+	}
+	fmt.Println("Token IDs as strings for DB query:", tokenStrs)
+
+	// 4️⃣ ดึง landtitle จาก database
+	db := config.DB()
+	var lands []entity.Landtitle
+	if err := db.Where("token_id IN ?", tokenStrs).Find(&lands).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Cannot fetch landtitle",
+			"detail": err.Error(),
+		})
+		return
+	}
+	fmt.Println("Lands from DB:", lands)
+
+	// 5️⃣ สร้าง map tokenID -> IsLocked
 	lockedMap := make(map[string]bool)
 	for _, l := range lands {
 		if l.TokenID != nil {
-			lockedMap[strconv.FormatUint(uint64(*l.TokenID), 10)] = l.IsLocked
+			tokenIDStr := strconv.FormatUint(uint64(*l.TokenID), 10)
+			lockedMap[tokenIDStr] = l.IsLocked
+			fmt.Println("DB tokenID:", tokenIDStr, "IsLocked:", l.IsLocked)
 		}
 	}
+	fmt.Println("Locked map:", lockedMap)
 
-	// 3️⃣ ดึง metadata จาก contract และ merge IsLocked
+	// 6️⃣ ดึง metadata จาก contract และ merge IsLocked
 	metadataList := []map[string]interface{}{}
 	for _, t := range tokenIDs {
 		meta, err := ContractInstance.GetLandMetadata(t)
@@ -149,9 +176,11 @@ func GetLandMetadataByWallet(c *gin.Context) {
 			})
 			return
 		}
+		fmt.Println("Metadata for token", t.String(), ":", meta)
 
 		tokenIDStr := t.String()
-		isLocked := lockedMap[tokenIDStr] // เอา IsLocked จาก landtitle จริง
+		isLocked := lockedMap[tokenIDStr] // default false ถ้า key ไม่มี
+		fmt.Println("IsLocked from DB map for token", tokenIDStr, ":", isLocked)
 
 		metadataList = append(metadataList, map[string]interface{}{
 			"tokenID":    tokenIDStr,
@@ -159,10 +188,11 @@ func GetLandMetadataByWallet(c *gin.Context) {
 			"price":      meta.Price.String(),
 			"buyer":      meta.Buyer.Hex(),
 			"walletID":   meta.WalletID.Hex(),
-			"isLocked":   isLocked, // 🔹 จาก landtitle
+			"isLocked":   isLocked,
 		})
 	}
 
+	// 7️⃣ ส่ง response
 	c.JSON(http.StatusOK, gin.H{
 		"wallet":   wallet.Hex(),
 		"metadata": metadataList,

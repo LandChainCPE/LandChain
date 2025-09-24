@@ -110,6 +110,31 @@ export async function GetRequestBuybyLandID(id: number | string) {
   }
 }
 
+
+// function getAuthHeaders() {
+//   const token = localStorage.getItem("token");
+//   const tokenType = localStorage.getItem("token_type");
+//   return {
+//     "Authorization": `${tokenType} ${token}`,
+//     "Content-Type": "application/json",
+//   };
+// }
+
+// export async function GetRequestBuybyLandID(id: number | string) {
+//     const requestOptions = {
+//         method: "GET",
+//         headers: getAuthHeaders(),
+//     };
+
+//     let response = await fetch(`${apiUrl}/user/lands/requestbuy/${id}`, requestOptions);
+//     const result = await response.json();
+//     console.log(response);
+//     console.log(result);
+
+//     return { result };
+// };
+
+
 export async function DeleteRequestBuy(userID: number, landID: string | number) {
   try {
     const res = await api.delete(`/user/lands/delete/requestbuy`, {
@@ -498,6 +523,17 @@ export async function GetUserinfoByUserID(id: number | string) {
 export async function DeleteLandsalepostByLandIDandUserID(landid: number | string) {
   try {
     const res = await api.delete(`/user/lands/post/${landid}`); // ✅ แทนค่า id จริง
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function CheckVerify() {
+  try {
+    const res = await api.get(`/user/verify`); // ✅ แทนค่า id จริง
     return res.data;
   } catch (e) {
     const err = e as any;

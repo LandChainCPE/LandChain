@@ -36,7 +36,7 @@ func CreateRequestBuySellHandler(c *gin.Context) {
 	request := entity.RequestBuySell{
 		BuyerID:  req.BuyerID,
 		SellerID: landPost.UserID,
-		LandID:   landPost.ID, // ใช้ ID ของโพสต์
+		LandID:   landPost.LandID, // ใช้ ID ของโพสต์   ใช้ LandID  แทน
 	}
 
 	if err := config.DB().Create(&request).Error; err != nil {

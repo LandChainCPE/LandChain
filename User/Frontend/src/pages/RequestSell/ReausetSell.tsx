@@ -62,9 +62,11 @@ function RequestSell() {
     try {
       const userInfo = await GetInfoUserByToken();
       setTokenData(userInfo);
+      console.log("TOken data:", userInfo);
       setUserID(userInfo.id); // <-- เพิ่มตรงนี้
       console.log(userInfo.id);
       const metadata = await GetLandMetadataByWallet();
+      console.log(metadata);
       setLandMetadata((metadata.metadata || []).map((item: any) => ({
         ...item,
         parsedFields: parseMetaFields(item.metaFields)
@@ -484,6 +486,8 @@ function RequestSell() {
                       value={acceptPriceTHB}
                       onChange={(e) => setAcceptPriceTHB(e.target.value)}
                       className="form-control-glass-modern"
+                      min={10000}        // ราคาขั้นต่ำ
+                      max={1000000}  // ราคาสูงสุด
                     />
                     <div className="input-highlight-modern"></div>
                   </div>
