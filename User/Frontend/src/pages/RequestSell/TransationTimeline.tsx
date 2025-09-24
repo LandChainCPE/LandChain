@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { GetTransationByUserID, GetInfoUserByToken, UpdateTransactionBuyerAccept, SetSellInfoHandler, DeleteTransactionTodelete, GetSaleInfoHandler, DeleteLandsalepostByLandIDandUserID, BuyLandHandler, DeleteTransactionandAllrequest, DeleteTransactionToscucess } from "../../service/https/bam/bam";
+import { GetTransationByUserID, GetInfoUserByToken, UpdateTransactionBuyerAccept, SetSellInfoHandler, DeleteTransactionTodelete, GetSaleInfoHandler, DeleteLandsalepostByLandIDandUserID, BuyLandHandler, DeleteTransactionandAllrequest, DeleteTransactionToscucess , DeleteAllRequestBuyByLandID} from "../../service/https/bam/bam";
 import './TransactionTimeline.css';
 import Navbar from "../../component/user/Navbar";
 import { Modal, Button } from "react-bootstrap";
@@ -181,17 +181,17 @@ const checkWalletBalance = async (requiredEth: number): Promise<boolean> => {
     };
 
     const getEthToThbRate = async (): Promise<number> => {
-        try {
-            const res = await fetch(
+    try {
+        const res = await fetch(
             "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=thb"
-            );
-            const data = await res.json();
-            return data.ethereum.thb; // ✅ ราคาของ ETH ในหน่วย THB
-        } catch (err) {
-            console.error("Error fetching ETH price:", err);
-            throw new Error("ไม่สามารถดึงอัตราแลกเปลี่ยนได้");
-        }
-        };
+        );
+        const data = await res.json();
+        return data.ethereum.thb;
+    } catch (err) {
+        return 0;
+    }
+};
+
 
    const confirmAccept = async () => {
     if (!selectedTransaction) return;
@@ -459,11 +459,11 @@ interface SaleInfoType {
   (sale: any) => sale.tokenId.toString() === tokenId.toString()
 );
 
-if (!txInfo) {
-  console.error("saleInfos:", saleInfos);
-  console.error("tokenId:", tokenId);
-  throw new Error("ไม่พบข้อมูลการโอน ETH สำหรับ token นี้");
-}
+    if (!txInfo) {
+    console.error("saleInfos:", saleInfos);
+    console.error("tokenId:", tokenId);
+    throw new Error("ไม่พบข้อมูลการโอน ETH สำหรับ token นี้");
+    }
 
     // ตรวจสอบยอดเงิน
     const balance = await provider.getBalance(fromAddress); // balance เป็น bigint
@@ -485,8 +485,8 @@ if (!txInfo) {
 
     // ลบ transaction และ sale info
 
-    await DeleteTransactionToscucess(transactionId);
-    await DeleteTransactionandAllrequest(transactionId);
+    // await DeleteTransactionToscucess(transactionId);
+    await DeleteAllRequestBuyByLandID(tokenId);
     await DeleteLandsalepostByLandIDandUserID(tokenId);
 
 
@@ -770,14 +770,7 @@ const openETHModalForTransaction = (tx: any) => {
                 <div className="page-header">
                     <div className="header-content">
                         <h1>ระบบจัดการธุรกรรมโฉนด</h1>
-                        <div className={`connection-status status-${connectionStatus}`}>
-                            <div className="status-dot"></div>
-                            <span>
-                                {connectionStatus === 'connected' && 'เชื่อมต่อแล้ว'}
-                                {connectionStatus === 'connecting' && 'กำลังเชื่อมต่อ...'}
-                                {connectionStatus === 'disconnected' && 'การเชื่อมต่อขาด'}
-                            </span>
-                        </div>
+
                     </div>
                 </div>
 
@@ -921,26 +914,28 @@ const openETHModalForTransaction = (tx: any) => {
                     <Modal.Body>
                         {ethTransaction ? (
                             <div>
-                                <p>คุณกำลังจะโอน ETH ดังนี้:</p>
-                                <div className="transaction-summary">   
-                                    <div className="summary-item">
+                                <p style={{ wordBreak: "break-word" }}>คุณกำลังจะโอน ETH ดังนี้:</p>
+                                <div className="transaction-summary" style={{ wordBreak: "break-word" }}>
+                                    <div className="summary-item" style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                                         <span>ผู้ส่ง (คุณ):</span>
-                                        <span>{ethTransaction.toAddress}</span>
+                                        <span style={{ maxWidth: "220px", overflowWrap: "break-word", wordBreak: "break-all" }}>
+                                            {ethTransaction.toAddress}
+                                        </span>
                                     </div>
-                                    <div className="summary-item">
+                                    <div className="summary-item" style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                                         <span>จำนวนเงิน (ETH):</span>
                                         <span>
                                             {ethTransaction.amountWei
-                                                ? Number(ethers.formatEther(ethTransaction.amountWei))
+                                                ? parseFloat(ethers.formatUnits(ethTransaction.amountWei, "ether")).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 })
                                                 : "N/A"}
                                         </span>
                                     </div>
-                                    <div className="summary-item">
+                                    {/* <div className="summary-item">
                                         <span>Token ID:</span>
                                         <span>{ethTransaction.tokenId || "-"}</span>
-                                    </div>
+                                    </div> */}
                                 </div>
-                                <p className="text-danger mt-2">
+                                <p className="text-danger mt-2" style={{ wordBreak: "break-word" }}>
                                     ⚠️ การโอน ETH จะไม่สามารถย้อนกลับได้ กรุณาตรวจสอบข้อมูลให้ถูกต้อง
                                 </p>
                             </div>
