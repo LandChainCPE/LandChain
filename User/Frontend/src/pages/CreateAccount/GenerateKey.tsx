@@ -15,7 +15,7 @@ const GenerateKey = () => {
     event.preventDefault();
     
     // ดึงชื่อที่เก็บใน LocalStorage
-    const storedName = localStorage.getItem('firstname');
+    const storedName = sessionStorage.getItem('firstname');
 
     if (storedName && storedName === name) {
       console.log('Name submitted:', name);

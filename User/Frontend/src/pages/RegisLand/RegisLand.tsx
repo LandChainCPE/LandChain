@@ -6,12 +6,30 @@ import type { BookingInterface } from "../../interfaces/Booking";
 import dayjs from "dayjs";
 import "./RegisLand.css";
 import Navbar from "../../component/user/Navbar";
+import { GetUserIDByWalletAddress } from "../../service/https/bam/bam";
 
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
 
 const BookingCalendar = () => {
+  // เรียกใช้ GetUserIDByWalletAddress และ log ผลลัพธ์
+  const [currentUserId, setCurrentUserId] = useState<number>(Number(sessionStorage.getItem("user_id") || 1));
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const result = await GetUserIDByWalletAddress();
+        console.log("GetUserIDByWalletAddress result:", result);
+        if (result && typeof result.user_id === "number") {
+          setCurrentUserId(result.user_id);
+        }
+      } catch (error) {
+        console.error("Error calling GetUserIDByWalletAddress:", error);
+      }
+    };
+    fetchUserId();
+  }, []);
   const [provinces, setProvinces] = useState<any[]>([]);
   const [branches, setBranches] = useState<any[]>([]);
   const [times, setTimes] = useState<any[]>([]);
@@ -31,7 +49,6 @@ const BookingCalendar = () => {
   const [userBookings, setUserBookings] = useState<any[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
 
-  const currentUserId = Number(localStorage.getItem("user_id") || 1);
 
   const fetchUserBookings = async () => {
     try {

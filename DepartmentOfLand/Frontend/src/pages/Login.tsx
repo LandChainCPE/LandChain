@@ -84,9 +84,9 @@ const Login: React.FC = () => {
         // TODO: Verify wallet address with your backend
         // You can add signature verification here
         
-        localStorage.setItem('isLogin', 'true');
-        localStorage.setItem('walletAddress', account);
-        localStorage.setItem('loginMethod', 'metamask');
+        sessionStorage.setItem('isLogin', 'true');
+        sessionStorage.setItem('walletAddress', account);
+        sessionStorage.setItem('loginMethod', 'metamask');
         
         message.success(`เข้าสู่ระบบสำเร็จด้วย MetaMask`);
         navigate('/main');
@@ -120,7 +120,7 @@ const Login: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       // For now, just set login status and navigate
-      localStorage.setItem('isLogin', 'true');
+      sessionStorage.setItem('isLogin', 'true');
       message.success('เข้าสู่ระบบสำเร็จ');
       navigate('/main');
     } catch (error) {

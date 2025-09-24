@@ -1,4 +1,3 @@
-
 const apiUrl = "http://localhost:8080";
 
 import axios from "axios";
@@ -6,8 +5,8 @@ import type { BookingInterface } from "../../../interfaces/Booking";
 import type { AvailableSlotsResponse } from "../../../interfaces/types";
 
 function getAuthHeaders() {
-  const token = localStorage.getItem("token");
-  const tokenType = localStorage.getItem("token_type");
+  const token = sessionStorage.getItem("token");
+  const tokenType = sessionStorage.getItem("token_type");
   return {
     "Authorization": `${tokenType} ${token}`,
     "Content-Type": "application/json",
@@ -22,8 +21,8 @@ const api = axios.create({
 // เพิ่ม Authorization header ในทุกคำขอ
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    const tokenType = localStorage.getItem("token_type") || "Bearer";
+    const token = sessionStorage.getItem("token");
+    const tokenType = sessionStorage.getItem("token_type") || "Bearer";
 
     // ตรวจสอบว่า headers มีอยู่หรือไม่ ถ้าไม่มีให้สร้างใหม่
     if (!config.headers) {
@@ -48,8 +47,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Token หมดอายุหรือไม่ถูกต้อง - redirect to login
-      localStorage.removeItem("token");
-      localStorage.removeItem("token_type");
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("token_type");
       window.location.href = "/login";
     }
     return Promise.reject(error);
@@ -242,14 +241,14 @@ export const GetUserBookings = async (userID: number) => {
 
 // 🔧 เพิ่ม utility function สำหรับตรวจสอบ token
 export const isTokenValid = (): boolean => {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   return !!token;
 };
 
 // 🔧 เพิ่ม function สำหรับ logout
 export const logout = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("token_type");
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("token_type");
   window.location.href = "/login";
 };
 
@@ -295,6 +294,67 @@ export async function getLocationsByLandSalePostId(landsalepostId: number) {
     } else {
       return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
     }
+  }
+}
+
+// ================== เพิ่มฟังก์ชั่นใหม่สำหรับ managepost API ==================
+export async function addMultiplePhotos(post_id: number, images: string[]) {
+  try {
+    const res = await api.post(`/managepost/photos/${post_id}`, { images });
+    return res.data;
+  } catch (error: any) {
+    console.error("addMultiplePhotos Error:", error);
+    return error.response?.data || { error: "เกิดข้อผิดพลาดในการเพิ่มรูปภาพ" };
+  }
+}
+
+export async function replaceAllPhotos(post_id: number, images: string[]) {
+  try {
+    const res = await api.put(`/managepost/photos/replace/${post_id}`, { images });
+    return res.data;
+  } catch (error: any) {
+    console.error("replaceAllPhotos Error:", error);
+    return error.response?.data || { error: "เกิดข้อผิดพลาดในการแทนที่รูปภาพ" };
+  }
+}
+
+export async function updatePostManage(post_id: number, data: any) {
+  try {
+    const res = await api.put(`/managepost/update/${post_id}`, data);
+    return res.data;
+  } catch (error: any) {
+    console.error("updatePostManage Error:", error);
+    return error.response?.data || { error: "เกิดข้อผิดพลาดในการแก้ไขโพสต์" };
+  }
+}
+
+export async function updatePhotolandManage(photoland_id: number, data: any) {
+  try {
+    const res = await api.put(`/managepost/updatephotoland/${photoland_id}`, data);
+    return res.data;
+  } catch (error: any) {
+    console.error("updatePhotolandManage Error:", error);
+    return error.response?.data || { error: "เกิดข้อผิดพลาดในการแก้ไขรูปภาพ" };
+  }
+}
+
+export async function updateLocationManage(location_id: number, data: any) {
+  try {
+    const res = await api.put(`/managepost/updatelocation/${location_id}`, data);
+    return res.data;
+  } catch (error: any) {
+    console.error("updateLocationManage Error:", error);
+    return error.response?.data || { error: "เกิดข้อผิดพลาดในการแก้ไข Location" };
+  }
+}
+
+export async function getUserPostLandDataManage(wallet: string) {
+  try {
+    const res = await api.get(`/managepost/userpostland/${wallet}`);
+    return res.data;
+  } catch (error: any) {
+    console.error("getUserPostLandDataManage Error:", error);
+    return error.response?.data || { error: "เกิดข้อผิดพลาดในการดึงข้อมูลโพสต์" };
   }
 }
 
@@ -394,6 +454,17 @@ async function GetUserPostLandData (wallet: string) {
   console.log("555555",response);
 }
 
+const getUserIDByWallet = async (wallet: string): Promise<{ user_id?: number; wallet?: string; error?: string }> => {
+  try {
+    const res = await api.get(`/user/GetUserID/${wallet}`);
+    return res.data as { user_id?: number; wallet?: string; error?: string };
+  } catch (error: any) {
+    console.error("getUserIDByWallet Error:", error);
+    if (error.response) return error.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+};
+
 export {
   CreateBooking,
   GetProvinces,
@@ -403,5 +474,6 @@ export {
   CheckVerifyWallet,
   GetUserPostLandData,
   updateLocation,
-  updatePhotoland
+  updatePhotoland,
+  getUserIDByWallet
 };

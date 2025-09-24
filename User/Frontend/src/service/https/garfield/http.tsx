@@ -6,8 +6,8 @@ const apiUrl = "http://localhost:8080";
 
 /** ใส่เฉพาะ Authorization (อย่าใส่ Content-Type ที่นี่) */
 function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem("token");
-  const tokenType = localStorage.getItem("token_type") || "Bearer";
+  const token = sessionStorage.getItem("token");
+  const tokenType = sessionStorage.getItem("token_type") || "Bearer";
   return token ? { Authorization: `${tokenType} ${token}` } : {};
 }
 
@@ -52,13 +52,13 @@ async function LoginWallet(walletAddress: string) {
   const result = await response.json();
 
   if (result.success && result.exists) {
-    // localStorage.setItem("walletAddress", walletAddress); 
-    localStorage.setItem("token", result.token || "");
-    localStorage.setItem("token_type", result.token_type || "Bearer");
-    // localStorage.setItem("firstName", result.first_name || "");
-    // localStorage.setItem("lastName", result.last_name || "");
-    // localStorage.setItem("user_id", result.user_id);
-    localStorage.setItem("isLogin", "true"); // ✅ ต้องมี
+    // sessionStorage.setItem("walletAddress", walletAddress); 
+    sessionStorage.setItem("token", result.token || "");
+    sessionStorage.setItem("token_type", result.token_type || "Bearer");
+    // sessionStorage.setItem("firstName", result.first_name || "");
+    // sessionStorage.setItem("lastName", result.last_name || "");
+    // sessionStorage.setItem("user_id", result.user_id);
+    sessionStorage.setItem("isLogin", "true"); // ✅ ต้องมี
   }
 
   return { result, response };
@@ -66,16 +66,16 @@ async function LoginWallet(walletAddress: string) {
 
 
 // ฟังก์ชัน Logout
-/** Logout: ลบทุกค่าใน localStorage ที่เกี่ยวข้อง */
+/** Logout: ลบทุกค่าใน sessionStorage ที่เกี่ยวข้อง */
 function LogoutWallet() {
-  localStorage.clear();
-  localStorage.removeItem("walletAddress");
-  localStorage.removeItem("token");
-  localStorage.removeItem("token_type");
-  localStorage.removeItem("firstName");
-  localStorage.removeItem("lastName");
-  localStorage.removeItem("user_id");
-  localStorage.removeItem("isLogin");
+  sessionStorage.clear();
+  sessionStorage.removeItem("walletAddress");
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("token_type");
+  sessionStorage.removeItem("firstName");
+  sessionStorage.removeItem("lastName");
+  sessionStorage.removeItem("user_id");
+  sessionStorage.removeItem("isLogin");
 }
 
 async function RegisterLand(payload: any) {
@@ -164,7 +164,7 @@ async function GetUserinfoByID(userId: string) {
   return { response, result };
 }
 
-/** ดึง landtitle ของ user ที่ login (ใช้ token ใน localStorage) */
+/** ดึง landtitle ของ user ที่ login (ใช้ token ใน sessionStorage) */
 async function GetLandtitlesByUser(userId: string) {
   const response = await fetch(`${apiUrl}/landtitles/${userId}`, {
     method: "GET",

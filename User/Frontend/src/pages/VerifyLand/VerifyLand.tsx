@@ -89,8 +89,8 @@ const VerifyLand: React.FC = () => {
 
   useEffect(() => {
     console.log('ss', location)
-    const userId = localStorage.getItem('user_id');
-    const token = localStorage.getItem('token');
+    const userId = sessionStorage.getItem('user_id');
+    const token = sessionStorage.getItem('token');
     console.log('DEBUG user_id:', userId);
     console.log('DEBUG token:', token);
     if (token) {

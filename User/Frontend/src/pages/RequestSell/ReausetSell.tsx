@@ -116,6 +116,7 @@ function RequestSell() {
     setSelectedBuyRequest(request);
     setAcceptPriceTHB("");
     setShowAcceptModal(true);
+    
   };
 
   const handleRejectRequest = (request: BuyRequest) => {
@@ -133,10 +134,12 @@ function RequestSell() {
       setShowAcceptModal(false);
 
       setLandMetadata(prev =>
-  prev.map(land =>
-    land.tokenID === selectedLand ? { ...land, isLocked: true } : land
-  )
+      prev.map(land =>
+      land.tokenID === selectedLand ? { ...land, isLocked: true } : land
+      
+    )
 );
+navigate(`/user/transation`);
     } catch (err) {
       Swal.fire("ผิดพลาด", "เกิดข้อผิดพลาด", "error");
     }
@@ -188,7 +191,7 @@ function RequestSell() {
 };
 
 
-
+const [priceError, setPriceError] = useState<string>("");
   if (loading) return <Loader />;
 
   const selectedLandData = landMetadata.find(land => land.tokenID === selectedLand);
@@ -298,12 +301,6 @@ function RequestSell() {
                       </div>
                     </div>
                     <h6 className="land-title-text">TokenID: {land.tokenID}</h6>
-                    {isSelected && (
-                      <div className="selected-indicator">
-                        <div className="selected-pulse"></div>
-                        <span className="selected-text">เลือกแล้ว</span>
-                      </div>
-                    )}
                   </div>
                   
                   <div className="land-card-body">
@@ -480,16 +477,35 @@ function RequestSell() {
                     ราคาขาย (บาท)
                   </Form.Label>
                   <div className="input-group-modern">
-                    <Form.Control
+                   <Form.Control
                       type="number"
                       placeholder="กรอกราคาที่ต้องการขาย"
                       value={acceptPriceTHB}
-                      onChange={(e) => setAcceptPriceTHB(e.target.value)}
-                      className="form-control-glass-modern"
-                      min={10000}        // ราคาขั้นต่ำ
-                      max={1000000}  // ราคาสูงสุด
+                      onChange={(e) => setAcceptPriceTHB(e.target.value)} // ให้พิมพ์อะไรก็ได้
+                      onBlur={(e) => {
+                        const num = Number(e.target.value);
+
+                        if (isNaN(num) || e.target.value === "") {
+                          setPriceError("กรุณากรอกราคาเป็นตัวเลข");
+                          return;
+                        }
+
+                        if (num < 10000) {
+                          setPriceError("ราคาต้องไม่น้อยกว่า 50,000 บาท");
+                        } else if (num > 5000000) {
+                          setPriceError("ราคาต้องไม่เกิน 5,000,000 บาท");
+                        } else {
+                          setPriceError(""); // ผ่าน ไม่มี error
+                        }
+                      }}
+                      className={`form-control-glass-modern ${priceError ? "is-invalid" : ""}`}
+                      min={50000}      // hint สำหรับ UI
+                      max={5000000}
                     />
-                    <div className="input-highlight-modern"></div>
+
+                    {priceError && <div className="invalid-feedback">{priceError}</div>}
+
+                    
                   </div>
                 </Form.Group>
               </div>
@@ -502,10 +518,10 @@ function RequestSell() {
             >
               ยกเลิก
             </Button>
-            <Button 
+           <Button 
               className="btn-modern btn-accept-modern" 
               onClick={confirmAccept}
-              disabled={!acceptPriceTHB}
+              disabled={!acceptPriceTHB || !!priceError} // ✅ ปิดถ้าว่างหรือมี error
             >
               <div className="btn-content-modern">
                 <span className="btn-icon-modern">✅</span>

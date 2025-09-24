@@ -14,8 +14,8 @@ const api = axios.create({
 // เพิ่ม Authorization header ในทุกคำขอ
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    const tokenType = localStorage.getItem("token_type") || "Bearer";
+    const token = sessionStorage.getItem("token");
+    const tokenType = sessionStorage.getItem("token_type") || "Bearer";
 
     if (!config.headers) config.headers = {};
 
@@ -34,8 +34,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Token หมดอายุหรือไม่ถูกต้อง
-      localStorage.removeItem("token");
-      localStorage.removeItem("token_type");
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("token_type");
       // window.location.href = "/login";
     }
     return Promise.reject(error);
@@ -112,8 +112,8 @@ export async function GetRequestBuybyLandID(id: number | string) {
 
 
 // function getAuthHeaders() {
-//   const token = localStorage.getItem("token");
-//   const tokenType = localStorage.getItem("token_type");
+//   const token = sessionStorage.getItem("token");
+//   const tokenType = sessionStorage.getItem("token_type");
 //   return {
 //     "Authorization": `${tokenType} ${token}`,
 //     "Content-Type": "application/json",

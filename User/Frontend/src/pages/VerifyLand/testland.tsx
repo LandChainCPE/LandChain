@@ -42,8 +42,8 @@ const Testland: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const userId = localStorage.getItem("user_id");
-        const token = localStorage.getItem("token");
+        const userId = sessionStorage.getItem("user_id");
+        const token = sessionStorage.getItem("token");
 
         if (userId && token) {
             const fetchLandTitles = async () => {

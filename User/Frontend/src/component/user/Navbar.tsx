@@ -11,7 +11,7 @@ interface Notification {
 }
 
 const Navbar = () => {
-  const [isLoggedIn] = useState(localStorage.getItem("isLogin") === "true");
+  const [isLoggedIn] = useState(sessionStorage.getItem("isLogin") === "true");
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -90,8 +90,8 @@ const Navbar = () => {
   const toggleMobileMenu = () => setShowMobileMenu(!showMobileMenu);
 
   const handleLogout = () => {
-    localStorage.removeItem("isLogin");
-    localStorage.removeItem("userID");
+    sessionStorage.removeItem("isLogin");
+    sessionStorage.removeItem("userID");
     window.location.href = "/";
   };
 
