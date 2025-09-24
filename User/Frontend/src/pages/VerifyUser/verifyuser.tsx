@@ -158,9 +158,6 @@ function VerifyUser() {
 
       <div className="hero-section">
         <div className="hero-content">
-          <div className="hero-badge">
-            <span>🏛️ Blockchain User Verification</span>
-          </div>
           <h1 className="hero-title">
             <span className="gradient-text">ยืนยันตัวตนบน Blockchain</span>
           </h1>
