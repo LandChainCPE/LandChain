@@ -5,6 +5,7 @@ import (
 	"landchain/entity" // แก้ชื่อ module ให้ตรงกับโปรเจกต์คุณ
 	"landchain/services"
 	"strings"
+	"time"
 
 	//"time"
 
@@ -127,6 +128,7 @@ func CreateTransaction(c *gin.Context) {
 	transaction.BuyerAccepted = false
 	transaction.SellerAccepted = true
 	transaction.LandDepartmentApproved = false
+	transaction.Expire = time.Now().Add(72 * time.Hour)
 	transaction.TxHash = nil
 
 	// สร้าง Transaction
@@ -313,24 +315,35 @@ func GetRequestBuyByTokenID(c *gin.Context) {
 }
 
 func DeleteRequestBuyByUserIDAndLandID(c *gin.Context) {
-	landIDStr := c.Query("landID")
+	tokenIDStr := c.Query("landID")
+	sellerIDStr := c.Query("sellerID")
 	userIDStr := c.Query("userID")
 
-	if landIDStr == "" || userIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ต้องระบุ landID และ userID"})
+	if tokenIDStr == "" || userIDStr == "" || sellerIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ต้องระบุ landID, sellerID และ userID"})
 		return
 	}
 
-	landID, err1 := strconv.Atoi(landIDStr)
+	TokenID, err1 := strconv.Atoi(tokenIDStr)
 	userID, err2 := strconv.Atoi(userIDStr)
-	if err1 != nil || err2 != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "landID และ userID ต้องเป็นตัวเลข"})
+	sellerID, err3 := strconv.Atoi(sellerIDStr)
+	if err1 != nil || err2 != nil || err3 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "landID, sellerID และ userID ต้องเป็นตัวเลข"})
 		return
 	}
 
 	db := config.DB()
 
-	if err := db.Where("land_id = ? AND buyer_id = ?", landID, userID).Delete(&entity.RequestBuySell{}).Error; err != nil {
+	// 1️⃣ หา Landtitle ด้วย TokenID
+	var land entity.Landtitle
+	if err := db.Where("token_id = ?", TokenID).First(&land).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบโฉนดนี้"})
+		return
+	}
+
+	// 2️⃣ ลบ RequestBuySell ตาม land_id, buyer_id, seller_id
+	if err := db.Where("land_id = ? AND buyer_id = ? AND seller_id = ?", land.ID, userID, sellerID).
+		Delete(&entity.RequestBuySell{}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถลบข้อมูลได้", "detail": err.Error()})
 		return
 	}
@@ -345,6 +358,19 @@ func SetSellInfoHandler(c *gin.Context) {
 		TokenID  int     `json:"tokenId"`
 		PriceTHB float64 `json:"priceTHB"`
 		Buyer    string  `json:"buyer"`
+	}
+
+	land := entity.Landtitle{}
+	db := config.DB()
+
+	if err := db.First(&land, "id = ?", req.TokenID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "land not found"})
+		return
+	}
+
+	if land.IsLocked {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "land is already locked"})
+		return
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {

@@ -58,7 +58,7 @@ func UpdateTransactionBuyerAccept(c *gin.Context) {
 
 	// --- ดึง tokenID ของ Land จาก LandTitle ---
 	var land entity.Landtitle
-	if err := db.First(&land, "id = ?", landId).Error; err != nil {
+	if err := db.First(&land, "id = ? AND is_locked = true", landId).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบที่ดิน"})
 		return
 	}
@@ -122,23 +122,41 @@ func DeleteTransactionTodelete(c *gin.Context) {
 
 	db := config.DB()
 
-	// 1️⃣ Update typetransaction_id ก่อน
+	// 0️⃣ ดึง Transaction มาก่อน เพื่อรู้ TokenID
+	var tx entity.Transaction
+	if err := db.First(&tx, transactionID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบธุรกรรมนี้"})
+		return
+	}
+
+	// 1️⃣ ปลดล็อกที่ดินด้วย TokenID
+	if tx.LandID != 0 {
+		if err := db.Model(&entity.Landtitle{}).
+			Where("id = ?", tx.LandID).
+			Update("is_locked", false).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถปลดล็อกโฉนดได้", "detail": err.Error()})
+			return
+		}
+	}
+
+	// 2️⃣ Update typetransaction_id
 	if err := db.Model(&entity.Transaction{}).
 		Where("id = ?", transactionID).
-		Update("typetransaction_id", 3).
-		Error; err != nil {
+		Update("typetransaction_id", 2).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถอัปเดตได้", "detail": err.Error()})
 		return
 	}
 
-	// 2️⃣ Delete record หลังจาก update
+	// 3️⃣ Delete Transaction
 	if err := db.Where("id = ?", transactionID).
 		Delete(&entity.Transaction{}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถลบข้อมูลได้", "detail": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "อัปเดต typetransaction และลบข้อมูลเรียบร้อย"})
+	c.JSON(http.StatusOK, gin.H{
+		"message": "ปลดล็อกโฉนด อัปเดต typetransaction และลบข้อมูลเรียบร้อย",
+	})
 }
 
 func DeleteTransactionToscucess(c *gin.Context) {

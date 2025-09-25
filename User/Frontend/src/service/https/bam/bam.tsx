@@ -135,10 +135,10 @@ export async function GetRequestBuybyLandID(id: number | string) {
 // };
 
 
-export async function DeleteRequestBuy(userID: number, landID: string | number) {
+export async function DeleteRequestBuy(userID: number, landID: string | number, sellerID: string | number) {
   try {
     const res = await api.delete(`/user/lands/delete/requestbuy`, {
-      params: { userID, landID },
+      params: { userID, landID, sellerID },
     });
     return res.data;
   } catch (e: any) {
