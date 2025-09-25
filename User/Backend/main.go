@@ -30,6 +30,7 @@ func main() {
 	controller.SetHub(hub)
 	controller.InitContract()
 	r.Use(CORSMiddleware())
+	controller.StartCron()
 
 	// เริ่มต้น Scheduler สำหรับลบการจองที่หมดอายุ
 	//controller.StartBookingCleanupScheduler()

@@ -434,8 +434,8 @@ const openETHModal = (toAddress: string, amountWei: string, tokenId: string, tra
 
 interface SaleInfoType {
     tokenId: string;
-  price: string; // สมมติเป็น ETH เช่น "1.5"
-  buyer?: string;
+    price: string; 
+    buyer?: string;
 }
 
  const confirmBuyLand = async (
