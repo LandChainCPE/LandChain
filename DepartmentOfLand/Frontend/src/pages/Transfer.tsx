@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ArrowRightLeft, User, FileText, CheckCircle, Clock, MapPin, X } from "lucide-react";
+import { ArrowRightLeft, User, FileText, CheckCircle, MapPin, X } from "lucide-react";
 import { getTransactionLand, DepartmentOfLandVerifyTransaction } from "../service/https/aut/https";
 
 interface LandTransfer {
@@ -31,6 +31,7 @@ interface LandTransfer {
 function Transfer() {
   const [transfers, setTransfers] = useState<LandTransfer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [expandedCard, setExpandedCard] = useState<number | null>(null);
 
   const convertToThaiDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -169,64 +170,6 @@ function Transfer() {
             </div>
           </div>
           
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
-                  <FileText className="w-7 h-7 text-white" />
-                </div>
-                <div className="ml-5">
-                  <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">รายการทั้งหมด</p>
-                  <p className="text-3xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                    {transfers.length}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
-                  <Clock className="w-7 h-7 text-white" />
-                </div>
-                <div className="ml-5">
-                  <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">รอดำเนินการ</p>
-                  <p className="text-3xl font-bold text-gray-800 group-hover:text-amber-600 transition-colors duration-300">
-                    {transfers.filter(t => t.status === 'pending').length}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
-                  <CheckCircle className="w-7 h-7 text-white" />
-                </div>
-                <div className="ml-5">
-                  <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">อนุมัติแล้ว</p>
-                  <p className="text-3xl font-bold text-gray-800 group-hover:text-green-600 transition-colors duration-300">
-                    {transfers.filter(t => t.status === 'approved').length}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
-                  <X className="w-7 h-7 text-white" />
-                </div>
-                <div className="ml-5">
-                  <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">ยกเลิกแล้ว</p>
-                  <p className="text-3xl font-bold text-gray-800 group-hover:text-red-600 transition-colors duration-300">
-                    {transfers.filter(t => t.status === 'rejected').length}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Main Content */}
@@ -244,7 +187,10 @@ function Transfer() {
             {transfers.map((transfer) => (
               <div key={transfer.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 animate-fadeIn">
                 {/* Transfer Header */}
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-6 border-b border-gray-200">
+                <div 
+                  className="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-6 border-b border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors duration-200"
+                  onClick={() => setExpandedCard(expandedCard === transfer.id ? null : transfer.id)}
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-md">
@@ -265,13 +211,20 @@ function Transfer() {
                         </div>
                         <div className="text-xs text-gray-500">{convertToThaiDate(transfer.dateCreated)}</div>
                       </div>
+                      <button
+                        className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors flex items-center space-x-1"
+                      >
+                        <span>{expandedCard === transfer.id ? 'ย่อ' : 'ดูรายละเอียด'}</span>
+                        <span className={`text-lg transition-transform duration-300 ${expandedCard === transfer.id ? 'rotate-180' : ''}`}>▼</span>
+                      </button>
                     </div>
                   </div>
                 </div>
 
                 {/* Transfer Details */}
-                <div className="p-8">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {expandedCard === transfer.id && (
+                  <div className="p-8 bg-gray-50/50">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Seller & Buyer Info */}
                     <div className="space-y-6">
                       {/* Seller */}
@@ -352,28 +305,29 @@ function Transfer() {
                         </div>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  {transfer.status === 'pending' && (
-                    <div className="mt-8 flex justify-end space-x-4">
-                      <button
-                        onClick={() => handleReject(transfer.id)}
-                        className="px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center space-x-2"
-                      >
-                        <X className="w-4 h-4" />
-                        <span>ยกเลิก</span>
-                      </button>
-                      <button
-                        onClick={() => handleApprove(transfer.transaction_id)}
-                        className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center space-x-2"
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                        <span>อนุมัติ</span>
-                      </button>
                     </div>
-                  )}
-                </div>
+
+                    {/* Action Buttons */}
+                    {transfer.status === 'pending' && (
+                      <div className="mt-8 flex justify-end space-x-4">
+                        <button
+                          onClick={() => handleReject(transfer.id)}
+                          className="px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center space-x-2"
+                        >
+                          <X className="w-4 h-4" />
+                          <span>ยกเลิก</span>
+                        </button>
+                        <button
+                          onClick={() => handleApprove(transfer.transaction_id)}
+                          className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center space-x-2"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                          <span>อนุมัติ</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>

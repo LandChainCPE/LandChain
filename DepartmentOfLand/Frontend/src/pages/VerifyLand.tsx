@@ -32,8 +32,7 @@ function VerifyLand() {
   const [confirmAction, setConfirmAction] = useState<string>("");
   const [isHolding, setIsHolding] = useState<boolean>(false);
   const [holdProgress, setHoldProgress] = useState<number>(0);
-  const [expandedWallets, setExpandedWallets] = useState<Set<number>>(new Set());
-  const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
+  const [expandedCard, setExpandedCard] = useState<number | null>(null);
 
 
   useEffect(() => {
@@ -112,33 +111,8 @@ function VerifyLand() {
     
   };
 
-  const toggleWalletExpansion = (requestId: number) => {
-    setExpandedWallets(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(requestId)) {
-        newSet.delete(requestId);
-      } else {
-        newSet.add(requestId);
-      }
-      return newSet;
-    });
-  };
-
-  const truncateWallet = (wallet: string, maxLength: number = 20) => {
-    if (wallet.length <= maxLength) return wallet;
-    return `${wallet.slice(0, 10)}...${wallet.slice(-6)}`;
-  };
-
-  const toggleSection = (section: string, requestId: number) => {
-    setExpandedCards(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(requestId)) {
-        newSet.delete(requestId);
-      } else {
-        newSet.add(requestId);
-      }
-      return newSet;
-    });
+  const toggleCardExpansion = (requestId: number) => {
+    setExpandedCard(expandedCard === requestId ? null : requestId);
   };
 
   if (loading && !landData) {
@@ -149,28 +123,52 @@ function VerifyLand() {
     <>
       {loading && <Loader />}
 
-      {/* Enhanced Header */}
-      <div className="bg-gradient-to-r from-emerald-600 via-green-700 to-teal-800 shadow-xl mb-8 -mx-4 lg:-mx-8 -mt-4 lg:-mt-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-8">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                <Home className="h-10 w-10 text-white" />
+      {/* Modern Header */}
+      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 shadow-xl mb-8">
+        <div className="px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col space-y-4 py-6">
+            {/* Top Section */}
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-4">
+                {/* <div className="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <FileText className="h-8 w-8 text-white" />
+                </div> */}
+                <div>
+                  <h1 className="text-3xl font-bold text-white">ตรวจสอบโฉนดที่ดิน</h1>
+                  <p className="text-blue-100 text-lg">Land Title Verification</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-white">ตรวจสอบโฉนดที่ดิน</h1>
-                <p className="text-green-100 text-lg font-medium">Land Title Verification System</p>
-                <p className="text-green-200 text-sm">ระบบตรวจสอบความถูกต้องของโฉนดที่ดิน</p>
+              <div className="flex items-center space-x-3">
+                <div className="bg-blue-700 bg-opacity-40 text-white px-4 py-2 rounded-xl border border-blue-400 border-opacity-30">
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="w-5 h-5" />
+                    <span className="text-sm font-medium">{new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="flex items-center space-x-6">
-              <div className="text-right text-white">
-                <div className="text-sm text-green-200">วันที่</div>
-                <div className="text-lg font-semibold">{new Date().toLocaleDateString('th-TH')}</div>
+            
+            {/* Bottom Section */}
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-2 text-blue-200">
+                  <CheckSquare className="w-5 h-5" />
+                  <span>ระบบตรวจสอบและยืนยันความถูกต้องของโฉนดที่ดิน</span>
+                </div>
               </div>
-              <div className="flex items-center space-x-3 bg-white bg-opacity-20 text-white px-6 py-3 rounded-full border border-white border-opacity-30 backdrop-blur-sm">
-                <Shield className="w-5 h-5" />
-                <span className="font-medium">ระบบปลอดภัย</span>
+              <div className="flex items-center space-x-3">
+                <div className="bg-green-500 bg-opacity-20 text-green-100 px-4 py-2 rounded-xl border border-green-300 border-opacity-30 shadow-lg">
+                  <div className="flex items-center space-x-2">
+                    <Shield className="w-5 h-5" />
+                    <span className="font-medium">ระบบปลอดภัย</span>
+                  </div>
+                </div>
+                <div className="bg-indigo-600 bg-opacity-40 text-white px-4 py-2 rounded-xl border border-indigo-400 border-opacity-30 shadow-lg">
+                  <div className="flex items-center space-x-2">
+                    <Eye className="w-5 h-5" />
+                    <span className="font-medium">ตรวจสอบข้อมูล</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -178,90 +176,56 @@ function VerifyLand() {
       </div>
 
       <div className="max-w-7xl mx-auto">
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-xl border border-gray-100 p-6 transform hover:scale-105 transition-all duration-300 hover:shadow-2xl">
-            <div className="flex items-center space-x-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                <FileText className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-gray-900">{landData?.totalRequests}</div>
-                <div className="text-gray-600 font-medium">คำขอทั้งหมด</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-xl border border-gray-100 p-6 transform hover:scale-105 transition-all duration-300 hover:shadow-2xl">
-            <div className="flex items-center space-x-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Clock className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-gray-900">{landData?.pendingRequests}</div>
-                <div className="text-gray-600 font-medium">รอดำเนินการ</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-xl border border-gray-100 p-6 transform hover:scale-105 transition-all duration-300 hover:shadow-2xl">
-            <div className="flex items-center space-x-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
-                <CheckCircle className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-gray-900">{landData?.approvedRequests}</div>
-                <div className="text-gray-600 font-medium">อนุมัติแล้ว</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-xl border border-gray-100 p-6 transform hover:scale-105 transition-all duration-300 hover:shadow-2xl">
-            <div className="flex items-center space-x-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
-                <XCircle className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-gray-900">{landData?.rejectedRequests}</div>
-                <div className="text-gray-600 font-medium">ไม่อนุมัติ</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Filters and Search */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+        {/* Enhanced Search and Filters */}
+        <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg border border-blue-200 p-6 mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="flex-1 flex flex-col sm:flex-row gap-4">
+              {/* Search */}
+              <div className="flex-1 relative">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400">
+                  <Search className="w-5 h-5" />
+                </div>
                 <input
                   type="text"
-                  placeholder="ค้นหาชื่อเจ้าของ, รหัสโฉนด, หรือสถานที่..."
-                  className="pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent w-full sm:w-80"
+                  placeholder="ค้นหาชื่อเจ้าของ, เลขโฉนด, หรือสถานที่..."
+                  className="w-full pl-10 pr-4 py-3 bg-white border-2 border-blue-100 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-300 transition-all duration-200 text-gray-700 placeholder-gray-400"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <select
-                  className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                >
-                  <option value="all">สถานะทั้งหมด</option>
-                  <option value="pending">รอการตรวจสอบ</option>
-                  <option value="reviewing">กำลังตรวจสอบ</option>
-                  <option value="approved">อนุมัติแล้ว</option>
-                  <option value="rejected">ไม่อนุมัติ</option>
-                </select>
+              {/* Filter */}
+              <div className="sm:w-48">
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400">
+                    <Filter className="w-5 h-5" />
+                  </div>
+                  <select
+                    className="w-full pl-10 pr-8 py-3 bg-white border-2 border-blue-100 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-300 appearance-none cursor-pointer transition-all duration-200 text-gray-700"
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                  >
+                    <option value="all">ทุกสถานะ</option>
+                    <option value="pending">รอตรวจสอบ</option>
+                    <option value="reviewing">กำลังตรวจสอบ</option>
+                    <option value="approved">อนุมัติแล้ว</option>
+                    <option value="rejected">ไม่อนุมัติ</option>
+                  </select>
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-blue-400">
+                    ▼
+                  </div>
+                </div>
               </div>
             </div>
             
-            <div className="text-gray-600">
-              แสดง {filteredRequests.length} จาก {landData?.totalRequests} รายการ
+            {/* Results Count */}
+            <div className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100">
+              <div className="flex items-center space-x-2 text-blue-700">
+                <Hash className="w-5 h-5" />
+                <span className="font-medium">
+                  แสดง {filteredRequests.length} จาก {landData?.requests.length || 0} รายการ
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -269,45 +233,53 @@ function VerifyLand() {
         {/* Land Verification Requests */}
         <div className="space-y-3">
           {filteredRequests.map((request: any) => (
-            <div key={request.idlandtitle} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+            <div key={request.idlandtitle} className="bg-gradient-to-br from-white to-blue-50 rounded-lg shadow-md border border-blue-200 overflow-hidden hover:shadow-lg transition-shadow">
               
-              {/* Compact Header with All Key Info */}
-              <div className="bg-gradient-to-r from-slate-700 to-slate-800 px-4 py-3">
+              {/* Enhanced Card Header */}
+              <div 
+                className="bg-white px-6 py-4 cursor-pointer border-b border-blue-100 hover:bg-blue-50/50 transition-colors duration-200" 
+                onClick={() => toggleCardExpansion(request.idlandtitle)}
+              >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-8 h-8 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-                      <Home className="w-4 h-4 text-white" />
+                  <div className="flex items-center space-x-6">
+                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                      <FileText className="w-6 h-6 text-blue-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-4 text-white">
-                        <span className="font-bold">#{request.title_deed_number}</span>
-                        <span className="text-slate-200">•</span>
+                      <div className="flex items-center space-x-2 mb-1">
+                        <b>{`${request.title_deed_number}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`}</b>
+                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium">
+                          {request.rai} ไร่ {request.ngan} งาน {request.square_wa} ตร.วา
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-gray-600">
+                        <User className="w-4 h-4" />
                         <span className="font-medium">{request.firstname} {request.lastname}</span>
-                        <span className="text-slate-200">•</span>
-                        <span className="text-slate-300 text-sm">{request.subdistrict}, {request.district}</span>
-                        <span className="text-slate-200">•</span>
-                        <span className="text-slate-300 text-sm">{request.rai}-{request.ngan}-{request.square_wa}</span>
+                        <span>•</span>
+                        <MapPin className="w-4 h-4" />
+                        <span>{request.subdistrict}, {request.district}</span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status_verify ? "approved" : "pending")}`}>
+                  <div className="flex items-center space-x-4">
+                    <span className={`px-4 py-2 rounded-xl text-sm font-medium ${getStatusColor(request.status_verify ? "approved" : "pending")}`}>
                       {getStatusText(request.status_verify ? "approved" : "pending")}
                     </span>
                     <button
-                      onClick={() => toggleSection('', request.id)}
-                      className="text-white hover:text-slate-200 text-sm font-medium transition-colors flex items-center space-x-1"
+                      className="group flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors"
                     >
-                      <span>{expandedCards.has(request.id) ? 'ย่อ' : 'ดูรายละเอียด'}</span>
-                      <span className="text-lg">{expandedCards.has(request.id) ? '▲' : '▼'}</span>
+                      <span className="text-sm font-medium">{expandedCard === request.idlandtitle ? 'ย่อข้อมูล' : 'ดูรายละเอียด'}</span>
+                      <span className={`text-lg transform transition-transform duration-300 group-hover:translate-y-0.5 ${expandedCard === request.idlandtitle ? 'rotate-180' : ''}`}>
+                        ▼
+                      </span>
                     </button>
                   </div>
                 </div>
               </div>
 
               {/* Expanded Details */}
-              {expandedCards.has(request.id) && (
-                <div className="p-4">
+              {expandedCard === request.idlandtitle && (
+                <div className="p-4 bg-blue-50/50">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     
                     {/* เจ้าของและ Wallet */}
@@ -324,74 +296,65 @@ function VerifyLand() {
                         <div className="text-sm">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-blue-700 font-medium">Wallet Address:</span>
-                            <button
-                              onClick={() => toggleWalletExpansion(request.id)}
-                              className="text-blue-600 hover:text-blue-800 text-xs transition-colors"
-                            >
-                              {expandedWallets.has(request.id) ? 'ย่อ' : 'ขยาย'}
-                            </button>
                           </div>
                           <div className="font-mono text-xs bg-blue-100 p-2 rounded border break-all font-bold text-blue-900">
-                            {expandedWallets.has(request.id) 
-                              ? request.metamaskaddress 
-                              : truncateWallet(request.metamaskaddress)
-                            }
+                            {request.metamaskaddress}
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* ข้อมูลโฉนด */}
-                    <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                      <h4 className="font-semibold text-green-900 mb-2 flex items-center text-sm">
+                    <div className="bg-indigo-50 rounded-lg p-3 border border-indigo-200">
+                      <h4 className="font-semibold text-indigo-900 mb-2 flex items-center text-sm">
                         <FileText className="w-4 h-4 mr-2" />
                         รายละเอียดโฉนด
                       </h4>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div>
-                          <span className="text-green-700">เลขโฉนด:</span>
-                          <div className="font-bold text-green-900 bg-green-100 px-1 py-0.5 rounded mt-0.5">{request.title_deed_number}</div>
+                          <span className="text-indigo-700">เลขโฉนด:</span>
+                          <div className="font-bold text-indigo-900 bg-indigo-100 px-1 py-0.5 rounded mt-0.5">{request.title_deed_number}</div>
                         </div>
                         <div>
-                          <span className="text-green-700">เลขที่ดิน:</span>
-                          <div className="font-bold text-green-900 bg-green-100 px-1 py-0.5 rounded mt-0.5">{request.land_number}</div>
+                          <span className="text-indigo-700">เลขที่ดิน:</span>
+                          <div className="font-bold text-indigo-900 bg-indigo-100 px-1 py-0.5 rounded mt-0.5">{request.land_number}</div>
                         </div>
                         <div>
-                          <span className="text-green-700">ระวาง:</span>
-                          <div className="font-bold text-green-900 bg-green-100 px-1 py-0.5 rounded mt-0.5">{request.survey_number}</div>
+                          <span className="text-indigo-700">ระวาง:</span>
+                          <div className="font-bold text-indigo-900 bg-indigo-100 px-1 py-0.5 rounded mt-0.5">{request.survey_number}</div>
                         </div>
                         <div>
-                          <span className="text-green-700">หน้าสำรวจ:</span>
-                          <div className="font-bold text-green-900 bg-green-100 px-1 py-0.5 rounded mt-0.5">{request.survey_page}</div>
+                          <span className="text-indigo-700">หน้าสำรวจ:</span>
+                          <div className="font-bold text-indigo-900 bg-indigo-100 px-1 py-0.5 rounded mt-0.5">{request.survey_page}</div>
                         </div>
                         <div>
-                          <span className="text-green-700">เล่ม:</span>
-                          <div className="font-bold text-green-900 bg-green-100 px-1 py-0.5 rounded mt-0.5">{request.volume}</div>
+                          <span className="text-indigo-700">เล่ม:</span>
+                          <div className="font-bold text-indigo-900 bg-indigo-100 px-1 py-0.5 rounded mt-0.5">{request.volume}</div>
                         </div>
                         <div>
-                          <span className="text-green-700">หน้า:</span>
-                          <div className="font-bold text-green-900 bg-green-100 px-1 py-0.5 rounded mt-0.5">{request.page}</div>
+                          <span className="text-indigo-700">หน้า:</span>
+                          <div className="font-bold text-indigo-900 bg-indigo-100 px-1 py-0.5 rounded mt-0.5">{request.page}</div>
                         </div>
                       </div>
                       
                       {/* ขนาดที่ดิน */}
-                      <div className="mt-3 pt-2 border-t border-green-200">
-                        <h5 className="text-green-800 font-medium text-xs mb-2 flex items-center">
+                      <div className="mt-3 pt-2 border-t border-indigo-200">
+                        <h5 className="text-indigo-800 font-medium text-xs mb-2 flex items-center">
                           <Ruler className="w-3 h-3 mr-1" />
                           ขนาดพื้นที่
                         </h5>
                         <div className="flex space-x-2">
-                          <div className="bg-green-100 px-2 py-1 rounded text-center flex-1">
-                            <div className="text-green-700 text-xs">ไร่</div>
-                            <div className="font-bold text-green-900">{request.rai}</div>
+                          <div className="bg-indigo-100 px-2 py-1 rounded text-center flex-1">
+                            <div className="text-indigo-700 text-xs">ไร่</div>
+                            <div className="font-bold text-indigo-900">{request.rai}</div>
                           </div>
-                          <div className="bg-green-100 px-2 py-1 rounded text-center flex-1">
-                            <div className="text-green-700 text-xs">งาน</div>
-                            <div className="font-bold text-green-900">{request.ngan}</div>
+                          <div className="bg-indigo-100 px-2 py-1 rounded text-center flex-1">
+                            <div className="text-indigo-700 text-xs">งาน</div>
+                            <div className="font-bold text-indigo-900">{request.ngan}</div>
                           </div>
-                          <div className="bg-green-100 px-2 py-1 rounded text-center flex-1">
-                            <div className="text-green-700 text-xs">ตร.วา</div>
-                            <div className="font-bold text-green-900">{request.square_wa}</div>
+                          <div className="bg-indigo-100 px-2 py-1 rounded text-center flex-1">
+                            <div className="text-indigo-700 text-xs">ตร.วา</div>
+                            <div className="font-bold text-indigo-900">{request.square_wa}</div>
                           </div>
                         </div>
                       </div>
@@ -400,23 +363,23 @@ function VerifyLand() {
                     {/* ที่ตั้งและการดำเนินการ */}
                     <div className="space-y-4">
                       {/* ที่ตั้ง */}
-                      <div className="bg-indigo-50 rounded-lg p-3 border border-indigo-200">
-                        <h4 className="font-semibold text-indigo-900 mb-2 flex items-center text-sm">
+                      <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                        <h4 className="font-semibold text-blue-900 mb-2 flex items-center text-sm">
                           <MapPin className="w-4 h-4 mr-2" />
                           ที่ตั้ง
                         </h4>
                         <div className="space-y-1 text-sm">
                           <div>
-                            <span className="text-indigo-700">ตำบล:</span>
-                            <span className="ml-2 font-bold text-indigo-900">{request.subdistrict}</span>
+                            <span className="text-blue-700">ตำบล:</span>
+                            <span className="ml-2 font-bold text-blue-900">{request.subdistrict}</span>
                           </div>
                           <div>
-                            <span className="text-indigo-700">อำเภอ:</span>
-                            <span className="ml-2 font-bold text-indigo-900">{request.district}</span>
+                            <span className="text-blue-700">อำเภอ:</span>
+                            <span className="ml-2 font-bold text-blue-900">{request.district}</span>
                           </div>
                           <div>
-                            <span className="text-indigo-700">จังหวัด:</span>
-                            <span className="ml-2 font-bold text-indigo-900">{request.province}</span>
+                            <span className="text-blue-700">จังหวัด:</span>
+                            <span className="ml-2 font-bold text-blue-900">{request.province}</span>
                           </div>
                         </div>
                       </div>

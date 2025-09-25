@@ -219,7 +219,7 @@ function UserMain() {
                       </td>
                       <td className="px-8 py-6 whitespace-nowrap">
                         <span className="px-4 py-2 inline-flex text-sm leading-5 font-semibold rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-200 group-hover:from-blue-200 group-hover:to-indigo-200 transition-all duration-300">
-                          {item.service_type}
+                          {/* {item.service_type} */}ลงทะเบียนผู้ใช้
                         </span>
                       </td>
                       <td className="px-8 py-6 whitespace-nowrap text-right text-sm font-medium">

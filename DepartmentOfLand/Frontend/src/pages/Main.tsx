@@ -44,9 +44,9 @@ function MainDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-8">
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+              {/* <div className="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
                 <Building2 className="h-10 w-10 text-white" />
-              </div>
+              </div> */}
               <div>
                 <h1 className="text-3xl font-bold text-white">กรมที่ดิน</h1>
                 <p className="text-blue-100 text-lg font-medium">LandChain Dashboard</p>
@@ -58,10 +58,10 @@ function MainDashboard() {
                 <div className="text-sm text-blue-200">วันที่</div>
                 <div className="text-lg font-semibold">{new Date().toLocaleDateString('th-TH')}</div>
               </div>
-              <div className="flex items-center space-x-3 bg-white bg-opacity-20 text-white px-6 py-3 rounded-full border border-white border-opacity-30 backdrop-blur-sm">
+              {/* <div className="flex items-center space-x-3 bg-white bg-opacity-20 text-white px-6 py-3 rounded-full border border-white border-opacity-30 backdrop-blur-sm">
                 <Shield className="w-5 h-5" />
-                <span className="font-medium">ระบบปลอดภัย</span>
-              </div>
+                <span style={{color: "black"}}className="font-medium">ระบบปลอดภัย</span>
+              </div> */}
             </div>
           </div>
         </div>
@@ -132,9 +132,9 @@ function MainDashboard() {
           <div className="bg-gradient-to-r from-slate-600 to-slate-700 px-6 py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                {/* <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
                   <FileText className="w-6 h-6 text-white" />
-                </div>
+                </div> */}
                 <div>
                   <h2 className="text-xl font-bold text-white">กิจกรรมล่าสุด</h2>
                   <p className="text-slate-200 text-sm">Recent System Activities</p>
