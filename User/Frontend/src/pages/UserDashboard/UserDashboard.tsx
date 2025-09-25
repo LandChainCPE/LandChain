@@ -1,7 +1,8 @@
 import "./UserDashboard.css";
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { GetUserinfoByID, GetLandtitlesByUser } from "../../service/https/garfield/http";
+import { GetLandtitlesByUser } from "../../service/https/garfield/http";
+import { GetInfoUserByWalletID } from "../../service/https/bam/bam";
 import { Table, Tag, Card as AntCard, Row, Col, Statistic, Empty } from "antd";
 import { FileTextOutlined, CalendarOutlined, ClockCircleOutlined, CheckCircleOutlined, ExclamationCircleOutlined, } from "@ant-design/icons";
 import { GetAllPetition } from "../../service/https/jib/jib";
@@ -163,39 +164,26 @@ export default function UserProfilePage() {
   const [userError, setUserError] = useState<string | null>(null);
   const [titlesError, setTitlesError] = useState<string | null>(null);
   useEffect(() => {
-    const user_id = localStorage.getItem("user_id") || "";
-    console.log("User id:", user_id);
-    if (user_id) {
-      setIsLoadingUser(true);
-      setUserError(null);
-      GetUserinfoByID(user_id).then(({ result }) => {
-        if (result && (result.firstName || result.lastName || result.email)) {
-          setUserInfo({
-            firstName: result.firstName || "",
-            lastName: result.lastName || "",
-            email: result.email || "",
-            user_verification_id: result.user_verification_id || 0,
-          });
-          // อัปเดต localStorage ให้ตรงกับ backend
-          // localStorage.setItem("firstName", result.firstName || "");
-          // localStorage.setItem("lastName", result.lastName || "");
-          // localStorage.setItem("email", result.email || "");
-          // localStorage.setItem("user_verification_id", result.user_verification_id ? String(result.user_verification_id) : "0");
-        } else {
-          console.log("No user data found or invalid format");
-          setUserError("ไม่พบข้อมูลผู้ใช้");
-        }
-      }).catch((error) => {
-        console.error("Failed to fetch user info:", error);
-        setUserError("เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้");
-      }).finally(() => {
-        setIsLoadingUser(false);
-      });
-    } else {
-      console.log("No user_id found in localStorage");
-      setUserError("ไม่พบ User ID");
+    setIsLoadingUser(true);
+    setUserError(null);
+    GetInfoUserByWalletID().then((result) => {
+      if (result && (result.firstName || result.lastName || result.first_name || result.last_name || result.email)) {
+        setUserInfo({
+          firstName: result.firstName || result.first_name || "",
+          lastName: result.lastName || result.last_name || "",
+          email: result.email || "",
+          user_verification_id: result.user_verification_id || 0,
+        });
+      } else {
+        console.log("No user data found or invalid format");
+        setUserError("ไม่พบข้อมูลผู้ใช้");
+      }
+    }).catch((error) => {
+      console.error("Failed to fetch user info:", error);
+      setUserError("เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้");
+    }).finally(() => {
       setIsLoadingUser(false);
-    }
+    });
   }, []);
 
   // ---------- Titles stats ----------
@@ -203,7 +191,7 @@ export default function UserProfilePage() {
   const [totalLandCount, setTotalLandCount] = useState<number>(0);
 
   useEffect(() => {
-    const user_id = localStorage.getItem("user_id") || "";
+    const user_id = sessionStorage.getItem("user_id") || "";
     if (user_id) {
       GetLandtitlesByUser(user_id).then((res) => {
         if (Array.isArray(res)) {
@@ -223,7 +211,7 @@ export default function UserProfilePage() {
   const [notverifyCount, setNotverifyCount] = useState<number>(0);
 
   useEffect(() => {
-    const user_id = localStorage.getItem("user_id") || "";
+    const user_id = sessionStorage.getItem("user_id") || "";
     if (user_id) {
       GetLandtitlesByUser(user_id).then((res) => {
         let arr = Array.isArray(res) ? res : (res?.result && Array.isArray(res.result) ? res.result : []);
@@ -338,7 +326,7 @@ export default function UserProfilePage() {
       try {
         const accounts = await (window as any).ethereum.request({ method: "eth_requestAccounts" });
         if (accounts && accounts[0]) {
-          localStorage.setItem("wallet", accounts[0]);
+          // sessionStorage.setItem("wallet", accounts[0]);
           setWallet(accounts[0]);
           setTitlesError(null);
           fetchLandTitlesFromBlockchain(accounts[0]);
@@ -352,19 +340,19 @@ export default function UserProfilePage() {
   };
 
   // State สำหรับ wallet address
-  const [wallet, setWallet] = useState<string>(localStorage.getItem("wallet") || "");
+  const [wallet, setWallet] = useState<string>(sessionStorage.getItem("wallet") || "");
 
   // ฟังก์ชันดึงข้อมูลที่ดินจาก blockchain
   const fetchLandTitlesFromBlockchain = async (walletAddr?: string) => {
     setIsLoadingTitles(true);
     setTitlesError(null);
-    let walletToUse = walletAddr || wallet || localStorage.getItem("wallet") || "";
+    let walletToUse = walletAddr || wallet || sessionStorage.getItem("wallet") || "";
     if (!walletToUse && (window as any).ethereum) {
       try {
         const accounts = await (window as any).ethereum.request({ method: "eth_accounts" });
         walletToUse = accounts[0] || "";
         if (walletToUse) {
-          localStorage.setItem("wallet", walletToUse);
+          // sessionStorage.setItem("wallet", walletToUse);
           setWallet(walletToUse);
         }
       } catch { }

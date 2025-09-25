@@ -1,8 +1,8 @@
 import axios from "axios";
 const apiUrl = "http://localhost:8080";
 
-const Authorization = localStorage.getItem("token");
-const Bearer = localStorage.getItem("token_type");
+const Authorization = sessionStorage.getItem("token");
+const Bearer = sessionStorage.getItem("token_type");
 
 const requestOptions = {
   headers: {

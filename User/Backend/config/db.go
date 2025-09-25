@@ -1,10 +1,7 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"landchain/entity"
 	"log"
 	"os"
@@ -17,7 +14,6 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 var db *gorm.DB
@@ -53,143 +49,6 @@ func ConnectDatabase() *gorm.DB {
 	return db
 }
 
-func SeedGeographiesFromJSON(db *gorm.DB, jsonPath string) error {
-	// เปิดไฟล์ JSON
-	var err error
-	if err != nil {
-		return fmt.Errorf("cannot open geography JSON: %w", err)
-	}
-	file, err := os.Open(jsonPath)
-	if err != nil {
-		return fmt.Errorf("cannot open geography JSON: %w", err)
-	}
-	defer file.Close()
-
-	// อ่านไฟล์
-	bytes, err := io.ReadAll(file)
-	if err != nil {
-		return fmt.Errorf("cannot read geography JSON: %w", err)
-	}
-
-	// แปลง JSON เป็น slice ของ LandGeographies
-	var geographies []entity.LandGeographies
-	if err := json.Unmarshal(bytes, &geographies); err != nil {
-		return fmt.Errorf("cannot unmarshal geography JSON: %w", err)
-	}
-
-	// เริ่ม transaction
-	tx := db.Begin()
-	for _, geo := range geographies {
-		// เพิ่มข้อมูล ถ้ามี conflict ให้ข้าม
-		if err := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&geo).Error; err != nil {
-			tx.Rollback()
-			return fmt.Errorf("cannot create geography: %w", err)
-		}
-	}
-	return tx.Commit().Error
-}
-
-func SeedGeographyExample(db *gorm.DB) {
-	// เปิดไฟล์ JSON
-	jsonFile, err := os.Open("ProvincesData/thai_geographies.json")
-	if err != nil {
-		log.Fatalf("cannot open provinces JSON: %v", err)
-	}
-	defer jsonFile.Close()
-
-	// อ่านข้อมูล
-	byteValue, _ := io.ReadAll(jsonFile)
-
-	// แปลง JSON → struct
-	var geographies []entity.LandGeographies
-	if err := json.Unmarshal(byteValue, &geographies); err != nil {
-		log.Fatalf("cannot unmarshal provinces JSON: %v", err)
-	}
-
-	// Insert ลง DB
-	for _, geography := range geographies {
-		if err := db.Create(&geography).Error; err != nil {
-			fmt.Printf("❌ Failed to insert province %s: %v\n", geography.Name, err)
-		}
-	}
-}
-
-// ------------------ Seed Provinces ------------------
-func SeedProvinces(db *gorm.DB) {
-	// เปิดไฟล์ JSON
-	jsonFile, err := os.Open("ProvincesData/thai_provinces.json")
-	if err != nil {
-		log.Fatalf("cannot open provinces JSON: %v", err)
-	}
-	defer jsonFile.Close()
-
-	// อ่านข้อมูล
-	byteValue, _ := io.ReadAll(jsonFile)
-
-	// แปลง JSON → struct
-	var provinces []entity.LandProvinces
-	if err := json.Unmarshal(byteValue, &provinces); err != nil {
-		log.Fatalf("cannot unmarshal provinces JSON: %v", err)
-	}
-
-	// Insert ลง DB
-	for _, province := range provinces {
-		if err := db.Create(&province).Error; err != nil {
-			fmt.Printf("❌ Failed to insert province %s: %v\n", province.NameTh, err)
-		}
-	}
-}
-
-func SeedAmphures(db *gorm.DB) {
-	// เปิดไฟล์ JSON
-	jsonFile, err := os.Open("ProvincesData/thai_amphures.json")
-	if err != nil {
-		log.Fatalf("cannot open amphures JSON: %v", err)
-	}
-	defer jsonFile.Close()
-
-	// อ่านข้อมูล
-	byteValue, _ := ioutil.ReadAll(jsonFile)
-
-	// แปลง JSON → struct
-	var amphures []entity.LandAmphures
-	if err := json.Unmarshal(byteValue, &amphures); err != nil {
-		log.Fatalf("cannot unmarshal amphures JSON: %v", err)
-	}
-
-	// Insert ลง DB
-	for _, amphure := range amphures {
-		if err := db.Create(&amphure).Error; err != nil {
-			fmt.Printf("❌ Failed to insert amphure %s: %v\n", amphure.NameTh, err)
-		}
-	}
-}
-
-func SeedTambons(db *gorm.DB) {
-	// เปิดไฟล์ JSON
-	jsonFile, err := os.Open("ProvincesData/thai_tambons.json")
-	if err != nil {
-		log.Fatalf("cannot open tambons JSON: %v", err)
-	}
-	defer jsonFile.Close()
-
-	// อ่านข้อมูล
-	byteValue, _ := ioutil.ReadAll(jsonFile)
-
-	// แปลง JSON → struct
-	var tambons []entity.LandTambons
-	if err := json.Unmarshal(byteValue, &tambons); err != nil {
-		log.Fatalf("cannot unmarshal tambons JSON: %v", err)
-	}
-
-	// Insert ลง DB
-	for _, tambon := range tambons {
-		if err := db.Create(&tambon).Error; err != nil {
-			fmt.Printf("❌ Failed to insert tambon %s: %v\n", tambon.NameTh, err)
-		}
-	}
-}
-
 // ✅ SetupDatabase: ทำ Drop Table, AutoMigrate, และ Seed ข้อมูล
 // แก้ไขในส่วน SetupDatabase() - ย้ายการสร้าง Roomchat ไปหลัง Landsalepost
 func SetupDatabase() {
@@ -209,12 +68,7 @@ func SetupDatabase() {
 		&entity.Branch{},
 		&entity.Booking{},
 		&entity.Typetransaction{},
-
-		&entity.LandGeographies{},
-		&entity.LandProvinces{},
 		&entity.ServiceType{},
-		&entity.LandAmphures{},
-		&entity.LandTambons{},
 		&entity.LandVerification{}, /////
 
 		&entity.Landsalepost{},
@@ -226,14 +80,8 @@ func SetupDatabase() {
 		&entity.Petition{},
 		&entity.State{},
 		&entity.Location{},
-
-		&entity.LandGeographies{},
-		&entity.LandProvinces{},
 		&entity.ServiceType{},
-		&entity.LandAmphures{},
-		&entity.LandTambons{},
 		&entity.Landtitle{},
-		&entity.RequestBuySellType{},
 		&entity.RequestBuySell{},
 		&entity.Tag{},
 		&entity.District{},
@@ -301,22 +149,15 @@ func SetupDatabase() {
 		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID, UserID: RefTimeID, BranchID: RefTimeID, ServiceTypeID: RefTypeID})
 		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID1, UserID: RefTypeID, BranchID: RefTypeID, ServiceTypeID: RefTypeID})
 
-		SeedGeographyExample(db)
-		SeedProvinces(db)
-		SeedAmphures(db)
-		SeedTambons(db)
-
 		db.Create(&entity.Typetransaction{StatusNameTh: "รอผู้ซื้อ/ผู้ขายตกลง", StatusNameEn: "in_progress"})
-		db.Create(&entity.Typetransaction{StatusNameTh: "เสร็จสิ้น", StatusNameEn: "completed"})
 		db.Create(&entity.Typetransaction{StatusNameTh: "ถูกยกเลิกโดยผู้ซื้อหรือผู้ขาย", StatusNameEn: "cancelled"})
-		db.Create(&entity.Typetransaction{StatusNameTh: "รอการชำระเงิน", StatusNameEn: "money_clear"})
-		db.Create(&entity.Typetransaction{StatusNameTh: "หมดอายุ", StatusNameEn: "expired"})
-		db.Create(&entity.Typetransaction{StatusNameTh: "อยู่บนเชน", StatusNameEn: "on-chain"})
+		// db.Create(&entity.Typetransaction{StatusNameTh: "รอการชำระเงิน", StatusNameEn: "money_clear"})
+		// db.Create(&entity.Typetransaction{StatusNameTh: "หมดอายุ", StatusNameEn: "expired"})
+		db.Create(&entity.Typetransaction{StatusNameTh: "กรมที่ดินตรวจสอบแล้ว", StatusNameEn: "DepartmentOfLand-Verify"})
 
-		db.Create(&entity.RequestBuySellType{StatusNameTh: "เจ้าของโฉลดสร้างคำขอขาย", StatusNameEn: "pending"})
-		db.Create(&entity.RequestBuySellType{StatusNameTh: "ตกลงซื้อขาย", StatusNameEn: "accepted"})
-		db.Create(&entity.RequestBuySellType{StatusNameTh: "ปฏิเสธคำขอ", StatusNameEn: "rejected"})
-		db.Create(&entity.RequestBuySellType{StatusNameTh: "ยกเลิก", StatusNameEn: "cancelled"})
+		db.Create(&entity.Typetransaction{StatusNameTh: "อยู่บนเชน", StatusNameEn: "on-chain"})
+		db.Create(&entity.Typetransaction{StatusNameTh: "เสร็จสิ้น", StatusNameEn: "completed"})
+
 
 		// // สร้าง LandProvinces
 		db.Create(&entity.Transaction{LandID: 1, BuyerID: 2, SellerID: 4, TypetransactionID: 1})
@@ -334,7 +175,6 @@ func SetupDatabase() {
 			Ngan:               2,
 			SquareWa:           50,
 			Status_verify:      false,
-			GeographyID:        nil,  // Replace with actual GeographyID if available
 			ProvinceID:         38,   // Replace with actual ProvinceID
 			DistrictID:         537,  // Replace with actual DistrictID
 			SubdistrictID:      4320, // Replace with actual SubdistrictID
@@ -356,7 +196,6 @@ func SetupDatabase() {
 			Ngan:               2,
 			SquareWa:           50,
 			Status_verify:      false,
-			GeographyID:        nil,  // Replace with actual GeographyID if available
 			ProvinceID:         16,   // Replace with actual ProvinceID
 			DistrictID:         138,  // Replace with actual DistrictID
 			SubdistrictID:      1371, // Replace with actual SubdistrictID
@@ -378,7 +217,6 @@ func SetupDatabase() {
 			Ngan:               2,
 			SquareWa:           50,
 			Status_verify:      false,
-			GeographyID:        nil, // Replace with actual GeographyID if available
 			ProvinceID:         6,   // Replace with actual ProvinceID
 			DistrictID:         87,  // Replace with actual DistrictID
 			SubdistrictID:      568, // Replace with actual SubdistrictID
@@ -400,7 +238,6 @@ func SetupDatabase() {
 			Ngan:               2,
 			SquareWa:           50,
 			Status_verify:      false,
-			GeographyID:        nil, // Replace with actual GeographyID if available
 			ProvinceID:         6,   // Replace with actual ProvinceID
 			DistrictID:         87,  // Replace with actual DistrictID
 			SubdistrictID:      568, // Replace with actual SubdistrictID
@@ -493,7 +330,7 @@ func SetupDatabase() {
 		db.Create(&entity.Transaction{
 			Amount:         1500,
 			BuyerAccepted:  true,
-			SellerAccepted: false,
+			SellerAccepted: true,
 			//MoneyChecked:           false,
 			LandDepartmentApproved: false,
 			//Expire:                 time.Now().AddDate(0, 0, 7),

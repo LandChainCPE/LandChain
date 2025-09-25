@@ -13,12 +13,12 @@ const CreateAccount = () => {
   const [email, setEmail] = useState('');
   const navigate = useNavigate();
 
-  // เมื่อโหลดหน้าแรกให้ดึงข้อมูลจาก localStorage (ถ้ามี)
+  // เมื่อโหลดหน้าแรกให้ดึงข้อมูลจาก sessionStorage (ถ้ามี)
   React.useEffect(() => {
-    const storedFirstname = localStorage.getItem('firstname');
-    const storedLastname = localStorage.getItem('lastname');
-    const storedPhonenumber = localStorage.getItem('phonenumber');
-    const storedEmail = localStorage.getItem('email');
+    const storedFirstname = sessionStorage.getItem('firstname');
+    const storedLastname = sessionStorage.getItem('lastname');
+    const storedPhonenumber = sessionStorage.getItem('phonenumber');
+    const storedEmail = sessionStorage.getItem('email');
 
     if (storedFirstname) setFirstname(storedFirstname);
     if (storedLastname) setLastname(storedLastname);
@@ -29,11 +29,11 @@ const CreateAccount = () => {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
-    // เก็บข้อมูลใน localStorage
-    localStorage.setItem('firstname', firstname);
-    localStorage.setItem('lastname', lastname);
-    localStorage.setItem('phonenumber', phonenumber);
-    localStorage.setItem('email', email);
+    // เก็บข้อมูลใน sessionStorage
+    sessionStorage.setItem('firstname', firstname);
+    sessionStorage.setItem('lastname', lastname);
+    sessionStorage.setItem('phonenumber', phonenumber);
+    sessionStorage.setItem('email', email);
 
     // แสดงข้อมูลใน console
     console.log('บัญชีผู้ใช้ถูกสร้าง!', {
@@ -42,7 +42,15 @@ const CreateAccount = () => {
       phonenumber,
       email,
     });
+
+    // นำข้อมูลไปใช้แล้วให้ลบออก
+    
+
     navigate('/createaccount/connectmetamask');
+    sessionStorage.removeItem('firstname');
+    sessionStorage.removeItem('lastname');
+    sessionStorage.removeItem('phonenumber');
+    sessionStorage.removeItem('email');
   };
 
   return (

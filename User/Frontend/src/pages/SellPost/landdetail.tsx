@@ -4,13 +4,11 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import { MapPin, Phone, User, Home, Calendar, Ruler, Map, MessageCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { GetAllPostLandData, CreateRequestBuySell } from "../../service/https/jib/jib";
-import { Modal } from "antd"; 
+import { Modal } from "antd";
 import "leaflet/dist/leaflet.css";
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { CreateNewRoom } from "../../service/https/bam/bam";
-
-
 
 type LandDetailType = {
   ID: number | string;
@@ -59,7 +57,7 @@ function normalizeDetail(item: any): LandDetailType & { user_id?: number } {
   const landtitleObj = item.landtitle ?? item.Landtitle ?? undefined;
   const locationArr: any[] = item.location ?? item.Location ?? [];
 
-     // ดึงรูปจาก Photoland (ถ้ามี)
+  // ดึงรูปจาก Photoland (ถ้ามี)
   let images: string[] = [];
   if (Array.isArray(item.Photoland) && item.Photoland.length > 0) {
     images = item.Photoland.map((p: any) => p.Path).filter(Boolean);
@@ -86,9 +84,8 @@ function normalizeDetail(item: any): LandDetailType & { user_id?: number } {
   const desc =
     item.description ??
     item.Description ??
-    `ที่ดินใน${subdistrictObj?.name_th ?? subdistrictObj?.NameTH ?? ""} ${
-      districtObj?.name_th ?? districtObj?.NameTH ?? ""
-    } ${provinceObj?.name_th ?? provinceObj?.NameTH ?? ""}`.trim();
+    `ที่ดินใน${subdistrictObj?.name_th ?? subdistrictObj?.NameTH ?? ""} ${districtObj?.name_th ?? districtObj?.NameTH ?? ""
+      } ${provinceObj?.name_th ?? provinceObj?.NameTH ?? ""}`.trim();
 
   return {
     ID: item.id ?? item.ID,
@@ -116,23 +113,23 @@ function normalizeDetail(item: any): LandDetailType & { user_id?: number } {
     Subdistrict: subdistrictObj ? { NameTH: subdistrictObj.name_th ?? subdistrictObj.NameTH } : undefined,
     Landtitle: landtitleObj
       ? {
-          Rai: landtitleObj.rai ?? landtitleObj.Rai,
-          Ngan: landtitleObj.ngan ?? landtitleObj.Ngan,
-          SquareWa: landtitleObj.square_wa ?? landtitleObj.SquareWa,
-          TitleDeedNumber: landtitleObj.title_deed_number ?? landtitleObj.TitleDeedNumber,
-        }
+        Rai: landtitleObj.rai ?? landtitleObj.Rai,
+        Ngan: landtitleObj.ngan ?? landtitleObj.Ngan,
+        SquareWa: landtitleObj.square_wa ?? landtitleObj.SquareWa,
+        TitleDeedNumber: landtitleObj.title_deed_number ?? landtitleObj.TitleDeedNumber,
+      }
       : undefined,
     Location: Array.isArray(locationArr)
       ? locationArr
-          .map((l) => ({
-            Sequence: l.sequence ?? l.Sequence,
-            Latitude: l.latitude ?? l.Latitude,
-            Longitude: l.longitude ?? l.Longitude,
-          }))
-          .filter((l) => typeof l.Latitude === "number" && typeof l.Longitude === "number")
-          .sort((a, b) => (a.Sequence ?? 0) - (b.Sequence ?? 0))
+        .map((l) => ({
+          Sequence: l.sequence ?? l.Sequence,
+          Latitude: l.latitude ?? l.Latitude,
+          Longitude: l.longitude ?? l.Longitude,
+        }))
+        .filter((l) => typeof l.Latitude === "number" && typeof l.Longitude === "number")
+        .sort((a, b) => (a.Sequence ?? 0) - (b.Sequence ?? 0))
       : [],
-  user_id: item.user_id ?? item.UserID ?? item.userId ?? item.userid, // รองรับทุกแบบ
+    user_id: item.user_id ?? item.UserID ?? item.userId ?? item.userid, // รองรับทุกแบบ
   };
 }
 
@@ -142,9 +139,9 @@ const MAPBOX_TOKEN = 'pk.eyJ1Ijoiam9oYXJ0MjU0NiIsImEiOiJjbWVmZ3YzMGcwcTByMm1zOWR
 // Set Mapbox access token
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
-const MapDisplay: React.FC<{ 
-  points: { Sequence?: number; Latitude: number; Longitude: number }[]; 
-  name?: string 
+const MapDisplay: React.FC<{
+  points: { Sequence?: number; Latitude: number; Longitude: number }[];
+  name?: string
 }> = ({ points, name }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -152,11 +149,11 @@ const MapDisplay: React.FC<{
 
   const handleMapClick = () => {
     if (!points || points.length === 0) return;
-    
+
     const confirmed = window.confirm(
       `คุณกำลังจะเปิดแผนที่ขนาดใหญ่เพื่อดูตำแหน่งที่ดินต้องการดำเนินการต่อหรือไม่?`
     );
-    
+
     if (confirmed) {
       navigate('/user/fullmapview', {
         state: {
@@ -203,81 +200,81 @@ const MapDisplay: React.FC<{
         },
       });
 
-        // Add polygon/line source
-        if (coordinates.length >= 3) {
-          // สำหรับ polygon ต้องมีอย่างน้อย 3 จุด และต้องปิดให้เป็นรูปหลายเหลี่ยม
-          let polygonCoordinates = [...coordinates];
-          
-          // ตรวจสอบว่าจุดแรกและจุดสุดท้ายเหมือนกันหรือไม่ (ปิด polygon)
-          const firstPoint = coordinates[0];
-          const lastPoint = coordinates[coordinates.length - 1];
-          const isClosed = firstPoint[0] === lastPoint[0] && firstPoint[1] === lastPoint[1];
-          
-          // ถ้ายังไม่ปิด ให้ปิดให้เป็น polygon
-          if (!isClosed) {
-            polygonCoordinates = [...coordinates, firstPoint];
-          }
+      // Add polygon/line source
+      if (coordinates.length >= 3) {
+        // สำหรับ polygon ต้องมีอย่างน้อย 3 จุด และต้องปิดให้เป็นรูปหลายเหลี่ยม
+        let polygonCoordinates = [...coordinates];
 
-          // เพิ่ม source สำหรับ polygon
-          mapRef.current.addSource('boundary', {
-            type: 'geojson',
-            data: {
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                type: 'Polygon',
-                coordinates: [polygonCoordinates],
-              },
-            },
-          });
+        // ตรวจสอบว่าจุดแรกและจุดสุดท้ายเหมือนกันหรือไม่ (ปิด polygon)
+        const firstPoint = coordinates[0];
+        const lastPoint = coordinates[coordinates.length - 1];
+        const isClosed = firstPoint[0] === lastPoint[0] && firstPoint[1] === lastPoint[1];
 
-          // เพิ่ม layer สำหรับพื้นที่ polygon (สีแดงโปร่งแสง)
-          mapRef.current.addLayer({
-            id: 'polygon-fill',
-            type: 'fill',
-            source: 'boundary',
-            paint: {
-              'fill-color': '#DC2626', // สีแดง
-              'fill-opacity': 0.3,
-            },
-          });
-
-          // เพิ่ม layer สำหรับเส้นขอบ polygon
-          mapRef.current.addLayer({
-            id: 'boundary-line',
-            type: 'line',
-            source: 'boundary',
-            paint: {
-              'line-color': '#DC2626', // สีแดง
-              'line-width': 3,
-              'line-opacity': 0.8,
-            },
-          });
-        } else if (coordinates.length === 2) {
-          // ถ้ามีแค่ 2 จุด ให้วาดเป็นเส้นตรง
-          mapRef.current.addSource('boundary', {
-            type: 'geojson',
-            data: {
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                type: 'LineString',
-                coordinates: coordinates,
-              },
-            },
-          });
-
-          mapRef.current.addLayer({
-            id: 'boundary-line',
-            type: 'line',
-            source: 'boundary',
-            paint: {
-              'line-color': '#DC2626', // สีแดง
-              'line-width': 3,
-              'line-opacity': 0.8,
-            },
-          });
+        // ถ้ายังไม่ปิด ให้ปิดให้เป็น polygon
+        if (!isClosed) {
+          polygonCoordinates = [...coordinates, firstPoint];
         }
+
+        // เพิ่ม source สำหรับ polygon
+        mapRef.current.addSource('boundary', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'Polygon',
+              coordinates: [polygonCoordinates],
+            },
+          },
+        });
+
+        // เพิ่ม layer สำหรับพื้นที่ polygon (สีแดงโปร่งแสง)
+        mapRef.current.addLayer({
+          id: 'polygon-fill',
+          type: 'fill',
+          source: 'boundary',
+          paint: {
+            'fill-color': '#DC2626', // สีแดง
+            'fill-opacity': 0.3,
+          },
+        });
+
+        // เพิ่ม layer สำหรับเส้นขอบ polygon
+        mapRef.current.addLayer({
+          id: 'boundary-line',
+          type: 'line',
+          source: 'boundary',
+          paint: {
+            'line-color': '#DC2626', // สีแดง
+            'line-width': 3,
+            'line-opacity': 0.8,
+          },
+        });
+      } else if (coordinates.length === 2) {
+        // ถ้ามีแค่ 2 จุด ให้วาดเป็นเส้นตรง
+        mapRef.current.addSource('boundary', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: coordinates,
+            },
+          },
+        });
+
+        mapRef.current.addLayer({
+          id: 'boundary-line',
+          type: 'line',
+          source: 'boundary',
+          paint: {
+            'line-color': '#DC2626', // สีแดง
+            'line-width': 3,
+            'line-opacity': 0.8,
+          },
+        });
+      }
 
       // Add marker layers
       mapRef.current.addLayer({
@@ -323,10 +320,10 @@ const MapDisplay: React.FC<{
       // Add popups on marker click
       mapRef.current.on('click', 'markers', (e) => {
         if (!e.features?.[0]) return;
-        
+
         const coordinates = (e.features[0].geometry as any).coordinates.slice();
         const sequence = e.features[0].properties?.sequence || '1';
-        
+
         new mapboxgl.Popup()
           .setLngLat(coordinates)
           .setHTML(`
@@ -359,15 +356,15 @@ const MapDisplay: React.FC<{
 
   if (!points || points.length === 0) {
     return (
-      <div style={{ 
-        width: "100%", 
-        height: 300, 
-        background: "#E5E7EB", 
-        borderRadius: 12, 
-        display: "flex", 
-        alignItems: "center", 
-        justifyContent: "center", 
-        color: "#6B7280" 
+      <div style={{
+        width: "100%",
+        height: 300,
+        background: "#E5E7EB",
+        borderRadius: 12,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#6B7280"
       }}>
         <div style={{ textAlign: "center" }}>
           <Map size={32} style={{ margin: "0 auto 8px" }} />
@@ -379,21 +376,21 @@ const MapDisplay: React.FC<{
 
   return (
     <div style={{ position: "relative" }}>
-      <div 
-        ref={mapContainerRef} 
+      <div
+        ref={mapContainerRef}
         onClick={handleMapClick}
-        style={{ 
-          width: "100%", 
-          height: 300, 
-          borderRadius: 12, 
+        style={{
+          width: "100%",
+          height: 300,
+          borderRadius: 12,
           overflow: "hidden",
           cursor: "pointer",
           position: "relative"
-        }} 
+        }}
       />
-      
+
       {/* Click overlay */}
-      <div 
+      <div
         onClick={handleMapClick}
         style={{
           position: "absolute",
@@ -437,6 +434,32 @@ const MapDisplay: React.FC<{
   );
 };
 
+// ฟังก์ชันแปลง path รูปภาพให้รองรับ base64, URL, และ fallback
+function getImageSrc(path?: string) {
+  if (!path) {
+    // SVG placeholder
+    return "data:image/svg+xml;utf8,<svg width='400' height='300' xmlns='http://www.w3.org/2000/svg'><rect width='400' height='300' fill='%23e5e7eb'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='24' fill='%236b7280'>ไม่มีรูปภาพ</text></svg>";
+  }
+  if (typeof path === "string") {
+    // If already a data URL
+    if (path.startsWith("data:image")) {
+      return path;
+    }
+    // If looks like base64 but missing prefix
+    if (/^[A-Za-z0-9+/=]+$/.test(path) && path.length > 100) {
+      // Default to jpeg, you can adjust if needed
+      return `data:image/jpeg;base64,${path}`;
+    }
+    // If is a URL
+    if (/^https?:\/\//.test(path)) {
+      return path;
+    }
+    // Otherwise treat as relative path
+    return `${import.meta.env.VITE_API_URL || ""}/${path}`;
+  }
+  return path;
+}
+
 /** ---------------- Component ---------------- */
 const LandDetail = () => {
   const { id = "" } = useParams<{ id: string }>();
@@ -447,9 +470,9 @@ const LandDetail = () => {
   const [isLarge, setIsLarge] = useState<boolean>(typeof window !== "undefined" ? window.innerWidth >= 1024 : true);
   // const [msgApi] = message.useMessage();
   const [messageState, setMessageState] = useState<{ type: 'error' | 'success'; content: string } | null>(null);
-  const [confirmLoading, setConfirmLoading] = useState(false); 
+  const [confirmLoading, setConfirmLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const userId = Number(localStorage.getItem("user_id"));
+  const userId = Number(sessionStorage.getItem("user_id"));
 
   // ฟังก์ชันสร้างห้องแชทใหม่
   const handleCreateRoom = async () => {
@@ -465,6 +488,7 @@ const LandDetail = () => {
       setMessageState({ type: 'error', content: "ไม่สามารถส่งข้อความหาตัวเองได้" });
       return;
     }
+
     try {
       const res = await CreateNewRoom(userId, land.user_id);
       if (res?.room_id) {
@@ -512,33 +536,33 @@ const LandDetail = () => {
     })();
   }, [id]);
 
-const handleBuy = async () => {
-  if (!userId) {
-    setMessageState({ type: 'error', content: "กรุณาเข้าสู่ระบบก่อนทำรายการซื้อ" });
-    return;
-  }
-  // DEBUG log ตรวจสอบค่าจริง
-  console.log('userId:', userId, 'land.user_id:', land?.user_id, 'land:', land);
-  // เช็คว่า userId เป็นเจ้าของโพสต์หรือไม่
-  if (userId === land?.user_id) {
-    setMessageState({ type: 'error', content: "ไม่สามารถซื้อโพสต์ของตัวเองได้" });
-    return;
-  }
-  try {
-    const res = await CreateRequestBuySell({
-      buyer_id: userId,
-      land_id: land?.ID,
-    });
-    if (res?.error) {
-      setMessageState({ type: 'error', content: res.error || "เกิดข้อผิดพลาด" });
+  const handleBuy = async () => {
+    if (!userId) {
+      setMessageState({ type: 'error', content: "กรุณาเข้าสู่ระบบก่อนทำรายการซื้อ" });
       return;
     }
-    setMessageState({ type: 'success', content: "ส่งคำขอซื้อสำเร็จ" });
-    // redirect หรืออัพเดต UI ต่อได้
-  } catch (e) {
-    setMessageState({ type: 'error', content: "เกิดข้อผิดพลาดในการเชื่อมต่อ" });
-  }
-};
+    // DEBUG log ตรวจสอบค่าจริง
+    console.log('userId:', userId, 'land.user_id:', land?.user_id, 'land:', land);
+    // เช็คว่า userId เป็นเจ้าของโพสต์หรือไม่
+    if (userId === land?.user_id) {
+      setMessageState({ type: 'error', content: "ไม่สามารถซื้อโพสต์ของตัวเองได้" });
+      return;
+    }
+    try {
+      const res = await CreateRequestBuySell({
+        buyer_id: userId,
+        land_id: land?.ID,
+      });
+      if (res?.error) {
+        setMessageState({ type: 'error', content: res.error || "เกิดข้อผิดพลาด" });
+        return;
+      }
+      setMessageState({ type: 'success', content: "ส่งคำขอซื้อสำเร็จ" });
+      // redirect หรืออัพเดต UI ต่อได้
+    } catch (e) {
+      setMessageState({ type: 'error', content: "เกิดข้อผิดพลาดในการเชื่อมต่อ" });
+    }
+  };
 
   const showModal = () => setIsModalOpen(true);
   const handleOk = async () => {
@@ -552,6 +576,12 @@ const handleBuy = async () => {
   const images = land?.Image ?? [];
   const nextImage = () => setCurrentImageIndex((p) => (p + 1) % (images.length || 1));
   const prevImage = () => setCurrentImageIndex((p) => (p - 1 + (images.length || 1)) % (images.length || 1));
+  // DEBUG log ตรวจสอบค่ารูปภาพ
+  useEffect(() => {
+    if (images && images.length) {
+      console.log('images:', images);
+    }
+  }, [images]);
 
   const areaStr = useMemo(() => areaText(land?.Landtitle), [land]);
   //const pricePerRai = useMemo(() => calcPricePerRai(land?.Price, land?.Landtitle), [land]);
@@ -577,28 +607,28 @@ const handleBuy = async () => {
 
   /** --------------- Styles --------------- */
   const styles = {
-    page: { 
-      minHeight: "100vh", 
+    page: {
+      minHeight: "100vh",
       background: "linear-gradient(135deg, #E2E8F0 0%, #F8FAFC 100%)",
       position: "relative",
       overflow: "hidden"
     },
-    header: { 
-      backgroundColor: "rgba(255, 255, 255, 0.8)", 
+    header: {
+      backgroundColor: "rgba(255, 255, 255, 0.8)",
       backdropFilter: "blur(10px)",
       boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
       borderBottom: "1px solid rgba(255, 255, 255, 0.2)"
     },
-    container: { 
-      maxWidth: 1152, 
-      margin: "0 auto", 
+    container: {
+      maxWidth: 1152,
+      margin: "0 auto",
       padding: "16px",
       position: "relative",
       zIndex: 1
     },
-    headerRow: { 
-      display: "flex", 
-      alignItems: "center", 
+    headerRow: {
+      display: "flex",
+      alignItems: "center",
       justifyContent: "space-between" as const,
       padding: "12px 24px",
       borderRadius: "16px",
@@ -607,10 +637,10 @@ const handleBuy = async () => {
       border: "1px solid rgba(255, 255, 255, 0.2)",
       boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
     },
-    headerBtn: { 
-      color: "#2563EB", 
-      display: "flex", 
-      alignItems: "center", 
+    headerBtn: {
+      color: "#2563EB",
+      display: "flex",
+      alignItems: "center",
       gap: 8,
       transition: "all 0.3s ease"
     },
@@ -623,32 +653,32 @@ const handleBuy = async () => {
       cursor: "pointer",
     }),
     body: { maxWidth: 1152, margin: "0 auto", padding: "24px 16px", display: "block" },
-    card: { 
-      backgroundColor: "rgba(255, 255, 255, 0.8)", 
-      borderRadius: 16, 
+    card: {
+      backgroundColor: "rgba(255, 255, 255, 0.8)",
+      borderRadius: 16,
       backdropFilter: "blur(10px)",
       border: "1px solid rgba(255, 255, 255, 0.2)",
       boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
       transition: "all 0.3s ease",
       transform: "translateY(0)"
     },
-    cardPad: { 
+    cardPad: {
       padding: 24,
       backdropFilter: "blur(10px)"
     },
-    imageWrap: { 
-      position: "relative" as const, 
-      width: "100%", 
-      height: 384, 
-      overflow: "hidden" as const, 
+    imageWrap: {
+      position: "relative" as const,
+      width: "100%",
+      height: 384,
+      overflow: "hidden" as const,
       borderRadius: 16,
       boxShadow: "0 8px 16px -4px rgba(0, 0, 0, 0.1), 0 4px 8px -4px rgba(0, 0, 0, 0.06)",
       transition: "all 0.3s ease",
       border: "1px solid rgba(255, 255, 255, 0.2)"
     },
-    image: { 
-      width: "100%", 
-      height: "100%", 
+    image: {
+      width: "100%",
+      height: "100%",
       objectFit: "cover" as const,
       transition: "transform 0.3s ease"
     },
@@ -658,65 +688,65 @@ const handleBuy = async () => {
     thumbsRow: { display: "flex", gap: 8, padding: 16, overflowX: "auto" as const },
     thumb: (active = false) => ({ flexShrink: 0, width: 80, height: 64, borderRadius: 8, overflow: "hidden", border: `2px solid ${active ? "#3B82F6" : "#E5E7EB"}`, cursor: "pointer", padding: 0, background: "transparent" }),
     grid: { display: "grid", gridTemplateColumns: isLarge ? "2fr 1fr" : "1fr", gap: 24 },
-    title: { 
-      fontWeight: 800, 
-      color: "#1E293B", 
-      marginBottom: 16, 
+    title: {
+      fontWeight: 800,
+      color: "#1E293B",
+      marginBottom: 16,
       fontSize: 28,
       background: "linear-gradient(135deg, #1E293B 0%, #334155 100%)",
       WebkitBackgroundClip: "text",
       WebkitTextFillColor: "transparent",
       letterSpacing: "-0.02em"
     },
-    locRow: { 
-      display: "flex", 
-      alignItems: "center", 
-      gap: 8, 
-      color: "#64748B", 
+    locRow: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      color: "#64748B",
       marginBottom: 16,
       padding: "8px 12px",
       background: "rgba(241, 245, 249, 0.5)",
       borderRadius: "8px",
       backdropFilter: "blur(4px)"
     },
-    priceRow: { 
-      display: "flex", 
-      flexDirection: "column" as const, 
+    priceRow: {
+      display: "flex",
+      flexDirection: "column" as const,
       gap: 8,
       padding: "16px",
       background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)",
       borderRadius: "12px",
       border: "1px solid rgba(37, 99, 235, 0.1)"
     },
-    price: { 
-      fontSize: 32, 
-      fontWeight: 800, 
+    price: {
+      fontSize: 32,
+      fontWeight: 800,
       background: "linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)",
       WebkitBackgroundClip: "text",
       WebkitTextFillColor: "transparent",
       textShadow: "0 2px 4px rgba(37, 99, 235, 0.1)"
     },
-    priceNote: { 
+    priceNote: {
       color: "#64748B",
-      fontSize: "14px" 
+      fontSize: "14px"
     },
-    sectionTitle: { 
-      fontSize: 20, 
-      fontWeight: 700, 
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: 700,
       marginBottom: 16,
       color: "#334155",
       position: "relative",
       paddingLeft: "12px"
     },
-    detailsGrid: { 
-      display: "grid", 
-      gridTemplateColumns: isLarge ? "1fr 1fr" : "1fr", 
-      gap: 16, 
-      marginBottom: 24 
+    detailsGrid: {
+      display: "grid",
+      gridTemplateColumns: isLarge ? "1fr 1fr" : "1fr",
+      gap: 16,
+      marginBottom: 24
     },
-    detailItem: { 
-      display: "flex", 
-      alignItems: "center", 
+    detailItem: {
+      display: "flex",
+      alignItems: "center",
       gap: 12,
       padding: "16px",
       background: "rgba(255, 255, 255, 0.7)",
@@ -731,18 +761,18 @@ const handleBuy = async () => {
         background: "rgba(255, 255, 255, 0.9)"
       }
     },
-    dimGrid: { 
-      display: "grid", 
-      gridTemplateColumns: "1fr 1fr", 
-      gap: 16, 
-      background: "rgba(249, 250, 251, 0.8)", 
+    dimGrid: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 16,
+      background: "rgba(249, 250, 251, 0.8)",
       padding: "20px",
       borderRadius: "12px",
       backdropFilter: "blur(8px)",
       border: "1px solid rgba(255, 255, 255, 0.3)",
       transition: "all 0.3s ease"
     },
-    dimCell: { 
+    dimCell: {
       textAlign: "center" as const,
       padding: "12px",
       background: "rgba(255, 255, 255, 0.5)",
@@ -761,37 +791,37 @@ const handleBuy = async () => {
     contactRow: { display: "flex", alignItems: "center", gap: 12, marginBottom: 16 },
     avatar: { width: 48, height: 48, borderRadius: 9999, background: "#DBEAFE", display: "flex", alignItems: "center", justifyContent: "center", color: "#2563EB" },
     contactBtn: (variant: "call" | "msg" | "ghost") => {
-      const base: React.CSSProperties = { 
-        width: "100%", 
-        borderRadius: 12, 
-        padding: "14px 20px", 
-        display: "flex", 
-        alignItems: "center", 
-        justifyContent: "center", 
-        gap: 8, 
-        cursor: "pointer", 
+      const base: React.CSSProperties = {
+        width: "100%",
+        borderRadius: 12,
+        padding: "14px 20px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        cursor: "pointer",
         border: "none",
         fontWeight: 600,
         transition: "all 0.3s ease",
         transform: "translateY(0)",
         boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
       };
-      if (variant === "call") return { 
-        ...base, 
-        background: "linear-gradient(135deg, #059669 0%, #16A34A 100%)", 
+      if (variant === "call") return {
+        ...base,
+        background: "linear-gradient(135deg, #059669 0%, #16A34A 100%)",
         color: "#fff",
         boxShadow: "0 4px 12px rgba(22, 163, 74, 0.3)"
       };
-      if (variant === "msg") return { 
-        ...base, 
-        background: "linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)", 
+      if (variant === "msg") return {
+        ...base,
+        background: "linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)",
         color: "#fff",
         boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)"
       };
-      return { 
-        ...base, 
-        background: "rgba(255, 255, 255, 0.8)", 
-        color: "#374151", 
+      return {
+        ...base,
+        background: "rgba(255, 255, 255, 0.8)",
+        color: "#374151",
         border: "2px solid rgba(37, 99, 235, 0.2)",
         backdropFilter: "blur(8px)",
         boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)"
@@ -806,7 +836,7 @@ const handleBuy = async () => {
   /** --------------- Render --------------- */
   return (
     <div style={styles.page}>
-      <div style={{ 
+      <div style={{
         background: "linear-gradient(135deg, #2b423aff 0%, #1f3b33ff 100%)",
         padding: "40px 0",
         marginBottom: "24px",
@@ -851,8 +881,8 @@ const handleBuy = async () => {
               e.currentTarget.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.1)";
             }}
           >
-            <span style={{ 
-              fontSize: 20, 
+            <span style={{
+              fontSize: 20,
               lineHeight: 1,
               background: "rgba(255, 255, 255, 0.2)",
               borderRadius: "50%",
@@ -861,148 +891,148 @@ const handleBuy = async () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center"
-            }}>←</span> 
+            }}>←</span>
             ย้อนกลับ
           </button>
         </div>
       </div>
-      
+
       {/* Body */}
       <div style={styles.body}>
         {/* Image Gallery */}
-<div style={{ 
-  ...styles.card, 
-  overflow: "hidden",
-  background: "linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0.8))",
-  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-  border: "1px solid rgba(255, 255, 255, 0.4)"
-}}>
-  {/* กรอบรูปหลัก */}
-  <div style={{
-    ...styles.imageWrap,
-    position: "relative",
-    height: 450,
-    borderRadius: "20px",
-    overflow: "hidden",
-    boxShadow: "0 12px 24px rgba(0, 0, 0, 0.15)"
-  }}>
-    <img
-      src={images[currentImageIndex] || "/default-image.png"}
-      alt={`รูปที่ดิน ${currentImageIndex + 1}`}
-      style={{
-        ...styles.image,
-        transform: "scale(1.0)",
-        transition: "transform 0.5s ease-out"
-      }}
-      onError={(e) => {
-        (e.target as HTMLImageElement).src = "/default-image.png";
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "scale(1.05)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "scale(1.0)";
-      }}
-    />
-    <div style={{
-      ...styles.imageOverlay,
-      background: "linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.5))"
-    }} />
-    {images.length > 1 && (
-      <>
-        <button 
-          onClick={prevImage} 
-          style={{
-            ...styles.navBtn,
-            left: 20,
-            width: "40px",
-            height: "40px",
-            background: "rgba(255,255,255,0.95)",
-            backdropFilter: "blur(8px)",
-            border: "1px solid rgba(255,255,255,0.3)",
-            borderRadius: "50%",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "20px",
-            color: "#1E40AF",
-            transition: "all 0.3s ease"
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-50%) scale(1.1)";
-            e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.15)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(-50%) scale(1.0)";
-            e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
-          }}
-        >←</button>
-        <button 
-          onClick={nextImage} 
-          style={{
-            ...styles.navBtn,
-            right: 20,
-            width: "40px",
-            height: "40px",
-            background: "rgba(255,255,255,0.95)",
-            backdropFilter: "blur(8px)",
-            border: "1px solid rgba(255,255,255,0.3)",
-            borderRadius: "50%",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "20px",
-            color: "#1E40AF",
-            transition: "all 0.3s ease"
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-50%) scale(1.1)";
-            e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.15)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(-50%) scale(1.0)";
-            e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
-          }}
-        >→</button>
-      </>
-    )}
-    <div style={{
-      ...styles.imgCounter,
-      background: "rgba(0,0,0,0.75)",
-      backdropFilter: "blur(8px)",
-      padding: "8px 16px",
-      borderRadius: "20px",
-      fontSize: "14px",
-      fontWeight: 500,
-      boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
-    }}>
-      {Math.min(currentImageIndex + 1, images.length)} / {images.length || 1}
-    </div>
-  </div>
-  {/* thumbnails แยกออกมาอยู่นอกกรอบรูปหลัก */}
-  {images.length > 1 && (
-    <div style={styles.thumbsRow}>
-      {images.map((img, index) => (
-        <button
-          key={index}
-          onClick={() => setCurrentImageIndex(index)}
-          style={styles.thumb(index === currentImageIndex)}
-        >
-          <img
-            src={img}
-            alt={`ภาพย่อ ${index + 1}`}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = "/default-image.png";
-            }}
-          />
-        </button>
-      ))}
-    </div>
-  )}
-</div>
+        <div style={{
+          ...styles.card,
+          overflow: "hidden",
+          background: "linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0.8))",
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+          border: "1px solid rgba(255, 255, 255, 0.4)"
+        }}>
+          {/* กรอบรูปหลัก */}
+          <div style={{
+            ...styles.imageWrap,
+            position: "relative",
+            height: 450,
+            borderRadius: "20px",
+            overflow: "hidden",
+            boxShadow: "0 12px 24px rgba(0, 0, 0, 0.15)"
+          }}>
+            <img
+              src={getImageSrc(images[currentImageIndex])}
+              alt={`รูปที่ดิน ${currentImageIndex + 1}`}
+              style={{
+                ...styles.image,
+                transform: "scale(1.0)",
+                transition: "transform 0.5s ease-out"
+              }}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = getImageSrc();
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "scale(1.05)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "scale(1.0)";
+              }}
+            />
+            <div style={{
+              ...styles.imageOverlay,
+              background: "linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.5))"
+            }} />
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  style={{
+                    ...styles.navBtn,
+                    left: 20,
+                    width: "40px",
+                    height: "40px",
+                    background: "rgba(255,255,255,0.95)",
+                    backdropFilter: "blur(8px)",
+                    border: "1px solid rgba(255,255,255,0.3)",
+                    borderRadius: "50%",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "20px",
+                    color: "#1E40AF",
+                    transition: "all 0.3s ease"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-50%) scale(1.1)";
+                    e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.15)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(-50%) scale(1.0)";
+                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
+                  }}
+                >←</button>
+                <button
+                  onClick={nextImage}
+                  style={{
+                    ...styles.navBtn,
+                    right: 20,
+                    width: "40px",
+                    height: "40px",
+                    background: "rgba(255,255,255,0.95)",
+                    backdropFilter: "blur(8px)",
+                    border: "1px solid rgba(255,255,255,0.3)",
+                    borderRadius: "50%",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "20px",
+                    color: "#1E40AF",
+                    transition: "all 0.3s ease"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-50%) scale(1.1)";
+                    e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.15)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(-50%) scale(1.0)";
+                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
+                  }}
+                >→</button>
+              </>
+            )}
+            <div style={{
+              ...styles.imgCounter,
+              background: "rgba(0,0,0,0.75)",
+              backdropFilter: "blur(8px)",
+              padding: "8px 16px",
+              borderRadius: "20px",
+              fontSize: "14px",
+              fontWeight: 500,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
+            }}>
+              {Math.min(currentImageIndex + 1, images.length)} / {images.length || 1}
+            </div>
+          </div>
+          {/* thumbnails แยกออกมาอยู่นอกกรอบรูปหลัก */}
+          {images.length > 1 && (
+            <div style={styles.thumbsRow}>
+              {images.map((img, idx) => (
+                <button
+                  key={idx}
+                  style={styles.thumb(idx === currentImageIndex)}
+                  onClick={() => setCurrentImageIndex(idx)}
+                >
+                  <img
+                    src={getImageSrc(img)}
+                    alt={`thumb-${idx}`}
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = getImageSrc();
+                    }}
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
 
         <div style={styles.grid}>
@@ -1021,8 +1051,8 @@ const handleBuy = async () => {
             </div>
 
             {/* Property Details */}
-            <div style={{ 
-              ...styles.card, 
+            <div style={{
+              ...styles.card,
               ...styles.cardPad,
               background: "linear-gradient(to bottom right, rgba(255,255,255,0.95), rgba(255,255,255,0.85))",
               backdropFilter: "blur(12px)",
@@ -1031,14 +1061,14 @@ const handleBuy = async () => {
               transform: "translateY(0)",
               transition: "all 0.3s ease"
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-5px)";
-              e.currentTarget.style.boxShadow = "0 15px 35px rgba(0,0,0,0.15)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "0 10px 30px rgba(0,0,0,0.1)";
-            }}>
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-5px)";
+                e.currentTarget.style.boxShadow = "0 15px 35px rgba(0,0,0,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 10px 30px rgba(0,0,0,0.1)";
+              }}>
               <h2 style={{
                 ...styles.sectionTitle,
                 fontSize: "24px",
@@ -1061,16 +1091,16 @@ const handleBuy = async () => {
                   boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                   transition: "all 0.3s ease"
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.8)";
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                  e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.1)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.6)";
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.05)";
-                }}>
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.8)";
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                    e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.1)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.6)";
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.05)";
+                  }}>
                   <div style={{
                     background: "linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%)",
                     width: "40px",
@@ -1089,7 +1119,7 @@ const handleBuy = async () => {
                       fontSize: "14px",
                       marginBottom: "4px"
                     }}>ขนาด</div>
-                    <div style={{ 
+                    <div style={{
                       fontWeight: 600,
                       color: "#1E40AF",
                       fontSize: "16px"
@@ -1136,8 +1166,8 @@ const handleBuy = async () => {
             )}
 
             {/* Map (real) */}
-            <div style={{ 
-              ...styles.card, 
+            <div style={{
+              ...styles.card,
               ...styles.cardPad,
               background: "linear-gradient(to bottom right, rgba(255,255,255,0.95), rgba(255,255,255,0.85))",
               border: "1px solid rgba(255,255,255,0.3)",
@@ -1151,7 +1181,7 @@ const handleBuy = async () => {
                 WebkitTextFillColor: "transparent",
                 marginBottom: "24px"
               }}>แผนที่</h2>
-              <div style={{ 
+              <div style={{
                 padding: "16px",
                 background: "linear-gradient(135deg, #FEF3C7 0%, #FFFBEB 100%)",
                 border: "1px solid rgba(217, 119, 6, 0.2)",
@@ -1167,8 +1197,8 @@ const handleBuy = async () => {
                 gap: "8px"
               }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 9V13M12 17H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" 
-                    stroke="#92400E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 9V13M12 17H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                    stroke="#92400E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 แผนที่นี้มีไว้เพื่อประกอบการพิจารณา
               </div>
@@ -1210,9 +1240,9 @@ const handleBuy = async () => {
 
           {/* Contact Sidebar */}
           <div style={{ display: "flex", flexDirection: "column", gap: 24, padding: "10px" }}>
-            <div style={{ 
-              ...styles.card, 
-              ...styles.cardPad, 
+            <div style={{
+              ...styles.card,
+              ...styles.cardPad,
               ...styles.sticky,
               background: "linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85))",
               backdropFilter: "blur(12px)",
@@ -1252,7 +1282,7 @@ const handleBuy = async () => {
                   <User style={{ width: 24, height: 24, color: "#ffffff" }} />
                 </div>
                 <div>
-                  <div style={{ 
+                  <div style={{
                     fontWeight: 600,
                     fontSize: "16px",
                     color: "#1E40AF",
@@ -1276,38 +1306,45 @@ const handleBuy = async () => {
                   <button style={styles.contactBtn("ghost")}>โทรศัพท์ไม่พบ</button>
                 )}
 
-                <button style={styles.contactBtn("msg")} onClick={handleCreateRoom}>
-                  <MessageCircle style={{ width: 20, height: 20 }} />
-                  ส่งข้อความ
-                </button>
-
-      {/* Buy button: block if user is owner */}
-      {userId === land.user_id ? (
-        <button style={{ ...styles.contactBtn("ghost"), background: '#fef2f2', color: '#dc2626', cursor: 'not-allowed' }} disabled>
-          ไม่สามารถซื้อโฉนดที่ดินของตัวเองได้
-        </button>
-      ) : (
-        <>
-          <button
-            style={styles.contactBtn("ghost")}
-            onClick={showModal}
-            disabled={confirmLoading}
-          >
-            {confirmLoading ? "กำลังดำเนินการ..." : "ส่งคำขอซื้อ"}
-          </button>
-          <Modal
-            title="ยืนยันการซื้อที่ดิน"
-            open={isModalOpen}
-            onOk={handleOk}
-            confirmLoading={confirmLoading}
-            onCancel={handleCancel}
-            okText="ยืนยัน"
-            cancelText="ยกเลิก"
-          >
-            คุณต้องการยืนยันการซื้อที่ดินนี้ใช่หรือไม่?
-          </Modal>
-        </>
-      )}
+                {/* แสดงปุ่มส่งข้อความและส่งคำขอซื้อ เฉพาะถ้าไม่ใช่เจ้าของโพสต์ และที่ดินยังไม่ถูกโพสต์ขาย */}
+                {userId !== land.user_id && land?.ID && (
+                  <>
+                    <button style={styles.contactBtn("msg")} onClick={handleCreateRoom}>
+                      <MessageCircle style={{ width: 20, height: 20 }} />
+                      ส่งข้อความ
+                    </button>
+                    <button
+                      style={styles.contactBtn("ghost")}
+                      onClick={showModal}
+                      disabled={confirmLoading}
+                    >
+                      {confirmLoading ? "กำลังดำเนินการ..." : "ส่งคำขอซื้อ"}
+                    </button>
+                    <Modal
+                      title="ยืนยันการซื้อที่ดิน"
+                      open={isModalOpen}
+                      onOk={handleOk}
+                      confirmLoading={confirmLoading}
+                      onCancel={handleCancel}
+                      okText="ยืนยัน"
+                      cancelText="ยกเลิก"
+                    >
+                      คุณต้องการยืนยันการซื้อที่ดินนี้ใช่หรือไม่?
+                    </Modal>
+                  </>
+                )}
+                {/* ถ้าที่ดินถูกโพสต์ขายแล้ว (มีโพสต์นี้อยู่แล้ว) ให้ disable ปุ่ม */}
+                {userId !== land.user_id && !land?.ID && (
+                  <>
+                    <button style={{ ...styles.contactBtn("msg"), opacity: 0.5, cursor: "not-allowed" }} disabled>
+                      <MessageCircle style={{ width: 20, height: 20 }} />
+                      ส่งข้อความ (ที่ดินนี้ถูกโพสต์ขายแล้ว)
+                    </button>
+                    <button style={{ ...styles.contactBtn("ghost"), opacity: 0.5, cursor: "not-allowed" }} disabled>
+                      ส่งคำขอซื้อ (ที่ดินนี้ถูกโพสต์ขายแล้ว)
+                    </button>
+                  </>
+                )}
               </div>
 
               <div style={styles.warn}>

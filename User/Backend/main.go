@@ -41,6 +41,14 @@ func main() {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
 
+	// เพิ่ม/ปรับปรุง API จาก managepost.go
+	r.PUT("/managepost/update/:post_id", controller.UpdatePost)
+	r.PUT("/managepost/updatephotoland/:photoland_id", controller.UpdatePhotoland)
+	r.PUT("/managepost/updatelocation/:location_id", controller.UpdateLocation)
+	r.GET("/managepost/userpostland/:wallet", controller.GetUserPostLandData)
+	r.POST("/managepost/photos/:post_id", controller.AddMultiplePhotos)
+	r.PUT("/managepost/photos/replace/:post_id", controller.ReplaceAllPhotos)
+
 	r.POST("/createaccount", controller.CreateAccount)
 	r.POST("/check-wallet", controller.CheckWallet)
 	r.POST("/login", controller.LoginUser)
@@ -80,6 +88,7 @@ func main() {
 
 	r.GET("/nonce/:address", controller.GetNonce)
 	r.POST("/nonce/validate", controller.ValidateNonce)
+	r.POST("/checkverifywallet", controller.CheckVerifyWallet)
 
 	// 🔧 Debug API เพื่อตรวจสอบข้อมูล user (ชั่วคราว)
 	debugAuth := r.Group("")
@@ -116,6 +125,8 @@ func main() {
 		admin.POST("/verifylandtitleid/:LandtitleID", controller.VerifyLandtitleID)    //กรมที่ดินกดยืนยัน ระบบทำการดึงข้อมูลของที่ดิน รวมเป็น metadata ทำการเซ็นข้อมูล เก็บลง land_verification
 		admin.GET("/getalllanddata", controller.GetAllLandData)                        //ดึงข้อมูล โฉนดมาแสดง ทั้งหมด
 		//admin.GET("getdatauserverification/:userid", controller.GetDataUserVerification)   //เป็นของ User ดึงข้อมูล ผู้ใช้ WalletID  NameHash Signature  เพื่อลงทะเบียนผู้ใช้ลงBlockchain
+		admin.GET("/gettransactionland", controller.GetTransactionLand)
+		admin.POST("/departmentoflandverifytransaction", controller.DepartmentOfLandVerifyTransaction)
 		//จบ----- อรรถ -------
 
 		admin.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
@@ -129,6 +140,11 @@ func main() {
 	userOwnership.Use(middlewares.Authorizes())
 	userOwnership.Use(middlewares.CheckOwnershipOrAdmin())
 	{
+		userOwnership.GET("/user/GetUserID/:wallet", controller.GetUserIDByWallet)
+		userOwnership.GET("/user/lands/:wallet", controller.GetUserPostLandData)
+		userOwnership.PUT("/user/updatepost", controller.UpdatePost)
+		userOwnership.PUT("/user/location/:location_id", controller.UpdateLocation)
+		userOwnership.PUT("/user/photoland/:photoland_id", controller.UpdatePhotoland)
 		userOwnership.POST("/userbookings", controller.CreateBooking)
 		userOwnership.PUT("/bookings/:id", controller.UpdateBooking)
 		userOwnership.GET("/bookings/:userID", controller.GetUserBookings)
@@ -152,7 +168,6 @@ func main() {
 		userToken.GET("/user/info/", controller.GetInfoUserByWalletID)
 		userToken.GET("/user/lands", controller.GetLandTitleInfoByWallet)
 
-		userToken.GET("/user/lands/requestsellbydelete", controller.GetAllRequestSellByUserIDAndDelete)
 	}
 
 	// 🌐 General authorized routes
@@ -217,12 +232,14 @@ func main() {
 		authorized.GET("/chat/allroom/:id", controller.GetAllRoomMessagesByUserID)
 		authorized.POST("/upload/:roomID/:userID", controller.UploadImage)
 		authorized.GET("/user/info/:id", controller.GetUserinfoByUserID)
+		authorized.GET("/user/lands/requestsellbydelete", controller.GetAllRequestSellByUserIDAndDelete)
 
-		authorized.DELETE("/user/lands/post/:landid", controller.DeleteLandsalepostByLandIDandUserID)
+		authorized.DELETE("/user/lands/post/:id", controller.DeleteLandsalepostByLandIDandUserID)
 
 		authorized.GET("/userinfo/:userId", controller.GetUserinfoByID)
 		authorized.GET("/landtitles/:userId", controller.GetLandtitlesByUser) //ดึงข้อมูล landtitles
 		// authorized.GET("/land_verification/:userid", controller.GetLandVerificationByUserID) //ดึงข้อมูล land_verification
+		authorized.GET("/user/verify", controller.CheckVerify)
 	}
 
 	r.GET("/ws/notification/:userID", controller.NotificationWS)

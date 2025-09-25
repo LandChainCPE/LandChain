@@ -20,12 +20,12 @@ const MainPage = (): JSX.Element => {
 
   // แก้ไข: ตรวจสอบ login status ก่อนไป regisland
   const goToRegisland = () => {
-    const token = localStorage.getItem("token");
-    const isLogin = localStorage.getItem("isLogin") === "true";
+    const token = sessionStorage.getItem("token");
+    const isLogin = sessionStorage.getItem("isLogin") === "true";
     
     if (!token || !isLogin) {
       // หากยังไม่ได้ login ให้ไปหน้า login และเก็บ path ปลายทางไว้
-      localStorage.setItem("redirectPath", "/user/regisland");
+      sessionStorage.setItem("redirectPath", "/user/regisland");
       navigate("/login");
       return;
     }

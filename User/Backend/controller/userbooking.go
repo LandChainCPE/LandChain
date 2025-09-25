@@ -1,3 +1,4 @@
+
 package controller
 
 import (
@@ -774,6 +775,33 @@ func GetUserBookingsDebug(c *gin.Context) {
         "count":    len(result),
     })
 }
+
+
+// GET /user-id-by-wallet
+func GetUserIDByWallet(c *gin.Context) {
+	// ดึง wallet address จาก context (middleware ต้อง set ก่อน)
+	walletAddr, exists := c.Get("wallet")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Wallet address not found in context"})
+		return
+	}
+	walletStr := strings.ToLower(walletAddr.(string))
+
+	// ค้นหา user_id จาก entity.Users โดยใช้ wallet address
+	var user entity.Users
+	err := config.DB().Where("metamaskaddress = ?", walletStr).First(&user).Error
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found for this wallet"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"user_id": user.ID,
+		"wallet": walletStr,
+	})
+}
+
+
 
 
 

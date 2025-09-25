@@ -9,7 +9,7 @@ function UserMain() {
 
   const gotomainuser = () => {
     setLoading(true);  // เริ่มแสดง Loader
-    localStorage.setItem("isLogin", "true");
+    sessionStorage.setItem("isLogin", "true");
     setTimeout(() => {
       navigate("/user/main");  // เปลี่ยนหน้า
     }, 2000);  // ดีเลย์ 2 วินาที

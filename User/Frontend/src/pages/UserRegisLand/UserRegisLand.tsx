@@ -43,7 +43,7 @@ const UserRegisLand: React.FC = () => {
     setIsSubmitting(true);
     try {
       // ถ้าต้องการบังคับเป็นตัวเลขตอนส่ง ให้แปลงก่อน (แบ็กเอนด์บางที่รับ string ก็ได้)
-      const userid = localStorage.getItem("user_id");
+      const userid = sessionStorage.getItem("user_id");
       const payload = {
         ...formData,
         province_id: formData.province_id,

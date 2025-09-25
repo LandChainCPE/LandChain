@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { GetTransationByUserID, GetInfoUserByToken, UpdateTransactionBuyerAccept, SetSellInfoHandler, DeleteTransactionTodelete, GetSaleInfoHandler, DeleteLandsalepostByLandIDandUserID, BuyLandHandler, DeleteTransactionandAllrequest, DeleteTransactionToscucess } from "../../service/https/bam/bam";
+import { GetTransationByUserID, GetInfoUserByToken, UpdateTransactionBuyerAccept, SetSellInfoHandler, DeleteTransactionTodelete, GetSaleInfoHandler, DeleteLandsalepostByLandIDandUserID, BuyLandHandler, DeleteTransactionandAllrequest, DeleteTransactionToscucess , DeleteAllRequestBuyByLandID} from "../../service/https/bam/bam";
 import './TransactionTimeline.css';
 import Navbar from "../../component/user/Navbar";
 import { Modal, Button } from "react-bootstrap";
@@ -17,7 +17,7 @@ function TransactionTimeline() {
     const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
 
     // useEffect(() => {
-    //     const token = localStorage.getItem("token");
+    //     const token = sessionStorage.getItem("token");
     //     const wsUrl = `ws://localhost:8080/ws/transactions?token=${token}`;
     //     const socket = new WebSocket(wsUrl);
 
@@ -181,17 +181,17 @@ const checkWalletBalance = async (requiredEth: number): Promise<boolean> => {
     };
 
     const getEthToThbRate = async (): Promise<number> => {
-        try {
-            const res = await fetch(
+    try {
+        const res = await fetch(
             "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=thb"
-            );
-            const data = await res.json();
-            return data.ethereum.thb; // ✅ ราคาของ ETH ในหน่วย THB
-        } catch (err) {
-            console.error("Error fetching ETH price:", err);
-            throw new Error("ไม่สามารถดึงอัตราแลกเปลี่ยนได้");
-        }
-        };
+        );
+        const data = await res.json();
+        return data.ethereum.thb;
+    } catch (err) {
+        return 0;
+    }
+};
+
 
    const confirmAccept = async () => {
     if (!selectedTransaction) return;
@@ -241,15 +241,15 @@ const handleSetsaleinfo = async (transaction: any) => {
     const priceTHB = transaction.Amount; // THB
     const buyer = transaction.Buyer?.Metamaskaddress;
 
-    if (!tokenId || !buyer || !priceTHB) {
-       Swal.fire({
-                      icon: "error",
-                      title: "ไม่พบ Token ID, buyer หรือราคาขาย",
-                      confirmButtonColor: "#e74c3c",
-                      });
-      console.log(tokenId, buyer, priceTHB);
-      return;
-    }
+    // if (!tokenId || !buyer || !priceTHB) {
+    //    Swal.fire({
+    //                   icon: "error",
+    //                   title: "ไม่พบ Token ID, buyer หรือราคาขาย",
+    //                   confirmButtonColor: "#e74c3c",
+    //                   });
+    //   console.log(tokenId, buyer, priceTHB);
+    //   return;
+    // }
 
     setProcessingTxId(transaction.ID);
 
@@ -459,11 +459,11 @@ interface SaleInfoType {
   (sale: any) => sale.tokenId.toString() === tokenId.toString()
 );
 
-if (!txInfo) {
-  console.error("saleInfos:", saleInfos);
-  console.error("tokenId:", tokenId);
-  throw new Error("ไม่พบข้อมูลการโอน ETH สำหรับ token นี้");
-}
+    if (!txInfo) {
+    console.error("saleInfos:", saleInfos);
+    console.error("tokenId:", tokenId);
+    throw new Error("ไม่พบข้อมูลการโอน ETH สำหรับ token นี้");
+    }
 
     // ตรวจสอบยอดเงิน
     const balance = await provider.getBalance(fromAddress); // balance เป็น bigint
@@ -485,8 +485,8 @@ if (!txInfo) {
 
     // ลบ transaction และ sale info
 
-    await DeleteTransactionToscucess(transactionId);
-    await DeleteTransactionandAllrequest(transactionId);
+    // await DeleteTransactionToscucess(transactionId);
+    await DeleteAllRequestBuyByLandID(tokenId);
     await DeleteLandsalepostByLandIDandUserID(tokenId);
 
 
@@ -685,7 +685,7 @@ const openETHModalForTransaction = (tx: any) => {
                         </div>
                     )}
 
-                    {userType === "buyer" && tx.TypetransactionID === 6 && (
+                    {userType === "buyer" && tx.TypetransactionID === 4 && (
                         <div className="card-actions">
                             {tx.BuyerAccepted && tx.SellerAccepted && tx.LandDepartmentApproved ? (
                             <button 
@@ -770,14 +770,7 @@ const openETHModalForTransaction = (tx: any) => {
                 <div className="page-header">
                     <div className="header-content">
                         <h1>ระบบจัดการธุรกรรมโฉนด</h1>
-                        <div className={`connection-status status-${connectionStatus}`}>
-                            <div className="status-dot"></div>
-                            <span>
-                                {connectionStatus === 'connected' && 'เชื่อมต่อแล้ว'}
-                                {connectionStatus === 'connecting' && 'กำลังเชื่อมต่อ...'}
-                                {connectionStatus === 'disconnected' && 'การเชื่อมต่อขาด'}
-                            </span>
-                        </div>
+
                     </div>
                 </div>
 
@@ -898,7 +891,7 @@ const openETHModalForTransaction = (tx: any) => {
                 {/* Delete Modal */}
                 <Modal show={showDeleteModal} onHide={handleCloseDeleteModal} centered>
                     <Modal.Header closeButton>
-                        <Modal.Title>ยืนยันการลบธุรกรรม</Modal.Title>
+                        <Modal.Title>ยืนยันการยกเลิกการทำธุรกรรม</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <p>คุณแน่ใจหรือไม่ว่าต้องการลบธุรกรรมนี้? การลบจะไม่สามารถกู้คืนได้</p>
@@ -921,26 +914,28 @@ const openETHModalForTransaction = (tx: any) => {
                     <Modal.Body>
                         {ethTransaction ? (
                             <div>
-                                <p>คุณกำลังจะโอน ETH ดังนี้:</p>
-                                <div className="transaction-summary">   
-                                    <div className="summary-item">
+                                <p style={{ wordBreak: "break-word" }}>คุณกำลังจะโอน ETH ดังนี้:</p>
+                                <div className="transaction-summary" style={{ wordBreak: "break-word" }}>
+                                    <div className="summary-item" style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                                         <span>ผู้ส่ง (คุณ):</span>
-                                        <span>{ethTransaction.toAddress}</span>
+                                        <span style={{ maxWidth: "220px", overflowWrap: "break-word", wordBreak: "break-all" }}>
+                                            {ethTransaction.toAddress}
+                                        </span>
                                     </div>
-                                    <div className="summary-item">
+                                    <div className="summary-item" style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                                         <span>จำนวนเงิน (ETH):</span>
                                         <span>
                                             {ethTransaction.amountWei
-                                                ? Number(ethers.formatEther(ethTransaction.amountWei))
+                                                ? parseFloat(ethers.formatUnits(ethTransaction.amountWei, "ether")).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 })
                                                 : "N/A"}
                                         </span>
                                     </div>
-                                    <div className="summary-item">
+                                    {/* <div className="summary-item">
                                         <span>Token ID:</span>
                                         <span>{ethTransaction.tokenId || "-"}</span>
-                                    </div>
+                                    </div> */}
                                 </div>
-                                <p className="text-danger mt-2">
+                                <p className="text-danger mt-2" style={{ wordBreak: "break-word" }}>
                                     ⚠️ การโอน ETH จะไม่สามารถย้อนกลับได้ กรุณาตรวจสอบข้อมูลให้ถูกต้อง
                                 </p>
                             </div>

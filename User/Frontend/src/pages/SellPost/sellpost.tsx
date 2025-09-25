@@ -23,8 +23,8 @@ async function saveLocations(
     (import.meta as any)?.env?.VITE_API_BASE_URL ??
     "http://localhost:8080";
 
-  const token = opts?.token ?? localStorage.getItem("token") ?? "";
-  const tokenType = opts?.tokenType ?? localStorage.getItem("token_type") ?? "Bearer";
+  const token = opts?.token ?? sessionStorage.getItem("token") ?? "";
+  const tokenType = opts?.tokenType ?? sessionStorage.getItem("token_type") ?? "Bearer";
 
   const payload = coords.map((c, i) => ({
     sequence: i + 1,
@@ -873,7 +873,7 @@ useEffect(() => {
       return;
     }
 
-    const userId = localStorage.getItem("user_id");
+    const userId = sessionStorage.getItem("user_id");
 
     try {
       const payload = {

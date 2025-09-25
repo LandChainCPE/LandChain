@@ -14,8 +14,8 @@ const api = axios.create({
 // เพิ่ม Authorization header ในทุกคำขอ
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    const tokenType = localStorage.getItem("token_type") || "Bearer";
+    const token = sessionStorage.getItem("token");
+    const tokenType = sessionStorage.getItem("token_type") || "Bearer";
 
     if (!config.headers) config.headers = {};
 
@@ -34,8 +34,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Token หมดอายุหรือไม่ถูกต้อง
-      localStorage.removeItem("token");
-      localStorage.removeItem("token_type");
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("token_type");
       // window.location.href = "/login";
     }
     return Promise.reject(error);
@@ -109,6 +109,31 @@ export async function GetRequestBuybyLandID(id: number | string) {
     else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
   }
 }
+
+
+// function getAuthHeaders() {
+//   const token = sessionStorage.getItem("token");
+//   const tokenType = sessionStorage.getItem("token_type");
+//   return {
+//     "Authorization": `${tokenType} ${token}`,
+//     "Content-Type": "application/json",
+//   };
+// }
+
+// export async function GetRequestBuybyLandID(id: number | string) {
+//     const requestOptions = {
+//         method: "GET",
+//         headers: getAuthHeaders(),
+//     };
+
+//     let response = await fetch(`${apiUrl}/user/lands/requestbuy/${id}`, requestOptions);
+//     const result = await response.json();
+//     console.log(response);
+//     console.log(result);
+
+//     return { result };
+// };
+
 
 export async function DeleteRequestBuy(userID: number, landID: string | number) {
   try {
@@ -357,10 +382,10 @@ export async function BuyLandHandler(tokenId: string, txHash: string) {
   }
 }
 
-export async function DeleteAllRequestBuyByLandID(landID: string | number) {
+export async function DeleteAllRequestBuyByLandID(id: string | number) {
   try {
-    const res = await api.delete(`/user/lands/delete/allrequset/`, {
-      params: { landID },
+    const res = await api.delete(`/user/lands/delete/allrequset/${id}`, {
+
     });
     return res.data;
   } catch (e: any) {
@@ -371,8 +396,7 @@ export async function DeleteAllRequestBuyByLandID(landID: string | number) {
 
 export async function DeleteTransactionandAllrequest(id: string | number) {
   try {
-    const res = await api.delete(`/user/lands/delete/transactionallrequest/`, {
-      params: { id },
+    const res = await api.delete(`/user/lands/delete/transactionallrequest/${id}`, {
     });
     return res.data;
   } catch (e: any) {
@@ -495,9 +519,20 @@ export async function GetUserinfoByUserID(id: number | string) {
   }
 }
 
-export async function DeleteLandsalepostByLandIDandUserID(landid: number | string) {
+export async function DeleteLandsalepostByLandIDandUserID(id: number | string) {
   try {
-    const res = await api.delete(`/user/lands/post/${landid}`); // ✅ แทนค่า id จริง
+    const res = await api.delete(`/user/lands/post/${id}`); // ✅ แทนค่า id จริง
+    return res.data;
+  } catch (e) {
+    const err = e as any;
+    if (err.response) return err.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+}
+
+export async function CheckVerify() {
+  try {
+    const res = await api.get(`/user/verify`); // ✅ แทนค่า id จริง
     return res.data;
   } catch (e) {
     const err = e as any;

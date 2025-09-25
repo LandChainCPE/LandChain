@@ -9,7 +9,7 @@ function Main() {
 
   const gotologin = () => {
     setLoading(true);
-    localStorage.setItem("isLogin", "false");
+    sessionStorage.setItem("isLogin", "false");
     setTimeout(() => {
       navigate("/login");
     }, 2000);
@@ -17,7 +17,7 @@ function Main() {
 
   const gotoregister = () => {
     setLoading(true);
-    localStorage.setItem("isLogin", "false");
+    sessionStorage.setItem("isLogin", "false");
     setTimeout(() => {
       navigate("/register");
     }, 2000);

@@ -7,6 +7,7 @@ import (
 	"landchain/entity"
 	"math/rand"
 	"net/http"
+	"os"
 	"strings"
 
 	"golang.org/x/crypto/sha3"
@@ -105,7 +106,7 @@ func VerifyWalletID(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "booking has no user"})
 		return
 	}
-	walletID := strings.TrimSpace(booking.Users.Metamaskaddress)
+	walletID := strings.ToLower(strings.TrimSpace(booking.Users.Metamaskaddress))
 	if walletID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "user has no metamask address"})
 		return
@@ -147,8 +148,8 @@ func VerifyWalletID(c *gin.Context) {
 	finalHash := crypto.Keccak256(msg)
 
 	// 6. sign hash นี้ ด้วย private key ของเซิร์ฟเวอร์ (ตัวอย่าง)
-	privateKeyHex := "11c1f346bfe76f45058d04a7d42ad9a70d51f597b5880bc41ae7af819ab8531d"
-	privateKey, err := crypto.HexToECDSA(privateKeyHex)
+	privateKeyHex := os.Getenv("PRIVATE_KEY")
+	privateKey, err := crypto.HexToECDSA(strings.TrimPrefix(privateKeyHex, "0x"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid server private key"})
 		return
@@ -170,7 +171,7 @@ func VerifyWalletID(c *gin.Context) {
 		Signature:      sigHex,
 		Status_onchain: false,
 		RandomSalt:     salt,
-		TxHash: 		nil,
+		TxHash:         nil,
 	}
 	if err := tx.Create(&uv).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user_verification: " + err.Error()})
@@ -248,10 +249,10 @@ func VerifyLandtitleID(c *gin.Context) {
 		", SqWa:" + fmt.Sprint(land.SquareWa) +
 		", Subdistrict:" + land.District.NameTH +
 		", District:" + land.District.NameTH +
-		", Province:" + land.Province.NameTh +
+		", Province:" + land.Province.NameTH +
 		", UUID:" + uuidStr
 
-	walletID := land.User.Metamaskaddress
+	walletID := strings.ToLower(land.User.Metamaskaddress)
 	if walletID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User has no wallet address"})
 		return
@@ -270,8 +271,8 @@ func VerifyLandtitleID(c *gin.Context) {
 	ethHash := crypto.Keccak256Hash(msg)
 
 	// เซ็น hash ด้วย private key ของระบบ
-	privateKeyHex := "11c1f346bfe76f45058d04a7d42ad9a70d51f597b5880bc41ae7af819ab8531d"
-	privateKey, err := crypto.HexToECDSA(privateKeyHex)
+	privateKeyHex := os.Getenv("PRIVATE_KEY")
+	privateKey, err := crypto.HexToECDSA(strings.TrimPrefix(privateKeyHex, "0x"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid server private key"})
 		return
@@ -342,7 +343,7 @@ func GetAllLandData(c *gin.Context) {
 		districtName := ""
 		subdistrictName := ""
 		if l.Province.ID != 0 {
-			provinceName = l.Province.NameTh
+			provinceName = l.Province.NameTH
 		}
 		if l.District.ID != 0 {
 			districtName = l.District.NameTH
@@ -372,4 +373,95 @@ func GetAllLandData(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": result})
+}
+
+func GetTransactionLand(c *gin.Context) {
+	// ดึง DB
+	db := config.DB()
+
+	var transactions []entity.Transaction
+	// ดึงเฉพาะที่ BuyerAccepted, SellerAccepted เป็น true และ TypetransactionID = 1
+	if err := db.Preload("Buyer").Preload("Seller").Preload("Landtitle.Subdistrict").Preload("Landtitle.District").Preload("Landtitle.Province").
+		Where("buyer_accepted = ? AND seller_accepted = ? AND typetransaction_id = ?", true, true, 1).
+		Find(&transactions).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// เตรียมข้อมูลสำหรับ frontend
+	var result []gin.H
+	for _, t := range transactions {
+		buyer := t.Buyer
+		seller := t.Seller
+		land := t.Landtitle
+		provinceName := ""
+		districtName := ""
+		subdistrictName := ""
+		if land.Province.ID != 0 {
+			provinceName = land.Province.NameTH
+		}
+		if land.District.ID != 0 {
+			districtName = land.District.NameTH
+		}
+		if land.Subdistrict.ID != 0 {
+			subdistrictName = land.Subdistrict.NameTH
+		}
+		result = append(result, gin.H{
+			"transaction_id":         t.ID,
+			"buyer_firstname":        buyer.Firstname,
+			"buyer_lastname":         buyer.Lastname,
+			"buyer_email":            buyer.Email,
+			"buyer_phonenumber":      buyer.Phonenumber,
+			"seller_firstname":       seller.Firstname,
+			"seller_lastname":        seller.Lastname,
+			"seller_email":           seller.Email,
+			"seller_phonenumber":     seller.Phonenumber,
+			"land_token_id":          land.TokenID,
+			"land_survey_number":     land.SurveyNumber,
+			"land_number":            land.LandNumber,
+			"land_survey_page":       land.SurveyPage,
+			"land_title_deed_number": land.TitleDeedNumber,
+			"land_volume":            land.Volume,
+			"land_page":              land.Page,
+			"land_rai":               land.Rai,
+			"land_ngan":              land.Ngan,
+			"land_square_wa":         land.SquareWa,
+			"province":               provinceName,
+			"district":               districtName,
+			"subdistrict":            subdistrictName,
+			"price":                  t.Amount,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": result})
+}
+
+func DepartmentOfLandVerifyTransaction(c *gin.Context) {
+	// รับ transaction_id จาก JSON body
+	var req struct {
+		TransactionID uint `json:"transaction_id"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request: " + err.Error()})
+		return
+	}
+
+	db := config.DB()
+	var tx entity.Transaction
+	if err := db.First(&tx, req.TransactionID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "transaction not found"})
+		return
+	}
+
+	// อัพเดต LandDepartmentApproved เป็น true และ TypetransactionID เป็น 3
+	updates := map[string]interface{}{
+		"land_department_approved": true,
+		"typetransaction_id":       3,
+	}
+	if err := db.Model(&tx).Updates(updates).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "update failed: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "LandDepartmentApproved and TypetransactionID updated", "transaction_id": req.TransactionID})
 }
