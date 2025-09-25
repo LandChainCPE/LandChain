@@ -3,9 +3,9 @@ package controller
 import (
 	"landchain/config"
 	"landchain/entity"
+	"log"
 	"net/http"
 	"strconv"
-	"log"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -16,7 +16,7 @@ func UpdatePost(c *gin.Context) {
 	// รับ post_id จาก URL parameter ถ้ามี
 	postIDParam := c.Param("post_id")
 	var postIDFromURL uint = 0
-	
+
 	if postIDParam != "" {
 		if id, err := strconv.ParseUint(postIDParam, 10, 32); err == nil {
 			postIDFromURL = uint(id)
@@ -40,7 +40,7 @@ func UpdatePost(c *gin.Context) {
 		Images        []string `json:"images,omitempty"` // รูปภาพ (ถ้ามี)
 		TagID         []uint   `json:"tag_id,omitempty"` // แท็ก (ถ้ามี)
 	}
-	
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Printf("UpdatePost: JSON binding error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format", "detail": err.Error()})
@@ -123,8 +123,8 @@ func UpdatePost(c *gin.Context) {
 			tx.Rollback()
 			log.Printf("UpdatePost: Failed to update post: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Failed to update post", 
-				"detail": err.Error(),
+				"error":   "Failed to update post",
+				"detail":  err.Error(),
 				"post_id": finalPostID,
 			})
 			return
@@ -135,7 +135,7 @@ func UpdatePost(c *gin.Context) {
 	// อัปเดตรูปภาพถ้ามีการส่งมา
 	if len(req.Images) > 0 {
 		log.Printf("UpdatePost: Updating images, count: %d", len(req.Images))
-		
+
 		// ลบรูปภาพเก่าทั้งหมดก่อน
 		if err := tx.Where("landsalepost_id = ?", finalPostID).Delete(&entity.Photoland{}).Error; err != nil {
 			tx.Rollback()
@@ -165,7 +165,7 @@ func UpdatePost(c *gin.Context) {
 	// อัปเดต tags ถ้ามีการส่งมา
 	if len(req.TagID) > 0 {
 		log.Printf("UpdatePost: Updating tags, count: %d", len(req.TagID))
-		
+
 		var tags []entity.Tag
 		if err := tx.Where("id IN ?", req.TagID).Find(&tags).Error; err != nil {
 			tx.Rollback()
@@ -210,8 +210,8 @@ func UpdatePost(c *gin.Context) {
 		// ถ้าโหลดไม่ได้ ก็ส่งกลับข้อมูลพื้นฐาน
 		log.Printf("UpdatePost: Failed to preload relations: %v", err)
 		c.JSON(http.StatusOK, gin.H{
-			"message": "Post updated successfully (without relations)", 
-			"post": post,
+			"message": "Post updated successfully (without relations)",
+			"post":    post,
 			"post_id": finalPostID,
 		})
 		return
@@ -219,8 +219,8 @@ func UpdatePost(c *gin.Context) {
 
 	log.Printf("UpdatePost: Successfully updated post %d", finalPostID)
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Post updated successfully", 
-		"post": result,
+		"message": "Post updated successfully",
+		"post":    result,
 		"post_id": finalPostID,
 	})
 }
@@ -236,8 +236,8 @@ func UpdatePhotoland(c *gin.Context) {
 	}
 
 	var input struct {
-		Path            *string `json:"path,omitempty"`
-		LandsalepostID  *uint   `json:"landsalepost_id,omitempty"`
+		Path           *string `json:"path,omitempty"`
+		LandsalepostID *uint   `json:"landsalepost_id,omitempty"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input format"})
@@ -263,7 +263,7 @@ func UpdatePhotoland(c *gin.Context) {
 	if input.LandsalepostID != nil {
 		updateData["landsalepost_id"] = *input.LandsalepostID
 	}
-	
+
 	if len(updateData) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No data to update"})
 		return
@@ -376,32 +376,27 @@ func UpdateLocation(c *gin.Context) {
 func GetUserPostLandData(c *gin.Context) {
 	db := config.DB()
 
-	// รับ wallet จาก path param หรือ query param
-	wallet := c.Param("wallet")
-	if wallet == "" {
-		wallet = c.Query("wallet")
+	// รับ user_id จาก path param หรือ query param
+	userIDParam := c.Param("user_id")
+	if userIDParam == "" {
+		userIDParam = c.Query("user_id")
 	}
-	
+
 	var userID uint
-	if wallet != "" {
-		// ค้นหา user_id จาก metamaskaddress
-		var user entity.Users
-		if err := db.Where("metamaskaddress = ?", wallet).First(&user).Error; err != nil {
-			if err == gorm.ErrRecordNotFound {
-				c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบผู้ใช้ที่มี wallet นี้"})
-			} else {
-				log.Printf("GetUserPostLandData: Failed to find user: %v", err)
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error while finding user"})
-			}
+	if userIDParam != "" {
+		// แปลง user_id เป็น uint
+		if id, err := strconv.ParseUint(userIDParam, 10, 32); err == nil {
+			userID = uint(id)
+			log.Printf("GetUserPostLandData: Using user ID from param/query: %d", userID)
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_id format"})
 			return
 		}
-		userID = user.ID
-		log.Printf("GetUserPostLandData: Found user ID %d for wallet %s", userID, wallet)
 	} else {
 		// fallback: ดึง user_id จาก JWT/context
 		uid, ok := c.Get("user_id")
 		if !ok {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "user_id not found in context and no wallet provided"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "user_id not found in context and no user_id provided"})
 			return
 		}
 		userID, _ = uid.(uint)
@@ -421,12 +416,12 @@ func GetUserPostLandData(c *gin.Context) {
 		Preload("Subdistrict", func(db *gorm.DB) *gorm.DB {
 			return db.Select("id", "name_th", "district_id")
 		}).
-		Preload("Tags").        // ดึงข้อมูล Tags ด้วย (many-to-many)
-		Preload("Landtitle").   // ดึงข้อมูล Landtitle ด้วย 
-		Preload("Photoland").   // ดึงข้อมูล Photoland ด้วย (one-to-many) - สำคัญมาก!
-		Preload("Location").    // ดึงข้อมูล Location ด้วย (one-to-many)
-		Preload("Users").       // ดึงข้อมูล Users ด้วย
-		Order("id DESC").       // เรียงใหม่ไปเก่า
+		Preload("Tags").      // ดึงข้อมูล Tags ด้วย (many-to-many)
+		Preload("Landtitle"). // ดึงข้อมูล Landtitle ด้วย
+		Preload("Photoland"). // ดึงข้อมูล Photoland ด้วย (one-to-many) - สำคัญมาก!
+		Preload("Location").  // ดึงข้อมูล Location ด้วย (one-to-many)
+		Preload("Users").     // ดึงข้อมูล Users ด้วย
+		Order("id DESC").     // เรียงใหม่ไปเก่า
 		Find(&postlands).Error
 
 	if err != nil {
@@ -498,10 +493,10 @@ func AddMultiplePhotos(c *gin.Context) {
 
 	log.Printf("AddMultiplePhotos: Successfully added %d photos to post %d", len(createdPhotos), postID)
 	c.JSON(http.StatusOK, gin.H{
-		"status":        "success",
-		"message":       "Photos added successfully",
-		"photos_count":  len(createdPhotos),
-		"photos":        createdPhotos,
+		"status":       "success",
+		"message":      "Photos added successfully",
+		"photos_count": len(createdPhotos),
+		"photos":       createdPhotos,
 	})
 }
 
@@ -572,9 +567,9 @@ func ReplaceAllPhotos(c *gin.Context) {
 
 	log.Printf("ReplaceAllPhotos: Successfully replaced %d photos for post %d", len(createdPhotos), postID)
 	c.JSON(http.StatusOK, gin.H{
-		"status":        "success",
-		"message":       "All photos replaced successfully",
-		"photos_count":  len(createdPhotos),
-		"photos":        createdPhotos,
+		"status":       "success",
+		"message":      "All photos replaced successfully",
+		"photos_count": len(createdPhotos),
+		"photos":       createdPhotos,
 	})
 }

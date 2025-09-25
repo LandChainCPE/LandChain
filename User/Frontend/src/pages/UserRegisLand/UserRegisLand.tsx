@@ -39,17 +39,41 @@ const UserRegisLand: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    // ดึง user_id จาก wallet
+    const fetchUserId = async () => {
+      try {
+        // import ให้ถูกต้องตามที่ใช้จริง
+        const wallet = sessionStorage.getItem("wallet") || "";
+        const { user_id } = await import("../../service/https/bam/bam").then(mod => mod.GetUserIDByWalletAddress(wallet));
+        if (typeof user_id === "number") {
+          setCurrentUserId(user_id);
+        }
+      } catch (error) {
+        console.error("Error calling GetUserIDByWalletAddress:", error);
+      }
+    };
+    fetchUserId();
+  }, []);
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // ถ้าต้องการบังคับเป็นตัวเลขตอนส่ง ให้แปลงก่อน (แบ็กเอนด์บางที่รับ string ก็ได้)
-      const userid = sessionStorage.getItem("user_id");
+      // ใช้ user_id ที่ได้จากฟังก์ชั่น
+      const userid = currentUserId;
+      if (!userid) {
+        alert("ไม่พบ user_id กรุณา login ใหม่");
+        setIsSubmitting(false);
+        return;
+      }
       const payload = {
         ...formData,
         province_id: formData.province_id,
         district_id: formData.district_id,
         subdistrict_id: formData.subdistrict_id,
-        userid: userid,
+        userid: String(userid), // ✅ แปลงเป็น string
       };
       console.log("payload", payload);
 

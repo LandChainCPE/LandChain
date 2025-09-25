@@ -14,12 +14,13 @@ const { Option } = Select;
 
 const BookingCalendar = () => {
   // เรียกใช้ GetUserIDByWalletAddress และ log ผลลัพธ์
-  const [currentUserId, setCurrentUserId] = useState<number>(Number(sessionStorage.getItem("user_id") || 1));
+  const [currentUserId, setCurrentUserId] = useState<number>(Number(sessionStorage.getItem("user_id") || ""));
 
   useEffect(() => {
     const fetchUserId = async () => {
       try {
-        const result = await GetUserIDByWalletAddress();
+        const wallet = sessionStorage.getItem("wallet") || "";
+        const result = await GetUserIDByWalletAddress(wallet);
         console.log("GetUserIDByWalletAddress result:", result);
         if (result && typeof result.user_id === "number") {
           setCurrentUserId(result.user_id);

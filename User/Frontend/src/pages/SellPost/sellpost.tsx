@@ -863,6 +863,24 @@ useEffect(() => {
 
 
 // 
+  const [currentUserId, setCurrentUserId] = useState<string>("");
+
+  useEffect(() => {
+    // ดึง user_id จาก wallet
+    const fetchUserId = async () => {
+      try {
+        const wallet = sessionStorage.getItem("wallet") || "";
+        const { user_id } = await import("../../service/https/bam/bam").then(mod => mod.GetUserIDByWalletAddress(wallet));
+        if (user_id) {
+          setCurrentUserId(String(user_id));
+        }
+      } catch (error) {
+        setCurrentUserId("");
+      }
+    };
+    fetchUserId();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -873,7 +891,7 @@ useEffect(() => {
       return;
     }
 
-    const userId = sessionStorage.getItem("user_id");
+    const userId = currentUserId;
 
     try {
       const payload = {
@@ -893,7 +911,7 @@ useEffect(() => {
           sequence: i + 1,
           latitude: c.lat,
           longitude: c.lng,
-          })),
+        })),
       };
 
       // 1) สร้างโพสต์
