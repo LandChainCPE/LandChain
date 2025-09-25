@@ -81,7 +81,7 @@ const StateComponent: React.FC = () => {
 
     // Check for undefined state and ensure safety before accessing state.name
     const pending = petitions.filter(p => p.State?.name === "รอตรวจสอบ").length;
-    const approved = petitions.filter(p => p.State?.name === "อนุมัติแล้ว").length;
+    const approved = petitions.filter(p => p.State?.name === "เสร็จสิ้น").length;
     const processing = petitions.filter(p => p.State?.name === "กำลังดำเนินการ").length;
 
     return { total, pending, approved, processing };
