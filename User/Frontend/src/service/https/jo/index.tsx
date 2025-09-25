@@ -348,9 +348,9 @@ export async function updateLocationManage(location_id: number, data: any) {
   }
 }
 
-export async function getUserPostLandDataManage(wallet: string) {
+export async function getUserPostLandDataManage(user_id: string) {
   try {
-    const res = await api.get(`/managepost/userpostland/${wallet}`);
+    const res = await api.get(`/managepost/userpostland/${user_id}`);
     return res.data;
   } catch (error: any) {
     console.error("getUserPostLandDataManage Error:", error);
@@ -443,12 +443,12 @@ async function updatePhotoland(photoland_id: number, data: any) {
   return { response, result };
 }
 
-async function GetUserPostLandData (wallet: string) {
+async function GetUserPostLandData (user_id: string) {
   const requestOptions = {
     method: "GET",
     headers: getAuthHeaders(),
   };
-  let response = await fetch(`${apiUrl}/user/lands/${wallet}`, requestOptions);
+  let response = await fetch(`${apiUrl}/user/lands/${user_id}`, requestOptions);
   const result = await response.json();
   return { response, result };
   console.log("555555",response);

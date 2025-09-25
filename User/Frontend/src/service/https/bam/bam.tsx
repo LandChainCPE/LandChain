@@ -437,7 +437,7 @@ export async function CheckOwner(
 }
 
 
-export async function GetUserIDByWalletAddress() {
+export async function GetUserIDByWalletAddress(wallet: string) {
   try {
     const res = await api.get(`/chat/get/userid`)
     return res.data;
