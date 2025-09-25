@@ -78,7 +78,7 @@ const Petition: React.FC = () => {
 
       // After successful submission, redirect to another page
       setTimeout(() => {
-        navigate("/user/userdashboard");
+        navigate("/user/state");
       }, 2000);
     } catch (error) {
       message.error("❌ เกิดข้อผิดพลาด: " + (error || "ไม่ทราบสาเหตุ"));
@@ -516,7 +516,7 @@ const Petition: React.FC = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="กรอกอีเมล (ไม่บังคับ)"
+                    placeholder="กรอกอีเมล"
                     size="large"
                     style={{ 
                       borderRadius: "1rem",

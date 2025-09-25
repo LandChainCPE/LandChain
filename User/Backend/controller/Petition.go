@@ -131,3 +131,26 @@ func UpdatePetitionStatus(c *gin.Context) {
 
 	c.JSON(http.StatusOK, petition)
 }
+
+// r.GET("/petitions/user/:user_id", controller.GetPetitionByUserId)
+func GetPetitionByUserId(c *gin.Context) {
+	userIDParam := c.Param("user_id")
+	if userIDParam == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+		return
+	}
+
+	userID, err := strconv.ParseUint(userIDParam, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
+		return
+	}
+
+	var petitions []entity.Petition
+	if err := config.DB().Preload("State").Where("user_id = ?", userID).Find(&petitions).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, petitions)
+}

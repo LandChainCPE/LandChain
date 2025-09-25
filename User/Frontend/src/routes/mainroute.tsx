@@ -17,6 +17,7 @@ const VerifyUser = Loadable(lazy(() => import("../pages/VerifyUser/verifyuser"))
 
 
 const Petition = Loadable(lazy(() => import("../pages/Petition/Petition")));
+const StateComponent = Loadable(lazy(() => import("../pages/Petition/state")));
 
 const SellMainPage = Loadable(lazy(() => import("../pages/Sell-Buy/SellMainpage")));
 const Map = Loadable(lazy(() => import("../pages/Map/map")));
@@ -338,6 +339,14 @@ const UserRoutes = (): RouteObject[] => [
         element: (
           <ProtectedRoute>
             <History />
+          </ProtectedRoute>
+        ) 
+      },
+      { 
+        path: "state", 
+        element: (
+          <ProtectedRoute>
+            <StateComponent />
           </ProtectedRoute>
         ) 
       },
