@@ -150,14 +150,13 @@ func SetupDatabase() {
 		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID1, UserID: RefTypeID, BranchID: RefTypeID, ServiceTypeID: RefTypeID})
 
 		db.Create(&entity.Typetransaction{StatusNameTh: "รอผู้ซื้อ/ผู้ขายตกลง", StatusNameEn: "in_progress"})
-		db.Create(&entity.Typetransaction{StatusNameTh: "ถูกยกเลิกโดยผู้ซื้อหรือผู้ขาย", StatusNameEn: "cancelled"})
+		db.Create(&entity.Typetransaction{StatusNameTh: "ถูกยกเลิกหรือหมดอายุ", StatusNameEn: "cancelled"})
 		// db.Create(&entity.Typetransaction{StatusNameTh: "รอการชำระเงิน", StatusNameEn: "money_clear"})
 		// db.Create(&entity.Typetransaction{StatusNameTh: "หมดอายุ", StatusNameEn: "expired"})
 		db.Create(&entity.Typetransaction{StatusNameTh: "กรมที่ดินตรวจสอบแล้ว", StatusNameEn: "DepartmentOfLand-Verify"})
 
 		db.Create(&entity.Typetransaction{StatusNameTh: "อยู่บนเชน", StatusNameEn: "on-chain"})
 		db.Create(&entity.Typetransaction{StatusNameTh: "เสร็จสิ้น", StatusNameEn: "completed"})
-
 
 		// // สร้าง LandProvinces
 		db.Create(&entity.Transaction{LandID: 1, BuyerID: 2, SellerID: 4, TypetransactionID: 1})

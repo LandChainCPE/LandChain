@@ -1,10 +1,12 @@
-	package entity
+package entity
 
-	import (
-		//"time"
+import (
+	//"time"
 
-		"gorm.io/gorm"
-	)
+	"time"
+
+	"gorm.io/gorm"
+)
 
 	type Transaction struct {
 		gorm.Model
@@ -14,7 +16,7 @@
 		SellerAccepted         bool
 		//MoneyChecked           bool
 		LandDepartmentApproved bool
-		//Expire                 time.Time
+		Expire                 time.Time
 
 		TypetransactionID uint            // 👈 FK ไปยัง role.id
 		Typetransaction   Typetransaction `gorm:"foreignKey:TypetransactionID"`

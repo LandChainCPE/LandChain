@@ -148,10 +148,11 @@ navigate(`/user/transation`);
   const confirmReject = async () => {
     if (!selectedBuyRequest || !selectedLand) return;
     try {
-      await DeleteRequestBuy(selectedBuyRequest.Buyer?.ID || 0, selectedLand);
+      await DeleteRequestBuy(selectedBuyRequest.Buyer?.ID || 0, selectedLand, selectedBuyRequest.Seller?.ID || 0);
       const res = await GetRequestBuybyLandID(Number(selectedLand));
       setRequestBuyData(res || []);
       setShowRejectModal(false);
+      Swal.fire("Success", "ลบสำเร็จ", "success");
     } catch {
       Swal.fire("ผิดพลาด", "เกิดข้อผิดพลาดในการปฏิเสธ", "error");
     }
