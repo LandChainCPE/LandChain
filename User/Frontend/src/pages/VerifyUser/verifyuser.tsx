@@ -1,6 +1,7 @@
 import "./verifyuser.css";
 import React, { useEffect, useState } from "react";
-import { GetDataUserVerification } from "../../service/https/garfield/http";
+import { GetDataUserVerification,} from "../../service/https/garfield/http";
+import { GetUserIDByWalletAddress } from "../../service/https/bam/bam";
 import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { Container } from "react-bootstrap";
@@ -62,12 +63,30 @@ function VerifyUser() {
   const [signature, setSignature] = useState<string>("");
   const [nameHash, setNameHash] = useState<string>("");
 
+const [currentUserId, setCurrentUserId] = useState<number>(Number(sessionStorage.getItem("user_id") || 1));
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const wallet = sessionStorage.getItem("wallet") || "";
+        const result = await GetUserIDByWalletAddress(wallet);
+        console.log("GetUserIDByWalletAddress result:", result);
+        if (result && typeof result.user_id === "number") {
+          setCurrentUserId(result.user_id);
+        }
+      } catch (error) {
+        console.error("Error calling GetUserIDByWalletAddress:", error);
+      }
+    };
+    fetchUserId();
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
-      const userid = sessionStorage.getItem("user_id");   ///แก้  
-      console.log();
+      const userid = currentUserId;
+      console.log("UserID:", userid);
       if (!userid) return;
-      const { response, result } = await GetDataUserVerification(userid);
+      const { response, result } = await GetDataUserVerification(String(userid));
       if (response && result) {
         console.log(response);
         console.log(result);
@@ -77,7 +96,7 @@ function VerifyUser() {
       }
     };
     fetchData();
-  }, []);
+  }, [currentUserId]);
 
   const copy = async (text?: string) => {
     if (!text) return alert("ไม่มีข้อมูลให้คัดลอก");

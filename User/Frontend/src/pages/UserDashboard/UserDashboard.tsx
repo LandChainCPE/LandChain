@@ -1,7 +1,8 @@
 import "./UserDashboard.css";
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { GetUserinfoByID, GetLandtitlesByUser } from "../../service/https/garfield/http";
+import { GetLandtitlesByUser } from "../../service/https/garfield/http";
+import { GetInfoUserByWalletID } from "../../service/https/bam/bam";
 import { Table, Tag, Card as AntCard, Row, Col, Statistic, Empty } from "antd";
 import { FileTextOutlined, CalendarOutlined, ClockCircleOutlined, CheckCircleOutlined, ExclamationCircleOutlined, } from "@ant-design/icons";
 import { GetAllPetition } from "../../service/https/jib/jib";
@@ -163,39 +164,26 @@ export default function UserProfilePage() {
   const [userError, setUserError] = useState<string | null>(null);
   const [titlesError, setTitlesError] = useState<string | null>(null);
   useEffect(() => {
-    const user_id = sessionStorage.getItem("user_id") || "";
-    console.log("User id:", user_id);
-    if (user_id) {
-      setIsLoadingUser(true);
-      setUserError(null);
-      GetUserinfoByID(user_id).then(({ result }) => {
-        if (result && (result.firstName || result.lastName || result.email)) {
-          setUserInfo({
-            firstName: result.firstName || "",
-            lastName: result.lastName || "",
-            email: result.email || "",
-            user_verification_id: result.user_verification_id || 0,
-          });
-          // อัปเดต sessionStorage ให้ตรงกับ backend
-          // sessionStorage.setItem("firstName", result.firstName || "");
-          // sessionStorage.setItem("lastName", result.lastName || "");
-          // sessionStorage.setItem("email", result.email || "");
-          // sessionStorage.setItem("user_verification_id", result.user_verification_id ? String(result.user_verification_id) : "0");
-        } else {
-          console.log("No user data found or invalid format");
-          setUserError("ไม่พบข้อมูลผู้ใช้");
-        }
-      }).catch((error) => {
-        console.error("Failed to fetch user info:", error);
-        setUserError("เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้");
-      }).finally(() => {
-        setIsLoadingUser(false);
-      });
-    } else {
-      console.log("No user_id found in sessionStorage");
-      setUserError("ไม่พบ User ID");
+    setIsLoadingUser(true);
+    setUserError(null);
+    GetInfoUserByWalletID().then((result) => {
+      if (result && (result.firstName || result.lastName || result.first_name || result.last_name || result.email)) {
+        setUserInfo({
+          firstName: result.firstName || result.first_name || "",
+          lastName: result.lastName || result.last_name || "",
+          email: result.email || "",
+          user_verification_id: result.user_verification_id || 0,
+        });
+      } else {
+        console.log("No user data found or invalid format");
+        setUserError("ไม่พบข้อมูลผู้ใช้");
+      }
+    }).catch((error) => {
+      console.error("Failed to fetch user info:", error);
+      setUserError("เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้");
+    }).finally(() => {
       setIsLoadingUser(false);
-    }
+    });
   }, []);
 
   // ---------- Titles stats ----------

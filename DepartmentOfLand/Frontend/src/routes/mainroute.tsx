@@ -49,7 +49,7 @@ const MainRoutes = (): RouteObject[] => [
 ];
 
 function ConfigRoutes() {
-  const isLoggedIn = localStorage.getItem('isLogin') === 'true';
+  const isLoggedIn = sessionStorage.getItem('isLogin') === 'true';
   console.log("ค่า isLoggedIn:", isLoggedIn);
   let routes: RouteObject[] = [];
 

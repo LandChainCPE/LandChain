@@ -88,44 +88,33 @@ const VerifyLand: React.FC = () => {
   });
 
   useEffect(() => {
-    console.log('ss', location)
-    const userId = sessionStorage.getItem('user_id');
-    const token = sessionStorage.getItem('token');
-    console.log('DEBUG user_id:', userId);
-    console.log('DEBUG token:', token);
-    if (token) {
+    // ดึง user_id จาก wallet
+    const fetchUserIdAndLand = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        console.log('DEBUG token payload:', payload);
-      } catch (e) {
-        console.log('DEBUG token decode error:', e);
-      }
-    }
-    if (userId && token) {
-      const fetchLandDeeds = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-          const { result } = await GetLandtitlesByUser(userId);
+        const wallet = sessionStorage.getItem("wallet") || "";
+        const { user_id } = await import("../../service/https/bam/bam").then(mod => mod.GetUserIDByWalletAddress(wallet));
+        if (user_id) {
+          const { result } = await GetLandtitlesByUser(String(user_id));
           if (Array.isArray(result)) {
             setVerifiedDeeds(result.map(mapLandDeed));
           } else {
             setVerifiedDeeds([]);
             setError('ไม่พบข้อมูลโฉนดที่ดิน');
           }
-        } catch (err) {
-          setError('เกิดข้อผิดพลาดในการดึงข้อมูล');
+        } else {
           setVerifiedDeeds([]);
-        } finally {
-          setLoading(false);
+          setError('กรุณาเข้าสู่ระบบก่อน');
         }
-      };
-      fetchLandDeeds();
-    } else {
-      setError('กรุณาเข้าสู่ระบบก่อน');
-      setVerifiedDeeds([]);
-      setLoading(false);
-    }
+      } catch (err) {
+        setError('เกิดข้อผิดพลาดในการดึงข้อมูล');
+        setVerifiedDeeds([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserIdAndLand();
   }, []);
 
   const handleUploadToBlockchain = async () => {
