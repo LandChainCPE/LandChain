@@ -95,17 +95,17 @@ function addressText(land: Land) {
 // Helper function to handle base64 and normal image src
 function getImageSrc(path?: string): string {
   if (!path || path.trim() === "") {
-    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='%236b7280'%3E ไม่มีรูปภาพ %3C/text%3E%3C/svg%3E";
+    return "data:image/svg+xml,%3Csvg xmlns='https://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='%236b7280'%3E ไม่มีรูปภาพ %3C/text%3E%3C/svg%3E";
   }
   const cleanPath = path.trim();
   if (cleanPath.startsWith("data:image/")) {
     return cleanPath;
   }
-  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
+  if (cleanPath.startsWith("https://") || cleanPath.startsWith("https://")) {
     return cleanPath;
   }
-  // ถ้าเป็น base64 จริงๆ (ยาวและไม่มี http/data:image)
-  if (cleanPath.length > 50 && !cleanPath.startsWith("http") && !cleanPath.startsWith("data:image/")) {
+  // ถ้าเป็น base64 จริงๆ (ยาวและไม่มี https/data:image)
+  if (cleanPath.length > 50 && !cleanPath.startsWith("https") && !cleanPath.startsWith("data:image/")) {
     // ถ้ามี prefix อยู่แล้ว
     if (
       cleanPath.startsWith("image/jpeg;base64,") ||
@@ -514,11 +514,11 @@ const SellPostMain = () => {
                 overflow: 'hidden'
               }}>
                 <img
-                  src={land.Images && land.Images.length > 0 ? land.Images[0] : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='%236b7280'%3E ไม่มีรูปภาพ %3C/text%3E%3C/svg%3E"}
+                  src={land.Images && land.Images.length > 0 ? land.Images[0] : "data:image/svg+xml,%3Csvg xmlns='https://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='%236b7280'%3E ไม่มีรูปภาพ %3C/text%3E%3C/svg%3E"}
                   alt={land.Name ?? "land"}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='%236b7280'%3E ไม่มีรูปภาพ %3C/text%3E%3C/svg%3E";
+                    target.src = "data:image/svg+xml,%3Csvg xmlns='https://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='%236b7280'%3E ไม่มีรูปภาพ %3C/text%3E%3C/svg%3E";
                   }}
                   style={{
                     width: '100%',
@@ -705,11 +705,11 @@ const SellPostMain = () => {
               {/* Image */}
               <div style={{ flexShrink: 0 }}>
                 <img
-                  src={land.Images && land.Images.length > 0 ? land.Images[0] : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect width='200' height='150' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='14' fill='%236b7280'%3E ไม่มีรูปภาพ %3C/text%3E%3C/svg%3E"}
+                  src={land.Images && land.Images.length > 0 ? land.Images[0] : "data:image/svg+xml,%3Csvg xmlns='https://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect width='200' height='150' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='14' fill='%236b7280'%3E ไม่มีรูปภาพ %3C/text%3E%3C/svg%3E"}
                   alt={land.Name ?? "land"}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect width='200' height='150' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='14' fill='%236b7280'%3E ไม่มีรูปภาพ %3C/text%3E%3C/svg%3E";
+                    target.src = "data:image/svg+xml,%3Csvg xmlns='https://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect width='200' height='150' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='14' fill='%236b7280'%3E ไม่มีรูปภาพ %3C/text%3E%3C/svg%3E";
                   }}
                   style={{
                     width: '100%',

@@ -38,7 +38,7 @@ export const NotificationProvider: React.FC<Props> = ({ userID, children }) => {
 
     if (wsRef.current) wsRef.current.close();
 
-    const ws = new WebSocket(`ws://localhost:8080/ws/notification/${userID}`);
+    const ws = new WebSocket(`ws://52.230.63.209:8080/ws/notification/${userID}`);
     wsRef.current = ws;
 
     // @ts-ignore
@@ -79,10 +79,10 @@ export const NotificationProvider: React.FC<Props> = ({ userID, children }) => {
       // กำหนดข้อความ toast สั้น ๆ
       let toastMessage = "";
       const isImage =
-        msg.Content.startsWith("http") &&
+        msg.Content.startsWith("") &&
         /\.(jpg|jpeg|png|gif|webp)$/i.test(msg.Content);
       const isFile =
-        msg.Content.startsWith("http") && !isImage; // ลิงก์แต่ไม่ใช่รูป
+        msg.Content.startsWith("") && !isImage; // ลิงก์แต่ไม่ใช่รูป
 
       if (isImage) {
         toastMessage = `${senderName} ส่งรูปให้คุณ`;

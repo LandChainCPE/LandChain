@@ -22,7 +22,7 @@ func main() {
 	}
 
 	config.ConnectDatabase()
-	config.SetupDatabase()
+	// config.SetupDatabase()
 	db := config.DB()
 	r := gin.Default()
 	hub := websocket.NewHub(db)
@@ -248,7 +248,7 @@ func main() {
 	r.GET("/ws/chat/:roomID/:userID", controller.Websocket)
 	r.Static("/uploads", "./uploads")
 
-	r.Run(":8080")
+	r.Run("0.0.0.0:8080")
 }
 
 // Middleware CORS - รองรับ Frontend หลายตัว
@@ -261,6 +261,9 @@ func CORSMiddleware() gin.HandlerFunc {
 			"http://localhost:5174", // Department Frontend (Vite port 2)
 			"http://localhost:3000", // React default (ถ้ามี)
 			"http://localhost:3001", // React port 2 (ถ้ามี)
+			"https://52.230.63.209:5173",
+			"https://52.230.63.209:5174",
+			"https://52.230.63.209:80",
 		}
 
 		// ตรวจสอบว่า origin อยู่ในรายการที่อนุญาตไหม

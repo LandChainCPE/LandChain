@@ -88,7 +88,7 @@ const ManagePost: React.FC = () => {
     
     if (!path || path.trim() === '') {
       console.log("No path provided, returning placeholder");
-      return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='%236b7280'%3Eไม่มีรูปภาพ%3C/text%3E%3C/svg%3E";
+      return "data:image/svg+xml,%3Csvg xmlns='https://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='%236b7280'%3Eไม่มีรูปภาพ%3C/text%3E%3C/svg%3E";
     }
 
     const cleanPath = path.trim();
@@ -100,9 +100,9 @@ const ManagePost: React.FC = () => {
       return cleanPath;
     }
 
-    // ตรวจสอบว่าเป็น HTTP URL
-    if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
-      console.log("Path is HTTP URL");
+    // ตรวจสอบว่าเป็น https URL
+    if (cleanPath.startsWith("https://") || cleanPath.startsWith("https://")) {
+      console.log("Path is https URL");
       return cleanPath;
     }
 

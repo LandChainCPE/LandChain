@@ -8,7 +8,7 @@ import { getAllLocations, getLocationsByLandSalePostId } from '../../service/htt
 mapboxgl.accessToken = 'pk.eyJ1Ijoiam9oYXJ0MjU0NiIsImEiOiJjbWVmZ3YzMGcwcTByMm1zOWRkdjJkNTd0In0.DBDjy1rBDmc8A4PN3haQ4A';
 
 
-const apiUrl = "http://localhost:8080";
+const apiUrl = "https://52.230.63.209:8080";
 
 
 interface Coordinate {
@@ -76,7 +76,7 @@ const Map: React.FC = () => {
         window.location.href = "/login";
       }
 
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      let errorMessage = `https ${response.status}: ${response.statusText}`;
       try {
         const errorData = await response.json();
         if (errorData.error) {

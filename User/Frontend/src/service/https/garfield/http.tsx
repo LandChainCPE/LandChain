@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-const apiUrl = "http://localhost:8080";
+const apiUrl = "https://52.230.63.209:8080";
 
 
 /** ใส่เฉพาะ Authorization (อย่าใส่ Content-Type ที่นี่) */

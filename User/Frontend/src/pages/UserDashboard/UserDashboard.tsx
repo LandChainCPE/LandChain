@@ -1,7 +1,7 @@
 import "./UserDashboard.css";
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { GetLandtitlesByUser } from "../../service/https/garfield/http";
+import { GetLandtitlesByUser } from "../../service/https/garfield/https";
 import { GetInfoUserByWalletID } from "../../service/https/bam/bam";
 import { UserCheck, CheckSquare } from "react-feather"; // Assuming 'react-feather' contains the User and Home icons
 import { GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";

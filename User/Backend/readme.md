@@ -8,3 +8,11 @@ go get github.com/joho/godotenv
 
 go get github.com/gocarina/gocsv
 go get github.com/someuser/ethers
+
+
+Build Backed
+cd /user/Backend
+docker build -t backend .
+
+docker tag backend:latest sikharet/backend-app:latest
+docker push sikharet/backend-app:latest

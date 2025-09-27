@@ -1,5 +1,5 @@
 // Nonce service for handling replay attack prevention
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'https://52.230.63.209:8080';
 
 export interface NonceResponse {
   nonce: string;

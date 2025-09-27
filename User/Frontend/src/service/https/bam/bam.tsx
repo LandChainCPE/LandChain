@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const apiUrl = "http://localhost:8080";
+const apiUrl = "https://52.230.63.209:8080";
 
 
 // สร้าง instance ของ axios

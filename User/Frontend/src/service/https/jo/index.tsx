@@ -1,4 +1,4 @@
-const apiUrl = "http://localhost:8080";
+const apiUrl = "https://52.230.63.209:8080";
 
 import axios from "axios";
 import type { BookingInterface } from "../../../interfaces/Booking";
