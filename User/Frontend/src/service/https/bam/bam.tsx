@@ -280,8 +280,7 @@ export async function GetTransationByUserID(userId: number | string) {
 
 export async function UpdateTransactionBuyerAccept({ sellerID, buyerID, landID }: { sellerID: string | number, buyerID: string | number, landID: string | number }) {
   try {
-    const res = await api.put(
-      `/user/lands/put/transation/buyerupdate?sellerID=${sellerID}&buyerID=${buyerID}&landID=${landID}`
+    const res = await api.put(`/user/lands/put/transation/buyerupdate?sellerID=${sellerID}&buyerID=${buyerID}&landID=${landID}`
     );
     return res.data;
   } catch (e) {
