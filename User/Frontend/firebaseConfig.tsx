@@ -16,6 +16,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+// @ts-ignore
 const analytics = getAnalytics(app);
 
 // ✅ Export Storage ออกมาใช้งาน

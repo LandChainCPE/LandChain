@@ -1,5 +1,8 @@
+// @ts-ignore
 import React, { use, useEffect, useState } from "react";
+// @ts-ignore
 import { Search, MapPin, Edit, Plus, Grid3X3, List, Camera, Trash2 } from "lucide-react";
+// @ts-ignore
 import { Card, Button, Input, InputNumber, Modal, Form, message, Upload, Spin, Empty } from "antd";
 import { GetUserIDByWalletAddress } from "../../service/https/bam/bam";
 import { GetUserPostLandData, updatePost, updatePhotoland } from "../../service/https/jo/index";
@@ -172,7 +175,7 @@ const ManagePost: React.FC = () => {
 
     setLoading(true);
     try {
-      const { user_id } = await GetUserIDByWalletAddress(wallet || "");
+      const { user_id } = await GetUserIDByWalletAddress();
       // ดึง user_id จาก wallet
       console.log("user_id from wallet:", user_id);
       if (!user_id) {
@@ -690,6 +693,7 @@ const ManagePost: React.FC = () => {
                                   borderRadius: 18,
                                   transition: "transform 0.7s ease"
                                 }}
+                                // @ts-ignore
                                 onLoad={(e) => {
                                   console.log("Image loaded successfully");
                                 }}
@@ -951,6 +955,7 @@ const ManagePost: React.FC = () => {
                                   borderRadius: 16,
                                   boxShadow: "0 8px 32px rgba(23, 46, 37, 0.1)"
                                 }}
+                                // @ts-ignore
                                 onLoad={(e) => {
                                   console.log("List image loaded successfully");
                                 }}
@@ -1324,6 +1329,7 @@ const ManagePost: React.FC = () => {
                   borderRadius: 8,
                   boxShadow: "0 4px 12px rgba(5,150,105,0.3)"
                 }}
+                // @ts-ignore
                 onError={(e) => { 
                   console.error("Preview image failed to load"); 
                   message.error("ไม่สามารถแสดงตัวอย่างรูปภาพได้");

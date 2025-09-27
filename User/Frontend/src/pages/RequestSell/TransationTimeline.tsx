@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+// @ts-ignore
 import { GetTransationByUserID, GetInfoUserByToken, UpdateTransactionBuyerAccept, SetSellInfoHandler, DeleteTransactionTodelete, GetSaleInfoHandler, DeleteLandsalepostByLandIDandUserID, BuyLandHandler, DeleteTransactionandAllrequest, DeleteTransactionToscucess , DeleteAllRequestBuyByLandID} from "../../service/https/bam/bam";
 import './TransactionTimeline.css';
 import Navbar from "../../component/user/Navbar";
@@ -11,7 +12,6 @@ function TransactionTimeline() {
     const [transactions, setTransactions] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
     const [userId, setUserId] = useState<number | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
@@ -359,7 +359,9 @@ const handleConfirmDelete = async () => {
 const [showSaleModal, setShowSaleModal] = useState(false);
 
 // เปิด Modal
+// @ts-ignore
 const [saleInfo, setSaleInfo] = useState<any | null>(null);
+// @ts-ignore
 const [loadingSaleInfo, setLoadingSaleInfo] = useState(false);
 
 // เปิด Modal ร่างสัญญา
@@ -454,6 +456,7 @@ interface SaleInfoType {
     console.log("ส่งจากบัญชี:", fromAddress);
 
     // ดึง sale info
+    // @ts-ignore
     const saleArray: SaleInfoType[] = Object.values(saleInfos);
     const txInfo = Object.values(saleInfos).find(
   (sale: any) => sale.tokenId.toString() === tokenId.toString()

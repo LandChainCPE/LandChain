@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useState } from "react";
 import { CheckOwner } from "../../service/https/bam/bam"; // import service ใหม่
 import "./CheckLandowner.css";

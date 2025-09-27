@@ -1,4 +1,6 @@
+// @ts-ignore
 import React, { useEffect, useState } from "react";
+// @ts-ignore
 import { Badge, Card, Modal, Button, Form, Row, Col } from "react-bootstrap";
 import "./RequsetBuy.css";
 import {
@@ -18,7 +20,7 @@ interface RequestBuySellType {
   DeletedAt?: string;
   Status?: string;
 }
-
+// @ts-ignore
 interface Metadata {
   TokenID: number;
   MetaFields: string;

@@ -1,6 +1,8 @@
+// @ts-ignore
 import React, { useState } from 'react';
 import './LoginMetamask.css'; // นำเข้าไฟล์ CSS ที่สร้างขึ้นมา
 import Logo from '../../assets/LogoLandchain.png';
+// @ts-ignore
 import { LoginWallet } from '../../service/https/garfield/http';
 import { secureLogin } from '../../service/https/nonceService';
 import { useNavigate } from 'react-router-dom';

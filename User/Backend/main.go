@@ -176,9 +176,8 @@ func main() {
 	authorized.Use(middlewares.Authorizes())
 	{
 		authorized.POST("/requestbuysell", controller.CreateRequestBuySellHandler)
-		//authorized.PATCH("/petitions/:id/state", controller.UpdatePetitionState)
-		authorized.GET("/petition/:user_id", controller.GetAllPetition)
-
+		authorized.GET("/petitions/user/:user_id", controller.GetPetitionByUserId)
+		//authorized.GET("/petition/:user_id", controller.GetAllPetition)
 		authorized.GET("/petitions", controller.GetAllPetition)
 		authorized.POST("/petitions", controller.CreatePetition)
 		authorized.GET("/states", controller.GetAllStates)

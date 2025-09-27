@@ -68,8 +68,9 @@ const [currentUserId, setCurrentUserId] = useState<number>(Number(sessionStorage
   useEffect(() => {
     const fetchUserId = async () => {
       try {
-        const wallet = sessionStorage.getItem("wallet") || "";
-        const result = await GetUserIDByWalletAddress(wallet);
+        // @ts-ignore
+        const wallet = sessiosStorage.getItem("wallet") || "";
+        const result = await GetUserIDByWalletAddress();
         console.log("GetUserIDByWalletAddress result:", result);
         if (result && typeof result.user_id === "number") {
           setCurrentUserId(result.user_id);

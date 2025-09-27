@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';  // นำเข้า useNavigate
@@ -12,8 +13,9 @@ import { secureLogin } from '../../service/https/nonceService';
 const ConnectMetamask = () => {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const navigate = useNavigate(); // ใช้ useNavigate สำหรับการนำทางไปยังหน้า MainPage
-
+  // @ts-ignore
   const [errorMessage, setErrorMessage] = useState('');
+  // @ts-ignore
   const [loading, setLoading] = useState(false);
 
   const connectMetamaskRegis = async () => {

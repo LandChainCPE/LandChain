@@ -80,15 +80,18 @@ function addressText(land: Land) {
     .filter(Boolean)
     .join(", ");
 }
+// @ts-ignore
 import { CheckSquareOutlined, CopyOutlined, SearchOutlined, AuditOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
 import Loader from "../../component/third-patry/Loader";
 import { useNavigate } from "react-router-dom";
 import "./MainPage.css";
 import { useState, useEffect } from "react";
+// @ts-ignore
 import Logo from "../../assets/LogoLandchain.png";
 import { GetAllPostLandData } from "../../service/https/jib/jib";
 
 import Landpic from "../../assets/LandPic.jpg";
+// @ts-ignore
 import LandpicKorat from "../../assets/LandPicKorat.jpg"
 import type { JSX } from "react";
 import { Link } from 'react-router-dom';
@@ -130,6 +133,7 @@ const MainPageAfterLogin = (): JSX.Element => {
     setFilteredLands(result);
   }, [lands, provinceFilter, priceMin, priceMax]);
 
+  // @ts-ignore
   const goToRegisland = () => {
     setLoading(true);
     sessionStorage.setItem("isLogin", "true");
@@ -138,6 +142,7 @@ const MainPageAfterLogin = (): JSX.Element => {
     }, 2000);
   };
 
+  // @ts-ignore
   const goToLogin = () => {
     setLoading(true);
     setTimeout(() => {

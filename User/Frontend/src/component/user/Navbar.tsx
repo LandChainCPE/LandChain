@@ -239,6 +239,13 @@ const Navbar = () => {
                   >
                     ประวัติโฉนดที่ดิน/ตรวจสอบเจ้าของที่ดิน
                   </a>
+                  <a
+                    href="/user/state"
+                    className="dropdown-item-landchain"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    ติดตามสถานะคำร้อง
+                  </a>
                   <button
                     className="dropdown-item-landchain logout-btn"
                     onClick={handleLogout}

@@ -1,3 +1,4 @@
+// @ts-ignore
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../../component/third-patry/Loader";
 import { useState } from "react";

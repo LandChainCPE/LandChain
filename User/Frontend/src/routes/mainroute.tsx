@@ -17,6 +17,7 @@ const VerifyUser = Loadable(lazy(() => import("../pages/VerifyUser/verifyuser"))
 
 
 const Petition = Loadable(lazy(() => import("../pages/Petition/Petition")));
+const StateComponent = Loadable(lazy(() => import("../pages/Petition/state")));
 
 const SellMainPage = Loadable(lazy(() => import("../pages/Sell-Buy/SellMainpage")));
 const Map = Loadable(lazy(() => import("../pages/Map/map")));
@@ -39,11 +40,13 @@ const RequestSell = Loadable(lazy(() => import("../pages/RequestSell/ReausetSell
 const RequestBuy = Loadable(lazy(() => import("../pages/RequestSell/RequsetBuy")));
 const Transation = Loadable(lazy(() => import("../pages/RequestSell/TransationTimeline")));
 const History = Loadable(lazy(() => import("../pages/Landhistory/landhistory.tsx")));
+// @ts-ignore
 const CheckLandowner = Loadable(lazy(() => import("../pages/RequestSell/Checklandowner.tsx")));
 const AppointmentStatus = Loadable(lazy(() => import("../pages/appointmentstatus/appointmentstatus")));
 const CheckVerifyWallet = Loadable(lazy(() => import("../pages/CheckVerifyWallet/CheckVerifyWallet.tsx")));
 
 const ManagePost = Loadable(lazy(() => import("../pages/ManagePost/ManagePost.tsx")));
+// @ts-ignore
 const Testland = Loadable(lazy(() => import("../pages/VerifyLand/testland.tsx")));
 
 // Component สำหรับป้องกันหน้าที่ต้อง login
@@ -338,6 +341,14 @@ const UserRoutes = (): RouteObject[] => [
         element: (
           <ProtectedRoute>
             <History />
+          </ProtectedRoute>
+        ) 
+      },
+      { 
+        path: "state", 
+        element: (
+          <ProtectedRoute>
+            <StateComponent />
           </ProtectedRoute>
         ) 
       },

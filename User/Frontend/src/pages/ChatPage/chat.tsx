@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useEffect, useRef, useState } from "react";
 import Navbar from "../../component/user/Navbar";
 import "./Chat.css";

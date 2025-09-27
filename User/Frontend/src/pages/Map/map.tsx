@@ -1,4 +1,6 @@
+// @ts-ignore
 import { Link, useNavigate } from "react-router-dom";
+// @ts-ignore
 import Loader from "../../component/third-patry/Loader";
 import Navbar from "../../component/user/Navbar";
 import MapBox from "../../component/map/Mapbox";

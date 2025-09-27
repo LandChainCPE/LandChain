@@ -345,6 +345,31 @@ const SellPost = () => {
     land_id: string;
   } | null>(null);
 
+    const [errors, setErrors] = useState<{
+      firstName: string;
+      lastName: string;
+      phoneNumber: string;
+      images: string;
+      name: string;
+      price: string;
+      tag_id: string;
+      province_id: string;
+      district_id: string;
+      subdistrict_id: string;
+      mapCoords: string;
+    }>({
+      firstName: "",
+      lastName: "",
+      phoneNumber: "",
+      images: "",
+      name: "",
+      price: "",
+      tag_id: "",
+      province_id: "",
+      district_id: "",
+      subdistrict_id: "",
+      mapCoords: "",
+    });
   // Enhanced CSS styles using the color scheme
   const styles = {
     card: {
@@ -869,8 +894,9 @@ useEffect(() => {
     // ดึง user_id จาก wallet
     const fetchUserId = async () => {
       try {
+        // @ts-ignore
         const wallet = sessionStorage.getItem("wallet") || "";
-        const { user_id } = await import("../../service/https/bam/bam").then(mod => mod.GetUserIDByWalletAddress(wallet));
+        const { user_id } = await import("../../service/https/bam/bam").then(mod => mod.GetUserIDByWalletAddress());
         if (user_id) {
           setCurrentUserId(String(user_id));
         }
@@ -885,11 +911,25 @@ useEffect(() => {
     e.preventDefault();
     setLoading(true);
 
-    if (!formData.province_id || !formData.district_id || !formData.subdistrict_id) {
-      message.error("กรุณาเลือกจังหวัด อำเภอ และตำบลให้ครบถ้วน");
-      setLoading(false);
-      return;
-    }
+    // if (!formData.province_id || !formData.district_id || !formData.subdistrict_id) {
+    //   message.error("กรุณาเลือกจังหวัด อำเภอ และตำบลให้ครบถ้วน");
+    //   setLoading(false);
+    //   return;
+    // }
+      // สร้าง object เก็บ error
+      const newErrors: any = {};
+
+      if (!formData.province_id) newErrors.province_id = "กรุณาเลือกจังหวัด";
+      if (!formData.district_id) newErrors.district_id = "กรุณาเลือกอำเภอ";
+      if (!formData.subdistrict_id) newErrors.subdistrict_id = "กรุณาเลือกตำบล";
+      if (mapCoords.length < 3) newErrors.mapCoords = "เลือกอย่างน้อย 3 จุดเพื่อขึ้นรูปพื้นที่";
+
+      setErrors(newErrors); // อัปเดต state เพื่อให้ JSX แสดงข้อความแดง
+
+      if (Object.keys(newErrors).length > 0) {
+        setLoading(false);
+        return; // หยุดการ submit
+      }
 
     const userId = currentUserId;
 
@@ -1676,182 +1716,144 @@ useEffect(() => {
           </p>
           
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
+            {/* ชื่อ */}
             <div>
-              <label style={{ 
-                fontSize: "1rem", 
-                fontWeight: "600", 
-                color: "#172E25", 
-                marginBottom: "0.75rem",
-                display: "block"
-              }}>
+              <label style={{ fontSize: "1rem", fontWeight: "600", color: "#172E25", marginBottom: "0.75rem", display: "block" }}>
                 ชื่อ
               </label>
               <div style={{ position: "relative" }}>
-                <User style={{ 
-                  position: "absolute", 
-                  left: "1rem", 
-                  top: "50%", 
-                  transform: "translateY(-50%)",
-                  width: "1.25rem", 
-                  height: "1.25rem", 
-                  color: "#6F969B",
-                  zIndex: 1
-                }} />
+                <User style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)",
+                  width: "1.25rem", height: "1.25rem", color: "#6F969B", zIndex: 1 }} />
                 <input
                   type="text"
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleChange}
-                  style={{
-                    ...styles.input,
-                    paddingLeft: "3.5rem"
-                  }}
+                  style={{ ...styles.input, paddingLeft: "3.5rem" }}
                   placeholder="กรอกชื่อ"
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "#6F969B";
-                    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(111, 150, 155, 0.1)";
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = "#e2e8f0";
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
                 />
               </div>
+              {errors.firstName && (
+                <p style={{ color: "red", fontSize: "0.9rem", marginTop: "0.5rem" }}>
+                  {errors.firstName}
+                </p>
+              )}
             </div>
 
+            {/* นามสกุล */}
             <div>
-              <label style={{ 
-                fontSize: "1rem", 
-                fontWeight: "600", 
-                color: "#172E25", 
-                marginBottom: "0.75rem",
-                display: "block"
-              }}>
+              <label style={{ fontSize: "1rem", fontWeight: "600", color: "#172E25", marginBottom: "0.75rem", display: "block" }}>
                 นามสกุล
               </label>
               <div style={{ position: "relative" }}>
-                <User style={{ 
-                  position: "absolute", 
-                  left: "1rem", 
-                  top: "50%", 
-                  transform: "translateY(-50%)",
-                  width: "1.25rem", 
-                  height: "1.25rem", 
-                  color: "#6F969B",
-                  zIndex: 1
-                }} />
+                <User style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)",
+                  width: "1.25rem", height: "1.25rem", color: "#6F969B", zIndex: 1 }} />
                 <input
                   type="text"
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleChange}
-                  style={{
-                    ...styles.input,
-                    paddingLeft: "3.5rem"
-                  }}
+                  style={{ ...styles.input, paddingLeft: "3.5rem" }}
                   placeholder="กรอกนามสกุล"
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "#6F969B";
-                    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(111, 150, 155, 0.1)";
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = "#e2e8f0";
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
                 />
               </div>
+              {errors.lastName && (
+                <p style={{ color: "red", fontSize: "0.9rem", marginTop: "0.5rem" }}>
+                  {errors.lastName}
+                </p>
+              )}
             </div>
 
+            {/* เบอร์โทรศัพท์ */}
             <div style={{ gridColumn: "1 / -1" }}>
-              <label style={{ 
-                fontSize: "1rem", 
-                fontWeight: "600", 
-                color: "#172E25", 
-                marginBottom: "0.75rem",
-                display: "block"
-              }}>
+              <label style={{ fontSize: "1rem", fontWeight: "600", color: "#172E25", marginBottom: "0.75rem", display: "block" }}>
                 เบอร์โทรศัพท์
               </label>
               <div style={{ position: "relative", maxWidth: "330px", width: "100%" }}>
-                <Phone style={{ 
-                  position: "absolute", 
-                  left: "1rem", 
-                  top: "50%", 
-                  transform: "translateY(-50%)",
-                  width: "1.25rem", 
-                  height: "1.25rem", 
-                  color: "#6F969B",
-                  zIndex: 1
-                }} />
+                <Phone style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)",
+                  width: "1.25rem", height: "1.25rem", color: "#6F969B", zIndex: 1 }} />
                 <input
                   type="tel"
                   name="phoneNumber"
                   value={formData.phoneNumber}
-                  onChange={handleChange}
-                  style={{
-                    ...styles.input,
-                    paddingLeft: "3.5rem",
-                    width: "100%"
+                  onChange={(e) => {
+                    // อนุญาตเฉพาะตัวเลข
+                    const value = e.target.value.replace(/\D/g, "");
+                    setFormData({ ...formData, phoneNumber: value });
                   }}
-                  placeholder="กรอกเบอร์โทรศัพท์"
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "#6F969B";
-                    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(111, 150, 155, 0.1)";
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = "#e2e8f0";
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
+                  style={{ ...styles.input, paddingLeft: "3.5rem", width: "100%" }}
+                  placeholder="กรอกเบอร์โทรศัพท์ 10 หลัก"
+                  maxLength={10} // จำกัดความยาวสูงสุด
                 />
               </div>
+              {errors.phoneNumber && (
+                <p style={{ color: "red", fontSize: "0.9rem", marginTop: "0.5rem" }}>
+                  {errors.phoneNumber}
+                </p>
+              )}
             </div>
           </div>
 
+          {/* ปุ่มถัดไป & ย้อนกลับ */}
+                    {/* ปุ่มย้อนกลับ & ถัดไป */}
           <div style={{ marginTop: "3rem", display: "flex", justifyContent: "space-between" }}>
+            <button onClick={() => setCurrentStep(1)} style={styles.button.secondary}>← ย้อนกลับ</button>
             <button
-              onClick={() => setCurrentStep(1)}
-              style={styles.button.secondary}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 4px 12px rgba(148, 163, 184, 0.3)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "none";
-              }}
-            >
-              ← ย้อนกลับ
-            </button>
-            <button
-              onClick={() => setCurrentStep(3)}
+                onClick={() => {
+                  let newErrors = {
+                    firstName: "",
+                    lastName: "",
+                    phoneNumber: "",
+                    images: "",
+                    name: "",
+                    price: "",
+                    tag_id: "",
+                    province_id: "",
+                    district_id: "",
+                    subdistrict_id: "",
+                    mapCoords: ""
+                  };
+                  let valid = true;
+
+                  if (!formData.firstName.trim()) {
+                    newErrors.firstName = "กรุณากรอกชื่อ";
+                    valid = false;
+                  }
+                  if (!formData.lastName.trim()) {
+                    newErrors.lastName = "กรุณากรอกนามสกุล";
+                    valid = false;
+                  }
+                  if (!formData.phoneNumber.trim()) {
+                    newErrors.phoneNumber = "กรุณากรอกเบอร์โทรศัพท์";
+                    valid = false;
+                  } else if (!/^\d{10}$/.test(formData.phoneNumber)) {
+                    newErrors.phoneNumber = "เบอร์โทรศัพท์ต้องเป็นตัวเลข 10 หลัก";
+                    valid = false;
+                  }
+
+                  setErrors(newErrors);
+
+                  if (valid) {
+                    setCurrentStep(3);
+                  }
+                }}
               style={styles.button.primary}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 8px 24px rgba(111, 150, 155, 0.4)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 4px 12px rgba(111, 150, 155, 0.3)";
-              }}
             >
               ถัดไป →
             </button>
           </div>
         </div>
       )}
+
       {currentStep === 3 && (
-        <div style={{ 
-          ...styles.card, 
-          padding: "3rem",
-          marginTop: "1rem"
-        }}>
-          <h2 style={{ 
-            fontSize: "2rem", 
-            fontWeight: "800", 
-            color: "#172E25", 
-            marginBottom: "1rem", 
-            display: "flex", 
-            alignItems: "center", 
+        <div style={{ ...styles.card, padding: "3rem", marginTop: "1rem" }}>
+          <h2 style={{
+            fontSize: "2rem",
+            fontWeight: "800",
+            color: "#172E25",
+            marginBottom: "1rem",
+            display: "flex",
+            alignItems: "center",
             gap: "1rem"
           }}>
             <span style={{
@@ -1863,33 +1865,22 @@ useEffect(() => {
             }}>🏞️</span>
             รายละเอียดที่ดิน
           </h2>
-          <p style={{ 
-            color: "#3F5658", 
-            marginBottom: "2rem", 
-            fontSize: "1.1rem",
-            lineHeight: "1.6",
-            fontWeight: "500"
-          }}>
+          <p style={{ color: "#3F5658", marginBottom: "2rem", fontSize: "1.1rem", lineHeight: "1.6", fontWeight: "500" }}>
             เพิ่มรูปภาพและข้อมูลรายละเอียดของที่ดินที่ต้องการขาย
           </p>
 
+          {/* รูปที่ดิน */}
           <div style={{ marginBottom: "2rem" }}>
-            <label style={{ 
-              fontSize: "1rem", 
-              fontWeight: "600", 
-              color: "#172E25", 
-              marginBottom: "1rem",
-              display: "block"
-            }}>
+            <label style={{ fontSize: "1rem", fontWeight: "600", color: "#172E25", marginBottom: "1rem", display: "block" }}>
               รูปที่ดิน
             </label>
             <div style={{
-              border: "2px dashed #6F969B",
+              border: `2px dashed ${errors.images ? "red" : "#6F969B"}`,
               borderRadius: "16px",
               padding: "2rem",
               textAlign: "center",
               background: "linear-gradient(135deg, #f8fafc, #f1f5f9)",
-              marginBottom: "1rem"
+              marginBottom: "0.5rem"
             }}>
               <Upload
                 beforeUpload={handleUpload}
@@ -1898,7 +1889,7 @@ useEffect(() => {
                 accept="image/*"
                 showUploadList={false}
               >
-                <Button 
+                <Button
                   icon={<UploadOutlined />}
                   style={{
                     background: "linear-gradient(135deg, #6F969B, #3F5658)",
@@ -1914,50 +1905,15 @@ useEffect(() => {
                   อัปโหลดรูปภาพ
                 </Button>
               </Upload>
-              <p style={{ 
-                color: "#3F5658", 
-                marginTop: "1rem", 
-                fontSize: "0.9rem" 
-              }}>
-                รองรับไฟล์ JPG, PNG, GIF ขนาดไม่เกิน 5MB
-              </p>
             </div>
-            
+            {errors.images && <p style={{ color: "red", fontSize: "0.9rem", marginTop: "0.5rem" }}>{errors.images}</p>}
+
             {images.length > 0 && (
-              <div style={{ 
-                display: "grid", 
-                gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", 
-                gap: "1rem" 
-              }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "1rem" }}>
                 {images.map((img, idx) => (
-                  <div key={idx} style={{ 
-                    position: "relative",
-                    background: "#ffffff",
-                    borderRadius: "12px",
-                    padding: "8px",
-                    boxShadow: "0 4px 12px rgba(23, 46, 37, 0.1)",
-                    border: "1px solid #e2e8f0"
-                  }}>
-                    <img
-                      src={img}
-                      alt={`Preview ${idx + 1}`}
-                      style={{ 
-                        width: "100%", 
-                        height: "120px",
-                        borderRadius: "8px", 
-                        objectFit: "cover",
-                        marginBottom: "8px"
-                      }}
-                    />
-                    <Button 
-                      size="small" 
-                      danger 
-                      onClick={() => setImages(images.filter((_, i) => i !== idx))}
-                      style={{
-                        width: "100%",
-                        borderRadius: "8px"
-                      }}
-                    >
+                  <div key={idx} style={{ position: "relative", background: "#fff", borderRadius: "12px", padding: "8px", boxShadow: "0 4px 12px rgba(23,46,37,0.1)", border: "1px solid #e2e8f0" }}>
+                    <img src={img} alt={`Preview ${idx + 1}`} style={{ width: "100%", height: "120px", borderRadius: "8px", objectFit: "cover", marginBottom: "8px" }} />
+                    <Button size="small" danger onClick={() => setImages(images.filter((_, i) => i !== idx))} style={{ width: "100%", borderRadius: "8px" }}>
                       ลบ
                     </Button>
                   </div>
@@ -1966,28 +1922,14 @@ useEffect(() => {
             )}
           </div>
 
+          {/* ชื่อและราคา */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", marginBottom: "2rem" }}>
             <div>
-              <label style={{ 
-                fontSize: "1rem", 
-                fontWeight: "600", 
-                color: "#172E25", 
-                marginBottom: "0.75rem",
-                display: "block"
-              }}>
+              <label style={{ fontSize: "1rem", fontWeight: "600", color: "#172E25", marginBottom: "0.75rem", display: "block" }}>
                 ชื่อที่ดิน
               </label>
               <div style={{ position: "relative" }}>
-                <User style={{ 
-                  position: "absolute", 
-                  left: "1rem", 
-                  top: "50%", 
-                  transform: "translateY(-50%)",
-                  width: "1.25rem", 
-                  height: "1.25rem", 
-                  color: "#6F969B",
-                  zIndex: 1
-                }} />
+                <User style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", width: "1.25rem", height: "1.25rem", color: "#6F969B", zIndex: 1 }} />
                 <input
                   type="text"
                   name="name"
@@ -1995,42 +1937,21 @@ useEffect(() => {
                   onChange={handleChange}
                   style={{
                     ...styles.input,
-                    paddingLeft: "3.5rem"
+                    paddingLeft: "3.5rem",
+                    borderColor: errors.name ? "red" : undefined
                   }}
                   placeholder="กรอกชื่อที่ดิน"
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "#6F969B";
-                    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(111, 150, 155, 0.1)";
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = "#e2e8f0";
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
                 />
               </div>
+              {errors.name && <p style={{ color: "red", fontSize: "0.9rem", marginTop: "0.5rem" }}>{errors.name}</p>}
             </div>
 
             <div>
-              <label style={{ 
-                fontSize: "1rem", 
-                fontWeight: "600", 
-                color: "#172E25", 
-                marginBottom: "0.75rem",
-                display: "block"
-              }}>
+              <label style={{ fontSize: "1rem", fontWeight: "600", color: "#172E25", marginBottom: "0.75rem", display: "block" }}>
                 ราคา (บาท)
               </label>
               <div style={{ position: "relative" }}>
-                <DollarSign style={{ 
-                  position: "absolute", 
-                  left: "1rem", 
-                  top: "50%", 
-                  transform: "translateY(-50%)",
-                  width: "1.25rem", 
-                  height: "1.25rem", 
-                  color: "#6F969B",
-                  zIndex: 1
-                }} />
+                <DollarSign style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", width: "1.25rem", height: "1.25rem", color: "#6F969B", zIndex: 1 }} />
                 <input
                   type="number"
                   name="price"
@@ -2039,81 +1960,72 @@ useEffect(() => {
                   onChange={handleChange}
                   style={{
                     ...styles.input,
-                    paddingLeft: "3.5rem"
+                    paddingLeft: "3.5rem",
+                    borderColor: errors.price ? "red" : undefined
                   }}
                   placeholder="กรอกราคา"
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "#6F969B";
-                    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(111, 150, 155, 0.1)";
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = "#e2e8f0";
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
                 />
               </div>
+              {errors.price && <p style={{ color: "red", fontSize: "0.9rem", marginTop: "0.5rem" }}>{errors.price}</p>}
             </div>
           </div>
 
+          {/* แท็ก */}
           <div style={{ marginBottom: "2rem" }}>
-            <label style={{ 
-              fontSize: "1rem", 
-              fontWeight: "600", 
-              color: "#172E25", 
-              marginBottom: "0.75rem",
-              display: "block"
-            }}>
+            <label style={{ fontSize: "1rem", fontWeight: "600", color: "#172E25", marginBottom: "0.75rem", display: "block" }}>
               คุณสมบัติที่ดิน
             </label>
             <Select
-              mode="multiple"                                    
+              mode="multiple"
               allowClear
               value={formData.tag_id}
               onChange={(values) => setFormData({ ...formData, tag_id: values })}
-              style={{ 
-                width: "100%", 
-                borderRadius: "12px"
-              }}
+              style={{ width: "100%", borderRadius: "12px", borderColor: errors.tag_id ? "red" : undefined }}
               placeholder="เลือกคุณสมบัติที่ดิน (ได้หลายข้อ)"
               options={tags.map(t => ({ value: t.id, label: t.Tag }))}
-              optionFilterProp="label"
               size="large"
             />
+            {errors.tag_id && <p style={{ color: "red", fontSize: "0.9rem", marginTop: "0.5rem" }}>{errors.tag_id}</p>}
           </div>
 
+          {/* ปุ่มย้อนกลับ & ถัดไป */}
           <div style={{ marginTop: "3rem", display: "flex", justifyContent: "space-between" }}>
+            <button onClick={() => setCurrentStep(2)} style={styles.button.secondary}>← ย้อนกลับ</button>
             <button
-              onClick={() => setCurrentStep(2)}
-              style={styles.button.secondary}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 4px 12px rgba(148, 163, 184, 0.3)";
+              onClick={() => {
+                // Ensure newErrors matches the shape of errors state
+                let newErrors = {
+                  firstName: "",
+                  lastName: "",
+                  phoneNumber: "",
+                  images: "",
+                  name: "",
+                  price: "",
+                  tag_id: "",
+                  province_id: "",
+                  district_id: "",
+                  subdistrict_id: "",
+                  mapCoords: ""
+                };
+                let valid = true;
+
+                if (images.length === 0) { newErrors.images = "กรุณาอัปโหลดรูปที่ดิน"; valid = false; }
+                if (!formData.name.trim()) { newErrors.name = "กรุณากรอกชื่อที่ดิน"; valid = false; }
+                if (!formData.price || Number(formData.price) <= 0) { newErrors.price = "กรุณากรอกราคามากกว่า 0"; valid = false; }
+                if (!formData.tag_id || formData.tag_id.length === 0) { newErrors.tag_id = "กรุณาเลือกคุณสมบัติที่ดิน"; valid = false; }
+
+                // The rest fields are not required in this step, but keep shape for type safety
+                setErrors(newErrors);
+
+                if (valid) setCurrentStep(4);
               }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "none";
-              }}
-            >
-              ← ย้อนกลับ
-            </button>
-            <button
-              onClick={() => setCurrentStep(4)}
               style={styles.button.primary}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 8px 24px rgba(111, 150, 155, 0.4)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 4px 12px rgba(111, 150, 155, 0.3)";
-              }}
             >
               ถัดไป →
             </button>
           </div>
         </div>
       )}
-
       {/* Step 4: Location */}
       {currentStep === 4 && (
         <div style={{ 
@@ -2149,7 +2061,6 @@ useEffect(() => {
             เลือกจังหวัด อำเภอ ตำบล และกำหนดพื้นที่ของที่ดินบนแผนที่
           </p>
 
-          {/* ข้อความแจ้งเตือนเกี่ยวกับการดึงข้อมูลจากโฉนดที่ดิน */}
           {selectedLand && (
             <div style={{
               background: "linear-gradient(135deg, #dbeafe, #bfdbfe)",
@@ -2176,14 +2087,9 @@ useEffect(() => {
             gap: "2rem",
             marginBottom: "2rem"
           }}>
+            {/* จังหวัด */}
             <div>
-              <label style={{ 
-                fontSize: "1rem", 
-                fontWeight: "600", 
-                color: "#172E25", 
-                marginBottom: "0.75rem",
-                display: "block"
-              }}>
+              <label style={{ fontSize: "1rem", fontWeight: "600", color: "#172E25", marginBottom: "0.75rem", display: "block" }}>
                 จังหวัด
               </label>
               <select
@@ -2202,16 +2108,16 @@ useEffect(() => {
                   </option>
                 ))}
               </select>
+              {errors.province_id && (
+                <p style={{ color: "red", fontSize: "0.85rem", marginTop: "0.25rem" }}>
+                  {errors.province_id}
+                </p>
+              )}
             </div>
 
+            {/* อำเภอ */}
             <div>
-              <label style={{ 
-                fontSize: "1rem", 
-                fontWeight: "600", 
-                color: "#172E25", 
-                marginBottom: "0.75rem",
-                display: "block"
-              }}>
+              <label style={{ fontSize: "1rem", fontWeight: "600", color: "#172E25", marginBottom: "0.75rem", display: "block" }}>
                 อำเภอ
               </label>
               <select
@@ -2230,16 +2136,16 @@ useEffect(() => {
                   </option>
                 ))}
               </select>
+              {errors.district_id && (
+                <p style={{ color: "red", fontSize: "0.85rem", marginTop: "0.25rem" }}>
+                  {errors.district_id}
+                </p>
+              )}
             </div>
 
+            {/* ตำบล */}
             <div>
-              <label style={{ 
-                fontSize: "1rem", 
-                fontWeight: "600", 
-                color: "#172E25", 
-                marginBottom: "0.75rem",
-                display: "block"
-              }}>
+              <label style={{ fontSize: "1rem", fontWeight: "600", color: "#172E25", marginBottom: "0.75rem", display: "block" }}>
                 ตำบล
               </label>
               <select
@@ -2258,21 +2164,19 @@ useEffect(() => {
                   </option>
                 ))}
               </select>
+              {errors.subdistrict_id && (
+                <p style={{ color: "red", fontSize: "0.85rem", marginTop: "0.25rem" }}>
+                  {errors.subdistrict_id}
+                </p>
+              )}
             </div>
           </div>
 
+          {/* แผนที่ */}
           <div style={{ marginBottom: "2rem" }}>
-            <label style={{ 
-              fontSize: "1rem", 
-              fontWeight: "600", 
-              color: "#172E25", 
-              marginBottom: "1rem",
-              display: "block"
-            }}>
+            <label style={{ fontSize: "1rem", fontWeight: "600", color: "#172E25", marginBottom: "1rem", display: "block" }}>
               แผนที่ตำแหน่ง
             </label>
-            
-            {/* ข้อความแจ้งเตือนเกี่ยวกับการซูมแผนที่ */}
             {pendingLocationData && (
               <div style={{
                 background: "linear-gradient(135deg, #dbeafe, #bfdbfe)",
@@ -2297,23 +2201,30 @@ useEffect(() => {
                 </div>
               </div>
             )}
-            
-          <div style={{
-            background: "linear-gradient(135deg, #f8fafc, #f1f5f9)",
-            border: "2px solid #e2e8f0",
-            borderRadius: "16px",
-            padding: "1.5rem",
-            marginBottom: "1rem",
-            position: "relative"
-          }}>
-            <MapPicker 
-              value={mapCoords} 
-              onChange={setMapCoords} 
-              height={500} 
-              center={mapCenter}
-              zoom={mapZoom}
-            />
-          </div>            <div style={{ 
+
+            <div style={{
+              background: "linear-gradient(135deg, #f8fafc, #f1f5f9)",
+              border: "2px solid #e2e8f0",
+              borderRadius: "16px",
+              padding: "1.5rem",
+              marginBottom: "0.25rem",
+              position: "relative"
+            }}>
+              <MapPicker 
+                value={mapCoords} 
+                onChange={setMapCoords} 
+                height={500} 
+                center={mapCenter}
+                zoom={mapZoom}
+              />
+            </div>
+            {errors.mapCoords && (
+              <p style={{ color: "red", fontSize: "0.85rem", marginTop: "0.25rem" }}>
+                {errors.mapCoords}
+              </p>
+            )}
+
+            <div style={{ 
               fontSize: "0.9rem", 
               color: mapCoords.length >= 3 ? "#059669" : "#f59e0b", 
               marginTop: "0.5rem",

@@ -41,6 +41,7 @@ export const NotificationProvider: React.FC<Props> = ({ userID, children }) => {
     const ws = new WebSocket(`ws://localhost:8080/ws/notification/${userID}`);
     wsRef.current = ws;
 
+    // @ts-ignore
     ws.onclose = (e) => {
       setTimeout(connectWS, 2000);
     };

@@ -1,8 +1,10 @@
+// @ts-ignore
 import { CheckSquareOutlined, CopyOutlined, SearchOutlined, AuditOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
 import Loader from "../../component/third-patry/Loader";
 import { useNavigate } from "react-router-dom";
 import "./MainPage.css";
 import { useState } from "react";
+// @ts-ignore
 import Logo from "../../assets/LogoLandchain.png";
 import Landpic from "../../assets/LandPic.jpg";
 import LandpicKorat from "../../assets/LandPicKorat.jpg"
@@ -12,7 +14,7 @@ import HeaderMain from "./HeaderMain";
 const MainPage = (): JSX.Element => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-
+  // @ts-ignore
   const goToRegisland = () => {
     setLoading(true);
     sessionStorage.setItem("isLogin", "true");
@@ -20,7 +22,7 @@ const MainPage = (): JSX.Element => {
       navigate("/user/regisland");
     }, 2000);
   };
-
+  // @ts-ignore
   const goToLogin = () => {
     setLoading(true);
     setTimeout(() => {

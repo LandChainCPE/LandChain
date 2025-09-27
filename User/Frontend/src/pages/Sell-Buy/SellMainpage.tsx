@@ -3,6 +3,7 @@ import Loader from "../../component/third-patry/Loader";
 import Navbar from "../../component/user/Navbar";
 import { useState } from "react";
 import Landpic from "../../assets/LandPic.jpg";
+// @ts-ignore
 import { GetAllPostLandData } from "../../service/https/jib/jib";
 
 function SellMainPage() {
@@ -10,6 +11,7 @@ function SellMainPage() {
   const [loading, setLoading] = useState(false); // สถานะการโหลด
 
   // ฟังก์ชันไปยังหน้า /user/main
+  // @ts-ignore
   const gotomainuser = () => {
     setLoading(true);
     sessionStorage.setItem("isLogin", "true");

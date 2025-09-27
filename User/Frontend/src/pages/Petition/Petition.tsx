@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Input, Button, Space, Typography, message, Steps } from "antd";
 import { FileTextOutlined, UserOutlined, PhoneOutlined, MailOutlined, CalendarOutlined, SendOutlined, ReloadOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { CreatePetition } from "../../service/https/jib/jib"; 
+import { GetInfoUserByWalletID } from "../../service/https/bam/bam"; 
+
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -40,9 +42,24 @@ const Petition: React.FC = () => {
       return;
     }
 
-  const userId = sessionStorage.getItem("user_id");
-
     try {
+      // ดึง token และ token_type จาก sessionStorage
+      const token = sessionStorage.getItem("token");
+      //const tokenType = localStorage.getItem("token_type") || "Bearer";
+      if (!token) {
+        message.error("กรุณาเข้าสู่ระบบก่อน");
+        setLoading(false);
+        return;
+      }
+      // เรียก API โดยไม่ต้องส่ง argument (token จะถูกแนบใน service)
+      const userInfo = await GetInfoUserByWalletID();
+      const userId = userInfo?.user_id || userInfo?.id;
+      if (!userId) {
+        message.error("ไม่พบข้อมูลผู้ใช้จาก token");
+        setLoading(false);
+        return;
+      }
+
       const payload = {
         first_name: formData.firstName,
         last_name: formData.lastName,
@@ -61,7 +78,7 @@ const Petition: React.FC = () => {
 
       // After successful submission, redirect to another page
       setTimeout(() => {
-        navigate("/user/userdashboard");
+        navigate("/user/state");
       }, 2000);
     } catch (error) {
       message.error("❌ เกิดข้อผิดพลาด: " + (error || "ไม่ทราบสาเหตุ"));
@@ -499,7 +516,7 @@ const Petition: React.FC = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="กรอกอีเมล (ไม่บังคับ)"
+                    placeholder="กรอกอีเมล"
                     size="large"
                     style={{ 
                       borderRadius: "1rem",
