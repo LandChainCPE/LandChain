@@ -1,5 +1,5 @@
-const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
-
+// const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
+const apiUrl = "http://localhost:8080";
 function getAuthHeaders() {
   const token = sessionStorage.getItem("token");
   const tokenType = sessionStorage.getItem("token_type");

@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "landdepartment-e6b2a"
-  }
+    "default": "landdepartment-e6b2a",
+    "landdepartment": "landdepartment-e6b2a"
+  },
+  "targets": {},
+  "etags": {}
 }

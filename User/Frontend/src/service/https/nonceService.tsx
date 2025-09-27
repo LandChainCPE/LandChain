@@ -33,7 +33,7 @@ export interface LoginResponse {
   exists: boolean;
 }
 
-// Get nonce for address
+// ทำการ Get ค่า Nonce จากระบบมา
 export const getNonce = async (address: string): Promise<NonceResponse> => {
   const response = await fetch(`${API_BASE_URL}/nonce/${address}`);
   

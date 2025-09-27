@@ -28,8 +28,8 @@ func ConnectDatabase() *gorm.DB {
 		log.Fatal("❌ Failed to load .env file")
 	}
 
-	// DSN
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Bangkok",
+	// DSN														require      disable
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Bangkok",
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
@@ -114,8 +114,8 @@ func SetupDatabase() {
 		db.Create(&entity.Role{Role: "Admin"})
 
 		RefRole := uint(1)
-
-		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0x81c7a15ae0b72cade82d428844cff477f6e364b5", RoleID: RefRole}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
+		RefRole2 := uint(2)
+		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0x81c7a15ae0b72cade82d428844cff477f6e364b5", RoleID: RefRole2}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
 		db.Create(&entity.Users{Firstname: "Panachai", Lastname: "Potisuwan", Email: "Panachai@gmail.com", Phonenumber: "0555555554", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f4444", RoleID: RefRole})
 		db.Create(&entity.Users{Firstname: "Noth", Lastname: "Potisuwan", Email: "Noth@gmail.com", Phonenumber: "0555555556", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f6666", RoleID: RefRole})
 

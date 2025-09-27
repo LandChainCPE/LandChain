@@ -13,7 +13,7 @@ const LoginMetamask = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // ฟังก์ชันเชื่อมต่อ Metamask
+  // ฟังก์ชันเชื่อมต่อ Metamask  อรรถอ่านแล้ว
   const connectMetamask = async () => {
     if (window.ethereum) {
       try {
