@@ -1,3 +1,4 @@
+// @ts-ignore
 import { 
   CheckCircle, 
   MapPin, 
@@ -8,13 +9,8 @@ import {
   X, 
   Search,
   Filter,
-  Eye,
-  Calendar,
   User,
-  Hash,
-  Map,
   Ruler,
-  CheckSquare,
   XCircle,
   Home
 } from "lucide-react";
@@ -28,7 +24,9 @@ function VerifyLand() {
   const [selectedLand, setSelectedLand] = useState<any>(null);
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  // @ts-ignore
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
+  // @ts-ignore
   const [confirmAction, setConfirmAction] = useState<string>("");
   const [isHolding, setIsHolding] = useState<boolean>(false);
   const [holdProgress, setHoldProgress] = useState<number>(0);
@@ -129,6 +127,7 @@ function VerifyLand() {
     return `${wallet.slice(0, 10)}...${wallet.slice(-6)}`;
   };
 
+  // @ts-ignore
   const toggleSection = (section: string, requestId: number) => {
     setExpandedCards(prev => {
       const newSet = new Set(prev);

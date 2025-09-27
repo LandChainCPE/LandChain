@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const apiUrl = "https://52.230.63.209:8080";
+const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
 
 
 // สร้าง instance ของ axios

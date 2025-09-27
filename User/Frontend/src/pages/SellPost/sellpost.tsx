@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { GetTags,CreateLandPost, getLandtitleIdByTokenId, checkLandsalepostByLandId } from "../../service/https/jib/jib";
 import { ethers } from "ethers";
 import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";
-import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield/https";
+import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield";
 import MapPicker from "../../components/MapPicker";
 
 type Coordinate = { lng: number; lat: number };
@@ -21,7 +21,7 @@ async function saveLocations(
   const API_BASE =
     opts?.apiBase ??
     (import.meta as any)?.env?.VITE_API_BASE_URL ??
-    "https://52.230.63.209:8080";
+    "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io:8080";
 
   const token = opts?.token ?? sessionStorage.getItem("token") ?? "";
   const tokenType = opts?.tokenType ?? sessionStorage.getItem("token_type") ?? "Bearer";

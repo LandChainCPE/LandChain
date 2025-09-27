@@ -1,5 +1,5 @@
 // Nonce service for handling replay attack prevention
-const API_BASE_URL = 'https://52.230.63.209:8080';
+const API_BASE_URL = 'https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io';
 
 export interface NonceResponse {
   nonce: string;

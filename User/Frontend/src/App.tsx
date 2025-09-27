@@ -4,24 +4,47 @@ import ConfigRoutes from "./routes/mainroute";
 import { GetUserIDByWalletAddress } from "./service/https/bam/bam";
 
 const App: React.FC = () => {
-  const [userID, setUserID] = useState<number | null>(null);
+  // ดึงค่า isLogin จาก sessionStorage
+  const isLoginRaw = sessionStorage.getItem("isLogin");
 
-  // ตัวอย่าง fetch userID จาก API
+  // ยังไม่ถูกเซ็ต → consider ยังไม่ล็อกอิน
+  const isLoggedIn = isLoginRaw === "true";
+
+  const [userID, setUserID] = useState<number | null>(null);
+  const [checkedLogin, setCheckedLogin] = useState(false); // flag สำหรับเช็คว่าเช็ค session แล้ว
+
   useEffect(() => {
+    // mark ว่าเช็ค session แล้ว
+    setCheckedLogin(true);
+
+    if (!isLoggedIn) return; // ถ้ายังไม่ล็อกอิน หรือยังไม่มีค่า → ไม่ fetch
+
+    let isMounted = true;
     const fetchUserID = async () => {
-      const res = await GetUserIDByWalletAddress();
-      setUserID(res.user_id)
+      try {
+        const res = await GetUserIDByWalletAddress();
+        if (isMounted) setUserID(res.user_id);
+      } catch (err) {
+        console.error("Failed to fetch user ID", err);
+      }
     };
     fetchUserID();
-  }, []);
+    return () => { isMounted = false; };
+  }, [isLoggedIn]);
 
+  // ถ้ายังไม่เช็ค session → อาจ render loading หรือ null
+  if (!checkedLogin) return null;
 
   return (
-    userID !== null ? (
-      <NotificationProvider userID={userID}>
-        <ConfigRoutes />
-      </NotificationProvider>
-    ) : null
+    isLoggedIn ? (
+      userID !== null ? (
+        <NotificationProvider userID={userID}>
+          <ConfigRoutes />
+        </NotificationProvider>
+      ) : null // รอ fetch userID
+    ) : (
+      <ConfigRoutes /> // ไม่ล็อกอิน → render ConfigRoutes ปกติ
+    )
   );
 };
 

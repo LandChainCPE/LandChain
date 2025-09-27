@@ -1,6 +1,6 @@
 import "./verifyuser.css";
 import React, { useEffect, useState } from "react";
-import { GetDataUserVerification,} from "../../service/https/garfield/https";
+import { GetDataUserVerification,} from "../../service/https/garfield";
 import { GetUserIDByWalletAddress } from "../../service/https/bam/bam";
 import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';

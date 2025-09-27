@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useState } from "react";
 import { Settings as SettingsIcon, User, Bell, Shield, Database, Eye, EyeOff } from "lucide-react";
 

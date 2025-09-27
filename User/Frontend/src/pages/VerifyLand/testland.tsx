@@ -16,7 +16,7 @@ const mapLandTitle = (raw: any): LandTitle => ({
     process_status: raw.Status_verify ? "Verified" : "Unverified",
 });
 import React, { useEffect, useState } from "react";
-import { GetLandtitlesByUser } from "../../service/https/garfield/https";
+import { GetLandtitlesByUser } from "../../service/https/garfield";
 
 interface LandTitle {
     id: number;
@@ -50,7 +50,7 @@ const Testland: React.FC = () => {
                 try {
                     // debug header
                     // @ts-ignore
-                    const { getAuthHeaders } = await import("../../service/https/garfield/https");
+                    const { getAuthHeaders } = await import("../../service/https/garfield");
                     console.log("Auth headers:", getAuthHeaders());
                     const { result } = await GetLandtitlesByUser(userId);
                     setLandTitles(Array.isArray(result) ? result.map(mapLandTitle) : []);

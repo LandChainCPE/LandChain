@@ -1,8 +1,8 @@
 import "./UserRegisLand.css";
 import React, { useEffect, useState } from "react";
 import { MapPin, Save } from "lucide-react";
-import { RegisterLand } from "../../service/https/garfield/https";
-import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield/https";
+import { RegisterLand } from "../../service/https/garfield";
+import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield";
 import { useNavigate } from "react-router-dom";
 
 

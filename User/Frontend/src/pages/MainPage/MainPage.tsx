@@ -6,7 +6,9 @@ import "./MainPage.css";
 import { useState } from "react";
 // @ts-ignore
 import Logo from "../../assets/LogoLandchain.png";
+// @ts-ignore
 import Landpic from "../../assets/LandPic.jpg";
+// @ts-ignore
 import LandpicKorat from "../../assets/LandPicKorat.jpg"
 import type { JSX } from "react";
 import { Link } from 'react-router-dom';

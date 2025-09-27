@@ -18,7 +18,7 @@ function TransactionTimeline() {
 
     // useEffect(() => {
     //     const token = sessionStorage.getItem("token");
-    //     const wsUrl = `ws://52.230.63.209:8080/ws/transactions?token=${token}`;
+    //     const wsUrl = `wss://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/ws/transactions?token=${token}`;
     //     const socket = new WebSocket(wsUrl);
 
     //     socket.onopen = () => setConnectionStatus('connected');

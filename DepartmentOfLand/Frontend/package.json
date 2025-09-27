@@ -16,6 +16,7 @@
     "antd": "^5.27.4",
     "bootstrap": "^5.3.7",
     "ethers": "^6.14.1",
+    "firebase": "^12.3.0",
     "lucide-react": "^0.540.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

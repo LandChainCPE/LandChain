@@ -1,4 +1,4 @@
-const apiUrl = "http://localhost:8080";
+const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
 
 function getAuthHeaders() {
   const token = sessionStorage.getItem("token");

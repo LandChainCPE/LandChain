@@ -22,6 +22,7 @@ type Petition = {
 const StatePetition: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [petitions, setPetitions] = useState<Petition[]>([]);
+  // @ts-ignore
   const [states, setStates] = useState<State[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState<{ [id: number]: boolean }>({});

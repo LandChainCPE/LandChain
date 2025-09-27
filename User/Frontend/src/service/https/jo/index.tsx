@@ -1,4 +1,4 @@
-const apiUrl = "https://52.230.63.209:8080";
+const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
 
 import axios from "axios";
 import type { BookingInterface } from "../../../interfaces/Booking";
