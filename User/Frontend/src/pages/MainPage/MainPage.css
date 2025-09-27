@@ -124,6 +124,7 @@ body {
   padding: 4rem 0 6rem;
   z-index: 1;
   overflow: hidden;
+  margin-top: -25px;
 }
 
 .hero-section::before {
