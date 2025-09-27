@@ -1,5 +1,4 @@
-// const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
-const apiUrl = "http://localhost:8080";
+const apiUrl = import.meta.env.VITE_API_URL;
 
 function getAuthHeaders() {
   const token = sessionStorage.getItem("token");

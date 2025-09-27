@@ -1,5 +1,4 @@
-// const API_BASE_URL = 'https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io';
-const API_BASE_URL = 'http://localhost:8080';
+const apiUrl = import.meta.env.VITE_API_URL;
 
 interface NonceResponse {
   nonce: string;
@@ -25,7 +24,7 @@ interface LoginResponse {
 
 // ทำการ Get ค่า Nonce จากระบบมา
 const getNonce = async (address: string): Promise<NonceResponse> => {
-  const response = await fetch(`${API_BASE_URL}/nonce/${address}`);
+  const response = await fetch(`${apiUrl}/nonce/${address}`);
   
   if (!response.ok) {
     throw new Error(`Failed to get nonce: ${response.statusText}`);
@@ -51,7 +50,7 @@ const signMessage = async (message: string, address: string): Promise<string> =>
 
 // Login with nonce and signature
 const loginWithNonce = async (loginData: LoginRequest): Promise<LoginResponse> => {
-  const response = await fetch(`${API_BASE_URL}/department/login`, {
+  const response = await fetch(`${apiUrl}/department/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
