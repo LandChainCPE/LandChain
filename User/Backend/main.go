@@ -250,35 +250,14 @@ func main() {
 
 	r.Run("0.0.0.0:8080")
 }
-
+// เพราะผู้ใช้ นั้นรัน Frontend ที่เครื่องตัวเอง ผู้ใช้อยู่คนละวงแลน  บอกไม่ได้ว่าผู้ใช้  ใช้เน็ต IP ไหนบ้าง  จึงเปิดรับทั้งหมด 
+//เพราะผู้ใช้รัน Frontend ที่เครื่องตัวเอง (IP ไม่แน่นอน, อยู่คนละวงแลน, อาจเปลี่ยนเน็ตตลอดเวลา)
+//ถ้าระบุ Origin เฉพาะเจาะจงจะทำให้ผู้ใช้บางคนเข้าไม่ได้
 // Middleware CORS - รองรับ Frontend หลายตัว
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// รองรับ User Frontend และ Department Frontend
-		origin := c.Request.Header.Get("Origin")
-		allowedOrigins := []string{
-			"http://localhost:5173", // User Frontend (Vite default)
-			"http://localhost:5174", // Department Frontend (Vite port 2)
-			"http://localhost:3000", // React default (ถ้ามี)
-			"http://localhost:3001", // React port 2 (ถ้ามี)
-			"https://52.230.63.209:5173",
-			"https://52.230.63.209:5174",
-			"https://52.230.63.209:80",
-		}
-
-		// ตรวจสอบว่า origin อยู่ในรายการที่อนุญาตไหม
-		for _, allowedOrigin := range allowedOrigins {
-			if origin == allowedOrigin {
-				c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
-				break
-			}
-		}
-
-		// ถ้าไม่พบ origin ที่อนุญาต ให้ใช้ * (สำหรับ development)
-		if c.Writer.Header().Get("Access-Control-Allow-Origin") == "" {
-			c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		}
-
+		// ให้ทุก Origin เข้าถึง (Production) 
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, PATCH")
