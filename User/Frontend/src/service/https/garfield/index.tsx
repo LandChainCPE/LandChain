@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
+const apiUrl = "http://localhost:8080";
 
 
 /** ใส่เฉพาะ Authorization (อย่าใส่ Content-Type ที่นี่) */
