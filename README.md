@@ -32,3 +32,7 @@ Nginx เป็น Web Server และค่าเริ่มต้น (Defaul
 Railway จะเข้ามาเชื่อมต่อที่ Port ที่ Container เปิดไว้ → ต้องตรงกับ EXPOSE
 Client (443 HTTPS) → Railway → Container (Port 80)
 
+
+
+
+docker build -t backend-app -f backend/Dockerfile .
