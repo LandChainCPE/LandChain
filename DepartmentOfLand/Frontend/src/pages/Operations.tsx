@@ -32,7 +32,7 @@ function UserMain() {
           date_booking: convertToThaiDate(booking.date_booking), // แปลงวันที่
         }));
         setBookings(transformedBookings);
-        console.log(res.data);
+        console.log(res);
       }
       setLoading(false);
     };
