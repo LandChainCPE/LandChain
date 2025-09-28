@@ -33,7 +33,7 @@ func main() {
 	controller.StartCron()
 
 	// เริ่มต้น Scheduler สำหรับลบการจองที่หมดอายุ
-	//controller.StartBookingCleanupScheduler()
+	controller.StartBookingCleanupScheduler()
 
 	//อ่านค่าการตอบกลับจาก Smartcontract (ควรใช้ go routine)
 	go controller.ListenSmartContractEvents()
@@ -44,12 +44,8 @@ func main() {
 
 	// เพิ่ม/ปรับปรุง API จาก managepost.go
 	r.PUT("/managepost/update/:post_id", controller.UpdatePost)
-	r.PUT("/managepost/updatephotoland/:photoland_id", controller.UpdatePhotoland)
-	r.PUT("/managepost/updatelocation/:location_id", controller.UpdateLocation)
-	// r.GET("/managepost/userpostland/:user_id", controller.GetUserPostLandData)
-	// r.POST("/managepost/photos/:post_id", controller.AddMultiplePhotos)
-	// r.PUT("/managepost/photos/replace/:post_id", controller.ReplaceAllPhotos)
-
+	r.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
+	r.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)
 	r.POST("/createaccount", controller.CreateAccount)
 	r.POST("/check-wallet", controller.CheckWallet)
 	r.POST("/login", controller.LoginUser)
@@ -130,8 +126,6 @@ func main() {
 		admin.POST("/departmentoflandverifytransaction", controller.DepartmentOfLandVerifyTransaction)
 		//จบ----- อรรถ -------
 
-		admin.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
-		admin.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)
 		admin.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
 		admin.POST("/updatepetitions", controller.UpdatePetitionStatus)
 
@@ -142,10 +136,12 @@ func main() {
 	userOwnership.Use(middlewares.CheckOwnershipOrAdmin())
 	{
 		userOwnership.GET("/user/GetUserID/:wallet", controller.GetUserIDByWallet)
-		userOwnership.GET("/user/lands/:user_id", controller.GetUserPostLandData)
-		userOwnership.PUT("/user/updatepost", controller.UpdatePost)
-		userOwnership.PUT("/user/location/:location_id", controller.UpdateLocation)
-		userOwnership.PUT("/user/photoland/:photoland_id", controller.UpdatePhotoland)
+		//////////////////////////////////////////////////////////////////////////////////
+		userOwnership.GET("/user/lands/:user_id", controller.GetUserPostLandData) // มีแล้ว ✅
+		userOwnership.PUT("/user/posts/:post_id", controller.UpdatePost)          //ส่วนแก้ไขโพสต์
+		userOwnership.GET("/user/posts/:post_id", controller.GetPostDetail)
+		userOwnership.DELETE("/user/posts/:post_id", controller.DeletePost)
+		//////////////////////////////////////////////////////////////////////////////////
 		userOwnership.POST("/userbookings", controller.CreateBooking)
 		userOwnership.PUT("/bookings/:id", controller.UpdateBooking)
 		userOwnership.GET("/bookings/:userID", controller.GetUserBookings)
