@@ -36,3 +36,9 @@ Client (443 HTTPS) → Railway → Container (Port 80)
 
 
 docker build -t backend-app -f backend/Dockerfile .
+
+ก่อน Deploy เช็ค 
+1.Url Azure Frontend
+2.เช็ค contract address Frontend  (.env)
+3.เช็คชื่อ  Database ของ Azure   (.env)
+4.เช็คการเข้ารหัส sslmode
