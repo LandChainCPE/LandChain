@@ -229,7 +229,7 @@ func GetInfoUserByWalletID(c *gin.Context) {
 	db := config.DB()
 
 	// ดึงข้อความห้องแชทพร้อมเรียงเวลาข้อความ
-	if err := db.First(&User).Where("metamaskaddress = ?", walletAddr).Error; err != nil {
+	if err := db.First(&User).Where("metamaskaddress = ?", walletAddr).Preload("UserVerification").Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลผู้ใช้ได้"})
 		return
 	}

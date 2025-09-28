@@ -6,6 +6,7 @@ import { GetInfoUserByWalletID } from "../../service/https/bam/bam";
 import { UserCheck, CheckSquare } from "react-feather"; // Assuming 'react-feather' contains the User and Home icons
 import { GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";
 import Navbar from "../../component/user/Navbar";
+import { GetUserIDByWalletAddress } from "../../service/https/bam/bam";
 
 /* =======================
    Icon Components (SVG)
@@ -150,7 +151,8 @@ export default function UserProfilePage() {
     setIsLoadingUser(true);
     setUserError(null);
     GetInfoUserByWalletID().then((result) => {
-      if (result && (result.firstName || result.lastName || result.first_name || result.last_name || result.email)) {
+      if (result && (result.firstName || result.lastName || result.first_name || result.last_name || result.email || result.user_verification_id)) {
+        console.log("Fetched user data:", result);
         setUserInfo({
           firstName: result.firstName || result.first_name || "",
           lastName: result.lastName || result.last_name || "",
@@ -172,11 +174,14 @@ export default function UserProfilePage() {
   // ---------- Titles stats ----------
   // State สำหรับจำนวนที่ดินจาก backend
   const [totalLandCount, setTotalLandCount] = useState<number>(0);
+  const [userId, setuserId] = useState<number>(0);
 
   useEffect(() => {
-    const user_id = sessionStorage.getItem("user_id") || "";
-    if (user_id) {
-      GetLandtitlesByUser(user_id).then((res) => {
+    const fetchUserId = async () => {
+    const result = await GetUserIDByWalletAddress();
+    setuserId(result.user_id)
+    if (result.user_id) {
+      GetLandtitlesByUser(result.user_id).then((res) => {
         if (Array.isArray(res)) {
           setTotalLandCount(res.length);
         } else if (res?.result && Array.isArray(res.result)) {
@@ -188,15 +193,17 @@ export default function UserProfilePage() {
     } else {
       setTotalLandCount(0);
     }
+  }
+  fetchUserId();
   }, []);
 
   // State สำหรับจำนวนที่ดินที่ยังไม่ verify จาก backend
   const [notverifyCount, setNotverifyCount] = useState<number>(0);
 
   useEffect(() => {
-    const user_id = sessionStorage.getItem("user_id") || "";
-    if (user_id) {
-      GetLandtitlesByUser(user_id).then((res) => {
+
+    if (userId) {
+      GetLandtitlesByUser(userId.toString()).then((res) => {
         let arr = Array.isArray(res) ? res : (res?.result && Array.isArray(res.result) ? res.result : []);
         // รองรับทั้ง Status_verify และ status_verify
         const count = arr.filter((item: any) => item.Status_verify === false || item.status_verify === false).length;

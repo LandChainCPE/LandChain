@@ -4,7 +4,7 @@ import { MapPin, Save } from "lucide-react";
 import { RegisterLand } from "../../service/https/garfield";
 import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield";
 import { useNavigate } from "react-router-dom";
-
+import { GetUserIDByWalletAddress } from "../../service/https/bam/bam";
 
 type ProvinceDTO = { ID: number; name_th: string; name_en?: string };
 type DistrictDTO = { ID: number; name_th: string; province_id: number; name_en?: string };
@@ -47,11 +47,9 @@ const UserRegisLand: React.FC = () => {
       try {
         // import ให้ถูกต้องตามที่ใช้จริง
         // @ts-ignore
-        const wallet = sessionStorage.getItem("wallet") || "";
-        const { user_id } = await import("../../service/https/bam/bam").then(mod => mod.GetUserIDByWalletAddress());
-        if (typeof user_id === "number") {
-          setCurrentUserId(user_id);
-        }
+
+        const result = await GetUserIDByWalletAddress();
+          setCurrentUserId(result.user_id);
       } catch (error) {
         console.error("Error calling GetUserIDByWalletAddress:", error);
       }

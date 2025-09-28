@@ -63,18 +63,15 @@ function VerifyUser() {
   const [signature, setSignature] = useState<string>("");
   const [nameHash, setNameHash] = useState<string>("");
 
-const [currentUserId, setCurrentUserId] = useState<number>(Number(sessionStorage.getItem("user_id") || 1));
+const [currentUserId, setCurrentUserId] = useState<number>();
 
   useEffect(() => {
     const fetchUserId = async () => {
       try {
         // @ts-ignore
-        const wallet = sessiosStorage.getItem("wallet") || "";
-        const result = await GetUserIDByWalletAddress();
-        console.log("GetUserIDByWalletAddress result:", result);
-        if (result && typeof result.user_id === "number") {
+          const result = await GetUserIDByWalletAddress();
           setCurrentUserId(result.user_id);
-        }
+          console.log("ID:", result.user_id);
       } catch (error) {
         console.error("Error calling GetUserIDByWalletAddress:", error);
       }
@@ -85,9 +82,9 @@ const [currentUserId, setCurrentUserId] = useState<number>(Number(sessionStorage
   useEffect(() => {
     const fetchData = async () => {
       const userid = currentUserId;
-      console.log("UserID:", userid);
+      console.log("UserID:", currentUserId);
       if (!userid) return;
-      const { response, result } = await GetDataUserVerification(String(userid));
+      const { response, result } = await GetDataUserVerification(String(currentUserId));
       if (response && result) {
         console.log(response);
         console.log(result);

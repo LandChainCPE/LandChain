@@ -5,6 +5,7 @@ import (
 	"landchain/entity"
 	"log"
 	"os"
+
 	//"time"
 
 	"encoding/csv"
@@ -29,7 +30,7 @@ func ConnectDatabase() *gorm.DB {
 	}
 
 	// DSN														require      disable
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Bangkok",
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Bangkok",
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),

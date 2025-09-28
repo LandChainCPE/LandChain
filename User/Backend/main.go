@@ -246,13 +246,14 @@ func main() {
 
 	r.Run("0.0.0.0:8080")
 }
-// เพราะผู้ใช้ นั้นรัน Frontend ที่เครื่องตัวเอง ผู้ใช้อยู่คนละวงแลน  บอกไม่ได้ว่าผู้ใช้  ใช้เน็ต IP ไหนบ้าง  จึงเปิดรับทั้งหมด 
-//เพราะผู้ใช้รัน Frontend ที่เครื่องตัวเอง (IP ไม่แน่นอน, อยู่คนละวงแลน, อาจเปลี่ยนเน็ตตลอดเวลา)
-//ถ้าระบุ Origin เฉพาะเจาะจงจะทำให้ผู้ใช้บางคนเข้าไม่ได้
+
+// เพราะผู้ใช้ นั้นรัน Frontend ที่เครื่องตัวเอง ผู้ใช้อยู่คนละวงแลน  บอกไม่ได้ว่าผู้ใช้  ใช้เน็ต IP ไหนบ้าง  จึงเปิดรับทั้งหมด
+// เพราะผู้ใช้รัน Frontend ที่เครื่องตัวเอง (IP ไม่แน่นอน, อยู่คนละวงแลน, อาจเปลี่ยนเน็ตตลอดเวลา)
+// ถ้าระบุ Origin เฉพาะเจาะจงจะทำให้ผู้ใช้บางคนเข้าไม่ได้
 // Middleware CORS - รองรับ Frontend หลายตัว
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// ให้ทุก Origin เข้าถึง (Production) 
+		// ให้ทุก Origin เข้าถึง (Production)
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
