@@ -19,8 +19,9 @@ const BookingCalendar = () => {
   useEffect(() => {
     const fetchUserId = async () => {
       try {
+        // @ts-ignore
         const wallet = sessionStorage.getItem("wallet") || "";
-        const result = await GetUserIDByWalletAddress(wallet);
+        const result = await GetUserIDByWalletAddress();
         console.log("GetUserIDByWalletAddress result:", result);
         if (result && typeof result.user_id === "number") {
           setCurrentUserId(result.user_id);

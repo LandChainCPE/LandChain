@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';
@@ -5,6 +6,7 @@ import { Button, TextField, Box, Typography, Container, Card, CardContent } from
 
 const App = () => {
     const [web3, setWeb3] = useState<Web3 | null>(null);
+    // @ts-ignore
     const [accounts, setAccounts] = useState<string[]>([]);
     const [contract, setContract] = useState<any>(null);
     const [walletAddress, setWalletAddress] = useState('');
@@ -722,7 +724,7 @@ const App = () => {
             const provider = await detectEthereumProvider();
 
             if (provider) {
-                const web3Instance = new Web3(provider);
+                const web3Instance = new Web3(provider as any);
                 setWeb3(web3Instance);
 
                 // Request accounts
@@ -760,7 +762,7 @@ const App = () => {
             setTransactionStatus('Success');
         } catch (error) {
             console.error('Error registering owner:', error);
-            alert('Error: ' + error.message);
+            alert('Error: ' + (error instanceof Error ? error.message : String(error)));
             setTransactionStatus('Failed');
         }
     };
@@ -777,7 +779,7 @@ const App = () => {
             setTransactionStatus('Success');
         } catch (error) {
             console.error('Error minting NFT:', error);
-            alert('Error: ' + error.message);
+            alert('Error: ' + (error instanceof Error ? error.message : String(error)));
             setTransactionStatus('Failed');
         }
     };
@@ -793,7 +795,7 @@ const App = () => {
             alert(`Owner Info: ${ownerInfo}`);
         } catch (error) {
             console.error('Error fetching owner info:', error);
-            alert('Error: ' + error.message);
+            alert('Error: ' + (error instanceof Error ? error.message : String(error)));
         }
     };
 
@@ -808,7 +810,7 @@ const App = () => {
             alert(`Land Title Info: ${landTitleInfo}`);
         } catch (error) {
             console.error('Error fetching land title info:', error);
-            alert('Error: ' + error.message);
+            alert('Error: ' + (error instanceof Error ? error.message : String(error)));
         }
     };
 
@@ -824,7 +826,7 @@ const App = () => {
             setTransactionStatus('Success');
         } catch (error) {
             console.error('Error transferring ownership:', error);
-            alert('Error: ' + error.message);
+            alert('Error: ' + (error instanceof Error ? error.message : String(error)));
             setTransactionStatus('Failed');
         }
     };
@@ -840,7 +842,7 @@ const App = () => {
             alert(`Ownership History: ${history}`);
         } catch (error) {
             console.error('Error fetching ownership history:', error);
-            alert('Error: ' + error.message);
+            alert('Error: ' + (error instanceof Error ? error.message : String(error)));
         }
     };
 

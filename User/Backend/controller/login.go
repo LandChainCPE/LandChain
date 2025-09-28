@@ -58,19 +58,19 @@ func verifySignature(address, message, signature string) bool {
 	fmt.Printf("🔍 Debug - TextHash: %x\n", hash)
 
 	// Recover the public key from signature
-	pubKey, err := crypto.SigToPub(hash, sigBytes)
+	pubKey, err := crypto.SigToPub(hash, sigBytes)    		//ตรวจสอบผู้เซ็น Message นี้    โดย  message singnature  จะถอดได้ PublicKey
 	if err != nil {
 		fmt.Printf("❌ Signature recovery error: %v\n", err)
 		return false
 	}
 
 	// Get address from public key
-	recoveredAddr := crypto.PubkeyToAddress(*pubKey)
+	recoveredAddr := crypto.PubkeyToAddress(*pubKey)     //เอา PublicKey มาถอดเอา ETH Address
 	fmt.Printf("🔍 Debug - Expected: 0x%s\n", address)
 	fmt.Printf("🔍 Debug - Recovered: %s\n", recoveredAddr.Hex())
 
 	// Compare addresses (case insensitive)
-	result := strings.EqualFold(recoveredAddr.Hex(), "0x"+address)
+	result := strings.EqualFold(recoveredAddr.Hex(), "0x"+address)   // ก็แค่เทียบ ETH Address ที่กู้ได้ว่าตรงกับ WalletAddress ไหม
 	fmt.Printf("🔍 Debug - Verification result: %v\n", result)
 	return result
 }
@@ -199,7 +199,7 @@ func DepartmentLogin(c *gin.Context) {
 		"access_level":   "admin",
 	})
 }
-
+ //อรรถ อ่านแล้ว 
 func RegisterUser(c *gin.Context) {
 	// รับข้อมูลจาก frontend (Address, Nonce, Signature, Firstname, Lastname, Phonenumber, Email)
 	var req struct {
@@ -216,7 +216,7 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
-	// ตรวจสอบและใช้ nonce
+	// ตรวจสอบและใช้ nonce ว่ามี Nonce และยังไม่หมดอายุ
 	if !ValidateAndConsumeNonce(req.Address, req.Nonce) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired nonce"})
 		return
@@ -228,6 +228,7 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
+	//ตรวจสอบแล้วว่า WalletID ตรงกับ ETH Address ที่กู้ได้
 	db := config.DB()
 
 	// เช็คว่า Metamask ไม่ซ้ำกับในฐานข้อมูล

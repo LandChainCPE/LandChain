@@ -1,5 +1,5 @@
 import axios from "axios";
-const apiUrl = "http://localhost:8080";
+const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
 
 const Authorization = sessionStorage.getItem("token");
 const Bearer = sessionStorage.getItem("token_type");
@@ -86,9 +86,10 @@ async function getLandtitleIdByTokenId(tokenId: string) {
     .catch((e) => e.response);
 }
 
+// ดึงคำร้องของ user ตาม user_id
 async function GetPetitionsByUserID(userId: string) {
   return await axios
-    .get(`${apiUrl}/petition/${userId}`, requestOptions)
+    .get(`${apiUrl}/petitions/user/${userId}`, requestOptions)
     .then((res) => res.data)
     .catch((e) => e.response);
 }

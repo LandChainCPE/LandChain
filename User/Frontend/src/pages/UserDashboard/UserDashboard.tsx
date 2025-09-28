@@ -1,11 +1,8 @@
 import "./UserDashboard.css";
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { GetLandtitlesByUser } from "../../service/https/garfield/http";
+import { GetLandtitlesByUser } from "../../service/https/garfield";
 import { GetInfoUserByWalletID } from "../../service/https/bam/bam";
-import { Table, Tag, Card as AntCard, Row, Col, Statistic, Empty } from "antd";
-import { FileTextOutlined, CalendarOutlined, ClockCircleOutlined, CheckCircleOutlined, ExclamationCircleOutlined, } from "@ant-design/icons";
-import { GetAllPetition } from "../../service/https/jib/jib";
 import { UserCheck, CheckSquare } from "react-feather"; // Assuming 'react-feather' contains the User and Home icons
 import { GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";
 import Navbar from "../../component/user/Navbar";
@@ -119,27 +116,13 @@ interface LandTitle {
   size?: string;
   contract_address?: string;
 }
-interface State {
-  id: number;
-  name: string;
-  color: string;
-}
-interface Petition {
-  ID: number;
-  first_name: string;
-  last_name: string;
-  topic: string;
-  date: string;
-  description: string;
-  State: State | null;
-}
+
 
 /* ===== Helpers ===== */
 const StatusPill = ({ status }: { status: TitleStatus }) => {
   const label = status === "active" ? "พร้อมใช้งาน" : status === "encumbered" ? "มีภาระผูกพัน" : "รอตรวจสอบ";
   return <span className={`badge ${status === "active" ? "badge-green" : status === "encumbered" ? "badge-amber" : "badge-slate"}`}>{label}</span>;
 };
-
 
 
 const StatCard = ({ title, value, sub }: { title: React.ReactNode; value: React.ReactNode; sub?: React.ReactNode }) => (
@@ -238,84 +221,12 @@ export default function UserProfilePage() {
     console.log("User info:", userInfo);
   }, [userInfo]);
 
-  // ---------- Petitions ----------
-  const [petitions, setPetitions] = useState<Petition[]>([]);
-  const [loadingPetition, setLoadingPetition] = useState(false);
-  useEffect(() => {
-    const fetchPetitions = async () => {
-      setLoadingPetition(true);
-      try {
-        const response = await GetAllPetition();
-        setPetitions(response);
-      } catch {
-        // noop
-      } finally {
-        setLoadingPetition(false);
-      }
-    };
-    fetchPetitions();
-  }, []);
 
-  const getStatusIcon = (state?: State | null) => {
-    switch (state?.name) {
-      case "รอตรวจสอบ":
-        return <ClockCircleOutlined />;
-      case "เสร็จสิ้น":
-        return <CheckCircleOutlined />;
-      case "กำลังดำเนินการ":
-        return <ExclamationCircleOutlined />;
-      default:
-        return <ClockCircleOutlined />;
-    }
-  };
 
-  const petitionColumns = [
-    {
-      title: "เลขคำร้อง",
-      dataIndex: "ID",
-      key: "ID",
-      width: 120,
-      render: (id: number) => (
-        <Tag color="blue" style={{ fontWeight: 600 }}>#{id}</Tag>
-      ),
-    },
-    { title: "ชื่อ", dataIndex: "first_name", key: "first_name" },
-    { title: "นามสกุล", dataIndex: "last_name", key: "last_name" },
-    { title: "เรื่อง", dataIndex: "topic", key: "topic" },
-    { title: "รายละเอียด", dataIndex: "description", key: "description" },
-    {
-      title: "วันที่ยื่น",
-      dataIndex: "date",
-      key: "date",
-      width: 130,
-      render: (date: string) => {
-        const formattedDate = date
-          ? new Date(date).toLocaleDateString("th-TH", { day: "2-digit", month: "2-digit", year: "numeric" })
-          : "ไม่ระบุวันที่";
-        return (
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <CalendarOutlined style={{ color: "#8c8c8c" }} />
-            <span>{formattedDate}</span>
-          </div>
-        );
-      },
-    },
-    {
-      title: "สถานะ",
-      key: "status",
-      width: 150,
-      render: (record: Petition) => {
-        const state = record.State;
-        const color = state?.color || "default";
-        const statusName = state?.name || "ไม่ระบุสถานะ";
-        return (
-          <Tag color={color} icon={getStatusIcon(state)} style={{ borderRadius: 16, padding: "4px 12px", fontWeight: 600 }}>
-            {statusName}
-          </Tag>
-        );
-      },
-    },
-  ];
+
+
+
+
   useEffect(() => {
     console.log("User info:", userInfo);
   }, [userInfo]);
@@ -620,49 +531,6 @@ export default function UserProfilePage() {
               </tbody>
             </table>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* 5) PETITIONS OVERVIEW + TABLE */}
-      <Card>
-        <CardHeader>
-          <CardTitle>ติดตามสถานะคำร้อง</CardTitle>
-          <CardDescription>ดูสถานะคำร้องขอคัดโฉนดของคุณ</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="petition-stats">
-            <Row gutter={24}>
-              <Col xs={24} sm={6}>
-                <AntCard style={{ borderRadius: 12, textAlign: "center" }}>
-                  <Statistic title="คำร้องทั้งหมด" value={petitions.length} prefix={<FileTextOutlined style={{ color: "#1890ff" }} />} valueStyle={{ color: "#1890ff", fontWeight: 700 }} />
-                </AntCard>
-              </Col>
-              <Col xs={24} sm={6}>
-                <AntCard style={{ borderRadius: 12, textAlign: "center" }}>
-                  <Statistic title="รอตรวจสอบ" value={petitions.filter(p => p.State?.name === "รอตรวจสอบ").length} prefix={<ClockCircleOutlined style={{ color: "#fa8c16" }} />} valueStyle={{ color: "#fa8c16", fontWeight: 700 }} />
-                </AntCard>
-              </Col>
-              <Col xs={24} sm={6}>
-                <AntCard style={{ borderRadius: 12, textAlign: "center" }}>
-                  <Statistic title="กำลังดำเนินการ" value={petitions.filter(p => p.State?.name === "กำลังดำเนินการ").length} prefix={<ExclamationCircleOutlined style={{ color: "#1890ff" }} />} valueStyle={{ color: "#1890ff", fontWeight: 700 }} />
-                </AntCard>
-              </Col>
-              <Col xs={24} sm={6}>
-                <AntCard style={{ borderRadius: 12, textAlign: "center" }}>
-                  <Statistic title="เสร็จสิ้น" value={petitions.filter(p => p.State?.name === "เสร็จสิ้น").length} prefix={<CheckCircleOutlined style={{ color: "#52c41a" }} />} valueStyle={{ color: "#52c41a", fontWeight: 700 }} />
-                </AntCard>
-              </Col>
-            </Row>
-          </div>
-
-          <Table
-            columns={petitionColumns as any}
-            dataSource={petitions}
-            rowKey="ID"
-            loading={loadingPetition}
-            pagination={{ pageSize: 10, showSizeChanger: true, showQuickJumper: true, showTotal: (total, range) => `${range[0]}-${range[1]} จาก ${total} รายการ` }}
-            locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="ไม่พบข้อมูลคำร้อง" /> }}
-          />
         </CardContent>
       </Card>
     </div>

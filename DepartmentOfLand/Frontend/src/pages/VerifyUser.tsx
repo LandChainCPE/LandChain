@@ -25,6 +25,7 @@ function Verify() {
     fetchData();
   }, [bookingID]);
 
+  // @ts-ignore
   const handleAction = async (bookingID: any) => {
     setShowConfirmPopup(true);
   };

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { message } from 'antd';
-import { UserOutlined, LockOutlined, LoginOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+// import { useNavigate } from 'react-router-dom';
+// import { message } from 'antd';
 import "../index.css"
+import { SecureLogin } from '../service/https/nonceService';
+import { useNavigate } from 'react-router-dom';
 
 // Extend Window interface for MetaMask
 declare global {
@@ -11,227 +12,46 @@ declare global {
   }
 }
 
-interface LoginFormValues {
-  username: string;
-  password: string;
-}
-
 const Login: React.FC = () => {
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState<LoginFormValues>({
-    username: '',
-    password: ''
-  });
-  const [errors, setErrors] = useState<Partial<LoginFormValues>>({});
-
-  const validateForm = (): boolean => {
-    const newErrors: Partial<LoginFormValues> = {};
-
-    if (!formData.username) {
-      newErrors.username = 'กรุณาใส่ชื่อผู้ใช้งาน';
-    } else if (formData.username.length < 3) {
-      newErrors.username = 'ชื่อผู้ใช้งานต้องมีอย่างน้อย 3 ตัวอักษร';
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'กรุณาใส่รหัสผ่าน';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleInputChange = (field: keyof LoginFormValues) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: e.target.value
-    }));
-    
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: undefined
-      }));
-    }
-  };
 
   const handleMetaMaskLogin = async () => {
-    try {
-      // Check if MetaMask is installed
-      if (typeof window.ethereum === 'undefined') {
-        message.error('กรุณาติดตั้ง MetaMask ก่อนใช้งาน');
-        return;
-      }
-
-      setLoading(true);
-
-      // Request account access
-      const accounts = await window.ethereum.request({
-        method: 'eth_requestAccounts',
-      });
-
-      if (accounts.length > 0) {
-        const account = accounts[0];
-        console.log('Connected MetaMask account:', account);
-        
-        // TODO: Verify wallet address with your backend
-        // You can add signature verification here
-        
-        sessionStorage.setItem('isLogin', 'true');
-        sessionStorage.setItem('walletAddress', account);
-        sessionStorage.setItem('loginMethod', 'metamask');
-        
-        message.success(`เข้าสู่ระบบสำเร็จด้วย MetaMask`);
-        navigate('/main');
-      }
-    } catch (error: any) {
-      console.error('MetaMask login error:', error);
-      if (error.code === 4001) {
-        message.error('การเชื่อมต่อ MetaMask ถูกยกเลิก');
-      } else {
-        message.error('เกิดข้อผิดพลาดในการเชื่อมต่อ MetaMask');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
+    if (typeof window.ethereum === 'undefined') {
+      window.location.href = 'https://metamask.app.link/dapp/' + window.location.host;
       return;
     }
-
     setLoading(true);
-    
-    try {
-      // TODO: Replace with your actual login service
-      console.log('Login values:', formData);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // For now, just set login status and navigate
-      sessionStorage.setItem('isLogin', 'true');
-      message.success('เข้าสู่ระบบสำเร็จ');
-      navigate('/main');
-    } catch (error) {
-      message.error('เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
-    } finally {
-      setLoading(false);
+    const accounts = await window.ethereum.request({
+      method: 'eth_requestAccounts',
+    });
+    if (accounts && accounts.length > 0) {
+      console.log("Account", accounts);
+      const address = accounts[0];   //  มันคืนมาเป็น  Array  เลยต้องใช้ [0]
+      const loginResult = await SecureLogin(address);
+      console.log("loginResult" , loginResult);
+      sessionStorage.setItem("token", loginResult.token);
+      sessionStorage.setItem("token_type", loginResult.token_type);
+      sessionStorage.setItem("isLogin", "true");
+      navigate("/main");
     }
   };
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-slate-50 to-blue-100 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
-        {/* Login Form Card */}
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border-0 animate-slideIn p-8">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-blue-900 mb-2">
               เข้าสู่ระบบ
             </h2>
             <p className="text-blue-600 text-sm">
-              กรุณาใส่ข้อมูลผู้ใช้งานเพื่อเข้าสู่ระบบ
+              กรุณาเข้าสู่ระบบด้วย MetaMask
             </p>
           </div>
-
-          <form onSubmit={handleLogin} className="space-y-6">
-            {/* Username Field */}
-            <div>
-              <label className="block text-blue-900 font-semibold text-base mb-2">
-                ชื่อผู้ใช้งาน
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <UserOutlined className="text-blue-500 text-lg" />
-                </div>
-                <input
-                  type="text"
-                  value={formData.username}
-                  onChange={handleInputChange('username')}
-                  placeholder="กรอกชื่อผู้ใช้งาน"
-                  className={`w-full h-14 pl-12 pr-4 rounded-xl border-2 shadow-sm text-base focus:outline-none transition-colors duration-200 ${
-                    errors.username 
-                      ? 'border-red-400 focus:border-red-500 bg-red-50' 
-                      : 'border-blue-200 hover:border-blue-400 focus:border-blue-500 bg-white'
-                  }`}
-                />
-              </div>
-              {errors.username && (
-                <p className="mt-1 text-sm text-red-600">{errors.username}</p>
-              )}
-            </div>
-
-            {/* Password Field */}
-            <div>
-              <label className="block text-blue-900 font-semibold text-base mb-2">
-                รหัสผ่าน
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <LockOutlined className="text-blue-500 text-lg" />
-                </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={handleInputChange('password')}
-                  placeholder="กรอกรหัสผ่าน"
-                  className={`w-full h-14 pl-12 pr-12 rounded-xl border-2 shadow-sm text-base focus:outline-none transition-colors duration-200 ${
-                    errors.password 
-                      ? 'border-red-400 focus:border-red-500 bg-red-50' 
-                      : 'border-blue-200 hover:border-blue-400 focus:border-blue-500 bg-white'
-                  }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-blue-500 hover:text-blue-700 transition-colors"
-                >
-                  {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-              )}
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-blue-400 disabled:to-blue-500 text-white font-semibold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>กำลังเข้าสู่ระบบ...</span>
-                </>
-              ) : (
-                <>
-                  <LoginOutlined className="text-lg" />
-                  <span>เข้าสู่ระบบ</span>
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Divider */}
-          <div className="flex items-center my-6">
-            <div className="flex-1 border-t border-blue-100"></div>
-            <div className="px-4 text-blue-600 text-sm">หรือ</div>
-            <div className="flex-1 border-t border-blue-100"></div>
-          </div>
-
-          {/* MetaMask Login Button */}
           <button
             type="button"
             onClick={handleMetaMaskLogin}
@@ -261,16 +81,8 @@ const Login: React.FC = () => {
               </>
             )}
           </button>
-
-          {/* Footer Links */}
-          <div className="text-center space-y-3 pt-6 border-t border-blue-100 mt-8">
-            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors hover:underline">
-              ลืมรหัสผ่าน?
-            </button>
-          </div>
         </div>
       </div>
-
       {/* Background Decoration - Land & Blockchain Theme */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         {/* Grid Pattern */}
@@ -283,11 +95,9 @@ const Login: React.FC = () => {
             backgroundSize: '40px 40px'
           }}
         ></div>
-        
         {/* Subtle Gradient Overlays */}
         <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-blue-300/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-10 left-10 w-80 h-80 bg-gradient-to-tr from-blue-300/15 to-blue-400/10 rounded-full blur-3xl"></div>
-        
         {/* Land Plot Icons */}
         <div className="absolute top-20 right-20 text-blue-200 opacity-30 animate-fadeIn">
           <div className="w-20 h-20 border-2 border-current rounded-lg p-2">
@@ -302,7 +112,6 @@ const Login: React.FC = () => {
             <div className="text-xs text-center mt-1">Land Plots</div>
           </div>
         </div>
-
         {/* Blockchain Icon */}
         <div className="absolute bottom-20 left-20 text-blue-200 opacity-30 animate-fadeIn" style={{animationDelay: '1s'}}>
           <div className="w-20 h-20 border-2 border-current rounded-lg p-2">
@@ -316,7 +125,6 @@ const Login: React.FC = () => {
             <div className="text-xs text-center mt-2">Blockchain</div>
           </div>
         </div>
-
         {/* Property Document Icon */}
         <div className="absolute top-1/3 left-10 text-blue-200 opacity-25 animate-fadeIn" style={{animationDelay: '2s'}}>
           <div className="w-16 h-20 border-2 border-current rounded-lg p-2 bg-current bg-opacity-10">
@@ -330,7 +138,6 @@ const Login: React.FC = () => {
             <div className="text-xs text-center mt-1">Title Deed</div>
           </div>
         </div>
-
         {/* Digital Transaction Icon */}
         <div className="absolute bottom-1/3 right-10 text-blue-200 opacity-25 animate-fadeIn" style={{animationDelay: '3s'}}>
           <div className="w-16 h-16 border-2 border-current rounded-lg p-2">
@@ -345,7 +152,6 @@ const Login: React.FC = () => {
             <div className="text-xs text-center mt-1">Transaction</div>
           </div>
         </div>
-
         {/* Security Shield Icon */}
         <div className="absolute top-2/3 right-1/4 text-blue-200 opacity-20 animate-fadeIn" style={{animationDelay: '4s'}}>
           <div className="w-12 h-16 relative">
@@ -356,7 +162,6 @@ const Login: React.FC = () => {
             <div className="text-xs text-center mt-1">Secure</div>
           </div>
         </div>
-
         {/* Floating Data Elements */}
         <div className="absolute top-1/4 right-1/3 text-blue-100 opacity-15 animate-bounce-subtle" style={{animationDelay: '1.5s'}}>
           <div className="text-xs font-mono bg-blue-900/10 rounded p-2">
@@ -365,7 +170,6 @@ const Login: React.FC = () => {
             <div>Verified ✓</div>
           </div>
         </div>
-
         <div className="absolute bottom-1/4 left-1/3 text-blue-100 opacity-15 animate-bounce-subtle" style={{animationDelay: '2.5s'}}>
           <div className="text-xs font-mono bg-blue-900/10 rounded p-2">
             <div>Smart Contract</div>
@@ -373,7 +177,6 @@ const Login: React.FC = () => {
             <div>Gas: 21000</div>
           </div>
         </div>
-
         {/* Network Connection Lines */}
         <div className="absolute inset-0">
           <div className="absolute top-32 left-20 w-64 h-0.5 bg-gradient-to-r from-transparent via-blue-300/30 to-transparent animate-pulse-slow"></div>

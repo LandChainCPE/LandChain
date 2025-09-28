@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useEffect, useRef, useState } from "react";
 import Navbar from "../../component/user/Navbar";
 import "./Chat.css";
@@ -82,7 +83,7 @@ const Chat = () => {
   useEffect(() => {
     if (!userID) return;
 
-    const ws = new WebSocket(`ws://localhost:8080/ws/notification/${userID}`);
+    const ws = new WebSocket(`wss://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/ws/notification/${userID}`);
 
     ws.onmessage = (event) => {
       const msg: Message = JSON.parse(event.data);
@@ -112,7 +113,7 @@ const Chat = () => {
     if (wsRef.current) wsRef.current.close();
 
     const ws = new WebSocket(
-      `ws://localhost:8080/ws/chat/${selectedRoom.ID}/${userID}`
+      `wss://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/ws/chat/${selectedRoom.ID}/${userID}`
 
     );
 
@@ -126,11 +127,11 @@ const Chat = () => {
         if (!newMsg.Type) {
           if (typeof newMsg.Content === "string") {
             if (
-              newMsg.Content.startsWith("http") &&
+              newMsg.Content.startsWith("https") &&
               /\.(jpg|jpeg|png|gif|webp)$/i.test(newMsg.Content)
             ) {
               newMsg.Type = "image";
-            } else if (newMsg.Content.startsWith("http")) {
+            } else if (newMsg.Content.startsWith("https")) {
               newMsg.Type = "file";
             } else {
               newMsg.Type = "text";
@@ -253,7 +254,7 @@ const Chat = () => {
       setMessages((prev) => [...prev, msg]);
 
       try {
-        await fetch("http://localhost:8080/notification/send", {
+        await fetch("https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/notification/send", {
 
           method: "POST",
           headers: { "Content-Type": "application/json" },

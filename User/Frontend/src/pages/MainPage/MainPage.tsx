@@ -1,10 +1,14 @@
+// @ts-ignore
 import { CheckSquareOutlined, CopyOutlined, SearchOutlined, AuditOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
 import Loader from "../../component/third-patry/Loader";
 import { useNavigate } from "react-router-dom";
 import "./MainPage.css";
 import { useState } from "react";
+// @ts-ignore
 import Logo from "../../assets/LogoLandchain.png";
+// @ts-ignore
 import Landpic from "../../assets/LandPic.jpg";
+// @ts-ignore
 import LandpicKorat from "../../assets/LandPicKorat.jpg"
 import type { JSX } from "react";
 import { Link } from 'react-router-dom';
@@ -12,7 +16,7 @@ import HeaderMain from "./HeaderMain";
 const MainPage = (): JSX.Element => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-
+  // @ts-ignore
   const goToRegisland = () => {
     setLoading(true);
     sessionStorage.setItem("isLogin", "true");
@@ -20,7 +24,7 @@ const MainPage = (): JSX.Element => {
       navigate("/user/regisland");
     }, 2000);
   };
-
+  // @ts-ignore
   const goToLogin = () => {
     setLoading(true);
     setTimeout(() => {
@@ -56,134 +60,6 @@ const MainPage = (): JSX.Element => {
 
       {/* Modern Search Section */}
       <div className="content-section">
-        <div className="search-section">
-          <h2 className="search-title">🔍 ค้นหาที่ดินของคุณ</h2>
-
-          <div className="filter-section">
-            <div className="filter-group">
-              <label className="filter-label">จังหวัด</label>
-              <select className="filter-select">
-                <option>เลือกจังหวัด</option>
-                <option>กรุงเทพมหานคร</option>
-                <option>นนทบุรี</option>
-                <option>นครราชสีมา</option>
-              </select>
-            </div>
-
-            <div className="filter-group">
-              <label className="filter-label">ขนาดพื้นที่ (ตร.ว.)</label>
-              <input className="filter-input" placeholder="ขนาดต่ำสุด" type="number" />
-            </div>
-
-            <div className="filter-group">
-              <label className="filter-label">ถึง</label>
-              <input className="filter-input" placeholder="ขนาดสูงสุด" type="number" />
-            </div>
-
-            <div className="filter-group">
-              <label className="filter-label">ราคา (บาท)</label>
-              <input className="filter-input" placeholder="ราคาต่ำสุด" type="number" />
-            </div>
-
-            <div className="filter-group">
-              <label className="filter-label">ถึง</label>
-              <input className="filter-input" placeholder="ราคาสูงสุด" type="number" />
-            </div>
-
-            <div className="filter-group button-group">
-              <button className="search-btn-modern">
-                ค้นหา
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Property Listings Section */}
-        <div className="section-header">
-          <div className="section-badge">🏞️ ประกาศขายที่ดิน</div>
-          <h2 className="section-title">ที่ดินคุณภาพ</h2>
-          <p className="section-subtitle">
-            เลือกซื้อที่ดินจากประกาศที่ผ่านการตรวจสอบแล้ว
-          </p>
-        </div>
-
-        <div className="property-grid">
-          <div className="property-card">
-            <img
-              src={Landpic}
-              alt="ที่ดินนนทบุรี"
-              className="property-image"
-            />
-            <div className="property-content">
-              <h3 className="property-title">🏞️ ที่ดินติดแม่น้ำ นนทบุรี</h3>
-              <p className="property-location">2-3-43 ไร่ • ติดแม่น้ำเจ้าพระยา</p>
-
-              <div className="property-tags">
-                <span className="property-tag">ติดน้ำ</span>
-                <span className="property-tag">วิวสวย</span>
-              </div>
-
-              <p className="property-price">💰 18,000,000 บาท</p>
-              <p className="property-description">
-                ที่ดินเหมาะสำหรับทำบ้านพักตากอากาศ เงียบสงบ บรรยากาศดี
-                ติดแม่น้ำเจ้าพระยา มีท่าเรือส่วนตัว
-              </p>
-              <button className="property-btn">ดูรายละเอียด</button>
-            </div>
-          </div>
-
-          <div className="property-card">
-            <img
-              src={LandpicKorat}
-              alt="ที่ดินนครราชสีมา"
-              className="property-image"
-            />
-            <div className="property-content">
-              <h3 className="property-title">🏛️ ที่ดินติดถนนใหญ่ นครราชสีมา</h3>
-              <p className="property-location">5-3-16 ไร่ • ติดถนนใหญ่</p>
-
-              <div className="property-tags">
-                <span className="property-tag">ติดถนน</span>
-                <span className="property-tag">เหมาะธุรกิจ</span>
-              </div>
-
-              <p className="property-price">💰 35,000,000 บาท</p>
-              <p className="property-description">
-                ที่ดินเหมาะสำหรับทำธุรกิจ เดินทางสะดวก ใกล้ตลาดและโรงเรียน
-                มีศักยภาพในการลงทุน
-              </p>
-              <button className="property-btn">ดูรายละเอียด</button>
-            </div>
-          </div>
-        </div>
-        {/* เอาไว้ใช้เวลาดึงข้อมูลจริงมาแสดง
-          {data.map((item, index) => (
-            <Col key={index} span={8}>
-              <Card
-                hoverable
-                cover={<img alt="land" src={item.image} style={{ height: 200, objectFit: 'cover' }} />}
-                style={{ fontFamily: 'Kanit', borderRadius: '12px' }}
-              >
-                <Title level={4}>{item.title}</Title>
-                <Text type="secondary">{item.area} • {item.location}</Text>
-                <br />
-                <Text strong>ราคา: {item.price} บาท</Text>
-                <p style={{ marginTop: 8 }}>{item.description}</p>
-              </Card>
-            </Col>
-          ))}
-          const data = [
-            {
-              title: "ขายที่ดิน นนทบุรี",
-              location: "ติดแม่น้ำเจ้าพระยา",
-              area: "2-3-43 ไร่",
-              price: "18,000,000",
-              description: "เหมาะสร้างบ้านพักตากอากาศ",
-              image: "/images/land1.jpg"
-            },
-            ...
-          ]
-        */}
 
         {/* Services Section */}
         <div className="section-header">

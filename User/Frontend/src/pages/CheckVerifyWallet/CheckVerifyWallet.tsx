@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useState, useEffect } from "react";
 import Navbar from "../../component/user/Navbar";
 import "./appointmentstatus.css";

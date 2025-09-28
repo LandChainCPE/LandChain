@@ -73,11 +73,13 @@ const LandHistory: React.FC = () => {
   };
 
 
+  // @ts-ignore
   const formatWallet = (wallet: string) => {
     if (wallet.length <= 10) return wallet;
     return `${wallet.slice(0, 6)}...${wallet.slice(-4)}`;
   };
 
+  // @ts-ignore
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
   };

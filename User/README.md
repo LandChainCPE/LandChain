@@ -24,3 +24,11 @@ npm install --save-dev @types/leaflet
 npm install --save-dev @types/react-leaflet
 
 npm install --save-dev vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom @vitejs/plugin-react
+
+
+firebase deploy
+firebase use 
+// Active Project: {โปรเจ็คที่จะ deploy]
+// Project aliases : default {โปรเจ็คที่จะ deploy]
+
+firebase use --add

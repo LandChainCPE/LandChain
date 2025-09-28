@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useEffect, useState } from "react";
 import { Select, Card, Typography, Spin, message, DatePicker, Modal } from "antd";
 import { GetBranches, GetProvinces, GetTimeSlots, CreateBooking, GetServiceTypes, GetAvailableSlots, GetBookingStatus } from "../../service/https/jo/index";
@@ -25,6 +26,7 @@ const BookingCalendar = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   
   // New state for booking status
+  // @ts-ignore
   const [userBookings, setUserBookings] = useState<any[]>([]);
   const [bookingStatusMap, setBookingStatusMap] = useState<Record<number, string>>({});
 

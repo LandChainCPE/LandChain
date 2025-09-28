@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const apiUrl = "http://localhost:8080";
+const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
 
 
 // สร้าง instance ของ axios
@@ -135,10 +135,10 @@ export async function GetRequestBuybyLandID(id: number | string) {
 // };
 
 
-export async function DeleteRequestBuy(userID: number, landID: string | number) {
+export async function DeleteRequestBuy(userID: number, landID: string | number, sellerID: string | number) {
   try {
     const res = await api.delete(`/user/lands/delete/requestbuy`, {
-      params: { userID, landID },
+      params: { userID, landID, sellerID },
     });
     return res.data;
   } catch (e: any) {
@@ -280,8 +280,7 @@ export async function GetTransationByUserID(userId: number | string) {
 
 export async function UpdateTransactionBuyerAccept({ sellerID, buyerID, landID }: { sellerID: string | number, buyerID: string | number, landID: string | number }) {
   try {
-    const res = await api.put(
-      `/user/lands/put/transation/buyerupdate?sellerID=${sellerID}&buyerID=${buyerID}&landID=${landID}`
+    const res = await api.put(`/user/lands/put/transation/buyerupdate?sellerID=${sellerID}&buyerID=${buyerID}&landID=${landID}`
     );
     return res.data;
   } catch (e) {
@@ -437,7 +436,7 @@ export async function CheckOwner(
 }
 
 
-export async function GetUserIDByWalletAddress(wallet: string) {
+export async function GetUserIDByWalletAddress() {
   try {
     const res = await api.get(`/chat/get/userid`)
     return res.data;

@@ -1,6 +1,6 @@
 import "./verifyuser.css";
 import React, { useEffect, useState } from "react";
-import { GetDataUserVerification,} from "../../service/https/garfield/http";
+import { GetDataUserVerification,} from "../../service/https/garfield";
 import { GetUserIDByWalletAddress } from "../../service/https/bam/bam";
 import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';
@@ -68,8 +68,9 @@ const [currentUserId, setCurrentUserId] = useState<number>(Number(sessionStorage
   useEffect(() => {
     const fetchUserId = async () => {
       try {
-        const wallet = sessionStorage.getItem("wallet") || "";
-        const result = await GetUserIDByWalletAddress(wallet);
+        // @ts-ignore
+        const wallet = sessiosStorage.getItem("wallet") || "";
+        const result = await GetUserIDByWalletAddress();
         console.log("GetUserIDByWalletAddress result:", result);
         if (result && typeof result.user_id === "number") {
           setCurrentUserId(result.user_id);

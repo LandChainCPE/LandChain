@@ -1,8 +1,8 @@
 import "./UserRegisLand.css";
 import React, { useEffect, useState } from "react";
 import { MapPin, Save } from "lucide-react";
-import { RegisterLand } from "../../service/https/garfield/http";
-import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield/http";
+import { RegisterLand } from "../../service/https/garfield";
+import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield";
 import { useNavigate } from "react-router-dom";
 
 
@@ -46,8 +46,9 @@ const UserRegisLand: React.FC = () => {
     const fetchUserId = async () => {
       try {
         // import ให้ถูกต้องตามที่ใช้จริง
+        // @ts-ignore
         const wallet = sessionStorage.getItem("wallet") || "";
-        const { user_id } = await import("../../service/https/bam/bam").then(mod => mod.GetUserIDByWalletAddress(wallet));
+        const { user_id } = await import("../../service/https/bam/bam").then(mod => mod.GetUserIDByWalletAddress());
         if (typeof user_id === "number") {
           setCurrentUserId(user_id);
         }

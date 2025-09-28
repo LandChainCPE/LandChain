@@ -8,7 +8,7 @@ import { getAllLocations, getLocationsByLandSalePostId } from '../../service/htt
 mapboxgl.accessToken = 'pk.eyJ1Ijoiam9oYXJ0MjU0NiIsImEiOiJjbWVmZ3YzMGcwcTByMm1zOWRkdjJkNTd0In0.DBDjy1rBDmc8A4PN3haQ4A';
 
 
-const apiUrl = "http://localhost:8080";
+const apiUrl = "https://52.230.63.209:8080";
 
 
 interface Coordinate {
@@ -21,7 +21,7 @@ interface SaveStatus {
   success: boolean;
   error: string | null;
 }
-
+// @ts-ignore
 interface LocationInput {
   sequence: number;
   latitude: number;
@@ -42,6 +42,7 @@ const Map: React.FC = () => {
   const map = useRef<mapboxgl.Map | null>(null);
   const [coordinates, setCoordinates] = useState<Coordinate[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
+  // @ts-ignore
   const [currentPolygonId, setCurrentPolygonId] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>({
     loading: false,
@@ -75,7 +76,7 @@ const Map: React.FC = () => {
         window.location.href = "/login";
       }
 
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      let errorMessage = `https ${response.status}: ${response.statusText}`;
       try {
         const errorData = await response.json();
         if (errorData.error) {
@@ -761,6 +762,7 @@ const Map: React.FC = () => {
   };
 
   // เพิ่มฟังก์ชันสำหรับสร้าง Land Sale Post ID ใหม่อัตโนมัติ
+  // @ts-ignore
   const createNewLandSalePost = () => {
     if (window.confirm('คุณต้องการสร้าง Land Sale Post ใหม่หรือไม่? ข้อมูลปัจจุบันจะถูกล้าง')) {
       // สร้าง ID ใหม่จาก timestamp

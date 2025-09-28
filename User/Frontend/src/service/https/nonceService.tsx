@@ -1,5 +1,5 @@
 // Nonce service for handling replay attack prevention
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io';
 
 export interface NonceResponse {
   nonce: string;
@@ -33,7 +33,7 @@ export interface LoginResponse {
   exists: boolean;
 }
 
-// Get nonce for address
+// ทำการ Get ค่า Nonce จากระบบมา
 export const getNonce = async (address: string): Promise<NonceResponse> => {
   const response = await fetch(`${API_BASE_URL}/nonce/${address}`);
   

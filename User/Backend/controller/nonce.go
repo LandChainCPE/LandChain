@@ -26,25 +26,27 @@ func GetNonce(c *gin.Context) {
 		return
 	}
 
-	// เชื่อมต่อฐานข้อมูล
+
 	db := config.DB()
 
-	// ลบเฉพาะ nonce ที่หมดอายุแล้ว (ไม่ใช่ทั้งหมด)
-	db.Where("address = ? AND expires_at < ?", address, time.Now()).Delete(&entity.Nonce{})
 
-	// ตรวจสอบจำนวน nonce ที่ยังใช้ได้ (จำกัดการใช้งาน)
+	db.Where("address = ? AND expires_at < ?", address, time.Now()).Delete(&entity.Nonce{})  // ทำการเช็คตารางของ Address คนนั้น เช็คว่าNonceมันหมดอายุยัง  ถ้าหมดอายุก็ลบ 
+
+
 	var existingCount int64
 	db.Model(&entity.Nonce{}).Where("address = ? AND expires_at > ?",
-		address, time.Now()).Count(&existingCount)
+		address, time.Now()).Count(&existingCount)     //ทำการนับ ว่า wallet นี้ กับ Nonce ที่ยังไม่หทดอายุมีกี่ตัว
 
-	// จำกัดไม่เกิน 5 nonce ต่อ address
-	if existingCount >= 5 {
+
+	if existingCount >= 5 {     // ถ้า Nonce เกิน 5 ก็ส่ง Error ไป
 		c.JSON(http.StatusTooManyRequests, gin.H{
 			"error": "Too many pending login attempts. Please wait or try again later."})
 		return
 	}
 
-	// สร้าง nonce ใหม่
+ 	// เพื่อป้องกันการเขียนลง DB ซ้ำๆ เกินไป
+
+	// ถ้าไท่เข้าเงื่่อนไขก็ สร้าง nonce ใหม่
 	nonce := generateNonce()
 	nonceRecord := entity.Nonce{
 		Address:   address,
@@ -52,16 +54,17 @@ func GetNonce(c *gin.Context) {
 		ExpiresAt: time.Now().Add(5 * time.Minute), // หมดอายุใน 5 นาที
 	}
 
-	// บันทึกลงฐานข้อมูล
+	// บันทึก Nonce ลงฐานข้อมูล
 	if err := db.Create(&nonceRecord).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create nonce"})
 		return
 	}
 
+	// ส่ง Nonce กลับไป
 	c.JSON(http.StatusOK, gin.H{"nonce": nonce})
 }
 
-// ValidateAndConsumeNonce ตรวจสอบและลบ nonce (internal function)
+// ตรวจสอบว่า มี Nonce และยังไม่หมดอายุ  
 func ValidateAndConsumeNonce(address, nonce string) bool {
 	db := config.DB()
 

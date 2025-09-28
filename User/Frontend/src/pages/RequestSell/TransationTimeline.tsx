@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+// @ts-ignore
 import { GetTransationByUserID, GetInfoUserByToken, UpdateTransactionBuyerAccept, SetSellInfoHandler, DeleteTransactionTodelete, GetSaleInfoHandler, DeleteLandsalepostByLandIDandUserID, BuyLandHandler, DeleteTransactionandAllrequest, DeleteTransactionToscucess , DeleteAllRequestBuyByLandID} from "../../service/https/bam/bam";
 import './TransactionTimeline.css';
 import Navbar from "../../component/user/Navbar";
@@ -11,14 +12,13 @@ function TransactionTimeline() {
     const [transactions, setTransactions] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
     const [userId, setUserId] = useState<number | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
 
     // useEffect(() => {
     //     const token = sessionStorage.getItem("token");
-    //     const wsUrl = `ws://localhost:8080/ws/transactions?token=${token}`;
+    //     const wsUrl = `wss://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/ws/transactions?token=${token}`;
     //     const socket = new WebSocket(wsUrl);
 
     //     socket.onopen = () => setConnectionStatus('connected');
@@ -359,7 +359,9 @@ const handleConfirmDelete = async () => {
 const [showSaleModal, setShowSaleModal] = useState(false);
 
 // เปิด Modal
+// @ts-ignore
 const [saleInfo, setSaleInfo] = useState<any | null>(null);
+// @ts-ignore
 const [loadingSaleInfo, setLoadingSaleInfo] = useState(false);
 
 // เปิด Modal ร่างสัญญา
@@ -434,8 +436,8 @@ const openETHModal = (toAddress: string, amountWei: string, tokenId: string, tra
 
 interface SaleInfoType {
     tokenId: string;
-  price: string; // สมมติเป็น ETH เช่น "1.5"
-  buyer?: string;
+    price: string; 
+    buyer?: string;
 }
 
  const confirmBuyLand = async (
@@ -454,6 +456,7 @@ interface SaleInfoType {
     console.log("ส่งจากบัญชี:", fromAddress);
 
     // ดึง sale info
+    // @ts-ignore
     const saleArray: SaleInfoType[] = Object.values(saleInfos);
     const txInfo = Object.values(saleInfos).find(
   (sale: any) => sale.tokenId.toString() === tokenId.toString()

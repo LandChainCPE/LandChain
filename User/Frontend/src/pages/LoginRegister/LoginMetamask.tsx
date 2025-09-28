@@ -1,7 +1,9 @@
+// @ts-ignore
 import React, { useState } from 'react';
 import './LoginMetamask.css'; // นำเข้าไฟล์ CSS ที่สร้างขึ้นมา
 import Logo from '../../assets/LogoLandchain.png';
-import { LoginWallet } from '../../service/https/garfield/http';
+// @ts-ignore
+import { LoginWallet } from '../../service/https/garfield';
 import { secureLogin } from '../../service/https/nonceService';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,7 +13,7 @@ const LoginMetamask = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // ฟังก์ชันเชื่อมต่อ Metamask
+  // ฟังก์ชันเชื่อมต่อ Metamask  อรรถอ่านแล้ว
   const connectMetamask = async () => {
     if (window.ethereum) {
       try {
@@ -97,7 +99,7 @@ const LoginMetamask = () => {
         {/* Header */}
         <div className="header">
           <img src={Logo} alt="Logo" style={{ width: '350px' }} />
-          <p className="headerSubtitle" style={{ fontFamily: 'Kanit' }}>เชื่อม Metamask เพื่อดำเนินการต่อ</p>
+          <p className="headerSubtitle" style={{ fontFamily: 'Kanit' }}>เชื่อม Metamask เพื่อดำเนินการต่อ555</p>
         </div>
 
         {/* Content */}

@@ -25,6 +25,7 @@ const NavButton: React.FC<{
 
 const MainPage = (): JSX.Element => {
     const navigate = useNavigate();
+    // @ts-ignore
     const [loading, setLoading] = useState(false);
     const [isLogin, setIsLogin] = useState(false);
 

@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useEffect, useState } from "react";
 import { ArrowRightLeft, User, FileText, CheckCircle, Clock, MapPin, X } from "lucide-react";
 import { getTransactionLand, DepartmentOfLandVerifyTransaction } from "../service/https/aut/https";

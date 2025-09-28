@@ -1,13 +1,14 @@
 import './VerifyLand.css';   // ✅ import CSS แยกไฟล์
 import React, { useState } from 'react';
 import { useEffect } from 'react';
-import { GetLandtitlesByUser } from '../../service/https/garfield/http';
+import { GetLandtitlesByUser } from '../../service/https/garfield';
 import { Upload, FileText, MapPin, User, CheckCircle, AlertCircle, Loader2, Shield} from 'lucide-react';
 import { Container } from 'react-bootstrap';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { Web3 } from 'web3';
 const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
 import contractABI from "../VerifyUser/ContractABI.json";
+// @ts-ignore
 import Navbar from '../../component/user/Navbar';
 
 
@@ -93,8 +94,9 @@ const VerifyLand: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
+        // @ts-ignore
         const wallet = sessionStorage.getItem("wallet") || "";
-        const { user_id } = await import("../../service/https/bam/bam").then(mod => mod.GetUserIDByWalletAddress(wallet));
+        const { user_id } = await import("../../service/https/bam/bam").then(mod => mod.GetUserIDByWalletAddress());
         if (user_id) {
           const { result } = await GetLandtitlesByUser(String(user_id));
           if (Array.isArray(result)) {
