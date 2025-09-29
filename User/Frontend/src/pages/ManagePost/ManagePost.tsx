@@ -327,10 +327,7 @@ const ManagePost: React.FC = () => {
     }
   }, []);
 
-<<<<<<< HEAD
-  const loadUserPosts = async () => {
-     // @ts-ignore
-=======
+
   const loadDistricts = useCallback(async (provinceId: number) => {
     try {
       const response = await GetDistrict(provinceId);
@@ -377,7 +374,8 @@ const ManagePost: React.FC = () => {
   }, []);
 
   const loadUserPosts = useCallback(async () => {
->>>>>>> 82b0437b8a8b9b3318bfc590d8fa2e50b88784e9
+
+    //@ts-ignore
     const wallet = localStorage.getItem("wallet") || sessionStorage.getItem("wallet");
     setLoading(true);
     setError(null);
@@ -582,6 +580,7 @@ const ManagePost: React.FC = () => {
   }, []);
 
   // ===== EVENT HANDLERS =====
+  //@ts-ignore
   const handleProvinceChange = useCallback(async (provinceId: number) => {
     setDistricts([]);
     setSubdistricts([]);
@@ -598,6 +597,7 @@ const ManagePost: React.FC = () => {
     }
   }, [provinces, loadDistricts, postForm, getLocationCoordinates]);
 
+  //@ts-ignore
   const handleDistrictChange = useCallback(async (districtId: number) => {
     setSubdistricts([]);
     postForm.setFieldsValue({ subdistrict_id: undefined });
@@ -613,6 +613,7 @@ const ManagePost: React.FC = () => {
     }
   }, [districts, loadSubdistricts, postForm, getLocationCoordinates]);
 
+  //@ts-ignore
   const handleSubdistrictChange = useCallback((subdistrictId: number) => {
     if (subdistrictId) {
       const selectedSubdistrict = subdistricts.find(s => s.id === subdistrictId);
