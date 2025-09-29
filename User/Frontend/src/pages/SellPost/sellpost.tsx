@@ -952,25 +952,23 @@ useEffect(() => {
 
     try {
       const payload = {
-        landspost: {
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          phone_number: formData.phoneNumber,
-          name: formData.name,
-          price: Number(formData.price),
-          province_id: Number(formData.province_id),
-          district_id: Number(formData.district_id),
-          subdistrict_id: Number(formData.subdistrict_id),
-          land_id: Number(formData.land_id),
-          user_id: Number(currentUserId),
-        },
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone_number: formData.phoneNumber,
+        name: formData.name,
+        price: Number(formData.price),
+        province_id: Number(formData.province_id),
+        district_id: Number(formData.district_id),
+        subdistrict_id: Number(formData.subdistrict_id),
+        land_id: Number(formData.land_id),
+        user_id: Number(currentUserId),
         locations: mapCoords.map((c, i) => ({
           sequence: i + 1,
           latitude: c.lat,
           longitude: c.lng,
         })),
         tag_id: formData.tag_id,
-        images: images, // 🔹 array ของ base64
+        images: images, // array ของ base64
       };
 
       await CreateLandPost(payload);
@@ -1639,7 +1637,7 @@ useEffect(() => {
                   {/* Show selected deed number only once above the grid */}
                   {selectedLand && (() => {
                     const land = landMetadata.find((l: any) => String(l.tokenID) === String(selectedLand));
-                    const deedNo = land?.meta?.["Deed No"] || land?.meta?.["DeedNo"] || "-";
+                    const deedNo = land?.meta?.["TitleDeedNumber"] || land?.meta?.["TitleDeedNumber"] || "-";
                     return (
                       <div style={{ marginBottom: 12, textAlign: "center" }}>
                         <span style={{ color: "#1677ff", fontWeight: 600, fontSize: "1.1rem" }}>

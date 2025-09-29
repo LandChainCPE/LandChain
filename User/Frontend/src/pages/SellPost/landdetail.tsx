@@ -3,7 +3,7 @@ import "../../component/third-patry/Loader.css";
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { MapPin, Phone, User, Home, Calendar, Ruler, Map, MessageCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { GetAllPostLandData, CreateRequestBuySell } from "../../service/https/jib/jib";
+import { GetAllPostLandData, CreateRequestBuySellHandler } from "../../service/https/jib/jib";
 import { Modal } from "antd"; 
 import "leaflet/dist/leaflet.css";
 import mapboxgl from 'mapbox-gl';
@@ -524,7 +524,7 @@ const handleBuy = async () => {
     return;
   }
   try {
-    const res = await CreateRequestBuySell({
+    const res = await CreateRequestBuySellHandler({
       buyer_id: userId,
       land_id: land?.ID,
     });
