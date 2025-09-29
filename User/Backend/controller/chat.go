@@ -202,7 +202,7 @@ func UploadImage(c *gin.Context) {
 	}
 
 	// ตอบกลับ URL + type
-	url := fmt.Sprintf("http://172.20.10.2:8080/uploads/chat/%s", filename)
+	url := fmt.Sprintf("http://user.landchain.online/uploads/chat/%s", filename)
 	c.JSON(http.StatusOK, gin.H{
 		"url":  url,
 		"type": fileType,

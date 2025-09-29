@@ -5,10 +5,12 @@ import { Calendar, Clock, User, ChevronRight, AlertCircle, CheckCircle } from "l
 
 function UserMain() {
   const navigate = useNavigate();
+  //@ts-ignore
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   // ฟังก์ชันแปลงวันที่จากปี ค.ศ. เป็นปี พ.ศ.
+  //@ts-ignore
   const convertToThaiDate = (dateString: string) => {
     const date = new Date(dateString);
 

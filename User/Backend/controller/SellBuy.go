@@ -363,7 +363,7 @@ func SetSellInfoHandler(c *gin.Context) {
 	land := entity.Landtitle{}
 	db := config.DB()
 
-	if err := db.First(&land, "id = ?", req.TokenID).Error; err != nil {
+	if err := db.First(&land, "token_id = ?", req.TokenID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "land not found"})
 		return
 	}
