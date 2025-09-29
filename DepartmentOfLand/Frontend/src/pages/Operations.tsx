@@ -28,14 +28,14 @@ function UserMain() {
       let { response, result } = await getQueueByDate();
       console.log("response", response);
       console.log("result", result);
-      // if (res && res.data) {
-      //   const transformedBookings = res.data.map((booking: any) => ({
-      //     ...booking,
-      //     date_booking: convertToThaiDate(booking.date_booking), // แปลงวันที่
-      //   }));
-      //   setBookings(transformedBookings);
-      //   // console.log(res);
-      // }
+      if (response.status === 200 && result) {
+        const transformedBookings = result.map((booking: any) => ({
+          ...booking,
+          date_booking: convertToThaiDate(booking.date_booking), // แปลงวันที่
+        }));
+        setBookings(transformedBookings);
+        // console.log(res);
+      }
       setLoading(false);
     };
 
@@ -44,7 +44,8 @@ function UserMain() {
 
   const handleAction = (item: any) => {
     // ส่ง object ของรายการทั้งหมดไปเป็น state
-    navigate(`/verifyuser`, { state: { booking: item } });
+    console.log(item.id);
+    navigate(`/verifyuser`, { state: { booking: item.id } });
   };
 
   if (loading) {

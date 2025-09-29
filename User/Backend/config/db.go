@@ -30,12 +30,13 @@ func ConnectDatabase() *gorm.DB {
 	}
 
 	// DSN														require      disable
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Bangkok",
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=Asia/Bangkok",
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
 		os.Getenv("DB_PORT"),
+		os.Getenv("SSL_MODE"),
 	)
 	// log.Println("DSN:", dsn) // ✅ สำหรับ Debug
 
@@ -146,7 +147,7 @@ func SetupDatabase() {
 		RefTimeID := uint(1)
 		RefTimeID1 := uint(6)
 		RefTypeID := uint(2)
-		startTime := time.Date(2025, time.August, 6, 9, 0, 0, 0, time.UTC)
+		startTime := time.Date(2029, time.August, 6, 9, 0, 0, 0, time.UTC)
 		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID, UserID: RefTimeID, BranchID: RefTimeID, ServiceTypeID: RefTypeID})
 		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID1, UserID: RefTypeID, BranchID: RefTypeID, ServiceTypeID: RefTypeID})
 

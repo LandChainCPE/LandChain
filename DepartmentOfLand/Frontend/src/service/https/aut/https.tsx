@@ -22,7 +22,7 @@ async function getQueueByDate() {
 
 
 
-async function getDataUserForVerify(bookingID: any) {
+async function getDataUserForVerify(bookingID: number) {
     const requestOptions = {
         method: "GET",
         headers: getAuthHeaders(),
