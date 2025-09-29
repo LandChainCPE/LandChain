@@ -907,33 +907,10 @@ useEffect(() => {
     fetchUserId();
   }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  if (!e.target.files) return;
-  const files = Array.from(e.target.files);
-
-  Promise.all(
-    files.map(file => {
-      return new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string); // 🔹 base64
-        reader.onerror = error => reject(error);
-        reader.readAsDataURL(file);
-      });
-    })
-  ).then(base64Files => {
-    setImages(base64Files); // images เป็น array ของ base64
-  });
-};
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // if (!formData.province_id || !formData.district_id || !formData.subdistrict_id) {
-    //   message.error("กรุณาเลือกจังหวัด อำเภอ และตำบลให้ครบถ้วน");
-    //   setLoading(false);
-    //   return;
-    // }
       // สร้าง object เก็บ error
       const newErrors: any = {};
 
@@ -948,7 +925,6 @@ useEffect(() => {
         setLoading(false);
         return; // หยุดการ submit
       }
-
 
     try {
       const payload = {
