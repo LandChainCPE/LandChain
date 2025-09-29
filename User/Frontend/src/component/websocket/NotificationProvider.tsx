@@ -39,6 +39,7 @@ export const NotificationProvider: React.FC<Props> = ({ userID, children }) => {
 
     if (wsRef.current) wsRef.current.close();
 
+
     // const ws = new WebSocket(`wss://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/ws/notification/${userID}`);
     const ws = new WebSocket(`${URLBackendWS}/ws/notification/${userID}`);
 
@@ -49,8 +50,9 @@ export const NotificationProvider: React.FC<Props> = ({ userID, children }) => {
       setTimeout(connectWS, 2000);
     };
 
+    //@ts-ignore
     ws.onerror = (err) => {
-      console.error("Notification WS error", err);
+      // console.error("Notification WS error", err);
       ws.close();
     };
 

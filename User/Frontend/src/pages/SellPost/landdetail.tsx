@@ -3,12 +3,12 @@ import "../../component/third-patry/Loader.css";
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { MapPin, Phone, User, Home, Calendar, Ruler, Map, MessageCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { GetAllPostLandData, CreateRequestBuySell } from "../../service/https/jib/jib";
+import { GetAllPostLandData, CreateRequestBuySellHandler } from "../../service/https/jib/jib";
 import { Modal } from "antd"; 
 import "leaflet/dist/leaflet.css";
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { CreateNewRoom } from "../../service/https/bam/bam";
+import { CreateNewRoom, GetUserIDByWalletAddress } from "../../service/https/bam/bam";
 
 type LandDetailType = {
   ID: number | string;
@@ -447,7 +447,17 @@ const LandDetail = () => {
   const [messageState, setMessageState] = useState<{ type: 'error' | 'success'; content: string } | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false); 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const userId = Number(localStorage.getItem("user_id"));
+  const [userId, setuserId] = useState<number | null>(null);
+  
+
+    useEffect(() => {
+      const fetchUserId = async () => {
+      const result = await GetUserIDByWalletAddress();
+      setuserId(result.user_id)
+       
+    }
+    fetchUserId();
+    }, []);
 
   // ฟังก์ชันสร้างห้องแชทใหม่
   const handleCreateRoom = async () => {
@@ -524,7 +534,7 @@ const handleBuy = async () => {
     return;
   }
   try {
-    const res = await CreateRequestBuySell({
+    const res = await CreateRequestBuySellHandler({
       buyer_id: userId,
       land_id: land?.ID,
     });

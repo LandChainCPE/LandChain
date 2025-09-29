@@ -257,6 +257,8 @@ const handleSetsaleinfo = async (transaction: any) => {
     const res = await SetSellInfoHandler(tokenId, priceTHB, buyer);
     const { signature, wei } = res;
 
+    console.log("Signature from backend:", signature);
+        console.log("Wei from backend:", wei);
     if (!signature || !wei) {
       Swal.fire({
                       icon: "error",
