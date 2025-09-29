@@ -1,4 +1,4 @@
-const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = import.meta.env.VITE_URL_Backend;
 
 function getAuthHeaders() {
   const token = sessionStorage.getItem("token");
@@ -9,23 +9,17 @@ function getAuthHeaders() {
   };
 }
 
-
 async function getQueueByDate() {
     const requestOptions = {
         method: "GET",
         headers: getAuthHeaders(),
     };
 
-    let res = await fetch(`${apiUrl}/getbookingdata`, requestOptions) 
-        .then((res) => {
-        if (res.status == 200) {
-            return res.json();
-        } else {
-            return false;
-        }
-        });
-    return res;
+    let response = await fetch(`${apiUrl}/getbookingdata`, requestOptions)
+    const result = await response.json();
+    return { response, result };
 };
+
 
 
 async function getDataUserForVerify(bookingID: any) {

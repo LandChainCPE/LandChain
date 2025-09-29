@@ -9,7 +9,7 @@ import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByToken } 
 import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield";
 import MapPicker from "../../components/MapPicker";
 import { GetUserIDByWalletAddress } from "../../service/https/bam/bam";
-
+const URLBackend = import.meta.env.VITE_URL_Backend;
 
 type Coordinate = { lng: number; lat: number };
 
@@ -20,10 +20,10 @@ async function saveLocations(
 ) {
   if (!coords?.length) return;
 
-  const API_BASE =
-    opts?.apiBase ??
-    (import.meta as any)?.env?.VITE_API_BASE_URL ??
-    "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
+  // const API_BASE =
+  //   opts?.apiBase ??
+  //   (import.meta as any)?.env?.VITE_API_BASE_URL ??
+  //   "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
 
   const token = opts?.token ?? sessionStorage.getItem("token") ?? "";
   const tokenType = opts?.tokenType ?? sessionStorage.getItem("token_type") ?? "Bearer";
@@ -35,7 +35,7 @@ async function saveLocations(
     landsalepost_id: landsalepostId,
   }));
 
-  const res = await fetch(`${API_BASE}/location`, {
+  const res = await fetch(`${URLBackend}/location`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -907,33 +907,10 @@ useEffect(() => {
     fetchUserId();
   }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  if (!e.target.files) return;
-  const files = Array.from(e.target.files);
-
-  Promise.all(
-    files.map(file => {
-      return new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string); // 🔹 base64
-        reader.onerror = error => reject(error);
-        reader.readAsDataURL(file);
-      });
-    })
-  ).then(base64Files => {
-    setImages(base64Files); // images เป็น array ของ base64
-  });
-};
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // if (!formData.province_id || !formData.district_id || !formData.subdistrict_id) {
-    //   message.error("กรุณาเลือกจังหวัด อำเภอ และตำบลให้ครบถ้วน");
-    //   setLoading(false);
-    //   return;
-    // }
       // สร้าง object เก็บ error
       const newErrors: any = {};
 
@@ -949,28 +926,25 @@ useEffect(() => {
         return; // หยุดการ submit
       }
 
-
     try {
       const payload = {
-        landspost: {
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          phone_number: formData.phoneNumber,
-          name: formData.name,
-          price: Number(formData.price),
-          province_id: Number(formData.province_id),
-          district_id: Number(formData.district_id),
-          subdistrict_id: Number(formData.subdistrict_id),
-          land_id: Number(formData.land_id),
-          user_id: Number(currentUserId),
-        },
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone_number: formData.phoneNumber,
+        name: formData.name,
+        price: Number(formData.price),
+        province_id: Number(formData.province_id),
+        district_id: Number(formData.district_id),
+        subdistrict_id: Number(formData.subdistrict_id),
+        land_id: Number(formData.land_id),
+        user_id: Number(currentUserId),
         locations: mapCoords.map((c, i) => ({
           sequence: i + 1,
           latitude: c.lat,
           longitude: c.lng,
         })),
         tag_id: formData.tag_id,
-        images: images, // 🔹 array ของ base64
+        images: images, // array ของ base64
       };
 
       await CreateLandPost(payload);
@@ -1639,7 +1613,7 @@ useEffect(() => {
                   {/* Show selected deed number only once above the grid */}
                   {selectedLand && (() => {
                     const land = landMetadata.find((l: any) => String(l.tokenID) === String(selectedLand));
-                    const deedNo = land?.meta?.["Deed No"] || land?.meta?.["DeedNo"] || "-";
+                    const deedNo = land?.meta?.["TitleDeedNumber"] || land?.meta?.["TitleDeedNumber"] || "-";
                     return (
                       <div style={{ marginBottom: 12, textAlign: "center" }}>
                         <span style={{ color: "#1677ff", fontWeight: 600, fontSize: "1.1rem" }}>
