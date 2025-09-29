@@ -1,5 +1,5 @@
-const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
-
+// const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
+const apiUrl = import.meta.env.VITE_URL_Backend;
 import axios from "axios";
 import type { BookingInterface } from "../../../interfaces/Booking";
 import type { AvailableSlotsResponse } from "../../../interfaces/types";

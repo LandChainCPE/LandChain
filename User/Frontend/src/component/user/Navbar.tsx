@@ -4,6 +4,7 @@ import { FaUser, FaBars, FaTimes } from "react-icons/fa";
 import LogoBlack from "../../assets/LogoLandchainBlack.png";
 import "./Navbar.css";
 import { GetInfoUserByWalletID } from "../../service/https/bam/bam";
+const URLBackendWS = import.meta.env.VITE_URL_Backend_WSS;
 
 interface Notification {
   message: string;
@@ -38,8 +39,9 @@ const Navbar = () => {
   useEffect(() => {
 
     if (!isLoggedIn || !user?.id) return;
-
-    const ws = new WebSocket(`wss://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/ws/notification/${user?.id}`);
+    
+    // const ws = new WebSocket(`wss://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/ws/notification/${user?.id}`);
+    const ws = new WebSocket(`${URLBackendWS}/${user?.id}`);
 
 
     ws.onmessage = (event) => {

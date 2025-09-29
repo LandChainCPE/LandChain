@@ -9,7 +9,7 @@ import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByToken } 
 import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield";
 import MapPicker from "../../components/MapPicker";
 import { GetUserIDByWalletAddress } from "../../service/https/bam/bam";
-
+const URLBackend = import.meta.env.VITE_URL_Backend;
 
 type Coordinate = { lng: number; lat: number };
 
@@ -20,10 +20,10 @@ async function saveLocations(
 ) {
   if (!coords?.length) return;
 
-  const API_BASE =
-    opts?.apiBase ??
-    (import.meta as any)?.env?.VITE_API_BASE_URL ??
-    "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
+  // const API_BASE =
+  //   opts?.apiBase ??
+  //   (import.meta as any)?.env?.VITE_API_BASE_URL ??
+  //   "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
 
   const token = opts?.token ?? sessionStorage.getItem("token") ?? "";
   const tokenType = opts?.tokenType ?? sessionStorage.getItem("token_type") ?? "Bearer";
@@ -35,7 +35,7 @@ async function saveLocations(
     landsalepost_id: landsalepostId,
   }));
 
-  const res = await fetch(`${API_BASE}/location`, {
+  const res = await fetch(`${URLBackend}/location`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
