@@ -50,6 +50,7 @@ export const NotificationProvider: React.FC<Props> = ({ userID, children }) => {
       setTimeout(connectWS, 2000);
     };
 
+    //@ts-ignore
     ws.onerror = (err) => {
       // console.error("Notification WS error", err);
       ws.close();
