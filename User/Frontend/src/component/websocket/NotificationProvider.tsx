@@ -38,7 +38,7 @@ export const NotificationProvider: React.FC<Props> = ({ userID, children }) => {
 
     if (wsRef.current) wsRef.current.close();
 
-    const ws = new WebSocket(`wss://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/ws/notification/${userID}`);
+    const ws = new WebSocket(`wss://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/ws/notification/${userID}`);
     wsRef.current = ws;
 
     // @ts-ignore
@@ -47,7 +47,7 @@ export const NotificationProvider: React.FC<Props> = ({ userID, children }) => {
     };
 
     ws.onerror = (err) => {
-      console.error("Notification WS error", err);
+      // console.error("Notification WS error", err);
       ws.close();
     };
 

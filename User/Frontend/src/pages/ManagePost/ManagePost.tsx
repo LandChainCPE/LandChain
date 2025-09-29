@@ -435,7 +435,7 @@ const ManagePost: React.FC = () => {
   };
 
   const loadUserPosts = async () => {
-    // @ts-ignore
+     // @ts-ignore
     const wallet = localStorage.getItem("wallet") || sessionStorage.getItem("wallet");
 
     setLoading(true);
