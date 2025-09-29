@@ -30,11 +30,8 @@ func ConnectDatabase() *gorm.DB {
 	}
 
 	// DSN														require      disable
-<<<<<<< HEAD
+
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=Asia/Bangkok",
-=======
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Bangkok",
->>>>>>> 4cad4de392c0a10752a22414d448dadbfdfe4f36
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
