@@ -927,14 +927,6 @@ const openETHModalForTransaction = (tx: any) => {
                                             {ethTransaction.toAddress}
                                         </span>
                                     </div>
-                                    <div className="summary-item" style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                                        <span>จำนวนเงิน (ETH):</span>
-                                        <span>
-                                            {ethTransaction.amountWei
-                                                ? parseFloat(ethers.formatUnits(ethTransaction.amountWei, "ether")).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 })
-                                                : "N/A"}
-                                        </span>
-                                    </div>
                                     {/* <div className="summary-item">
                                         <span>Token ID:</span>
                                         <span>{ethTransaction.tokenId || "-"}</span>
