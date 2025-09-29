@@ -1,6 +1,6 @@
 import axios from "axios";
-const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
-
+// const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
+const apiUrl = import.meta.env.VITE_URL_Backend;
 const Authorization = sessionStorage.getItem("token");
 const Bearer = sessionStorage.getItem("token_type");
 

@@ -25,15 +25,17 @@ function UserMain() {
     navigate("/operations");
     const fetchData = async () => {
       setLoading(true);
-      const res = await getQueueByDate();
-      if (res && res.data) {
-        const transformedBookings = res.data.map((booking: any) => ({
-          ...booking,
-          date_booking: convertToThaiDate(booking.date_booking), // แปลงวันที่
-        }));
-        setBookings(transformedBookings);
-        console.log(res);
-      }
+      let { response, result } = await getQueueByDate();
+      console.log("response", response);
+      console.log("result", result);
+      // if (res && res.data) {
+      //   const transformedBookings = res.data.map((booking: any) => ({
+      //     ...booking,
+      //     date_booking: convertToThaiDate(booking.date_booking), // แปลงวันที่
+      //   }));
+      //   setBookings(transformedBookings);
+      //   // console.log(res);
+      // }
       setLoading(false);
     };
 
@@ -224,7 +226,7 @@ function UserMain() {
                       </td>
                       <td className="px-8 py-6 whitespace-nowrap text-right text-sm font-medium">
                         <button
-                          onClick={() => handleAction(item.id)}
+                          onClick={() => handleAction(item)}
                           className="group inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                         >
                           <span>ดำเนินการ</span>

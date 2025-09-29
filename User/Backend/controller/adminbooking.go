@@ -41,7 +41,6 @@ func GetBookingData(c *gin.Context) {
 		return
 	}
 
-	// แปลงข้อมูลสำหรับ Frontend
 	var result []gin.H
 	for _, b := range bookings {
 		result = append(result, gin.H{
@@ -50,11 +49,11 @@ func GetBookingData(c *gin.Context) {
 			"firstname":    b.Users.Firstname,
 			"lastname":     b.Users.Lastname,
 			"time_slot":    b.Time.Timework,
-			"service_type": b.ServiceType.Service, // เพิ่มข้อมูล ServiceType
+			"service_type": b.ServiceType.Service,
 		})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": result})
+	c.JSON(http.StatusOK, result) // ส่ง array ตรงๆ ไม่ห่อใน data
 }
 
 func GetDataUserForVerify(c *gin.Context) {

@@ -1,5 +1,6 @@
 // Nonce service for handling replay attack prevention
-const API_BASE_URL = 'https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io';
+const API_BASE_URL = import.meta.env.VITE_URL_Backend;
+// const API_BASE_URL = 'https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io';
 
 export interface NonceResponse {
   nonce: string;
