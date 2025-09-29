@@ -490,7 +490,7 @@ interface SaleInfoType {
 
     // ลบ transaction และ sale info
 
-    // await DeleteTransactionToscucess(transactionId);
+    await DeleteTransactionToscucess(transactionId);
     await DeleteAllRequestBuyByLandID(tokenId);
     await DeleteLandsalepostByLandIDandUserID(tokenId);
 
