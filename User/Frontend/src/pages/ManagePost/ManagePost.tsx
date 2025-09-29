@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { MapPin, Edit, Plus, Grid3X3, List, Camera, Trash2, Tag } from "lucide-react";
 import { Button, Input, InputNumber, Modal, Form, message, Spin, Empty, Select, Popconfirm } from "antd";
 import { GetUserIDByWalletAddress } from "../../service/https/bam/bam";
@@ -9,16 +9,14 @@ import {
   GetProvinces,
   getLocationsByLandSalePostId
 } from "../../service/https/jo/index";
-import { GetTags, GetDistrict, GetSubdistrict } from "../../service/https/jib/jib"; // เพิ่มบรรทัดนี้
+import { GetTags, GetDistrict, GetSubdistrict } from "../../service/https/jib/jib";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../component/user/Navbar";
 import "./ManagePost.css";
 
 const { Option } = Select;
 
-
-
-// Types
+// ===== TYPES =====
 interface PhotoItem {
   id?: number;
   path: string;
@@ -75,7 +73,6 @@ interface Photoland {
 interface TagEntity {
   [x: string]: string;
   name: any;
-
   tag: string;
 }
 
@@ -104,151 +101,60 @@ interface LandSalePost {
   location?: LocationItem[];
 }
 
+// ===== CONSTANTS =====
+const MAPBOX_TOKEN = 'pk.eyJ1Ijoiam9oYXJ0MjU0NiIsImEiOiJjbWVmZ3YzMGcwcTByMm1zOWRkdjJkNTd0In0.DBDjy1rBDmc8A4PN3haQ4A';
+const DEFAULT_CENTER: [number, number] = [100.5018, 13.7563];
+const DEFAULT_ZOOM = 12;
+
 const ManagePost: React.FC = () => {
   const navigate = useNavigate();
+  const [postForm] = Form.useForm();
+  const mapRef = useRef<any>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
 
-  // States
+  // ===== STATE GROUPS =====
+  // Posts & UI State
   const [posts, setPosts] = useState<LandSalePost[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [updateLoading, setUpdateLoading] = useState(false);
 
-  // Modals
+  // Modal States
   const [editPostModalVisible, setEditPostModalVisible] = useState(false);
   const [editPhotoModalVisible, setEditPhotoModalVisible] = useState(false);
   const [editTagsModalVisible, setEditTagsModalVisible] = useState(false);
   const [editLocationsModalVisible, setEditLocationsModalVisible] = useState(false);
   const [currentEditingPost, setCurrentEditingPost] = useState<LandSalePost | null>(null);
-  const [availableTags, setAvailableTags] = useState<any[]>([]); // เพิ่มบรรทัดนี้
 
-  const [districts, setDistricts] = useState<District[]>([]); // เพิ่ม
-  const [subdistricts, setSubdistricts] = useState<Subdistrict[]>([]);
-
-  // Forms
-  const [postForm] = Form.useForm();
-
-
-  // Data states
+  // Location Data States
   const [provinces, setProvinces] = useState<Province[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [subdistricts, setSubdistricts] = useState<Subdistrict[]>([]);
+  const [availableTags, setAvailableTags] = useState<any[]>([]);
+
+  // Edit Data States
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [locations, setLocations] = useState<LocationItem[]>([]);
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
 
-  // Loading states
-  const [mapCenter, setMapCenter] = useState<[number, number]>([100.5018, 13.7563]);
-  const [mapZoom, setMapZoom] = useState<number>(12);
-  const [updateLoading, setUpdateLoading] = useState(false);
-
-  // Mapbox states
+  // Map States
+  const [mapCenter, setMapCenter] = useState<[number, number]>(DEFAULT_CENTER);
+  const [mapZoom, setMapZoom] = useState<number>(DEFAULT_ZOOM);
   const [mapLoading, setMapLoading] = useState(false);
-  const mapRef = useRef<any>(null);
-  const mapContainerRef = useRef<HTMLDivElement>(null);
   const [mapboxLoaded, setMapboxLoaded] = useState(false);
   const [isDrawingMode, setIsDrawingMode] = useState(false);
-
   const [mapProvinceId, setMapProvinceId] = useState<number | undefined>();
   const [mapDistrictId, setMapDistrictId] = useState<number | undefined>();
   const [mapSubdistrictId, setMapSubdistrictId] = useState<number | undefined>();
 
-
-  // Helper functions
-  const getImageSrc = (path?: string): string => {
-    if (!path || path.trim() === '') {
-      return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='%236b7280'%3Eไม่มีรูปภาพ%3C/text%3E%3C/svg%3E";
-    }
-
-    const cleanPath = path.trim();
-    if (cleanPath.startsWith("data:image/")) {
-      return cleanPath;
-    }
-    if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
-      return cleanPath;
-    }
-    if (cleanPath.length > 50) {
-      let mimeType = "image/jpeg";
-      if (cleanPath.startsWith("iVBOR")) mimeType = "image/png";
-      else if (cleanPath.startsWith("R0lGOD")) mimeType = "image/gif";
-      else if (cleanPath.startsWith("/9j/") || cleanPath.startsWith("/9g/")) mimeType = "image/jpeg";
-      else if (cleanPath.startsWith("UklGR")) mimeType = "image/webp";
-
-      try {
-        return `data:${mimeType};base64,${cleanPath}`;
-      } catch (e) {
-        console.error("Error creating data URL:", e);
-      }
-    }
-    return cleanPath;
-  };
-
-  const getPhotoArray = (post: any): Photoland[] => {
-    return post.photoland || post.Photoland || post.photos || post.Photos || [];
-  };
-
-  const getPhotoPath = (photo: any): string => {
-    return photo.path || photo.Path || "";
-  };
-
-  const addressText = (post: any) => {
-    // ลอง log ดูว่าข้อมูลเป็นอย่างไร
-    console.log("addressText input:", post);
-
-    // ลองหาข้อมูลที่อยู่จากหลายแหล่ง
-    const subdistrict =
-      post.subdistrict?.name_th ||
-      post.Subdistrict?.name_th ||
-      post.subdistrict?.NameTH ||
-      post.Subdistrict?.NameTH;
-
-    const district =
-      post.district?.name_th ||
-      post.District?.name_th ||
-      post.district?.NameTH ||
-      post.District?.NameTH;
-
-    const province =
-      post.province?.name_th ||
-      post.Province?.name_th ||
-      post.province?.NameTH ||
-      post.Province?.NameTH;
-
-    console.log("Address parts found:", { subdistrict, district, province });
-
-    const result = [subdistrict, district, province].filter(Boolean).join(", ");
-    console.log("Final address:", result);
-
-    return result || "ไม่มีข้อมูลที่อยู่";
-  };
-  const loadTags = async () => {
-    try {
-      console.log("Starting to load tags..."); // debug
-      const response = await GetTags();
-      console.log("Tags response:", response); // debug
-
-      if (Array.isArray(response)) {
-        setAvailableTags(response);
-        console.log("Tags loaded successfully:", response.length); // debug
-      } else {
-        console.error("Invalid tags response:", response);
-        setAvailableTags([]);
-      }
-    } catch (error) {
-      console.error("Error loading tags:", error);
-      setAvailableTags([]);
-    }
-  };
-
-  // Load initial data
-  useEffect(() => {
-    loadUserPosts();
-    loadProvinces();
-    loadMapboxScript();
-    loadTags();
-
-  }, []);
-
-  const getLocationCoordinates = (provinceName: string, districtName?: string, subdistrictName?: string): { center: [number, number], zoom: number } => {
-    // พิกัดละเอียดของอำเภอและตำบลต่างๆ
+  // ===== COORDINATE MAPPING =====
+  const getLocationCoordinates = useCallback((
+    provinceName: string, 
+    districtName?: string, 
+    subdistrictName?: string
+  ): { center: [number, number], zoom: number } => {
     const detailedCoordinates: Record<string, Record<string, Record<string, [number, number]>>> = {
       "กรุงเทพมหานคร": {
         "เขตบางรัก": {
@@ -293,10 +199,8 @@ const ManagePost: React.FC = () => {
           "ตำบลรัษฎา": [98.3756, 7.8934]
         }
       }
-      // เพิ่มจังหวัดอื่นๆ ตามต้องการ
     };
 
-    // พิกัดประมาณของจังหวัดต่างๆ ในประเทศไทย
     const provinceCoordinates: Record<string, [number, number]> = {
       "กรุงเทพมหานคร": [100.5018, 13.7563],
       "นครราชสีมา": [102.0977, 14.9799],
@@ -308,12 +212,9 @@ const ManagePost: React.FC = () => {
       "ปราจีนบุรี": [101.3687, 14.0508],
       "สุราษฎร์ธานี": [99.3210, 9.1382],
       "สงขลา": [100.6087, 7.2056],
-      // เพิ่มจังหวัดอื่นๆ ตามต้องการ
     };
 
-    console.log("getLocationCoordinates called with:", { provinceName, districtName, subdistrictName });
-
-    // 1. ถ้ามีตำบลและอำเภอ ให้หาใน detailedCoordinates ก่อน - zoom 16
+    // 1. ค้นหาตำบล (zoom 16)
     if (subdistrictName && districtName) {
       const normalizedProvince = provinceName.toLowerCase();
       const normalizedDistrict = districtName.toLowerCase().replace(/อำเภอ/g, '').trim();
@@ -325,7 +226,6 @@ const ManagePost: React.FC = () => {
             if (district.toLowerCase().includes(normalizedDistrict) || normalizedDistrict.includes(district.toLowerCase())) {
               for (const [subdistrict, coords] of Object.entries(subdistricts)) {
                 if (subdistrict.toLowerCase().includes(normalizedSubdistrict) || normalizedSubdistrict.includes(subdistrict.toLowerCase())) {
-                  console.log("Found subdistrict coordinates:", coords, "zoom: 16");
                   return { center: coords, zoom: 16 };
                 }
               }
@@ -335,7 +235,7 @@ const ManagePost: React.FC = () => {
       }
     }
 
-    // 2. ถ้ามีอำเภอแต่ไม่เจอตำบล ให้หาอำเภอ - zoom 14
+    // 2. ค้นหาอำเภอ (zoom 14)
     if (districtName) {
       const normalizedProvince = provinceName.toLowerCase();
       const normalizedDistrict = districtName.toLowerCase().replace(/อำเภอ/g, '').trim();
@@ -346,7 +246,6 @@ const ManagePost: React.FC = () => {
             if (district.toLowerCase().includes(normalizedDistrict) || normalizedDistrict.includes(district.toLowerCase())) {
               const firstSubdistrictCoords = Object.values(subdistricts)[0];
               if (firstSubdistrictCoords) {
-                console.log("Found district coordinates:", firstSubdistrictCoords, "zoom: 14");
                 return { center: firstSubdistrictCoords, zoom: 14 };
               }
             }
@@ -355,74 +254,68 @@ const ManagePost: React.FC = () => {
       }
     }
 
-    // 3. หาพิกัดจากชื่อจังหวัด - zoom 12
+    // 3. ค้นหาจังหวัด (zoom 12)
     for (const [province, coords] of Object.entries(provinceCoordinates)) {
       if (province.toLowerCase().includes(provinceName.toLowerCase()) ||
         provinceName.toLowerCase().includes(province.toLowerCase())) {
-        console.log("Found province coordinates:", coords, "zoom: 12");
         return { center: coords, zoom: 12 };
       }
     }
 
-    // ถ้าไม่เจออะไรเลย ใช้พิกัดกรุงเทพเป็นค่าเริ่มต้น
-    console.log("No coordinates found, using Bangkok default");
-    return { center: [100.5018, 13.7563], zoom: 12 };
-  };
+    return { center: DEFAULT_CENTER, zoom: DEFAULT_ZOOM };
+  }, []);
 
-  const loadDistricts = async (provinceId: number) => {
-    try {
-      const response = await GetDistrict(provinceId);
-      // รองรับ response ได้หลายรูปแบบ
-      const arr = Array.isArray(response)
-        ? response
-        : Array.isArray(response.data)
-          ? response.data
-          : [];
-      // map ให้เป็น { id, name_th }
-      const districts = arr.map((d: any) => ({
-        id: d.id ?? d.ID,
-        name_th: d.name_th ?? d.District ?? d.NameTH ?? d.name
-      })).filter((d: { id: any; name_th: any; }) => d.id && d.name_th);
-      setDistricts(districts);
-    } catch (error) {
-      console.error("Error loading districts:", error);
-      setDistricts([]);
+  // ===== HELPER FUNCTIONS =====
+  const getImageSrc = useCallback((path?: string): string => {
+    if (!path || path.trim() === '') {
+      return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='%236b7280'%3Eไม่มีรูปภาพ%3C/text%3E%3C/svg%3E";
     }
-  };
 
-  const loadSubdistricts = async (districtId: number) => {
-    try {
-      const response = await GetSubdistrict(districtId);
-      // รองรับ response ได้หลายรูปแบบ
-      const arr = Array.isArray(response)
-        ? response
-        : Array.isArray(response.data)
-          ? response.data
-          : [];
-      // map ให้เป็น { id, name_th }
-      const subdistricts = arr.map((s: any) => ({
-        id: s.id ?? s.ID,
-        name_th: s.name_th ?? s.Subdistrict ?? s.NameTH ?? s.name
-      })).filter((s: { id: any; name_th: any; }) => s.id && s.name_th);
-      setSubdistricts(subdistricts);
-    } catch (error) {
-      console.error("Error loading subdistricts:", error);
-      setSubdistricts([]);
+    const cleanPath = path.trim();
+    if (cleanPath.startsWith("data:image/")) return cleanPath;
+    if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) return cleanPath;
+    
+    if (cleanPath.length > 50) {
+      let mimeType = "image/jpeg";
+      if (cleanPath.startsWith("iVBOR")) mimeType = "image/png";
+      else if (cleanPath.startsWith("R0lGOD")) mimeType = "image/gif";
+      else if (cleanPath.startsWith("/9j/") || cleanPath.startsWith("/9g/")) mimeType = "image/jpeg";
+      else if (cleanPath.startsWith("UklGR")) mimeType = "image/webp";
+
+      try {
+        return `data:${mimeType};base64,${cleanPath}`;
+      } catch (e) {
+        console.error("Error creating data URL:", e);
+      }
     }
-  };
+    return cleanPath;
+  }, []);
 
-  // Removed duplicate loadMapboxScript function declaration
+  const getPhotoArray = useCallback((post: any): Photoland[] => {
+    return post.photoland || post.Photoland || post.photos || post.Photos || [];
+  }, []);
 
-  const loadProvinces = async () => {
+  const getPhotoPath = useCallback((photo: any): string => {
+    return photo.path || photo.Path || "";
+  }, []);
+
+  const addressText = useCallback((post: any) => {
+    const subdistrict = post.subdistrict?.name_th || post.Subdistrict?.name_th || 
+                       post.subdistrict?.NameTH || post.Subdistrict?.NameTH;
+    const district = post.district?.name_th || post.District?.name_th || 
+                    post.district?.NameTH || post.District?.NameTH;
+    const province = post.province?.name_th || post.Province?.name_th || 
+                    post.province?.NameTH || post.Province?.NameTH;
+
+    const result = [subdistrict, district, province].filter(Boolean).join(", ");
+    return result || "ไม่มีข้อมูลที่อยู่";
+  }, []);
+
+  // ===== API CALLS =====
+  const loadProvinces = useCallback(async () => {
     try {
       const response = await GetProvinces();
-      // รองรับ response ได้หลายรูปแบบ
-      const arr = Array.isArray(response)
-        ? response
-        : Array.isArray(response.data)
-          ? response.data
-          : [];
-      // map ให้เป็น { id, name_th }
+      const arr = Array.isArray(response) ? response : Array.isArray(response.data) ? response.data : [];
       const provinces = arr.map((p: any) => ({
         id: p.id ?? p.ID,
         name_th: p.name_th ?? p.Province ?? p.NameTH ?? p.name
@@ -432,17 +325,64 @@ const ManagePost: React.FC = () => {
       console.error("Error loading provinces:", error);
       setProvinces([]);
     }
-  };
+  }, []);
 
+<<<<<<< HEAD
   const loadUserPosts = async () => {
      // @ts-ignore
-    const wallet = localStorage.getItem("wallet") || sessionStorage.getItem("wallet");
+=======
+  const loadDistricts = useCallback(async (provinceId: number) => {
+    try {
+      const response = await GetDistrict(provinceId);
+      const arr = Array.isArray(response) ? response : Array.isArray(response.data) ? response.data : [];
+      const districts = arr.map((d: any) => ({
+        id: d.id ?? d.ID,
+        name_th: d.name_th ?? d.District ?? d.NameTH ?? d.name
+      })).filter((d: { id: any; name_th: any; }) => d.id && d.name_th);
+      setDistricts(districts);
+    } catch (error) {
+      console.error("Error loading districts:", error);
+      setDistricts([]);
+    }
+  }, []);
 
+  const loadSubdistricts = useCallback(async (districtId: number) => {
+    try {
+      const response = await GetSubdistrict(districtId);
+      const arr = Array.isArray(response) ? response : Array.isArray(response.data) ? response.data : [];
+      const subdistricts = arr.map((s: any) => ({
+        id: s.id ?? s.ID,
+        name_th: s.name_th ?? s.Subdistrict ?? s.NameTH ?? s.name
+      })).filter((s: { id: any; name_th: any; }) => s.id && s.name_th);
+      setSubdistricts(subdistricts);
+    } catch (error) {
+      console.error("Error loading subdistricts:", error);
+      setSubdistricts([]);
+    }
+  }, []);
+
+  const loadTags = useCallback(async () => {
+    try {
+      const response = await GetTags();
+      if (Array.isArray(response)) {
+        setAvailableTags(response);
+      } else {
+        console.error("Invalid tags response:", response);
+        setAvailableTags([]);
+      }
+    } catch (error) {
+      console.error("Error loading tags:", error);
+      setAvailableTags([]);
+    }
+  }, []);
+
+  const loadUserPosts = useCallback(async () => {
+>>>>>>> 82b0437b8a8b9b3318bfc590d8fa2e50b88784e9
+    const wallet = localStorage.getItem("wallet") || sessionStorage.getItem("wallet");
     setLoading(true);
     setError(null);
 
     try {
-      // Get user_id from wallet
       const userResponse = await GetUserIDByWalletAddress();
 
       if (!userResponse?.user_id) {
@@ -451,556 +391,74 @@ const ManagePost: React.FC = () => {
         return;
       }
 
-      console.log("User ID from wallet:", userResponse.user_id);
-
-      // Get user posts using the new API
       const postsData = await getUserPostLandData(userResponse.user_id);
 
-      console.log("Posts data:", postsData);
-
       if (Array.isArray(postsData)) {
-        // เพิ่ม debug ที่นี่
-        console.log("=== Debug Posts Structure ===");
-        postsData.forEach((post, index) => {
-          console.log(`Post ${index}:`, post);
-          console.log(`Post ${index} keys:`, Object.keys(post));
-          console.log(`Post ${index} Province:`, post.Province || post.province);
-          console.log(`Post ${index} District:`, post.District || post.district);
-          console.log(`Post ${index} Subdistrict:`, post.Subdistrict || post.subdistrict);
-        });
-
         setPosts(postsData);
-
       } else {
         console.error("Invalid posts data format:", postsData);
         setPosts([]);
       }
-
     } catch (err: any) {
       console.error("LoadUserPosts error:", err);
       setError(err?.message || "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // Filter posts
-  const filteredPosts = posts.filter(post => {
-    if (!searchTerm.trim()) return true;
-    const term = searchTerm.toLowerCase();
-    return (
-      (post.name || "").toLowerCase().includes(term) ||
-      (post.province?.name_th || "").toLowerCase().includes(term) ||
-      (post.district?.name_th || "").toLowerCase().includes(term) ||
-      (post.subdistrict?.name_th || "").toLowerCase().includes(term)
-    );
-  });
-
-  // Post editing handlers
-  const handleEditPost = async (post: LandSalePost) => {
-    const id = post.id ?? post.ID;
-    const normalized = { ...post, id };
-
-    if (!id) {
-      message.error("ไม่พบ Post ID");
-      return;
-    }
-
-    setCurrentEditingPost(normalized);
-
-    // โหลด districts และ subdistricts ถ้ามี province_id และ district_id
-    if (normalized.province_id) {
-      await loadDistricts(normalized.province_id);
-
-      if (normalized.district_id) {
-        await loadSubdistricts(normalized.district_id);
-      }
-    }
-
-    postForm.setFieldsValue({
-      first_name: normalized.first_name || "",
-      last_name: normalized.last_name || "",
-      phone_number: normalized.phone_number || "",
-      name: normalized.name || "",
-      price: normalized.price || 0,
-      province_id: normalized.province_id || undefined,
-      district_id: normalized.district_id || undefined,
-      subdistrict_id: normalized.subdistrict_id || undefined,
-      land_id: normalized.land_id || undefined,
-    });
-
-    setEditPostModalVisible(true);
-  };
-
-  const handleSavePost = async () => {
-    if (!currentEditingPost) {
-      message.error("ไม่พบข้อมูลโพสต์ที่ต้องการแก้ไข");
-      return;
-    }
-
-    try {
-      setUpdateLoading(true);
-      const values = await postForm.validateFields();
-      const id = currentEditingPost.id ?? currentEditingPost.ID;
-
-      if (!id) {
-        message.error("ไม่พบ Post ID");
-        return;
-      }
-
-      // Prepare updateData for address update (province/district/subdistrict)
-      const updateData: any = {
-        id,
-        name: values.name,
-        price: values.price,
-        first_name: values.first_name,
-        last_name: values.last_name,
-        phone_number: values.phone_number,
-        province_id: values.province_id,
-        district_id: values.district_id,
-        subdistrict_id: values.subdistrict_id,
-        land_id: values.land_id,
-        user_id: currentEditingPost.user_id
-      };
-
-      // Do not send locations unless editing locations
-      // if (currentEditingPost.location) {
-      //   updateData.locations = currentEditingPost.location;
-      // }
-
-      const result = await updatePost(updateData);
-
-      if (result?.response?.ok) {
-        message.success("อัพเดทโพสต์สำเร็จ");
-        setEditPostModalVisible(false);
-        loadUserPosts();
-      } else {
-        message.error(result?.result?.error || "เกิดข้อผิดพลาดในการอัพเดทโพสต์");
-      }
-    } catch (err: any) {
-      console.error("handleSavePost error:", err);
-      message.error("กรุณาตรวจสอบข้อมูลที่กรอก");
-    } finally {
-      setUpdateLoading(false);
-    }
-  };
-  // @ts-ignore
-  const handleProvinceChange = async (provinceId: number) => {
-    setDistricts([]);
-    setSubdistricts([]);
-    postForm.setFieldsValue({
-      district_id: undefined,
-      subdistrict_id: undefined
-    });
-
-    if (provinceId) {
-      await loadDistricts(provinceId);
-
-      // ย้ายแผนที่ไปยังจังหวัดที่เลือก
-      const selectedProvince = provinces.find(p => p.id === provinceId);
-      if (selectedProvince && mapRef.current) {
-        const coordinates = getProvinceCoordinates(selectedProvince.name_th);
-        mapRef.current.setCenter(coordinates);
-        mapRef.current.setZoom(10);
-      }
-    }
-  };
-// @ts-ignore
-  const handleDistrictChange = async (districtId: number) => {
-    setSubdistricts([]);
-    postForm.setFieldsValue({
-      subdistrict_id: undefined
-    });
-
-    if (districtId) {
-      await loadSubdistricts(districtId);
-
-      // ย้ายแผนที่ไปยังอำเภอที่เลือก
-      const selectedDistrict = districts.find(d => d.id === districtId);
-      if (selectedDistrict && mapRef.current) {
-        const coordinates = getDistrictCoordinates(selectedDistrict.name_th);
-        mapRef.current.setCenter(coordinates);
-        mapRef.current.setZoom(12);
-      }
-    }
-  };
-// @ts-ignore
-  const handleSubdistrictChange = (subdistrictId: number) => {
-    if (subdistrictId) {
-      // ย้ายแผนที่ไปยังตำบลที่เลือก
-      const selectedSubdistrict = subdistricts.find(s => s.id === subdistrictId);
-      if (selectedSubdistrict && mapRef.current) {
-        const coordinates = getSubdistrictCoordinates(selectedSubdistrict.name_th);
-        mapRef.current.setCenter(coordinates);
-        mapRef.current.setZoom(14);
-      }
-    }
-  };
-  const getProvinceCoordinates = (provinceName: string): [number, number] => {
-    const provinceCoords: { [key: string]: [number, number] } = {
-      'กรุงเทพมหานคร': [100.5018, 13.7563],
-      'นครราชสีมา': [102.0977, 14.9799],
-      'เชียงใหม่': [98.9953, 18.7906],
-      'ภูเก็ต': [98.3923, 7.8804],
-      'ขอนแก่น': [102.8236, 16.4322],
-      // เพิ่มจังหวัดอื่นๆ ตามต้องการ
-    };
-
-    return provinceCoords[provinceName] || [100.5018, 13.7563]; // default กรุงเทพ
-  };
-// @ts-ignore
-  const getDistrictCoordinates = (districtName: string): [number, number] => {
-    // สามารถเพิ่มพิกัดอำเภอต่างๆ หรือใช้ API geocoding
-    return [100.5018, 13.7563]; // ใช้พิกัดเริ่มต้นก่อน
-  };
-// @ts-ignore
-  const getSubdistrictCoordinates = (subdistrictName: string): [number, number] => {
-    // สามารถเพิ่มพิกัดตำบลต่างๆ หรือใช้ API geocoding
-    return [100.5018, 13.7563]; // ใช้พิกัดเริ่มต้นก่อน
-  };
-
-  // Photo editing handlers
-  const handleEditPhotos = (post: LandSalePost) => {
-    const id = post.id ?? post.ID;
-    if (!id) {
-      message.error("ไม่พบ Post ID");
-      return;
-    }
-
-    setCurrentEditingPost(post);
-    const photoArray = getPhotoArray(post);
-    const existingPhotos: PhotoItem[] = photoArray.map(photo => ({
-      id: photo.id || photo.ID,
-      path: getPhotoPath(photo),
-      isNew: false
-    }));
-
-    setPhotos(existingPhotos);
-    setEditPhotoModalVisible(true);
-  };
-
-  const handleAddPhoto = () => {
-    const newPhoto: PhotoItem = {
-      path: "",
-      isNew: true
-    };
-    setPhotos([...photos, newPhoto]);
-  };
-
-  const handleRemovePhoto = (index: number) => {
-    const newPhotos = photos.filter((_, i) => i !== index);
-    setPhotos(newPhotos);
-  };
-
-
-
-  const handleSavePhotos = async () => {
-    if (!currentEditingPost) {
-      message.error("ไม่พบข้อมูลโพสต์");
-      return;
-    }
-
-    try {
-      setUpdateLoading(true);
-      const postId = currentEditingPost.id ?? currentEditingPost.ID;
-
-      if (!postId) {
-        message.error("ไม่พบ Post ID");
-        return;
-      }
-
-      // Extract only valid paths
-      const imagePaths = photos
-        .filter(photo => photo.path && photo.path.trim() !== "")
-        .map(photo => photo.path.trim());
-
-      // Use UpdatePost API with images only
-      const updateData = {
-        id: postId,
-        images: imagePaths,
-        user_id: currentEditingPost.user_id
-      };
-
-      const result = await updatePost(updateData);
-
-      if (result?.response?.ok) {
-        message.success("อัพเดทรูปภาพสำเร็จ");
-        setEditPhotoModalVisible(false);
-        loadUserPosts();
-      } else {
-        message.error(result?.result?.error || "เกิดข้อผิดพลาดในการอัพเดทรูปภาพ");
-      }
-    } catch (error: any) {
-      console.error("Save photos error:", error);
-      message.error("เกิดข้อผิดพลาดในการบันทึกรูปภาพ");
-    } finally {
-      setUpdateLoading(false);
-    }
-  };
-
-  // Tags editing handlers
-  const handleEditTags = (post: LandSalePost) => {
-    const id = post.id ?? post.ID;
-    if (!id) {
-      message.error("ไม่พบ Post ID");
-      return;
-    }
-
-    setCurrentEditingPost(post);
-
-    console.log("=== Edit Tags Debug ===");
-    console.log("Full post object:", post);
-    console.log("Post tags:", post.tags);
-    console.log("Post Tags (capital):", post.Tags);
-    console.log("All post keys:", Object.keys(post));
-
-    // ลองหา tags จากหลาย field
-    const tagsArray = post.tags || post.Tags || post.tag || post.Tag || [];
-    console.log("Found tags array:", tagsArray);
-
-    if (tagsArray && Array.isArray(tagsArray) && tagsArray.length > 0) {
-      const currentTagIds = tagsArray.map(tag => {
-        const tagId = tag.ID || tag.id;
-        console.log("Processing tag:", tag, "extracted ID:", tagId);
-        return Number(tagId);
-      }).filter(id => !isNaN(id));
-
-      console.log("Final current tag IDs:", currentTagIds);
-      setSelectedTags(currentTagIds);
-    } else {
-      console.log("No tags found in post, setting empty array");
-      setSelectedTags([]);
-    }
-
-    setEditTagsModalVisible(true);
-  };
-
-  const handleSaveTags = async () => {
-    if (!currentEditingPost) {
-      message.error("ไม่พบข้อมูลโพสต์");
-      return;
-    }
-
-    try {
-      setUpdateLoading(true);
-      const postId = currentEditingPost.id ?? currentEditingPost.ID;
-
-      if (!postId) {
-        message.error("ไม่พบ Post ID");
-        return;
-      }
-
-      // Use UpdatePost API with tag_id only
-      const updateData = {
-        id: postId,
-        tag_id: selectedTags,
-        user_id: currentEditingPost.user_id
-      };
-
-      const result = await updatePost(updateData);
-
-      if (result?.response?.ok) {
-        message.success("อัพเดทแท็กสำเร็จ");
-        setEditTagsModalVisible(false);
-        loadUserPosts();
-      } else {
-        message.error(result?.result?.error || "เกิดข้อผิดพลาดในการอัพเดทแท็ก");
-      }
-    } catch (error: any) {
-      console.error("Save tags error:", error);
-      message.error("เกิดข้อผิดพลาดในการบันทึกแท็ก");
-    } finally {
-      setUpdateLoading(false);
-    }
-  };
-  useEffect(() => {
-    if (editLocationsModalVisible) {
-      // Force clear ทุก state ที่เกี่ยวกับ map navigation
-      setTimeout(() => {
-        setMapProvinceId(undefined);
-        setMapDistrictId(undefined);
-        setMapSubdistrictId(undefined);
-        setDistricts([]);
-        setSubdistricts([]);
-      }, 100);
-    }
-  }, [editLocationsModalVisible]);
-  // Locations editing handlers
- const handleEditLocations = async (post: LandSalePost) => {
-  const id = post.id ?? post.ID;
-  if (!id) {
-    message.error("ไม่พบ Post ID");
-    return;
-  }
-
-  setCurrentEditingPost(post);
-  setMapLoading(true);
-
-  // รีเซ็ต map selection states
-  setMapProvinceId(undefined);
-  setMapDistrictId(undefined);
-  setMapSubdistrictId(undefined);
-  setDistricts([]);
-  setSubdistricts([]);
-  setLocations([]);
-  setIsDrawingMode(false);
-
-  try {
-    // ดึงข้อมูล locations เดิมจาก API
-    const existingLocations = await getLocationsByLandSalePostId(id);
-    console.log("Existing locations:", existingLocations);
-
-    if (Array.isArray(existingLocations) && existingLocations.length > 0) {
-      const cleanedLocations = existingLocations
-        .map((loc: any) => ({
-          id: loc.ID || loc.id,
-          sequence: parseInt(loc.Sequence) || parseInt(loc.sequence) || 0,
-          latitude: parseFloat(loc.Latitude) || parseFloat(loc.latitude) || 0,
-          longitude: parseFloat(loc.Longitude) || parseFloat(loc.longitude) || 0,
-          landsalepost_id: id
-        }))
-        .filter(loc =>
-          !isNaN(loc.latitude) &&
-          !isNaN(loc.longitude) &&
-          loc.latitude !== 0 &&
-          loc.longitude !== 0 &&
-          loc.latitude >= -90 && loc.latitude <= 90 &&
-          loc.longitude >= -180 && loc.longitude <= 180
-        )
-        .sort((a, b) => a.sequence - b.sequence);
-
-      console.log("Cleaned locations:", cleanedLocations);
-      setLocations(cleanedLocations);
-    } else {
-      setLocations([]);
-    }
-
-    // *** เพิ่มส่วนนี้เพื่อดึงข้อมูลจังหวัด อำเภอ ตำบล เดิม ***
-    if (post.province_id) {
-      console.log("Setting existing province_id:", post.province_id);
-      setMapProvinceId(post.province_id);
-      
-      // โหลด districts ของจังหวัดเดิม
-      await loadDistricts(post.province_id);
-      
-      if (post.district_id) {
-        console.log("Setting existing district_id:", post.district_id);
-        setMapDistrictId(post.district_id);
-        
-        // โหลด subdistricts ของอำเภอเดิม
-        await loadSubdistricts(post.district_id);
-        
-        if (post.subdistrict_id) {
-          console.log("Setting existing subdistrict_id:", post.subdistrict_id);
-          setMapSubdistrictId(post.subdistrict_id);
-        }
-      }
-
-      // ย้ายแผนที่ไปยังตำแหน่งเดิม
-      const selectedProvince = provinces.find(p => p.id === post.province_id);
-      if (selectedProvince) {
-        const locationData = getLocationCoordinates(
-          selectedProvince.name_th,
-          post.district?.name_th,
-          post.subdistrict?.name_th
-        );
-        console.log("Moving map to existing location:", locationData);
-        setMapCenter(locationData.center);
-        setMapZoom(locationData.zoom);
-      }
-    }
-
-    setIsDrawingMode(false);
-    setEditLocationsModalVisible(true);
-  } catch (error) {
-    console.error("Error loading locations:", error);
-    message.error("ไม่สามารถโหลดข้อมูลตำแหน่งได้");
-    setLocations([]);
-    setEditLocationsModalVisible(true);
-  } finally {
-    setMapLoading(false);
-  }
-};
-
-  // Initialize map when modal opens
-  // Initialize map when modal opens และ locations state เปลี่ยน
-  useEffect(() => {
-    if (editLocationsModalVisible && mapboxLoaded) {
-      // Delay เล็กน้อยให้ DOM render เสร็จ
-      const timer = setTimeout(() => {
-        if (!mapRef.current && mapContainerRef.current) {
-          initializeMap();
-        } else if (mapRef.current && locations.length > 0) {
-          // ถ้า map มีแล้วแต่ locations เปลี่ยน ให้อัพเดท
-          updateMapWithLocations(mapRef.current, locations);
-        }
-      }, 100);
-
-      return () => clearTimeout(timer);
-    }
-  }, [editLocationsModalVisible, mapboxLoaded, locations]);
-
-  const loadMapboxScript = () => {
+  // ===== MAPBOX FUNCTIONS =====
+  const loadMapboxScript = useCallback(() => {
     if (window.mapboxgl) {
       setMapboxLoaded(true);
-      console.log("Mapbox GL already loaded");
       return;
     }
 
     const script = document.createElement('script');
     script.src = 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js';
-    script.onload = () => {
-      setMapboxLoaded(true);
-      console.log("Mapbox GL script loaded");
-    };
-    script.onerror = () => {
-      console.error("Mapbox GL script failed to load");
-    };
+    script.onload = () => setMapboxLoaded(true);
+    script.onerror = () => console.error("Mapbox GL script failed to load");
     document.head.appendChild(script);
 
     const link = document.createElement('link');
     link.href = 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css';
     link.rel = 'stylesheet';
     document.head.appendChild(link);
-  };
-  const initializeMap = () => {
-    if (!window.mapboxgl || !mapContainerRef.current) {
-      console.error("Mapbox GL or container not ready");
-      return;
-    }
+  }, []);
 
-    // ล้าง map เก่าถ้ามี
+  const initializeMap = useCallback(() => {
+    if (!window.mapboxgl || !mapContainerRef.current) return;
+
     if (mapRef.current) {
       mapRef.current.remove();
       mapRef.current = null;
     }
 
-    // ล้าง container
     mapContainerRef.current.innerHTML = '';
 
     try {
-      (window as any).mapboxgl.accessToken = 'pk.eyJ1Ijoiam9oYXJ0MjU0NiIsImEiOiJjbWVmZ3YzMGcwcTByMm1zOWRkdjJkNTd0In0.DBDjy1rBDmc8A4PN3haQ4A';
+      (window as any).mapboxgl.accessToken = MAPBOX_TOKEN;
 
       const map = new (window as any).mapboxgl.Map({
         container: mapContainerRef.current,
         style: 'mapbox://styles/mapbox/satellite-v9',
-        center: mapCenter, // เปลี่ยนจาก [100.5018, 13.7563]
-        zoom: mapZoom // เปลี่ยนจาก 10
+        center: mapCenter,
+        zoom: mapZoom
       });
 
       map.on('load', () => {
-        console.log("Map loaded successfully");
-
-        // เพิ่ม sources และ layers
+        // เพิ่ม sources
         map.addSource('land-area', {
           type: 'geojson',
-          data: {
-            type: 'Feature',
-            geometry: { type: 'Polygon', coordinates: [[]] },
-            properties: {}
-          }
+          data: { type: 'Feature', geometry: { type: 'Polygon', coordinates: [[]] }, properties: {} }
         });
 
+        map.addSource('location-points', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] }
+        });
+
+        // เพิ่ม layers
         map.addLayer({
           id: 'land-area-fill',
           type: 'fill',
@@ -1013,11 +471,6 @@ const ManagePost: React.FC = () => {
           type: 'line',
           source: 'land-area',
           paint: { 'line-color': '#ff0000', 'line-width': 3 }
-        });
-
-        map.addSource('location-points', {
-          type: 'geojson',
-          data: { type: 'FeatureCollection', features: [] }
         });
 
         map.addLayer({
@@ -1049,107 +502,177 @@ const ManagePost: React.FC = () => {
           }
         });
 
-        // อัพเดท map ด้วย locations ที่มีอยู่
         if (locations.length > 0) {
           updateMapWithLocations(map, locations);
         }
 
         mapRef.current = map;
       });
-
     } catch (error) {
       console.error("Error initializing map:", error);
       message.error("ไม่สามารถโหลดแผนที่ได้");
     }
-  };
-  const handleMapProvinceChange = async (provinceId: number | undefined) => {
-    console.log("Map Province Change Called:", provinceId);
+  }, [mapCenter, mapZoom, locations]);
 
-    // Clear states
+  const updateMapWithLocations = useCallback((map: any, locationData: LocationItem[]) => {
+    if (!map || !locationData || locationData.length === 0) return;
+
+    try {
+      const validLocations = locationData.filter(loc =>
+        loc && !isNaN(loc.latitude) && !isNaN(loc.longitude) &&
+        loc.latitude >= -90 && loc.latitude <= 90 &&
+        loc.longitude >= -180 && loc.longitude <= 180 &&
+        loc.latitude !== 0 && loc.longitude !== 0
+      );
+
+      if (validLocations.length === 0) return;
+
+      // อัพเดท points
+      const features = validLocations.map(loc => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [loc.longitude, loc.latitude] },
+        properties: { sequence: loc.sequence.toString() }
+      }));
+
+      const pointSource = map.getSource('location-points');
+      if (pointSource) {
+        pointSource.setData({ type: 'FeatureCollection', features });
+      }
+
+      // อัพเดท polygon
+      if (validLocations.length >= 3) {
+        const coordinates = [
+          ...validLocations.map(loc => [loc.longitude, loc.latitude]),
+          [validLocations[0].longitude, validLocations[0].latitude]
+        ];
+
+        const polygonSource = map.getSource('land-area');
+        if (polygonSource) {
+          polygonSource.setData({
+            type: 'Feature',
+            geometry: { type: 'Polygon', coordinates: [coordinates] },
+            properties: {}
+          });
+        }
+      } else {
+        const polygonSource = map.getSource('land-area');
+        if (polygonSource) {
+          polygonSource.setData({
+            type: 'Feature',
+            geometry: { type: 'Polygon', coordinates: [[]] },
+            properties: {}
+          });
+        }
+      }
+
+      // ปรับ view
+      const bounds = new (window as any).mapboxgl.LngLatBounds();
+      validLocations.forEach(loc => bounds.extend([loc.longitude, loc.latitude]));
+
+      if (validLocations.length === 1) {
+        map.setCenter([validLocations[0].longitude, validLocations[0].latitude]);
+        map.setZoom(16);
+      } else {
+        map.fitBounds(bounds, { padding: 50, maxZoom: 16 });
+      }
+    } catch (error) {
+      console.error("Error updating map with locations:", error);
+      message.error("ไม่สามารถอัพเดทแผนที่ได้");
+    }
+  }, []);
+
+  // ===== EVENT HANDLERS =====
+  const handleProvinceChange = useCallback(async (provinceId: number) => {
+    setDistricts([]);
+    setSubdistricts([]);
+    postForm.setFieldsValue({ district_id: undefined, subdistrict_id: undefined });
+
+    if (provinceId) {
+      await loadDistricts(provinceId);
+      const selectedProvince = provinces.find(p => p.id === provinceId);
+      if (selectedProvince && mapRef.current) {
+        const locationData = getLocationCoordinates(selectedProvince.name_th);
+        mapRef.current.setCenter(locationData.center);
+        mapRef.current.setZoom(10);
+      }
+    }
+  }, [provinces, loadDistricts, postForm, getLocationCoordinates]);
+
+  const handleDistrictChange = useCallback(async (districtId: number) => {
+    setSubdistricts([]);
+    postForm.setFieldsValue({ subdistrict_id: undefined });
+
+    if (districtId) {
+      await loadSubdistricts(districtId);
+      const selectedDistrict = districts.find(d => d.id === districtId);
+      if (selectedDistrict && mapRef.current) {
+        const locationData = getLocationCoordinates('', selectedDistrict.name_th);
+        mapRef.current.setCenter(locationData.center);
+        mapRef.current.setZoom(12);
+      }
+    }
+  }, [districts, loadSubdistricts, postForm, getLocationCoordinates]);
+
+  const handleSubdistrictChange = useCallback((subdistrictId: number) => {
+    if (subdistrictId) {
+      const selectedSubdistrict = subdistricts.find(s => s.id === subdistrictId);
+      if (selectedSubdistrict && mapRef.current) {
+        const locationData = getLocationCoordinates('', '', selectedSubdistrict.name_th);
+        mapRef.current.setCenter(locationData.center);
+        mapRef.current.setZoom(14);
+      }
+    }
+  }, [subdistricts, getLocationCoordinates]);
+
+  const handleMapProvinceChange = useCallback(async (provinceId: number | undefined) => {
     setDistricts([]);
     setSubdistricts([]);
     setMapDistrictId(undefined);
     setMapSubdistrictId(undefined);
-
-    // Set new province
     setMapProvinceId(provinceId);
 
     if (provinceId && mapRef.current) {
       await loadDistricts(provinceId);
-
-      // หาชื่อจังหวัดและย้ายแผนที่
       const selectedProvince = provinces.find(p => p.id === provinceId);
+      
       if (selectedProvince) {
         const locationData = getLocationCoordinates(selectedProvince.name_th);
-        console.log("Moving map to province:", selectedProvince.name_th, locationData);
-
-        // Smooth zoom out then zoom in animation
         const currentZoom = mapRef.current.getZoom();
-        const targetCenter = locationData.center;
-        const targetZoom = locationData.zoom;
 
-        // Zoom out first, then move and zoom in
-        mapRef.current.easeTo({
-          zoom: Math.min(currentZoom - 2, 8),
-          duration: 300
-        });
-
+        mapRef.current.easeTo({ zoom: Math.min(currentZoom - 2, 8), duration: 300 });
         setTimeout(() => {
-          mapRef.current.easeTo({
-            center: targetCenter,
-            zoom: targetZoom,
-            duration: 1000
-          });
+          mapRef.current.easeTo({ center: locationData.center, zoom: locationData.zoom, duration: 1000 });
         }, 350);
       }
     }
-  };
-  const handleMapDistrictChange = async (districtId: number | undefined) => {
-    console.log("Map District Change:", districtId);
+  }, [provinces, loadDistricts, getLocationCoordinates]);
 
+  const handleMapDistrictChange = useCallback(async (districtId: number | undefined) => {
     setSubdistricts([]);
     setMapDistrictId(districtId);
     setMapSubdistrictId(undefined);
 
     if (districtId && mapRef.current) {
       await loadSubdistricts(districtId);
-
-      // หาชื่อจังหวัดและอำเภอ
       const selectedProvince = provinces.find(p => p.id === mapProvinceId);
       const selectedDistrict = districts.find(d => d.id === districtId);
 
       if (selectedProvince && selectedDistrict) {
-        const locationData = getLocationCoordinates(
-          selectedProvince.name_th,
-          selectedDistrict.name_th
-        );
-        console.log("Moving map to district:", selectedDistrict.name_th, locationData);
-
-        // Smooth animation
+        const locationData = getLocationCoordinates(selectedProvince.name_th, selectedDistrict.name_th);
         const currentZoom = mapRef.current.getZoom();
 
-        mapRef.current.easeTo({
-          zoom: Math.max(currentZoom - 1, 10),
-          duration: 200
-        });
-
+        mapRef.current.easeTo({ zoom: Math.max(currentZoom - 1, 10), duration: 200 });
         setTimeout(() => {
-          mapRef.current.easeTo({
-            center: locationData.center,
-            zoom: locationData.zoom,
-            duration: 800
-          });
+          mapRef.current.easeTo({ center: locationData.center, zoom: locationData.zoom, duration: 800 });
         }, 250);
       }
     }
-  };
-  const handleMapSubdistrictChange = (subdistrictId: number | undefined) => {
-    console.log("Map Subdistrict Change:", subdistrictId);
+  }, [provinces, districts, mapProvinceId, loadSubdistricts, getLocationCoordinates]);
 
+  const handleMapSubdistrictChange = useCallback((subdistrictId: number | undefined) => {
     setMapSubdistrictId(subdistrictId);
 
     if (subdistrictId && mapRef.current) {
-      // หาชื่อจังหวัด อำเภอ และตำบล
       const selectedProvince = provinces.find(p => p.id === mapProvinceId);
       const selectedDistrict = districts.find(d => d.id === mapDistrictId);
       const selectedSubdistrict = subdistricts.find(s => s.id === subdistrictId);
@@ -1160,206 +683,36 @@ const ManagePost: React.FC = () => {
           selectedDistrict.name_th,
           selectedSubdistrict.name_th
         );
-        console.log("Moving map to subdistrict:", selectedSubdistrict.name_th, locationData);
-
-        // Smooth animation
-        mapRef.current.easeTo({
-          center: locationData.center,
-          zoom: locationData.zoom,
-          duration: 1000
-        });
+        mapRef.current.easeTo({ center: locationData.center, zoom: locationData.zoom, duration: 1000 });
       }
     }
-  };
-  // จัดการ map click event แยกต่างหาก
-  useEffect(() => {
-    if (mapRef.current) {
-      // ลบ event listener เก่าทั้งหมด
-      mapRef.current.off('click');
+  }, [provinces, districts, subdistricts, mapProvinceId, mapDistrictId, getLocationCoordinates]);
 
-      // เพิ่ม event listener ใหม่
-      const handleMapClick = (e: any) => {
-        console.log("Map clicked, drawing mode:", isDrawingMode);
-
-        if (isDrawingMode && e.lngLat) {
-          const lat = e.lngLat.lat;
-          const lng = e.lngLat.lng;
-
-          console.log("Clicked coordinates:", lat, lng);
-
-          if (!isNaN(lat) && !isNaN(lng) &&
-            lat >= -90 && lat <= 90 &&
-            lng >= -180 && lng <= 180) {
-
-            const newLocation: LocationItem = {
-              sequence: locations.length + 1,
-              latitude: lat,
-              longitude: lng
-            };
-
-            console.log("Adding new location:", newLocation);
-
-            // อัพเดท locations state
-            setLocations(prev => {
-              const updated = [...prev, newLocation];
-              console.log("Updated locations:", updated);
-              return updated;
-            });
-
-            message.success(`เพิ่มจุดที่ ${locations.length + 1} สำเร็จ`);
-          } else {
-            console.error("Invalid coordinates:", lat, lng);
-            message.error("พิกัดไม่ถูกต้อง");
-          }
-        }
-      };
-
-      mapRef.current.on('click', handleMapClick);
-
-      // Cleanup
-      return () => {
-        if (mapRef.current) {
-          mapRef.current.off('click', handleMapClick);
-        }
-      };
-    }
-  }, [mapRef.current, isDrawingMode, locations.length]); // เพิ่ม dependencies ที่จำเป็น
-
-  const updateMapWithLocations = (map: any, locationData: LocationItem[]) => {
-    if (!map || !locationData || locationData.length === 0) {
-      console.log("No map or location data to update");
-      return;
-    }
-
-    try {
-      // ตรวจสอบและกรองข้อมูล coordinates
-      const validLocations = locationData.filter(loc =>
-        loc &&
-        !isNaN(loc.latitude) &&
-        !isNaN(loc.longitude) &&
-        loc.latitude >= -90 && loc.latitude <= 90 &&
-        loc.longitude >= -180 && loc.longitude <= 180 &&
-        loc.latitude !== 0 && loc.longitude !== 0
-      );
-
-      if (validLocations.length === 0) {
-        console.log("No valid locations to display");
-        return;
-      }
-
-      console.log("Updating map with valid locations:", validLocations);
-
-      // สร้าง features สำหรับ markers
-      const features = validLocations.map(loc => ({
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [loc.longitude, loc.latitude]
-        },
-        properties: {
-          sequence: loc.sequence.toString()
-        }
-      }));
-
-      // อัพเดท points
-      const pointSource = map.getSource('location-points');
-      if (pointSource) {
-        pointSource.setData({
-          type: 'FeatureCollection',
-          features
-        });
-      }
-
-      // สร้าง polygon ถ้ามีจุดมากกว่า 2 จุด
-      if (validLocations.length >= 3) {
-        const coordinates = [
-          ...validLocations.map(loc => [loc.longitude, loc.latitude]),
-          [validLocations[0].longitude, validLocations[0].latitude] // ปิด polygon
-        ];
-
-        const polygonSource = map.getSource('land-area');
-        if (polygonSource) {
-          polygonSource.setData({
-            type: 'Feature',
-            geometry: {
-              type: 'Polygon',
-              coordinates: [coordinates]
-            },
-            properties: {}
-          });
-        }
-      } else {
-        // ล้าง polygon ถ้ามีจุดน้อยกว่า 3 จุด
-        const polygonSource = map.getSource('land-area');
-        if (polygonSource) {
-          polygonSource.setData({
-            type: 'Feature',
-            geometry: {
-              type: 'Polygon',
-              coordinates: [[]]
-            },
-            properties: {}
-          });
-        }
-      }
-
-      // ปรับ view ให้แสดงทุกจุด
-      const bounds = new (window as any).mapboxgl.LngLatBounds();
-      validLocations.forEach(loc => {
-        bounds.extend([loc.longitude, loc.latitude]);
-      });
-
-      if (validLocations.length === 1) {
-        map.setCenter([validLocations[0].longitude, validLocations[0].latitude]);
-        map.setZoom(16);
-      } else {
-        map.fitBounds(bounds, {
-          padding: 50,
-          maxZoom: 16
-        });
-      }
-
-    } catch (error) {
-      console.error("Error updating map with locations:", error);
-      message.error("ไม่สามารถอัพเดทแผนที่ได้");
-    }
-  };
-
-  const handleToggleDrawingMode = () => {
+  const handleToggleDrawingMode = useCallback(() => {
     const newDrawingMode = !isDrawingMode;
     setIsDrawingMode(newDrawingMode);
 
-    console.log("Drawing mode changed to:", newDrawingMode);
-
     if (newDrawingMode) {
       message.info("โหมดวาดรูป: คลิกบนแผนที่เพื่อเพิ่มจุดใหม่");
-
-      // เปลี่ยน cursor ของ map
       if (mapRef.current) {
         mapRef.current.getCanvas().style.cursor = 'crosshair';
       }
     } else {
       message.info("ปิดโหมดวาดรูปแล้ว");
-
-      // เปลี่ยน cursor กลับเป็นปกติ
       if (mapRef.current) {
         mapRef.current.getCanvas().style.cursor = '';
       }
     }
-  };
+  }, [isDrawingMode]);
 
-  const handleClearLocations = () => {
+  const handleClearLocations = useCallback(() => {
     setLocations([]);
     setIsDrawingMode(false);
 
     if (mapRef.current) {
-      // ล้างข้อมูลทั้งหมด
       const pointSource = mapRef.current.getSource('location-points');
       if (pointSource) {
-        pointSource.setData({
-          type: 'FeatureCollection',
-          features: []
-        });
+        pointSource.setData({ type: 'FeatureCollection', features: [] });
       }
 
       const polygonSource = mapRef.current.getSource('land-area');
@@ -1371,72 +724,121 @@ const ManagePost: React.FC = () => {
         });
       }
 
-      // เปลี่ยน cursor กลับเป็นปกติ
       mapRef.current.getCanvas().style.cursor = '';
     }
 
     message.success("ล้างจุดทั้งหมดแล้ว");
-  };
-  // เพิ่มใน useEffect ที่โหลด provinces
-  useEffect(() => {
-    console.log("🌍 Provinces loaded:", provinces.length);
-    provinces.forEach((p, index) => {
-      console.log(`Province ${index}: ID=${p.id}, Name=${p.name_th}`);
-      if (!p.id || !p.name_th) {
-        console.error("❌ Invalid province data:", p);
-      }
-    });
-  }, [provinces]);
-  // อัพเดท map เมื่อ locations เปลี่ยนแปลง
-  useEffect(() => {
-    if (mapRef.current && editLocationsModalVisible) {
-      updateMapWithLocations(mapRef.current, locations);
-    }
-  }, [locations, editLocationsModalVisible]);
-// @ts-ignore
-  const handleAddLocation = () => {
-    const newLocation: LocationItem = {
-      sequence: locations.length + 1,
-      latitude: 0,
-      longitude: 0
-    };
-    setLocations([...locations, newLocation]);
-  };
+  }, []);
 
-  const handleRemoveLocation = (index: number) => {
-    const newLocations = locations.filter((_, i) => i !== index);
-    // Re-sequence
-    const reSequenced = newLocations.map((loc, i) => ({
-      ...loc,
-      sequence: i + 1
-    }));
-    setLocations(reSequenced);
-  };
+  // ===== CRUD HANDLERS =====
+  const handleEditPost = useCallback(async (post: LandSalePost) => {
+    const id = post.id ?? post.ID;
+    const normalized = { ...post, id };
 
-  const handleLocationChange = (index: number, field: 'latitude' | 'longitude', value: number) => {
-    if (isNaN(value) || value === null || value === undefined) {
+    if (!id) {
+      message.error("ไม่พบ Post ID");
       return;
     }
 
-    const newLocations = [...locations];
-    newLocations[index] = {
-      ...newLocations[index],
-      [field]: parseFloat(value.toString())
-    };
+    setCurrentEditingPost(normalized);
 
-    setLocations(newLocations);
-
-    // อัพเดท map ถ้า coordinates ถูกต้อง
-    if (mapRef.current &&
-      !isNaN(newLocations[index].latitude) &&
-      !isNaN(newLocations[index].longitude) &&
-      newLocations[index].latitude !== 0 &&
-      newLocations[index].longitude !== 0) {
-      updateMapWithLocations(mapRef.current, newLocations);
+    if (normalized.province_id) {
+      await loadDistricts(normalized.province_id);
+      if (normalized.district_id) {
+        await loadSubdistricts(normalized.district_id);
+      }
     }
-  };
 
-  const handleSaveLocations = async () => {
+    postForm.setFieldsValue({
+      first_name: normalized.first_name || "",
+      last_name: normalized.last_name || "",
+      phone_number: normalized.phone_number || "",
+      name: normalized.name || "",
+      price: normalized.price || 0,
+      province_id: normalized.province_id || undefined,
+      district_id: normalized.district_id || undefined,
+      subdistrict_id: normalized.subdistrict_id || undefined,
+      land_id: normalized.land_id || undefined,
+    });
+
+    setEditPostModalVisible(true);
+  }, [loadDistricts, loadSubdistricts, postForm]);
+
+  const handleSavePost = useCallback(async () => {
+    if (!currentEditingPost) {
+      message.error("ไม่พบข้อมูลโพสต์ที่ต้องการแก้ไข");
+      return;
+    }
+
+    try {
+      setUpdateLoading(true);
+      const values = await postForm.validateFields();
+      const id = currentEditingPost.id ?? currentEditingPost.ID;
+
+      if (!id) {
+        message.error("ไม่พบ Post ID");
+        return;
+      }
+
+      const updateData: any = {
+        id,
+        name: values.name,
+        price: values.price,
+        first_name: values.first_name,
+        last_name: values.last_name,
+        phone_number: values.phone_number,
+        province_id: values.province_id,
+        district_id: values.district_id,
+        subdistrict_id: values.subdistrict_id,
+        land_id: values.land_id,
+        user_id: currentEditingPost.user_id
+      };
+
+      const result = await updatePost(updateData);
+
+      if (result?.response?.ok) {
+        message.success("อัพเดทโพสต์สำเร็จ");
+        setEditPostModalVisible(false);
+        loadUserPosts();
+      } else {
+        message.error(result?.result?.error || "เกิดข้อผิดพลาดในการอัพเดทโพสต์");
+      }
+    } catch (err: any) {
+      console.error("handleSavePost error:", err);
+      message.error("กรุณาตรวจสอบข้อมูลที่กรอก");
+    } finally {
+      setUpdateLoading(false);
+    }
+  }, [currentEditingPost, postForm, loadUserPosts]);
+
+  const handleEditPhotos = useCallback((post: LandSalePost) => {
+    const id = post.id ?? post.ID;
+    if (!id) {
+      message.error("ไม่พบ Post ID");
+      return;
+    }
+
+    setCurrentEditingPost(post);
+    const photoArray = getPhotoArray(post);
+    const existingPhotos: PhotoItem[] = photoArray.map(photo => ({
+      id: photo.id || photo.ID,
+      path: getPhotoPath(photo),
+      isNew: false
+    }));
+
+    setPhotos(existingPhotos);
+    setEditPhotoModalVisible(true);
+  }, [getPhotoArray, getPhotoPath]);
+
+  const handleAddPhoto = useCallback(() => {
+    setPhotos(prev => [...prev, { path: "", isNew: true }]);
+  }, []);
+
+  const handleRemovePhoto = useCallback((index: number) => {
+    setPhotos(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleSavePhotos = useCallback(async () => {
     if (!currentEditingPost) {
       message.error("ไม่พบข้อมูลโพสต์");
       return;
@@ -1451,7 +853,218 @@ const ManagePost: React.FC = () => {
         return;
       }
 
-      // Validate locations
+      const imagePaths = photos
+        .filter(photo => photo.path && photo.path.trim() !== "")
+        .map(photo => photo.path.trim());
+
+      const updateData = {
+        id: postId,
+        images: imagePaths,
+        user_id: currentEditingPost.user_id
+      };
+
+      const result = await updatePost(updateData);
+
+      if (result?.response?.ok) {
+        message.success("อัพเดทรูปภาพสำเร็จ");
+        setEditPhotoModalVisible(false);
+        loadUserPosts();
+      } else {
+        message.error(result?.result?.error || "เกิดข้อผิดพลาดในการอัพเดทรูปภาพ");
+      }
+    } catch (error: any) {
+      console.error("Save photos error:", error);
+      message.error("เกิดข้อผิดพลาดในการบันทึกรูปภาพ");
+    } finally {
+      setUpdateLoading(false);
+    }
+  }, [currentEditingPost, photos, loadUserPosts]);
+
+  const handleEditTags = useCallback((post: LandSalePost) => {
+    const id = post.id ?? post.ID;
+    if (!id) {
+      message.error("ไม่พบ Post ID");
+      return;
+    }
+
+    setCurrentEditingPost(post);
+
+    const tagsArray = post.tags || post.Tags || post.tag || post.Tag || [];
+    if (tagsArray && Array.isArray(tagsArray) && tagsArray.length > 0) {
+      const currentTagIds = tagsArray
+        .map(tag => Number(tag.ID || tag.id))
+        .filter(id => !isNaN(id));
+      setSelectedTags(currentTagIds);
+    } else {
+      setSelectedTags([]);
+    }
+
+    setEditTagsModalVisible(true);
+  }, []);
+
+  const handleSaveTags = useCallback(async () => {
+    if (!currentEditingPost) {
+      message.error("ไม่พบข้อมูลโพสต์");
+      return;
+    }
+
+    try {
+      setUpdateLoading(true);
+      const postId = currentEditingPost.id ?? currentEditingPost.ID;
+
+      if (!postId) {
+        message.error("ไม่พบ Post ID");
+        return;
+      }
+
+      const updateData = {
+        id: postId,
+        tag_id: selectedTags,
+        user_id: currentEditingPost.user_id
+      };
+
+      const result = await updatePost(updateData);
+
+      if (result?.response?.ok) {
+        message.success("อัพเดทแท็กสำเร็จ");
+        setEditTagsModalVisible(false);
+        loadUserPosts();
+      } else {
+        message.error(result?.result?.error || "เกิดข้อผิดพลาดในการอัพเดทแท็ก");
+      }
+    } catch (error: any) {
+      console.error("Save tags error:", error);
+      message.error("เกิดข้อผิดพลาดในการบันทึกแท็ก");
+    } finally {
+      setUpdateLoading(false);
+    }
+  }, [currentEditingPost, selectedTags, loadUserPosts]);
+
+  const handleEditLocations = useCallback(async (post: LandSalePost) => {
+    const id = post.id ?? post.ID;
+    if (!id) {
+      message.error("ไม่พบ Post ID");
+      return;
+    }
+
+    setCurrentEditingPost(post);
+    setMapLoading(true);
+
+    // รีเซ็ต states
+    setMapProvinceId(undefined);
+    setMapDistrictId(undefined);
+    setMapSubdistrictId(undefined);
+    setDistricts([]);
+    setSubdistricts([]);
+    setLocations([]);
+    setIsDrawingMode(false);
+
+    try {
+      const existingLocations = await getLocationsByLandSalePostId(id);
+
+      if (Array.isArray(existingLocations) && existingLocations.length > 0) {
+        const cleanedLocations = existingLocations
+          .map((loc: any) => ({
+            id: loc.ID || loc.id,
+            sequence: parseInt(loc.Sequence) || parseInt(loc.sequence) || 0,
+            latitude: parseFloat(loc.Latitude) || parseFloat(loc.latitude) || 0,
+            longitude: parseFloat(loc.Longitude) || parseFloat(loc.longitude) || 0,
+            landsalepost_id: id
+          }))
+          .filter(loc =>
+            !isNaN(loc.latitude) && !isNaN(loc.longitude) &&
+            loc.latitude !== 0 && loc.longitude !== 0 &&
+            loc.latitude >= -90 && loc.latitude <= 90 &&
+            loc.longitude >= -180 && loc.longitude <= 180
+          )
+          .sort((a, b) => a.sequence - b.sequence);
+
+        setLocations(cleanedLocations);
+      } else {
+        setLocations([]);
+      }
+
+      // โหลดข้อมูลที่อยู่เดิม
+      if (post.province_id) {
+        setMapProvinceId(post.province_id);
+        await loadDistricts(post.province_id);
+        
+        if (post.district_id) {
+          setMapDistrictId(post.district_id);
+          await loadSubdistricts(post.district_id);
+          
+          if (post.subdistrict_id) {
+            setMapSubdistrictId(post.subdistrict_id);
+          }
+        }
+
+        const selectedProvince = provinces.find(p => p.id === post.province_id);
+        if (selectedProvince) {
+          const locationData = getLocationCoordinates(
+            selectedProvince.name_th,
+            post.district?.name_th,
+            post.subdistrict?.name_th
+          );
+          setMapCenter(locationData.center);
+          setMapZoom(locationData.zoom);
+        }
+      }
+
+      setEditLocationsModalVisible(true);
+    } catch (error) {
+      console.error("Error loading locations:", error);
+      message.error("ไม่สามารถโหลดข้อมูลตำแหน่งได้");
+      setLocations([]);
+      setEditLocationsModalVisible(true);
+    } finally {
+      setMapLoading(false);
+    }
+  }, [provinces, loadDistricts, loadSubdistricts, getLocationCoordinates]);
+
+  const handleLocationChange = useCallback((index: number, field: 'latitude' | 'longitude', value: number) => {
+    if (isNaN(value) || value === null || value === undefined) return;
+
+    setLocations(prev => {
+      const newLocations = [...prev];
+      newLocations[index] = {
+        ...newLocations[index],
+        [field]: parseFloat(value.toString())
+      };
+
+      if (mapRef.current &&
+        !isNaN(newLocations[index].latitude) &&
+        !isNaN(newLocations[index].longitude) &&
+        newLocations[index].latitude !== 0 &&
+        newLocations[index].longitude !== 0) {
+        updateMapWithLocations(mapRef.current, newLocations);
+      }
+
+      return newLocations;
+    });
+  }, [updateMapWithLocations]);
+
+  const handleRemoveLocation = useCallback((index: number) => {
+    setLocations(prev => {
+      const newLocations = prev.filter((_, i) => i !== index);
+      return newLocations.map((loc, i) => ({ ...loc, sequence: i + 1 }));
+    });
+  }, []);
+
+  const handleSaveLocations = useCallback(async () => {
+    if (!currentEditingPost) {
+      message.error("ไม่พบข้อมูลโพสต์");
+      return;
+    }
+
+    try {
+      setUpdateLoading(true);
+      const postId = currentEditingPost.id ?? currentEditingPost.ID;
+
+      if (!postId) {
+        message.error("ไม่พบ Post ID");
+        return;
+      }
+
       const validLocations = locations.filter(loc =>
         loc.latitude !== 0 && loc.longitude !== 0 &&
         loc.latitude >= -90 && loc.latitude <= 90 &&
@@ -1463,11 +1076,8 @@ const ManagePost: React.FC = () => {
         return;
       }
 
-      // Remove id field from each location before sending
       const locationsForApi = validLocations.map(({ id, ...rest }) => rest);
 
-
-      // Use the latest selected province/district/subdistrict from the map modal if set, otherwise fallback to currentEditingPost
       const updateData: any = {
         id: postId,
         locations: locationsForApi,
@@ -1492,10 +1102,9 @@ const ManagePost: React.FC = () => {
     } finally {
       setUpdateLoading(false);
     }
-  };
+  }, [currentEditingPost, locations, mapProvinceId, mapDistrictId, mapSubdistrictId, loadUserPosts]);
 
-  // Delete post handler
-  const handleDeletePost = async (post: LandSalePost) => {
+  const handleDeletePost = useCallback(async (post: LandSalePost) => {
     const postId = post.id ?? post.ID;
 
     if (!postId) {
@@ -1508,7 +1117,7 @@ const ManagePost: React.FC = () => {
 
       if (result?.response?.ok) {
         message.success("ลบโพสต์สำเร็จ");
-        loadUserPosts(); // Reload posts
+        loadUserPosts();
       } else {
         message.error(result?.result?.error || "เกิดข้อผิดพลาดในการลบโพสต์");
       }
@@ -1516,7 +1125,101 @@ const ManagePost: React.FC = () => {
       console.error("Delete post error:", error);
       message.error("เกิดข้อผิดพลาดในการลบโพสต์");
     }
-  };
+  }, [loadUserPosts]);
+
+  // ===== EFFECTS =====
+  // โหลดข้อมูลเริ่มต้น
+  useEffect(() => {
+    loadUserPosts();
+    loadProvinces();
+    loadMapboxScript();
+    loadTags();
+  }, [loadUserPosts, loadProvinces, loadMapboxScript, loadTags]);
+
+  // จัดการ map initialization
+  useEffect(() => {
+    if (editLocationsModalVisible && mapboxLoaded) {
+      const timer = setTimeout(() => {
+        if (!mapRef.current && mapContainerRef.current) {
+          initializeMap();
+        } else if (mapRef.current && locations.length > 0) {
+          updateMapWithLocations(mapRef.current, locations);
+        }
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [editLocationsModalVisible, mapboxLoaded, locations, initializeMap, updateMapWithLocations]);
+
+  // จัดการ map click event
+  useEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.off('click');
+
+      const handleMapClick = (e: any) => {
+        if (isDrawingMode && e.lngLat) {
+          const lat = e.lngLat.lat;
+          const lng = e.lngLat.lng;
+
+          if (!isNaN(lat) && !isNaN(lng) &&
+            lat >= -90 && lat <= 90 &&
+            lng >= -180 && lng <= 180) {
+
+            const newLocation: LocationItem = {
+              sequence: locations.length + 1,
+              latitude: lat,
+              longitude: lng
+            };
+
+            setLocations(prev => [...prev, newLocation]);
+            message.success(`เพิ่มจุดที่ ${locations.length + 1} สำเร็จ`);
+          } else {
+            message.error("พิกัดไม่ถูกต้อง");
+          }
+        }
+      };
+
+      mapRef.current.on('click', handleMapClick);
+
+      return () => {
+        if (mapRef.current) {
+          mapRef.current.off('click', handleMapClick);
+        }
+      };
+    }
+  }, [isDrawingMode, locations.length]);
+
+  // รีเซ็ตข้อมูลเมื่อเปิด modal ตำแหน่ง
+  useEffect(() => {
+    if (editLocationsModalVisible) {
+      setTimeout(() => {
+        setMapProvinceId(undefined);
+        setMapDistrictId(undefined);
+        setMapSubdistrictId(undefined);
+        setDistricts([]);
+        setSubdistricts([]);
+      }, 100);
+    }
+  }, [editLocationsModalVisible]);
+
+  // อัพเดท map เมื่อ locations เปลี่ยน
+  useEffect(() => {
+    if (mapRef.current && editLocationsModalVisible) {
+      updateMapWithLocations(mapRef.current, locations);
+    }
+  }, [locations, editLocationsModalVisible, updateMapWithLocations]);
+
+  // ===== RENDER =====
+  const filteredPosts = posts.filter(post => {
+    if (!searchTerm.trim()) return true;
+    const term = searchTerm.toLowerCase();
+    return (
+      (post.name || "").toLowerCase().includes(term) ||
+      (post.province?.name_th || "").toLowerCase().includes(term) ||
+      (post.district?.name_th || "").toLowerCase().includes(term) ||
+      (post.subdistrict?.name_th || "").toLowerCase().includes(term)
+    );
+  });
 
 
 
