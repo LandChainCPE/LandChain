@@ -480,33 +480,35 @@ const Chat = () => {
                 )}
 
                 <div className="input-controls">
-                  <textarea
-                    placeholder="Type your message..."
-                    value={newMessage}
-                    maxLength={200}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                    className="message-input"
-                  />
+                  <div className="message-input-wrapper">
+                    <textarea
+                      placeholder="Type your message..."
+                      value={newMessage}
+                      maxLength={200}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMessage();
+                        }
+                      }}
+                      className="message-input"
+                    />
 
-                  <div className="input-meta">
-                    <div className="char-count">
-                      {newMessage.length} / 200
-                    </div>
+                    <div className="input-meta">
+                      <div className="char-count">
+                        {newMessage.length} / 200
+                      </div>
 
-                    <div className="file-input-wrapper">
-                      <input
-                        type="file"
-                        onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
-                        className="file-input"
-                      />
-                      <div className="file-size-limit">
-                        Max {MAX_FILE_SIZE_MB}MB
+                      <div className="file-input-wrapper">
+                        <input
+                          type="file"
+                          onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
+                          className="file-input"
+                        />
+                        <div className="file-size-limit">
+                          Max {MAX_FILE_SIZE_MB}MB
+                        </div>
                       </div>
                     </div>
                   </div>
