@@ -83,11 +83,10 @@ export const NotificationProvider: React.FC<Props> = ({ userID, children }) => {
       // กำหนดข้อความ toast สั้น ๆ
       // กำหนดข้อความ toast สั้น ๆ
       let toastMessage = "";
-      const isImage =
-        msg.Content.startsWith("") &&
-        /\.(jpg|jpeg|png|gif|webp)$/i.test(msg.Content);
-      const isFile =
-        msg.Content.startsWith("") && !isImage; // ลิงก์แต่ไม่ใช่รูป
+
+      const isUrl = /^https?:\/\//i.test(msg.Content); // เช็คว่าเป็นลิงก์
+      const isImage = isUrl && /\.(jpg|jpeg|png|gif|webp)$/i.test(msg.Content);
+      const isFile = isUrl && !isImage;
 
       if (isImage) {
         toastMessage = `${senderName} ส่งรูปให้คุณ`;
@@ -96,6 +95,7 @@ export const NotificationProvider: React.FC<Props> = ({ userID, children }) => {
       } else {
         toastMessage = `${senderName} ส่งข้อความ: ${msg.Content}`;
       }
+
 
       // แสดง toast
       toast(toastMessage, {

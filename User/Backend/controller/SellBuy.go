@@ -368,8 +368,8 @@ func SetSellInfoHandler(c *gin.Context) {
 		return
 	}
 
-	if land.IsLocked {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "land is already locked"})
+	if !land.IsLocked {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "land is already not locked"})
 		return
 	}
 
