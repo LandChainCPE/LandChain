@@ -129,7 +129,7 @@ func CreateTransaction(c *gin.Context) {
 	transaction.SellerAccepted = true
 	transaction.LandDepartmentApproved = false
 	transaction.Expire = time.Now().Add(72 * time.Hour)
-	transaction.TxHash = nil
+	// transaction.TxHash = nil
 
 	// สร้าง Transaction
 	if err := db.Create(&transaction).Error; err != nil {

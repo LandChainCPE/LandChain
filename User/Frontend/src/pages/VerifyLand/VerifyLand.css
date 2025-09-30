@@ -34,7 +34,7 @@
   z-index: 0;
 }
 
-.floating-shapes .shape-1,
+/* .floating-shapes .shape-1,
 .floating-shapes .shape-2,
 .floating-shapes .shape-3,
 .floating-shapes .shape-4 {
@@ -90,7 +90,7 @@
   50% {
     transform: translateY(-20px) rotate(180deg);
   }
-}
+} */
 
 /* Hero Section */
 

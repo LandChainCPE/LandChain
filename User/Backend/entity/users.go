@@ -37,7 +37,7 @@ type Users struct {
 	Seller            []RequestBuySell `gorm:"foreignKey:SellerID"`
 	
 
-	LandOwnership    []LandOwnership `gorm:"foreignKey:UserID"`
+	// LandOwnership    []LandOwnership `gorm:"foreignKey:UserID"`
 
 	RoomChatsAsUser1 []Roomchat `gorm:"foreignKey:User1ID"` // ห้องที่ user เป็น User1
 	RoomChatsAsUser2 []Roomchat `gorm:"foreignKey:User2ID"` // ห้องที่ user เป็น User2
