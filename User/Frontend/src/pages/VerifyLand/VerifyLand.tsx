@@ -2,7 +2,7 @@ import './VerifyLand.css';   // ✅ import CSS แยกไฟล์
 import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { GetLandtitlesByUser } from '../../service/https/garfield';
-import { Upload, FileText, MapPin, User, CheckCircle, AlertCircle, Loader2, Shield} from 'lucide-react';
+import { Upload, FileText, MapPin, User, CheckCircle, AlertCircle, Loader2, Shield } from 'lucide-react';
 import { Container } from 'react-bootstrap';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { GetUserIDByWalletAddress } from "../../service/https/bam/bam";
@@ -97,14 +97,14 @@ const VerifyLand: React.FC = () => {
       try {
         // @ts-ignore
 
-        const  user_id  = await GetUserIDByWalletAddress();
-          const { result } = await GetLandtitlesByUser(String(user_id.user_id));
-          if (Array.isArray(result)) {
-            setVerifiedDeeds(result.map(mapLandDeed));
-          } else {
-            setVerifiedDeeds([]);
-            setError('ไม่พบข้อมูลโฉนดที่ดิน');
-          }
+        const user_id = await GetUserIDByWalletAddress();
+        const { result } = await GetLandtitlesByUser(String(user_id.user_id));
+        if (Array.isArray(result)) {
+          setVerifiedDeeds(result.map(mapLandDeed));
+        } else {
+          setVerifiedDeeds([]);
+          setError('ไม่พบข้อมูลโฉนดที่ดิน');
+        }
       } catch (err) {
         setError('เกิดข้อผิดพลาดในการดึงข้อมูล');
         setVerifiedDeeds([]);
@@ -155,18 +155,10 @@ const VerifyLand: React.FC = () => {
 
   return (
     <div className="verify-land-container">
-      <div className="floating-shapes">
-        <div className="shape-1"></div>
-        <div className="shape-2"></div>
-        <div className="shape-3"></div>
-        <div className="shape-4"></div>
-      </div>
-
+      <Navbar />
+      <div style={{ height: '30px' }}></div> {/* เพิ่มช่องว่างระหว่าง Navbar กับ hero-section */}
       <div className="hero-section">
         <div className="hero-content">
-          <div className="hero-badge">
-            <span>🏛️ Blockchain Land Verification</span>
-          </div>
           <h1 className="hero-title">
             <span className="gradient-text">อัปโหลดโฉนดสู่ Blockchain</span>
           </h1>
