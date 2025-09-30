@@ -90,7 +90,7 @@ func SetupDatabase() {
 		&entity.District{},
 		&entity.Subdistrict{},
 		&entity.Nonce{},
-		&entity.LandOwnership{},
+		// &entity.LandOwnership{},
 	); err != nil {
 		log.Fatal("❌ AutoMigrate failed:", err)
 	}
@@ -329,7 +329,7 @@ func SetupDatabase() {
 			BuyerID:           3,
 			SellerID:          2,
 			LandID:            2,
-			TxHash:            nil,
+			// TxHash:            nil,
 		})
 
 		db.Create(&entity.Transaction{
@@ -343,7 +343,7 @@ func SetupDatabase() {
 			BuyerID:           2,
 			SellerID:          3,
 			LandID:            2,
-			TxHash:            nil,
+			// TxHash:            nil,
 		})
 
 		db.Create(&entity.Roomchat{User1ID: 3, User2ID: 1})

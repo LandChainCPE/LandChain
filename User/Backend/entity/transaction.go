@@ -30,5 +30,5 @@ import (
 		LandID    uint      // 👈 FK ไปยัง role.id
 		Landtitle Landtitle `gorm:"foreignKey:LandID"`
 		
-		TxHash      *string
+		// TxHash      *string
 	}

@@ -36,7 +36,7 @@ func main() {
 	controller.StartBookingCleanupScheduler()
 
 	//อ่านค่าการตอบกลับจาก Smartcontract (ควรใช้ go routine)
-	go controller.ListenSmartContractEvents()
+	go controller.ListenSmartContractEvents()    //ทั้ง Auto ทั้งมือ 
 
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
