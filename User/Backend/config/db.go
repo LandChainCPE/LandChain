@@ -349,7 +349,6 @@ func SetupDatabase() {
 		db.Create(&entity.Roomchat{User1ID: 3, User2ID: 1})
 		db.Create(&entity.Roomchat{User1ID: 3, User2ID: 2})
 
-
 		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
 		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
 		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 1, SellerID: 2})

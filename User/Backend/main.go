@@ -22,7 +22,9 @@ func main() {
 	}
 
 	config.ConnectDatabase()
+
 	config.SetupDatabase()
+
 	db := config.DB()
 	r := gin.Default()
 	hub := websocket.NewHub(db)
@@ -233,6 +235,8 @@ func main() {
 		authorized.GET("/user/lands/requestsellbydelete", controller.GetAllRequestSellByUserIDAndDelete)
 		authorized.PUT("/user/lands/put/transation/buyerupdate", controller.UpdateTransactionBuyerAccept)
 		authorized.DELETE("/user/lands/post/:id", controller.DeleteLandsalepostByLandIDandUserID)
+		authorized.PUT("/user/sale/put/updatesetsale/:id", controller.LoadUpdateSetsale)
+		authorized.PUT("/user/sale/put/updatebuy/:id", controller.LoadTransactionAfterBuy)
 
 		authorized.GET("/userinfo/:userId", controller.GetUserinfoByID)
 		authorized.GET("/landtitles/:userId", controller.GetLandtitlesByUser) //ดึงข้อมูล landtitles

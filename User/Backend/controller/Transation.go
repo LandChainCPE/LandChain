@@ -4,6 +4,7 @@ import (
 	"math/big"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"landchain/config"
 	"landchain/entity"
@@ -243,4 +244,200 @@ func DeleteTransactionandAllrequest(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "ลบ transaction และ request ทั้งหมดเรียบร้อย"})
+}
+
+func LoadUpdateSetsale(c *gin.Context) {
+	transactionIDStr := c.Param("id")
+
+	if transactionIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ต้องระบุ transactionID"})
+		return
+	}
+
+	transactionID, err := strconv.Atoi(transactionIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "transactionID ต้องเป็นตัวเลข"})
+		return
+	}
+
+	db := config.DB()
+
+	// 1️⃣ หา transaction (เฉพาะที่ยังไม่ถูกลบ)
+	var tx entity.Transaction
+	if err := db.Where("id = ? AND deleted_at IS NULL", transactionID).First(&tx).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบ transaction หรือถูกลบไปแล้ว", "detail": err.Error()})
+		return
+	}
+
+	// 🚨 ถ้า typetransaction_id = 4 → return เลย
+	if tx.TypetransactionID == 4 {
+		c.JSON(http.StatusOK, gin.H{
+			"transactionID": transactionID,
+			"landID":        tx.LandID,
+			"message":       "ไม่ดึงข้อมูลจาก Smart Contract เนื่องจาก on chain แล้ว",
+		})
+		return
+	}
+
+	// 2️⃣ ดึง Landtitle
+	var landData entity.Landtitle
+	if err := db.Where("id = ?", tx.LandID).First(&landData).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึง Landtitle ได้", "detail": err.Error()})
+		return
+	}
+
+	if landData.TokenID == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Landtitle ไม่มี TokenID"})
+		return
+	}
+	tokenID := big.NewInt(int64(*landData.TokenID))
+
+	// 3️⃣ ดึง Metadata จาก SmartContract
+	meta, err := ContractInstance.GetLandMetadata(tokenID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ดึง Metadata ไม่สำเร็จ", "detail": err.Error()})
+		return
+	}
+
+	// 4️⃣ ดึง Wallet ของ Buyer/Seller จาก DB
+	var buyer entity.Users
+	if err := db.First(&buyer, tx.BuyerID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึง Buyer ได้", "detail": err.Error()})
+		return
+	}
+
+	var seller entity.Users
+	if err := db.First(&seller, tx.SellerID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึง Seller ได้", "detail": err.Error()})
+		return
+	}
+
+	// 5️⃣ เทียบ Wallet DB กับ Blockchain
+	updated := false
+	if strings.EqualFold(buyer.Metamaskaddress, meta.Buyer.Hex()) &&
+		strings.EqualFold(seller.Metamaskaddress, meta.WalletID.Hex()) {
+		// Update TypetransactionID = 4
+		if err := db.Model(&tx).Update("typetransaction_id", 4).Error; err == nil {
+			updated = true
+		}
+	}
+
+	// 6️⃣ ส่ง Response
+	c.JSON(http.StatusOK, gin.H{
+		"transactionID": transactionID,
+		"landID":        tx.LandID,
+		"tokenID":       tokenID.String(),
+		"metaFields":    meta.MetaFields,
+		"price":         meta.Price.String(),
+		"buyer":         meta.Buyer.Hex(),
+		"walletID":      meta.WalletID.Hex(),
+		"updated":       updated,
+	})
+}
+
+func LoadTransactionAfterBuy(c *gin.Context) {
+	transactionIDStr := c.Param("id")
+
+	if transactionIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ต้องระบุ transactionID"})
+		return
+	}
+
+	transactionID, err := strconv.Atoi(transactionIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "transactionID ต้องเป็นตัวเลข"})
+		return
+	}
+
+	db := config.DB()
+
+	// 1️⃣ หา transaction (เฉพาะที่ยังไม่ถูกลบ)
+	var tx entity.Transaction
+	if err := db.Where("id = ? AND deleted_at IS NULL", transactionID).First(&tx).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบ transaction หรือถูกลบไปแล้ว", "detail": err.Error()})
+		return
+	}
+
+	// 🚨 ถ้า typetransaction_id = 5 → return เลย
+	if tx.TypetransactionID == 5 {
+		c.JSON(http.StatusOK, gin.H{
+			"transactionID": transactionID,
+			"landID":        tx.LandID,
+			"message":       "ข้อมูลอัพเดทแล้ว ไม่ต้องดึง Smart Contract",
+		})
+		return
+	}
+
+	// 2️⃣ ดึง Landtitle
+	var landData entity.Landtitle
+	if err := db.Where("id = ?", tx.LandID).First(&landData).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึง Landtitle ได้", "detail": err.Error()})
+		return
+	}
+
+	if landData.TokenID == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Landtitle ไม่มี TokenID"})
+		return
+	}
+	tokenID := big.NewInt(int64(*landData.TokenID))
+
+	// 3️⃣ ดึง history ownership ล่าสุด 2 รายการ
+	history, err := ContractInstance.GetOwnershipHistory(tokenID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ดึง Ownership History ไม่สำเร็จ", "detail": err.Error()})
+		return
+	}
+
+	if len(history) < 2 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Ownership History มีไม่พอ"})
+		return
+	}
+
+	// เอา 2 รายการล่าสุด
+	latestHistory := history[len(history)-2:]
+
+	// 4️⃣ ดึง wallet ของ Buyer/Seller
+	var buyer entity.Users
+	if err := db.First(&buyer, tx.BuyerID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึง Buyer ได้", "detail": err.Error()})
+		return
+	}
+
+	var seller entity.Users
+	if err := db.First(&seller, tx.SellerID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึง Seller ได้", "detail": err.Error()})
+		return
+	}
+
+	// 5️⃣ ตรวจสอบลำดับ wallet (latestHistory[0] = ก่อนหน้า, latestHistory[1] = ล่าสุด)
+	if strings.EqualFold(latestHistory[0].Hex(), seller.Metamaskaddress) &&
+		strings.EqualFold(latestHistory[1].Hex(), buyer.Metamaskaddress) {
+
+		// อัพเดท TypetransactionID = 5
+		if err := db.Model(&tx).Update("typetransaction_id", 5).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "อัพเดท TypetransactionID ไม่สำเร็จ", "detail": err.Error()})
+			return
+		}
+
+		// 6️⃣ Soft delete transaction ทันที
+		if err := db.Delete(&tx).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "soft delete transaction ไม่สำเร็จ", "detail": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"transactionID": transactionID,
+			"landID":        tx.LandID,
+			"message":       "อัพเดทและลบ transaction สำเร็จ",
+			"history":       latestHistory,
+		})
+		return
+	}
+
+	c.JSON(http.StatusBadRequest, gin.H{
+		"transactionID": transactionID,
+		"landID":        tx.LandID,
+		"message":       "Wallet ของ Buyer/Seller ไม่ตรงกับ history ล่าสุดหรือลำดับไม่ถูกต้อง",
+		"history":       latestHistory,
+	})
 }
