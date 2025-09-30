@@ -229,7 +229,7 @@ func GetInfoUserByWalletID(c *gin.Context) {
 	db := config.DB()
 
 	// ดึงข้อความห้องแชทพร้อมเรียงเวลาข้อความ
-	if err := db.First(&User).Where("metamaskaddress = ?", walletAddr).Error; err != nil {
+	if err := db.First(&User).Where("metamaskaddress = ?", walletAddr).Preload("UserVerification").Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลผู้ใช้ได้"})
 		return
 	}
@@ -363,13 +363,13 @@ func SetSellInfoHandler(c *gin.Context) {
 	land := entity.Landtitle{}
 	db := config.DB()
 
-	if err := db.First(&land, "id = ?", req.TokenID).Error; err != nil {
+	if err := db.First(&land, "token_id = ?", req.TokenID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "land not found"})
 		return
 	}
 
-	if land.IsLocked {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "land is already locked"})
+	if !land.IsLocked {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "land is already not locked"})
 		return
 	}
 

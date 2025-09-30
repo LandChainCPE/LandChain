@@ -1,8 +1,8 @@
 import axios from "axios";
 
 
-const apiUrl = "http://localhost:8080";
-
+// const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
+const apiUrl = import.meta.env.VITE_URL_Backend;
 
 /** ใส่เฉพาะ Authorization (อย่าใส่ Content-Type ที่นี่) */
 function getAuthHeaders(): Record<string, string> {

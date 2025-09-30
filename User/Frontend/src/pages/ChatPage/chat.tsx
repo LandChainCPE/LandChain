@@ -9,6 +9,9 @@ import {
   UploadImage,
 } from "../../service/https/bam/bam";
 import { useParams } from "react-router-dom";
+const URLBackend = import.meta.env.VITE_URL_Backend;
+const URLBackendWS = import.meta.env.VITE_URL_Backend_WSS;
+
 
 interface Message {
   ID: number;
@@ -83,8 +86,8 @@ const Chat = () => {
   useEffect(() => {
     if (!userID) return;
 
-    const ws = new WebSocket(`wss://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/ws/notification/${userID}`);
-
+    // const ws = new WebSocket(`wss://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/ws/notification/${userID}`);
+    const ws = new WebSocket(`${URLBackendWS}/ws/notification/${userID}`);
     ws.onmessage = (event) => {
       const msg: Message = JSON.parse(event.data);
       const roomIDFromMsg = msg.RoomID ?? null;
@@ -112,10 +115,8 @@ const Chat = () => {
 
     if (wsRef.current) wsRef.current.close();
 
-    const ws = new WebSocket(
-      `wss://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/ws/chat/${selectedRoom.ID}/${userID}`
-
-    );
+    // const ws = new WebSocket(`wss://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/ws/chat/${selectedRoom.ID}/${userID}`);
+    const ws = new WebSocket(`${URLBackendWS}/ws/chat/${selectedRoom.ID}/${userID}`);
 
     ws.onopen = () => console.log("Connected to Chat WS");
 
@@ -254,8 +255,8 @@ const Chat = () => {
       setMessages((prev) => [...prev, msg]);
 
       try {
-        await fetch("https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/notification/send", {
-
+        // await fetch("https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/notification/send", {
+        await fetch(`${URLBackend}/notification/send`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -479,33 +480,35 @@ const Chat = () => {
                 )}
 
                 <div className="input-controls">
-                  <textarea
-                    placeholder="Type your message..."
-                    value={newMessage}
-                    maxLength={200}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                    className="message-input"
-                  />
+                  <div className="message-input-wrapper">
+                    <textarea
+                      placeholder="Type your message..."
+                      value={newMessage}
+                      maxLength={200}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMessage();
+                        }
+                      }}
+                      className="message-input"
+                    />
 
-                  <div className="input-meta">
-                    <div className="char-count">
-                      {newMessage.length} / 200
-                    </div>
+                    <div className="input-meta">
+                      <div className="char-count">
+                        {newMessage.length} / 200
+                      </div>
 
-                    <div className="file-input-wrapper">
-                      <input
-                        type="file"
-                        onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
-                        className="file-input"
-                      />
-                      <div className="file-size-limit">
-                        Max {MAX_FILE_SIZE_MB}MB
+                      <div className="file-input-wrapper">
+                        <input
+                          type="file"
+                          onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
+                          className="file-input"
+                        />
+                        <div className="file-size-limit">
+                          Max {MAX_FILE_SIZE_MB}MB
+                        </div>
                       </div>
                     </div>
                   </div>

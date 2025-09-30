@@ -8,6 +8,8 @@ import { ethers } from "ethers";
 import { GetInfoUserByToken, GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";
 import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield";
 import MapPicker from "../../components/MapPicker";
+import { GetUserIDByWalletAddress } from "../../service/https/bam/bam";
+const URLBackend = import.meta.env.VITE_URL_Backend;
 
 type Coordinate = { lng: number; lat: number };
 
@@ -18,10 +20,10 @@ async function saveLocations(
 ) {
   if (!coords?.length) return;
 
-  const API_BASE =
-    opts?.apiBase ??
-    (import.meta as any)?.env?.VITE_API_BASE_URL ??
-    "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io:8080";
+  // const API_BASE =
+  //   opts?.apiBase ??
+  //   (import.meta as any)?.env?.VITE_API_BASE_URL ??
+  //   "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
 
   const token = opts?.token ?? sessionStorage.getItem("token") ?? "";
   const tokenType = opts?.tokenType ?? sessionStorage.getItem("token_type") ?? "Bearer";
@@ -33,7 +35,7 @@ async function saveLocations(
     landsalepost_id: landsalepostId,
   }));
 
-  const res = await fetch(`${API_BASE}/location`, {
+  const res = await fetch(`${URLBackend}/location`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -894,14 +896,12 @@ useEffect(() => {
     // ดึง user_id จาก wallet
     const fetchUserId = async () => {
       try {
+        // import ให้ถูกต้องตามที่ใช้จริง
         // @ts-ignore
-        const wallet = sessionStorage.getItem("wallet") || "";
-        const { user_id } = await import("../../service/https/bam/bam").then(mod => mod.GetUserIDByWalletAddress());
-        if (user_id) {
-          setCurrentUserId(String(user_id));
-        }
+        const result = await GetUserIDByWalletAddress();
+          setCurrentUserId(result.user_id);
       } catch (error) {
-        setCurrentUserId("");
+        console.error("Error calling GetUserIDByWalletAddress:", error);
       }
     };
     fetchUserId();
@@ -911,11 +911,6 @@ useEffect(() => {
     e.preventDefault();
     setLoading(true);
 
-    // if (!formData.province_id || !formData.district_id || !formData.subdistrict_id) {
-    //   message.error("กรุณาเลือกจังหวัด อำเภอ และตำบลให้ครบถ้วน");
-    //   setLoading(false);
-    //   return;
-    // }
       // สร้าง object เก็บ error
       const newErrors: any = {};
 
@@ -931,30 +926,32 @@ useEffect(() => {
         return; // หยุดการ submit
       }
 
-    const userId = currentUserId;
-
     try {
       const payload = {
         first_name: formData.firstName,
         last_name: formData.lastName,
         phone_number: formData.phoneNumber,
         name: formData.name,
-        images,
         price: Number(formData.price),
         province_id: Number(formData.province_id),
         district_id: Number(formData.district_id),
         subdistrict_id: Number(formData.subdistrict_id),
-        tag_id: formData.tag_id,        
-        land_id: Number(formData.land_id), 
-        user_id: Number(userId),
+        land_id: Number(formData.land_id),
+        user_id: Number(currentUserId),
         locations: mapCoords.map((c, i) => ({
           sequence: i + 1,
           latitude: c.lat,
           longitude: c.lng,
         })),
+        tag_id: formData.tag_id,
+        images: images, // array ของ base64
       };
 
+      await CreateLandPost(payload);
+
+
       // 1) สร้างโพสต์
+      console.log("Submitting payload:", payload);
       const created = await CreateLandPost(payload);
       const newId =
         created?.ID ?? created?.id ?? created?.data?.ID ?? created?.data?.id;
@@ -1514,18 +1511,18 @@ useEffect(() => {
 
                                   <div className="land-tokens-container">
                                     {landMetadata.map((land: any, index: number) => {
-                                      const deedNo = land.meta?.["Deed No"] || land.meta?.["DeedNo"] || "-";
+                                      const deedNo = land.meta?.["TitleDeedNumber"] || land.meta?.["TitleDeedNumber"] || "-";
                                       const m = land.meta || {};
-                                      const map = m["Map"] ?? "-";
-                                      const landNo = m["Land No"] ?? "-";
-                                      const surveyPage = m["Survey Page"] ?? "-";
+                                      const map = m["SurveyNumber"] ?? "-";
+                                      const landNo = m["LandNumber"] ?? "-";
+                                      const surveyPage = m["SurveyPage"] ?? "-";
                                       const subdistrict = m["Subdistrict"] ?? "-";
                                       const district = m["District"] ?? "-";
                                       const province = m["Province"] ?? "-";
                                       const rai = m["Rai"] ?? "-";
                                       const ngan = m["Ngan"] ?? "-";
                                       const sqwa = m["SqWa"] ?? "-";
-                                      const book = m["Book"] ?? "-";
+                                      const book = m["Volume"] ?? "-";
                                       const page = m["Page"] ?? "-";
 
                                       const available = isZeroAddress(land.buyer); // true = ว่างขาย
@@ -1616,7 +1613,7 @@ useEffect(() => {
                   {/* Show selected deed number only once above the grid */}
                   {selectedLand && (() => {
                     const land = landMetadata.find((l: any) => String(l.tokenID) === String(selectedLand));
-                    const deedNo = land?.meta?.["Deed No"] || land?.meta?.["DeedNo"] || "-";
+                    const deedNo = land?.meta?.["TitleDeedNumber"] || land?.meta?.["TitleDeedNumber"] || "-";
                     return (
                       <div style={{ marginBottom: 12, textAlign: "center" }}>
                         <span style={{ color: "#1677ff", fontWeight: 600, fontSize: "1.1rem" }}>

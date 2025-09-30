@@ -5,10 +5,12 @@ import { Calendar, Clock, User, ChevronRight, AlertCircle, CheckCircle } from "l
 
 function UserMain() {
   const navigate = useNavigate();
+  //@ts-ignore
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   // ฟังก์ชันแปลงวันที่จากปี ค.ศ. เป็นปี พ.ศ.
+  //@ts-ignore
   const convertToThaiDate = (dateString: string) => {
     const date = new Date(dateString);
 
@@ -25,14 +27,16 @@ function UserMain() {
     navigate("/operations");
     const fetchData = async () => {
       setLoading(true);
-      const res = await getQueueByDate();
-      if (res && res.data) {
-        const transformedBookings = res.data.map((booking: any) => ({
+      let { response, result } = await getQueueByDate();
+      console.log("response", response);
+      console.log("result", result);
+      if (response.status === 200 && result) {
+        const transformedBookings = result.map((booking: any) => ({
           ...booking,
           date_booking: convertToThaiDate(booking.date_booking), // แปลงวันที่
         }));
         setBookings(transformedBookings);
-        console.log(res.data);
+        // console.log(res);
       }
       setLoading(false);
     };
@@ -42,7 +46,8 @@ function UserMain() {
 
   const handleAction = (item: any) => {
     // ส่ง object ของรายการทั้งหมดไปเป็น state
-    navigate(`/verifyuser`, { state: { booking: item } });
+    console.log(item.id);
+    navigate(`/verifyuser`, { state: { booking: item.id } });
   };
 
   if (loading) {
@@ -224,7 +229,7 @@ function UserMain() {
                       </td>
                       <td className="px-8 py-6 whitespace-nowrap text-right text-sm font-medium">
                         <button
-                          onClick={() => handleAction(item.id)}
+                          onClick={() => handleAction(item)}
                           className="group inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                         >
                           <span>ดำเนินการ</span>

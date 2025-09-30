@@ -1,6 +1,6 @@
 /* Enhanced Chat CSS - Improved UI with Better Message Display */
 
-/* Variables - matching LandHistory theme */
+/* Variables */
 :root {
   --primary-dark: #172E25;
   --primary-medium: #3F5658;
@@ -24,7 +24,7 @@
               radial-gradient(circle at 80% 20%, rgba(208, 226, 230, 0.3) 0%, transparent 50%),
               linear-gradient(135deg, #D0E2E6 0%, #FFFFFF 70%);
   min-height: 100vh;
-  padding-top: 100px; /* เพิ่มพื้นที่สำหรับ navbar */
+  padding-top: 100px;
   overflow-x: hidden;
 }
 
@@ -79,18 +79,18 @@
   75% { transform: translateY(-8px) rotate(3deg); }
 }
 
-/* Main Chat Layout - Enhanced for better message display */
+/* Main Chat Layout */
 .chat-main-layout {
   display: flex;
   gap: 1rem;
-  height: calc(100vh - 120px); /* ปรับความสูงให้ไม่บังกับ navbar */
+  height: calc(100vh - 120px);
   padding: 1rem;
   box-sizing: border-box;
   position: relative;
   z-index: 10;
 }
 
-/* Contacts Sidebar - Compact design */
+/* Contacts Sidebar */
 .chat-contacts {
   width: 280px;
   min-width: 280px;
@@ -143,7 +143,7 @@
   margin: 0.25rem 0 0 0;
 }
 
-/* Contact Items - Improved interaction */
+/* Contact Items */
 .contact-item {
   display: flex;
   align-items: center;
@@ -212,6 +212,7 @@
   font-weight: 600;
   font-size: 1rem;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
 }
 
 .contact-item.active .contact-avatar {
@@ -221,6 +222,7 @@
 
 .contact-details {
   flex: 1;
+  min-width: 0;
 }
 
 .contact-name {
@@ -230,14 +232,9 @@
   color: inherit;
   position: relative;
   z-index: 2;
-}
-
-.contact-status {
-  font-size: 0.8rem;
-  opacity: 0.7;
-  color: inherit;
-  position: relative;
-  z-index: 2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .unread-badge {
@@ -253,6 +250,7 @@
   position: relative;
   z-index: 2;
   animation: pulse 2s infinite;
+  flex-shrink: 0;
 }
 
 @keyframes pulse {
@@ -271,7 +269,7 @@
   border: 2px dashed var(--secondary-light);
 }
 
-/* Chat Room - Maximized for better message display */
+/* Chat Room */
 .chat-room {
   flex: 1;
   background: rgba(255, 255, 255, 0.98);
@@ -298,7 +296,7 @@
   opacity: 0.05;
 }
 
-/* Chat Header - Compact but informative */
+/* Chat Header */
 .chat-header {
   background: var(--gradient-dark);
   color: var(--white);
@@ -306,6 +304,7 @@
   border-radius: 20px 20px 0 0;
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .chat-header::before {
@@ -315,7 +314,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='https://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E");
+  background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 .chat-header-content {
@@ -338,43 +337,31 @@
   font-weight: 700;
   font-size: 1.1rem;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.chat-user-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .chat-user-info h4 {
   margin: 0 0 0.2rem 0;
   font-size: 1.2rem;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.chat-user-status {
-  font-size: 0.85rem;
-  opacity: 0.8;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.status-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--success-color);
-  animation: blink 2s infinite;
-}
-
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0.3; }
-}
-
-/* Messages Container - Enhanced for better readability */
+/* Messages Container */
 .chat-messages {
   flex: 1;
   padding: 1.5rem;
   overflow-y: auto;
   background: var(--gradient-light);
   position: relative;
-  min-height: 500px;
+  min-height: 0;
 }
 
 .chat-messages::before {
@@ -384,7 +371,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='https://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236F969B' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236F969B' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   pointer-events: none;
 }
 
@@ -396,7 +383,7 @@
   z-index: 1;
 }
 
-/* Message Bubbles - Improved size and readability */
+/* Message Bubbles - ปรับปรุงการแสดงผลรูปภาพ */
 .message-wrapper {
   display: flex;
   align-items: flex-end;
@@ -424,15 +411,15 @@
 }
 
 .message-bubble {
-  max-width: 75%;
-  padding: 1rem 1.3rem;
+  max-width: 70%;
+  padding: 0.75rem 1rem;
   border-radius: 18px;
   word-wrap: break-word;
   overflow-wrap: break-word;
   position: relative;
   box-shadow: var(--shadow-soft);
   transition: all 0.2s ease;
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.5;
 }
 
@@ -454,17 +441,30 @@
   border-bottom-left-radius: 6px;
 }
 
+/* ปรับการแสดงผลเนื้อหาข้อความ */
 .message-content {
   line-height: 1.5;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  word-break: break-word;
 }
 
+/* ปรับการแสดงผลรูปภาพให้ดีขึ้น */
 .message-content img {
-  max-width: 300px;
+  display: block;
+  max-width: 100%;
+  max-height: 400px;
+  width: auto;
+  height: auto;
   border-radius: 12px;
   margin: 0.25rem 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   cursor: pointer;
+  transition: transform 0.2s ease;
+  object-fit: contain;
+}
+
+.message-content img:hover {
+  transform: scale(1.02);
 }
 
 .message-content a {
@@ -472,6 +472,7 @@
   text-decoration: underline;
   opacity: 0.9;
   transition: opacity 0.2s ease;
+  word-break: break-all;
 }
 
 .message-content a:hover {
@@ -480,20 +481,6 @@
 
 .message-wrapper.own .message-content a {
   color: rgba(255, 255, 255, 0.9);
-}
-
-.message-timestamp {
-  font-size: 0.75rem;
-  opacity: 0.7;
-  margin-top: 0.5rem;
-}
-
-.message-wrapper.own .message-timestamp {
-  text-align: right;
-}
-
-.message-wrapper.other .message-timestamp {
-  text-align: left;
 }
 
 .no-messages {
@@ -506,30 +493,34 @@
   border: 2px dashed var(--secondary-light);
 }
 
-/* Input Area - Compact but functional */
+/* Input Area - ปรับให้คงที่และไม่ถูกดัน */
 .chat-input-area {
   background: var(--white);
   border-top: 1px solid var(--secondary-light);
-  padding: 1.2rem;
+  padding: 1rem 1.2rem;
   border-radius: 0 0 20px 20px;
+  flex-shrink: 0;
 }
 
+/* File Preview - ปรับให้แสดงผลเรียบร้อย */
 .file-preview {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  padding: 0.8rem;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
   background: var(--gradient-light);
   border-radius: 10px;
   border: 1px solid var(--secondary-light);
 }
 
 .file-preview img {
-  max-height: 50px;
+  max-height: 60px;
+  max-width: 80px;
   border-radius: 6px;
   cursor: pointer;
   transition: transform 0.2s ease;
+  object-fit: cover;
 }
 
 .file-preview img:hover {
@@ -543,6 +534,11 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .file-preview a:hover {
@@ -554,11 +550,12 @@
   color: var(--white);
   border: none;
   border-radius: 6px;
-  padding: 0.3rem 0.6rem;
+  padding: 0.4rem 0.75rem;
   cursor: pointer;
   font-size: 0.8rem;
   font-weight: 500;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .remove-file-btn:hover {
@@ -566,39 +563,49 @@
   box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
 }
 
+/* Input Controls - ปรับเลย์เอาท์ใหม่ */
 .input-controls {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   align-items: flex-end;
 }
 
-.message-input {
+.message-input-wrapper {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.message-input {
+  width: 100%;
   background: rgba(255, 255, 255, 0.9);
   border: 2px solid var(--secondary-light);
   border-radius: 14px;
-  padding: 1rem;
-  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
   resize: none;
-  min-height: 24px;
-  max-height: 100px;
+  min-height: 44px;
+  max-height: 120px;
   transition: all 0.3s ease;
   font-family: inherit;
   outline: none;
+  line-height: 1.5;
 }
 
 .message-input:focus {
   border-color: var(--primary-light);
   background: var(--white);
   box-shadow: 0 0 0 4px rgba(111, 150, 155, 0.1);
-  transform: translateY(-1px);
 }
 
+/* Input Meta - จัดเรียงในแนวนอน */
 .input-meta {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
+  padding: 0 0.25rem;
 }
 
 .char-count {
@@ -609,20 +616,18 @@
 
 .file-input-wrapper {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 
 .file-input {
   font-size: 0.75rem;
-  padding: 0.4rem;
+  padding: 0.3rem 0.5rem;
   border: 1px solid var(--secondary-light);
   border-radius: 6px;
   background: var(--white);
   cursor: pointer;
   transition: all 0.2s ease;
-  max-width: 100px;
 }
 
 .file-input:hover {
@@ -631,9 +636,10 @@
 }
 
 .file-size-limit {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   color: var(--primary-medium);
   opacity: 0.6;
+  white-space: nowrap;
 }
 
 .send-btn {
@@ -641,14 +647,19 @@
   color: var(--white);
   border: none;
   border-radius: 12px;
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1.5rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: var(--shadow-soft);
   position: relative;
   overflow: hidden;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .send-btn::before {
@@ -662,33 +673,23 @@
   transition: left 0.6s ease;
 }
 
-.send-btn:hover {
+.send-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: var(--shadow-medium);
 }
 
-.send-btn:hover::before {
+.send-btn:hover:not(:disabled)::before {
   left: 100%;
 }
 
-.send-btn:active {
+.send-btn:active:not(:disabled) {
   transform: translateY(0);
 }
 
 .send-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: var(--shadow-soft);
-  background: #ccc;
-}
-
-.send-btn:disabled:hover {
-  transform: none;
-}
-
-.send-btn:disabled::before {
-  display: none;
+  background: linear-gradient(135deg, #ccc, #aaa);
 }
 
 /* Empty State */
@@ -736,11 +737,38 @@
   animation: pulse 2s infinite;
 }
 
+/* Scrollbar Styling */
+.chat-messages::-webkit-scrollbar,
+.chat-contacts::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track,
+.chat-contacts::-webkit-scrollbar-track {
+  background: var(--secondary-light);
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb,
+.chat-contacts::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover,
+.chat-contacts::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-medium);
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .chat-contacts {
     width: 260px;
     min-width: 260px;
+  }
+  
+  .message-bubble {
+    max-width: 75%;
   }
 }
 
@@ -760,29 +788,24 @@
   
   .chat-room {
     height: 70vh;
+    min-height: 500px;
     order: 1;
   }
 
-  .input-controls {
-    flex-wrap: wrap;
-  }
-
-  .input-meta {
-    flex-direction: row;
-    justify-content: space-between;
-    width: 100%;
+  .message-bubble {
+    max-width: 80%;
   }
 }
 
 @media (max-width: 768px) {
   .chat-container {
-    padding-top: 80px; /* ลดลงใน mobile */
+    padding-top: 80px;
   }
   
   .chat-main-layout {
     padding: 0.8rem;
     gap: 0.8rem;
-    height: calc(100vh - 100px); /* ปรับให้เหมาะกับ mobile navbar */
+    height: calc(100vh - 100px);
   }
   
   .chat-contacts {
@@ -793,7 +816,7 @@
   
   .chat-room {
     border-radius: 16px;
-    height: 75vh;
+    min-height: 450px;
   }
   
   .chat-header {
@@ -803,30 +826,25 @@
   
   .chat-messages {
     padding: 1rem;
-    min-height: 400px;
   }
   
   .chat-input-area {
-    padding: 1rem;
+    padding: 0.9rem;
     border-radius: 0 0 16px 16px;
-  }
-  
-  .input-controls {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-  }
-  
-  .input-meta {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
   }
   
   .message-bubble {
     max-width: 85%;
-    padding: 0.8rem 1rem;
-    font-size: 0.95rem;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.9rem;
+  }
+  
+  .message-content {
+    font-size: 0.9rem;
+  }
+  
+  .message-content img {
+    max-height: 300px;
   }
   
   .contact-item {
@@ -849,15 +867,20 @@
     display: none;
   }
 
+  .input-meta {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
   .file-input {
-    max-width: 80px;
+    font-size: 0.7rem;
   }
 }
 
 @media (max-width: 576px) {
   .chat-main-layout {
     padding: 0.5rem;
-    height: calc(100vh - 90px); /* ปรับให้เหมาะกับ small mobile */
+    height: calc(100vh - 90px);
   }
   
   .chat-header-content {
@@ -871,26 +894,32 @@
   }
   
   .chat-user-info h4 {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
   }
   
   .message-input {
-    padding: 0.8rem;
-    font-size: 0.95rem;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+    min-height: 40px;
   }
   
   .send-btn {
-    padding: 0.8rem 1.2rem;
-    font-size: 0.95rem;
-  }
-
-  .chat-messages {
-    min-height: 350px;
+    padding: 0.65rem 1.2rem;
+    font-size: 0.9rem;
+    height: 40px;
   }
 
   .message-bubble {
-    padding: 0.75rem 1rem;
-    font-size: 0.9rem;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.85rem;
+  }
+
+  .message-content {
+    font-size: 0.85rem;
+  }
+
+  .message-content img {
+    max-height: 250px;
   }
 
   .contact-name {
@@ -900,29 +929,20 @@
   .contacts-subtitle {
     font-size: 0.75rem;
   }
-}
 
-/* Scrollbar Styling */
-.chat-messages::-webkit-scrollbar,
-.chat-contacts::-webkit-scrollbar {
-  width: 6px;
-}
+  .file-preview {
+    padding: 0.6rem;
+    gap: 0.5rem;
+  }
 
-.chat-messages::-webkit-scrollbar-track,
-.chat-contacts::-webkit-scrollbar-track {
-  background: var(--secondary-light);
-  border-radius: 3px;
-}
+  .file-preview img {
+    max-height: 50px;
+    max-width: 60px;
+  }
 
-.chat-messages::-webkit-scrollbar-thumb,
-.chat-contacts::-webkit-scrollbar-thumb {
-  background: var(--primary-light);
-  border-radius: 3px;
-}
-
-.chat-messages::-webkit-scrollbar-thumb:hover,
-.chat-contacts::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-medium);
+  .input-controls {
+    gap: 0.5rem;
+  }
 }
 
 /* Loading and Error States */
@@ -950,7 +970,6 @@
   font-size: 0.9rem;
 }
 
-/* Success message */
 .success-message {
   color: var(--success-color);
   background: rgba(76, 175, 80, 0.1);
@@ -959,4 +978,71 @@
   border: 1px solid rgba(76, 175, 80, 0.3);
   margin: 0.5rem 0;
   font-size: 0.9rem;
+}
+
+/* Additional improvements for image and file handling */
+.message-bubble:has(img) {
+  padding: 0.5rem;
+}
+
+.message-content:has(img) {
+  line-height: 1;
+}
+
+/* Ensure file links don't break layout */
+.message-content a[href*="."]:not([href*=".jpg"]):not([href*=".jpeg"]):not([href*=".png"]):not([href*=".gif"]):not([href*=".webp"]) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0;
+}
+
+/* Better text wrapping for long URLs */
+.message-content {
+  overflow-wrap: anywhere;
+}
+
+/* Smooth transitions for dynamic content */
+.message-wrapper,
+.file-preview,
+.contact-item {
+  will-change: transform;
+}
+
+/* Improve input area flexibility */
+.chat-input-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Better focus states */
+.message-input:focus,
+.file-input:focus,
+.send-btn:focus {
+  outline: none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .contact-item,
+  .message-bubble,
+  .chat-header {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .chat-floating-shapes {
+    display: none;
+  }
 }

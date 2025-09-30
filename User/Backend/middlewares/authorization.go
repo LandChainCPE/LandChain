@@ -43,7 +43,7 @@ func Authorizes() gin.HandlerFunc {
 			return
 		}
 
-		if claims == nil || claims.Wallet == "" {
+		if claims == nil || claims.Wallet == "" {  // บรรทัดนนี้นั้น claims คือ object ที่ได้จากการถอด JWT (decode/validate) ซึ่งจะมีโครงสร้างเป็น JwtWrapper ประกอบด้วย SecretKey Issuer ExpirationHours สามาถใช้ . อ่านค่าได้เลย
 			fmt.Printf("❌ Authorizes: Invalid token claims - claims: %+v\n", claims)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
 			return
@@ -56,3 +56,19 @@ func Authorizes() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+
+
+
+// ประมาณว่า ผู้ใช้ส่ง Request มาแล้ว ที่ Authorizes จะถูก c.Set   wallet
+// แล้ว Controller นะัั้เนจะ ใช้ c.Get อีกที เพื่อดึงค่า walletid ของRequest นั้น  แสดงว่า ค่าที่ c.Set("wallet", claims.Wallet) มันก็ตะถูกเปลี่ยนไปเรื่อยๆ ตามที่ User ส่งมาสิ
+
+
+// ค่าที่ c.Set("wallet", claims.Wallet) จะถูกเปลี่ยนไปตามแต่ละ request ของผู้ใช้แต่ละคน
+
+// ทุก request ใหม่ (แต่ละรอบที่ user ส่งมา) จะมี context ใหม่ของตัวเอง
+// middleware Authorizes จะ decode JWT ของ request นั้น แล้ว set wallet address เฉพาะของ request นั้นลง context
+// controller ใช้ c.Get("wallet") เพื่อดึง wallet address ของ request นั้นๆ
+
+
+

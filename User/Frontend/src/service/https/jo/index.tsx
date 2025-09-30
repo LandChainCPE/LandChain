@@ -1,5 +1,5 @@
-const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
-
+// const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
+const apiUrl = import.meta.env.VITE_URL_Backend;
 import axios from "axios";
 import type { BookingInterface } from "../../../interfaces/Booking";
 import type { AvailableSlotsResponse } from "../../../interfaces/types";
@@ -373,9 +373,129 @@ async function CheckVerifyWallet(wallet: any) {
 
 // แก้ไข updatePost function ใน index.tsx
 // แก้ไข updatePost function ใน index.tsx
+
+
+const getUserIDByWallet = async (wallet: string): Promise<{ user_id?: number; wallet?: string; error?: string }> => {
+  try {
+    const res = await api.get(`/user/GetUserID/${wallet}`);
+    return res.data as { user_id?: number; wallet?: string; error?: string };
+  } catch (error: any) {
+    console.error("getUserIDByWallet Error:", error);
+    if (error.response) return error.response.data;
+    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
+  }
+};
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export async function getUserPostLandData(userId: number) {
+  try {
+    const res = await api.get(`/user/lands/${userId}`);
+    return res.data;
+  } catch (error: any) {
+    console.error("getUserPostLandData Error:", error);
+    return [];
+  }
+}
+
+/**
+ * ลบโพสต์และข้อมูลที่เกี่ยวข้องทั้งหมด
+ * @param postId - ID ของโพสต์
+ * @returns Promise<ApiResponse<any>>
+ */
+export async function deletePost(postId: number) {
+  try {
+    const res = await api.delete(`/user/posts/${postId}`);
+    return { response: { ok: true }, result: res.data };
+  } catch (error: any) {
+    console.error("deletePost Error:", error);
+    if (error.response) {
+      return { response: { ok: false }, result: error.response.data };
+    } else {
+      return { response: { ok: false }, result: { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" } };
+    }
+  }
+}
+
+// เพิ่ม Type Definitions
+export interface Location {
+  id?: number;
+  sequence: number;
+  latitude: number;
+  longitude: number;
+  landsalepost_id?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Photoland {
+  id?: number;
+  path: string;
+  landsalepost_id?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Tag {
+  id: number;
+  name?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Province {
+  id: number;
+  name_th: string;
+}
+
+export interface District {
+  id: number;
+  name_th: string;
+  province_id: number;
+}
+
+export interface Subdistrict {
+  id: number;
+  name_th: string;
+  district_id: number;
+}
+
+export interface Landtitle {
+  id: number;
+}
+
+export interface Users {
+  id: number;
+}
+
+export interface LandsalePost {
+  id: number;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  name: string;
+  price: number;
+  province_id: number;
+  district_id: number;
+  subdistrict_id: number;
+  land_id: number;
+  user_id: number;
+  created_at: string;
+  updated_at: string;
+  
+  // Relations
+  province?: Province;
+  district?: District;
+  subdistrict?: Subdistrict;
+  landtitle?: Landtitle;
+  users?: Users;
+  photoland?: Photoland[];
+  location?: Location[];
+  tags?: Tag[];
+}
+
+
 export async function updatePost(data: any) {
   try {
-    // Debug log เพื่อตรวจสอบข้อมูลที่ได้รับ
     console.log('updatePost received data:', data);
     console.log('data.id:', data.id);
     
@@ -384,24 +504,58 @@ export async function updatePost(data: any) {
       return { response: { ok: false }, result: { error: "Post ID is required" } };
     }
 
-    const requestData = {
-      post_id: data.id, // ส่ง post_id ใน body
-      name: data.name,
-      price: data.price,
-      first_name: data.first_name,
-      last_name: data.last_name,
-      phone_number: data.phone_number,
-      province_id: data.province_id,
-      district_id: data.district_id,
-      subdistrict_id: data.subdistrict_id,
-      land_id: data.land_id,
-      user_id: data.user_id,
-    };
 
-    console.log('Sending updatePost request with post_id:', requestData);
+    // Special handling for locations: filter out invalid points, omit if empty
+    const requestData: any = {};
+    const fields = [
+      'name',
+      'price',
+      'first_name',
+      'last_name',
+      'phone_number',
+      'province_id',
+      'district_id',
+      'subdistrict_id',
+      'land_id',
+      'user_id',
+      'images',
+      'tag_id',
+      // 'locations', // handle below
+    ];
+    fields.forEach((key) => {
+      const value = data[key];
+      if (
+        value !== undefined &&
+        value !== null &&
+        !(Array.isArray(value) && value.length === 0) &&
+        !(typeof value === 'string' && value.trim() === '')
+      ) {
+        requestData[key] = value;
+      }
+    });
 
-    // ส่ง PUT request ไปยัง /user/updatepost (ไม่ใส่ post_id ใน URL)
-    const response = await api.put('/user/updatepost', requestData);
+    // Handle locations: filter out invalid points, omit if empty
+    if (Array.isArray(data.locations)) {
+      const validLocations = data.locations.filter((loc: any) =>
+        loc &&
+        typeof loc.latitude === 'number' &&
+        typeof loc.longitude === 'number' &&
+        !isNaN(loc.latitude) &&
+        !isNaN(loc.longitude) &&
+        loc.latitude !== 0 &&
+        loc.longitude !== 0 &&
+        loc.latitude >= -90 && loc.latitude <= 90 &&
+        loc.longitude >= -180 && loc.longitude <= 180
+      );
+      if (validLocations.length > 0) {
+        requestData.locations = validLocations;
+      }
+    }
+
+    console.log('Sending updatePost request:', requestData);
+
+    // ใช้ endpoint ที่ถูกต้อง
+    const response = await api.put(`/user/posts/${data.id}`, requestData);
     console.log('UpdatePost API Response:', response);
     
     if (response.status === 200) {
@@ -419,51 +573,7 @@ export async function updatePost(data: any) {
   }
 }
 
-async function updateLocation(location_id: number, data: any) {
-  const requestOptions = {
-    method: "PUT",
-    headers: getAuthHeaders(),
-    body: JSON.stringify(data),
-  };
-  let response = await fetch(`${apiUrl}/user/location/${location_id}`, requestOptions);
-  const result = await response.json();
-  return { response, result };
-  
-}
 
-
-async function updatePhotoland(photoland_id: number, data: any) {
-  const requestOptions = {
-    method: "PUT",  
-    headers: getAuthHeaders(),
-    body: JSON.stringify(data),
-  };
-  let response = await fetch(`${apiUrl}/user/photoland/${photoland_id}`, requestOptions);
-  const result = await response.json();
-  return { response, result };
-}
-
-async function GetUserPostLandData (user_id: string) {
-  const requestOptions = {
-    method: "GET",
-    headers: getAuthHeaders(),
-  };
-  let response = await fetch(`${apiUrl}/user/lands/${user_id}`, requestOptions);
-  const result = await response.json();
-  return { response, result };
-  console.log("555555",response);
-}
-
-const getUserIDByWallet = async (wallet: string): Promise<{ user_id?: number; wallet?: string; error?: string }> => {
-  try {
-    const res = await api.get(`/user/GetUserID/${wallet}`);
-    return res.data as { user_id?: number; wallet?: string; error?: string };
-  } catch (error: any) {
-    console.error("getUserIDByWallet Error:", error);
-    if (error.response) return error.response.data;
-    else return { error: "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์" };
-  }
-};
 
 export {
   CreateBooking,
@@ -472,8 +582,5 @@ export {
   GetTimeSlots,
   GetServiceTypes,
   CheckVerifyWallet,
-  GetUserPostLandData,
-  updateLocation,
-  updatePhotoland,
   getUserIDByWallet
 };

@@ -1,6 +1,6 @@
 import axios from "axios";
-const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
-
+// const apiUrl = "https://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io";
+const apiUrl = import.meta.env.VITE_URL_Backend;
 const Authorization = sessionStorage.getItem("token");
 const Bearer = sessionStorage.getItem("token_type");
 
@@ -94,7 +94,7 @@ async function GetPetitionsByUserID(userId: string) {
     .catch((e) => e.response);
 }
 
-async function CreateRequestBuySell(data: any) {
+async function CreateRequestBuySellHandler(data: any) {
   return await axios
     .post(`${apiUrl}/requestbuysell`, data, requestOptions)
     .then((res) => res.data)
@@ -121,7 +121,7 @@ export {
   CreateLandPost,
   getLandtitleIdByTokenId,
   GetPetitionsByUserID,
-  CreateRequestBuySell,
+  CreateRequestBuySellHandler,
   checkLandsalepostByLandId,
 
 };

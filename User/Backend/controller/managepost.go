@@ -11,7 +11,26 @@ import (
 	"gorm.io/gorm"
 )
 
-// UpdatePost - อัปเดตข้อมูลโพสต์ขายที่ดิน
+// UpdatePostRequest - โครงสร้างสำหรับรับข้อมูลการอัปเดตโพสต์
+type UpdatePostRequest struct {
+	ID            uint     `json:"id,omitempty"`
+	PostID        uint     `json:"post_id,omitempty"`
+	Name          string   `json:"name,omitempty"`
+	Price         int      `json:"price,omitempty"`
+	FirstName     string   `json:"first_name,omitempty"`
+	LastName      string   `json:"last_name,omitempty"`
+	PhoneNumber   string   `json:"phone_number,omitempty"`
+	ProvinceID    uint     `json:"province_id,omitempty"`
+	DistrictID    uint     `json:"district_id,omitempty"`
+	SubdistrictID uint     `json:"subdistrict_id,omitempty"`
+	LandID        uint     `json:"land_id,omitempty"`
+	UserID        uint     `json:"user_id,omitempty"`
+	Images        []string `json:"images,omitempty"`    // รูปภาพ (ถ้ามี)
+	TagID         []uint   `json:"tag_id,omitempty"`    // แท็ก (ถ้ามี)
+	Locations     []entity.Location `json:"locations,omitempty"` // ตำแหน่ง (ถ้ามี)
+}
+
+// UpdatePost - อัปเดตข้อมูลโพสต์ขายที่ดินแบบครบถ้วน
 func UpdatePost(c *gin.Context) {
 	// รับ post_id จาก URL parameter ถ้ามี
 	postIDParam := c.Param("post_id")
@@ -24,23 +43,7 @@ func UpdatePost(c *gin.Context) {
 	}
 
 	// รับข้อมูลจาก request body
-	var req struct {
-		ID            uint     `json:"id"`
-		PostID        uint     `json:"post_id"`
-		Name          string   `json:"name"`
-		Price         int      `json:"price"`
-		FirstName     string   `json:"first_name"`
-		LastName      string   `json:"last_name"`
-		PhoneNumber   string   `json:"phone_number"`
-		ProvinceID    uint     `json:"province_id"`
-		DistrictID    uint     `json:"district_id"`
-		SubdistrictID uint     `json:"subdistrict_id"`
-		LandID        uint     `json:"land_id"`
-		UserID        uint     `json:"user_id"`
-		Images        []string `json:"images,omitempty"` // รูปภาพ (ถ้ามี)
-		TagID         []uint   `json:"tag_id,omitempty"` // แท็ก (ถ้ามี)
-	}
-
+	var req UpdatePostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Printf("UpdatePost: JSON binding error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format", "detail": err.Error()})
@@ -146,7 +149,7 @@ func UpdatePost(c *gin.Context) {
 
 		// เพิ่มรูปภาพใหม่
 		for i, imgPath := range req.Images {
-			if imgPath != "" { // ตรวจสอบว่าไม่ใช่ string ว่าง
+			if imgPath != "" {
 				photo := entity.Photoland{
 					LandsalepostID: finalPostID,
 					Path:           imgPath,
@@ -182,6 +185,31 @@ func UpdatePost(c *gin.Context) {
 		log.Printf("UpdatePost: Successfully updated %d tags", len(tags))
 	}
 
+	// อัปเดต locations ถ้ามีการส่งมา
+	if len(req.Locations) > 0 {
+		log.Printf("UpdatePost: Updating locations, count: %d", len(req.Locations))
+
+		// ลบ locations เก่าทั้งหมดก่อน
+		if err := tx.Where("landsalepost_id = ?", finalPostID).Delete(&entity.Location{}).Error; err != nil {
+			tx.Rollback()
+			log.Printf("UpdatePost: Failed to delete old locations: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete old locations"})
+			return
+		}
+
+		// เพิ่ม locations ใหม่
+		for i, loc := range req.Locations {
+			loc.LandsalepostID = finalPostID
+			if err := tx.Create(&loc).Error; err != nil {
+				tx.Rollback()
+				log.Printf("UpdatePost: Failed to save location %d: %v", i, err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save new locations"})
+				return
+			}
+		}
+		log.Printf("UpdatePost: Successfully updated %d locations", len(req.Locations))
+	}
+
 	// Commit transaction
 	if err := tx.Commit().Error; err != nil {
 		log.Printf("UpdatePost: Failed to commit transaction: %v", err)
@@ -203,11 +231,10 @@ func UpdatePost(c *gin.Context) {
 		}).
 		Preload("Tags").
 		Preload("Landtitle").
-		Preload("Photoland"). // สำคัญ: ต้องมีเพื่อโหลดรูปภาพ
+		Preload("Photoland").
 		Preload("Location").
-		Preload("Users"). // เพิ่มเพื่อความสมบูรณ์
+		Preload("Users").
 		First(&result, finalPostID).Error; err != nil {
-		// ถ้าโหลดไม่ได้ ก็ส่งกลับข้อมูลพื้นฐาน
 		log.Printf("UpdatePost: Failed to preload relations: %v", err)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Post updated successfully (without relations)",
@@ -225,152 +252,7 @@ func UpdatePost(c *gin.Context) {
 	})
 }
 
-// UpdatePhotoland - อัปเดทข้อมูล Photoland เฉพาะจุด (เก็บไว้เพื่อความ backward compatible)
-func UpdatePhotoland(c *gin.Context) {
-	// รับค่า photoland_id จาก URL parameter
-	photolandIDStr := c.Param("photoland_id")
-	photolandID, err := strconv.ParseUint(photolandIDStr, 10, 32)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid photoland_id format"})
-		return
-	}
 
-	var input struct {
-		Path           *string `json:"path,omitempty"`
-		LandsalepostID *uint   `json:"landsalepost_id,omitempty"`
-	}
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input format"})
-		return
-	}
-
-	// ค้นหา photoland ที่ต้องการอัปเดท
-	var photoland entity.Photoland
-	if err := config.DB().First(&photoland, uint(photolandID)).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Photoland not found"})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
-		}
-		return
-	}
-
-	// อัปเดทเฉพาะฟิลด์ที่ส่งมา
-	updateData := make(map[string]interface{})
-	if input.Path != nil {
-		updateData["path"] = *input.Path
-	}
-	if input.LandsalepostID != nil {
-		updateData["landsalepost_id"] = *input.LandsalepostID
-	}
-
-	if len(updateData) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No data to update"})
-		return
-	}
-
-	if err := config.DB().Model(&photoland).Updates(updateData).Error; err != nil {
-		log.Printf("UpdatePhotoland: Failed to update: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update photoland"})
-		return
-	}
-
-	// โหลดข้อมูล photoland ที่อัปเดตแล้ว
-	var updatedPhoto entity.Photoland
-	if err := config.DB().First(&updatedPhoto, uint(photolandID)).Error; err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"status":       "success",
-			"message":      "Photoland updated successfully",
-			"photoland_id": photolandID,
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"status":       "success",
-		"message":      "Photoland updated successfully",
-		"photoland_id": photolandID,
-		"photoland":    updatedPhoto,
-	})
-}
-
-// UpdateLocation - อัปเดทข้อมูล Location เฉพาะจุด (เก็บไว้เพื่อความ backward compatible)
-func UpdateLocation(c *gin.Context) {
-	// รับค่า location_id จาก URL parameter
-	locationIDStr := c.Param("location_id")
-	locationID, err := strconv.ParseUint(locationIDStr, 10, 32)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid location_id format"})
-		return
-	}
-
-	var input struct {
-		Sequence       *int     `json:"sequence,omitempty"`
-		Latitude       *float64 `json:"latitude,omitempty"`
-		Longitude      *float64 `json:"longitude,omitempty"`
-		LandsalepostID *uint    `json:"landsalepost_id,omitempty"`
-	}
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input format"})
-		return
-	}
-
-	// ค้นหา location ที่ต้องการอัปเดท
-	var location entity.Location
-	if err := config.DB().First(&location, uint(locationID)).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Location not found"})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
-		}
-		return
-	}
-
-	// อัปเดทเฉพาะฟิลด์ที่ส่งมา
-	updateData := make(map[string]interface{})
-	if input.Sequence != nil {
-		updateData["sequence"] = *input.Sequence
-	}
-	if input.Latitude != nil {
-		updateData["latitude"] = *input.Latitude
-	}
-	if input.Longitude != nil {
-		updateData["longitude"] = *input.Longitude
-	}
-	if input.LandsalepostID != nil {
-		updateData["landsalepost_id"] = *input.LandsalepostID
-	}
-
-	if len(updateData) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No data to update"})
-		return
-	}
-
-	if err := config.DB().Model(&location).Updates(updateData).Error; err != nil {
-		log.Printf("UpdateLocation: Failed to update: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update location"})
-		return
-	}
-
-	// โหลดข้อมูล location ที่อัปเดตแล้ว
-	var updatedLocation entity.Location
-	if err := config.DB().First(&updatedLocation, uint(locationID)).Error; err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"status":      "success",
-			"message":     "Location updated successfully",
-			"location_id": locationID,
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"status":      "success",
-		"message":     "Location updated successfully",
-		"location_id": locationID,
-		"location":    updatedLocation,
-	})
-}
 
 // GetUserPostLandData - ดึงข้อมูลโพสต์ขายที่ดินของผู้ใช้ (ปรับให้เหมือนกับ GetAllPostLandData)
 func GetUserPostLandData(c *gin.Context) {
@@ -434,8 +316,17 @@ func GetUserPostLandData(c *gin.Context) {
 	c.JSON(http.StatusOK, postlands)
 }
 
-// AddMultiplePhotos - เพิ่มรูปภาพหลายรูปในโพสต์เดียว
-func AddMultiplePhotos(c *gin.Context) {
+
+
+
+// ReplaceAllLocations - แทนที่ตำแหน่งทั้งหมดในโพสต์
+
+
+// UpdatePostTags - อัปเดต Tags เฉพาะโพสต์
+
+
+// GetPostDetail - ดึงข้อมูลโพสต์เฉพาะรายการ
+func GetPostDetail(c *gin.Context) {
 	postIDParam := c.Param("post_id")
 	postID, err := strconv.ParseUint(postIDParam, 10, 32)
 	if err != nil {
@@ -443,78 +334,47 @@ func AddMultiplePhotos(c *gin.Context) {
 		return
 	}
 
-	var req struct {
-		Images []string `json:"images" binding:"required"`
-	}
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
-		return
-	}
-
-	// ตรวจสอบว่าโพสต์มีอยู่จริง
+	db := config.DB()
 	var post entity.Landsalepost
-	if err := config.DB().First(&post, uint(postID)).Error; err != nil {
+
+	// ดึงข้อมูลโพสต์พร้อม preload ทุกอย่าง
+	err = db.
+		Preload("Province", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id", "name_th")
+		}).
+		Preload("District", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id", "name_th", "province_id")
+		}).
+		Preload("Subdistrict", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id", "name_th", "district_id")
+		}).
+		Preload("Tags").
+		Preload("Landtitle").
+		Preload("Photoland").
+		Preload("Location").
+		Preload("Users").
+		First(&post, uint(postID)).Error
+
+	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 		} else {
+			log.Printf("GetPostDetail: Database error: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 		}
 		return
 	}
 
-	db := config.DB()
-	tx := db.Begin()
-
-	var createdPhotos []entity.Photoland
-
-	// เพิ่มรูปภาพทีละรูป
-	for _, imgPath := range req.Images {
-		if imgPath != "" {
-			photo := entity.Photoland{
-				LandsalepostID: uint(postID),
-				Path:           imgPath,
-			}
-			if err := tx.Create(&photo).Error; err != nil {
-				tx.Rollback()
-				log.Printf("AddMultiplePhotos: Failed to save image: %v", err)
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save image"})
-				return
-			}
-			createdPhotos = append(createdPhotos, photo)
-		}
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		log.Printf("AddMultiplePhotos: Failed to commit: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
-		return
-	}
-
-	log.Printf("AddMultiplePhotos: Successfully added %d photos to post %d", len(createdPhotos), postID)
-	c.JSON(http.StatusOK, gin.H{
-		"status":       "success",
-		"message":      "Photos added successfully",
-		"photos_count": len(createdPhotos),
-		"photos":       createdPhotos,
-	})
+	log.Printf("GetPostDetail: Successfully retrieved post %d", postID)
+	c.JSON(http.StatusOK, post)
 }
 
-// ReplaceAllPhotos - แทนที่รูปภาพทั้งหมดในโพสต์
-func ReplaceAllPhotos(c *gin.Context) {
+// DeletePost - ลบโพสต์และข้อมูลที่เกี่ยวข้องทั้งหมด
+func DeletePost(c *gin.Context) {
 	postIDParam := c.Param("post_id")
 	postID, err := strconv.ParseUint(postIDParam, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post_id format"})
-		return
-	}
-
-	var req struct {
-		Images []string `json:"images" binding:"required"`
-	}
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
 		return
 	}
 
@@ -532,44 +392,49 @@ func ReplaceAllPhotos(c *gin.Context) {
 	db := config.DB()
 	tx := db.Begin()
 
-	// ลบรูปภาพเก่าทั้งหมด
+	// ลบข้อมูลที่เกี่ยวข้องทั้งหมดก่อน
+	// 1. ลบรูปภาพ
 	if err := tx.Where("landsalepost_id = ?", postID).Delete(&entity.Photoland{}).Error; err != nil {
 		tx.Rollback()
-		log.Printf("ReplaceAllPhotos: Failed to delete old images: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete old images"})
+		log.Printf("DeletePost: Failed to delete photos: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete photos"})
 		return
 	}
 
-	var createdPhotos []entity.Photoland
+	// 2. ลบตำแหน่ง
+	if err := tx.Where("landsalepost_id = ?", postID).Delete(&entity.Location{}).Error; err != nil {
+		tx.Rollback()
+		log.Printf("DeletePost: Failed to delete locations: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete locations"})
+		return
+	}
 
-	// เพิ่มรูปภาพใหม่
-	for _, imgPath := range req.Images {
-		if imgPath != "" {
-			photo := entity.Photoland{
-				LandsalepostID: uint(postID),
-				Path:           imgPath,
-			}
-			if err := tx.Create(&photo).Error; err != nil {
-				tx.Rollback()
-				log.Printf("ReplaceAllPhotos: Failed to save new image: %v", err)
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save new image"})
-				return
-			}
-			createdPhotos = append(createdPhotos, photo)
-		}
+	// 3. ลบ association กับ tags (many-to-many)
+	if err := tx.Model(&post).Association("Tags").Clear(); err != nil {
+		tx.Rollback()
+		log.Printf("DeletePost: Failed to clear tags: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear tags"})
+		return
+	}
+
+	// 4. ลบโพสต์หลัก
+	if err := tx.Delete(&post).Error; err != nil {
+		tx.Rollback()
+		log.Printf("DeletePost: Failed to delete post: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete post"})
+		return
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		log.Printf("ReplaceAllPhotos: Failed to commit: %v", err)
+		log.Printf("DeletePost: Failed to commit: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
 		return
 	}
 
-	log.Printf("ReplaceAllPhotos: Successfully replaced %d photos for post %d", len(createdPhotos), postID)
+	log.Printf("DeletePost: Successfully deleted post %d", postID)
 	c.JSON(http.StatusOK, gin.H{
-		"status":       "success",
-		"message":      "All photos replaced successfully",
-		"photos_count": len(createdPhotos),
-		"photos":       createdPhotos,
+		"status":  "success",
+		"message": "Post deleted successfully",
+		"post_id": postID,
 	})
 }

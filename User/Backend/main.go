@@ -22,7 +22,7 @@ func main() {
 	}
 
 	config.ConnectDatabase()
-	config.SetupDatabase()
+	//config.SetupDatabase()
 	db := config.DB()
 	r := gin.Default()
 	hub := websocket.NewHub(db)
@@ -33,7 +33,7 @@ func main() {
 	controller.StartCron()
 
 	// เริ่มต้น Scheduler สำหรับลบการจองที่หมดอายุ
-	//controller.StartBookingCleanupScheduler()
+	controller.StartBookingCleanupScheduler()
 
 	//อ่านค่าการตอบกลับจาก Smartcontract (ควรใช้ go routine)
 	go controller.ListenSmartContractEvents()
@@ -44,12 +44,8 @@ func main() {
 
 	// เพิ่ม/ปรับปรุง API จาก managepost.go
 	r.PUT("/managepost/update/:post_id", controller.UpdatePost)
-	r.PUT("/managepost/updatephotoland/:photoland_id", controller.UpdatePhotoland)
-	r.PUT("/managepost/updatelocation/:location_id", controller.UpdateLocation)
-	// r.GET("/managepost/userpostland/:user_id", controller.GetUserPostLandData)
-	// r.POST("/managepost/photos/:post_id", controller.AddMultiplePhotos)
-	// r.PUT("/managepost/photos/replace/:post_id", controller.ReplaceAllPhotos)
-
+	r.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
+	r.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)
 	r.POST("/createaccount", controller.CreateAccount)
 	r.POST("/check-wallet", controller.CheckWallet)
 	r.POST("/login", controller.LoginUser)
@@ -130,8 +126,6 @@ func main() {
 		admin.POST("/departmentoflandverifytransaction", controller.DepartmentOfLandVerifyTransaction)
 		//จบ----- อรรถ -------
 
-		admin.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
-		admin.DELETE("/bookings/delete-expired-by-date", controller.DeleteExpiredBookingsByDate)
 		admin.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
 		admin.POST("/updatepetitions", controller.UpdatePetitionStatus)
 
@@ -142,10 +136,12 @@ func main() {
 	userOwnership.Use(middlewares.CheckOwnershipOrAdmin())
 	{
 		userOwnership.GET("/user/GetUserID/:wallet", controller.GetUserIDByWallet)
-		userOwnership.GET("/user/lands/:user_id", controller.GetUserPostLandData)
-		userOwnership.PUT("/user/updatepost", controller.UpdatePost)
-		userOwnership.PUT("/user/location/:location_id", controller.UpdateLocation)
-		userOwnership.PUT("/user/photoland/:photoland_id", controller.UpdatePhotoland)
+		//////////////////////////////////////////////////////////////////////////////////
+		userOwnership.GET("/user/lands/:user_id", controller.GetUserPostLandData) // มีแล้ว ✅
+		userOwnership.PUT("/user/posts/:post_id", controller.UpdatePost)          //ส่วนแก้ไขโพสต์
+		userOwnership.GET("/user/posts/:post_id", controller.GetPostDetail)
+		userOwnership.DELETE("/user/posts/:post_id", controller.DeletePost)
+		//////////////////////////////////////////////////////////////////////////////////
 		userOwnership.POST("/userbookings", controller.CreateBooking)
 		userOwnership.PUT("/bookings/:id", controller.UpdateBooking)
 		userOwnership.GET("/bookings/:userID", controller.GetUserBookings)
@@ -250,13 +246,14 @@ func main() {
 
 	r.Run("0.0.0.0:8080")
 }
-// เพราะผู้ใช้ นั้นรัน Frontend ที่เครื่องตัวเอง ผู้ใช้อยู่คนละวงแลน  บอกไม่ได้ว่าผู้ใช้  ใช้เน็ต IP ไหนบ้าง  จึงเปิดรับทั้งหมด 
-//เพราะผู้ใช้รัน Frontend ที่เครื่องตัวเอง (IP ไม่แน่นอน, อยู่คนละวงแลน, อาจเปลี่ยนเน็ตตลอดเวลา)
-//ถ้าระบุ Origin เฉพาะเจาะจงจะทำให้ผู้ใช้บางคนเข้าไม่ได้
+
+// เพราะผู้ใช้ นั้นรัน Frontend ที่เครื่องตัวเอง ผู้ใช้อยู่คนละวงแลน  บอกไม่ได้ว่าผู้ใช้  ใช้เน็ต IP ไหนบ้าง  จึงเปิดรับทั้งหมด
+// เพราะผู้ใช้รัน Frontend ที่เครื่องตัวเอง (IP ไม่แน่นอน, อยู่คนละวงแลน, อาจเปลี่ยนเน็ตตลอดเวลา)
+// ถ้าระบุ Origin เฉพาะเจาะจงจะทำให้ผู้ใช้บางคนเข้าไม่ได้
 // Middleware CORS - รองรับ Frontend หลายตัว
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// ให้ทุก Origin เข้าถึง (Production) 
+		// ให้ทุก Origin เข้าถึง (Production)
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")

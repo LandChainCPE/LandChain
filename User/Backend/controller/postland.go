@@ -70,10 +70,10 @@ func CreateLandPost(c *gin.Context) {
 	}
 
 	// 4) รูปภาพ (Photoland, one-to-many)
-	for _, imgPath := range req.Images {
+	for _, imgBase64 := range req.Images {
 		photo := entity.Photoland{
 			LandsalepostID: req.Landsalepost.ID,
-			Path:           imgPath,
+			Path:           imgBase64, // เก็บ Base64 แทน URL
 		}
 		if err := config.DB().Create(&photo).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "บันทึกรูปภาพไม่สำเร็จ"})

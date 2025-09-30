@@ -5,6 +5,7 @@ import { GetLandtitlesByUser } from '../../service/https/garfield';
 import { Upload, FileText, MapPin, User, CheckCircle, AlertCircle, Loader2, Shield} from 'lucide-react';
 import { Container } from 'react-bootstrap';
 import detectEthereumProvider from '@metamask/detect-provider';
+import { GetUserIDByWalletAddress } from "../../service/https/bam/bam";
 import { Web3 } from 'web3';
 const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
 import contractABI from "../VerifyUser/ContractABI.json";
@@ -95,20 +96,15 @@ const VerifyLand: React.FC = () => {
       setError(null);
       try {
         // @ts-ignore
-        const wallet = sessionStorage.getItem("wallet") || "";
-        const { user_id } = await import("../../service/https/bam/bam").then(mod => mod.GetUserIDByWalletAddress());
-        if (user_id) {
-          const { result } = await GetLandtitlesByUser(String(user_id));
+
+        const  user_id  = await GetUserIDByWalletAddress();
+          const { result } = await GetLandtitlesByUser(String(user_id.user_id));
           if (Array.isArray(result)) {
             setVerifiedDeeds(result.map(mapLandDeed));
           } else {
             setVerifiedDeeds([]);
             setError('ไม่พบข้อมูลโฉนดที่ดิน');
           }
-        } else {
-          setVerifiedDeeds([]);
-          setError('กรุณาเข้าสู่ระบบก่อน');
-        }
       } catch (err) {
         setError('เกิดข้อผิดพลาดในการดึงข้อมูล');
         setVerifiedDeeds([]);

@@ -178,7 +178,7 @@ func DeleteTransactionToscucess(c *gin.Context) {
 	// 1️⃣ Update typetransaction_id ก่อน
 	if err := db.Model(&entity.Transaction{}).
 		Where("id = ?", transactionID).
-		Update("typetransaction_id", 2).
+		Update("typetransaction_id", 5).
 		Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถอัปเดตได้", "detail": err.Error()})
 		return

@@ -257,6 +257,8 @@ const handleSetsaleinfo = async (transaction: any) => {
     const res = await SetSellInfoHandler(tokenId, priceTHB, buyer);
     const { signature, wei } = res;
 
+    console.log("Signature from backend:", signature);
+        console.log("Wei from backend:", wei);
     if (!signature || !wei) {
       Swal.fire({
                       icon: "error",
@@ -488,7 +490,7 @@ interface SaleInfoType {
 
     // ลบ transaction และ sale info
 
-    // await DeleteTransactionToscucess(transactionId);
+    await DeleteTransactionToscucess(transactionId);
     await DeleteAllRequestBuyByLandID(tokenId);
     await DeleteLandsalepostByLandIDandUserID(tokenId);
 
@@ -923,14 +925,6 @@ const openETHModalForTransaction = (tx: any) => {
                                         <span>ผู้ส่ง (คุณ):</span>
                                         <span style={{ maxWidth: "220px", overflowWrap: "break-word", wordBreak: "break-all" }}>
                                             {ethTransaction.toAddress}
-                                        </span>
-                                    </div>
-                                    <div className="summary-item" style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                                        <span>จำนวนเงิน (ETH):</span>
-                                        <span>
-                                            {ethTransaction.amountWei
-                                                ? parseFloat(ethers.formatUnits(ethTransaction.amountWei, "ether")).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 })
-                                                : "N/A"}
                                         </span>
                                     </div>
                                     {/* <div className="summary-item">

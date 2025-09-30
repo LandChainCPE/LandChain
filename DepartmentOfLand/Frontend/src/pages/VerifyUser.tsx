@@ -16,6 +16,7 @@ function Verify() {
 
   useEffect(() => {
     const fetchData = async () => {
+      console.log(bookingID.id);
       let { response, result } = await getDataUserForVerify(bookingID);
       if (response && result) {
         setUserData(result);

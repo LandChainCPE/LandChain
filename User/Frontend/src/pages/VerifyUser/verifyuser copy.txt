@@ -63,15 +63,18 @@ function VerifyUser() {
   const [signature, setSignature] = useState<string>("");
   const [nameHash, setNameHash] = useState<string>("");
 
-const [currentUserId, setCurrentUserId] = useState<number>();
+const [currentUserId, setCurrentUserId] = useState<number>(Number(sessionStorage.getItem("user_id") || 1));
 
   useEffect(() => {
     const fetchUserId = async () => {
       try {
         // @ts-ignore
-          const result = await GetUserIDByWalletAddress();
+        const wallet = sessiosStorage.getItem("wallet") || "";
+        const result = await GetUserIDByWalletAddress();
+        console.log("GetUserIDByWalletAddress result:", result);
+        if (result && typeof result.user_id === "number") {
           setCurrentUserId(result.user_id);
-          console.log("ID:", result.user_id);
+        }
       } catch (error) {
         console.error("Error calling GetUserIDByWalletAddress:", error);
       }
@@ -82,9 +85,9 @@ const [currentUserId, setCurrentUserId] = useState<number>();
   useEffect(() => {
     const fetchData = async () => {
       const userid = currentUserId;
-      console.log("UserID:", currentUserId);
+      console.log("UserID:", userid);
       if (!userid) return;
-      const { response, result } = await GetDataUserVerification(String(currentUserId));
+      const { response, result } = await GetDataUserVerification(String(userid));
       if (response && result) {
         console.log(response);
         console.log(result);
@@ -125,20 +128,73 @@ const [currentUserId, setCurrentUserId] = useState<number>();
     }
   };
 
+  const switchToHoodiTestnet = async () => {
+    const provider: any = window.ethereum;
+    if (!provider) return;
+    try {
+      // ChainId ของ Hoodi Testnet (hex string ตามมาตรฐาน EIP-155)
+      await provider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x88bb0' }], // 560048 = 0x88bb0
+      });
+    } catch (switchError: any) {
+      if (switchError.code === 4902) {
+        await provider.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: '0x88bb0', // 560048 = 0x88bb0
+            chainName: 'Ethereum Hoodi',
+            rpcUrls: ['https://ethereum-hoodi-rpc.publicnode.com/'],
+            nativeCurrency: {
+              name: 'HOODI',
+              symbol: 'HOODI',
+              decimals: 18,
+            },
+            blockExplorerUrls: ['https://hoodi.etherscan.io'],
+          }],
+        });
+      }
+    }
+  };
+
   const handleRegisterOwner = async () => {
     try {
-      const provider: any = await detectEthereumProvider();
+      await switchToHoodiTestnet();
+      // ใช้ window.ethereum แทน detectEthereumProvider
+      const provider: any = window.ethereum;
       if (!provider) {
         alert("กรุณาติดตั้ง MetaMask");
         return;
       }
+      // ขอสิทธิ์ connect wallet
+      await provider.request({ method: 'eth_requestAccounts' });
+
       const web3 = new Web3(provider);
+      // ดึง accounts ใหม่
+      const accounts = await web3.eth.getAccounts();
+      const currentWallet = accounts && accounts[0];
+      if (!currentWallet) {
+        alert("กรุณาเชื่อมต่อ MetaMask");
+        return;
+      }
+      setWallet(currentWallet); // อัปเดต state ด้วย
+
+      // เช็คค่าก่อนส่ง
+      if (!currentWallet || !nameHash || !signature) {
+        alert("ข้อมูลไม่ครบ");
+        return;
+      }
+
       const contractInstance = new web3.eth.Contract(
         contractABI as any,
         contractAddress
       );
-      await contractInstance.methods.registerOwner(wallet, nameHash, signature).send({ from: wallet });
-      alert('Owner registration successful!');
+      const tx = await contractInstance.methods.registerOwner(currentWallet, nameHash, signature).send({ from: currentWallet });
+      if (tx && tx.status) {
+        alert('✅ Owner registration successful!\nTransaction Hash: ' + tx.transactionHash);
+      } else {
+        alert('❌ Transaction failed or reverted!\nTransaction Hash: ' + (tx?.transactionHash || 'N/A'));
+      }
     } catch (error: any) {
       console.error('Error registering owner:', error);
       alert('Error: ' + (error?.message || error));

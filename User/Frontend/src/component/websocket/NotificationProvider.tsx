@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useRef, useState } from "r
 import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { GetUserinfoByUserID } from "../../service/https/bam/bam";
+const URLBackendWS = import.meta.env.VITE_URL_Backend_WSS;
 
 interface Notification {
   Content: string;
@@ -38,7 +39,10 @@ export const NotificationProvider: React.FC<Props> = ({ userID, children }) => {
 
     if (wsRef.current) wsRef.current.close();
 
-    const ws = new WebSocket(`wss://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/ws/notification/${userID}`);
+
+    // const ws = new WebSocket(`wss://landchainbackend.purpleglacier-3813f6b3.southeastasia.azurecontainerapps.io/:8080/ws/notification/${userID}`);
+    const ws = new WebSocket(`${URLBackendWS}/ws/notification/${userID}`);
+
     wsRef.current = ws;
 
     // @ts-ignore
@@ -46,8 +50,9 @@ export const NotificationProvider: React.FC<Props> = ({ userID, children }) => {
       setTimeout(connectWS, 2000);
     };
 
+    //@ts-ignore
     ws.onerror = (err) => {
-      console.error("Notification WS error", err);
+      // console.error("Notification WS error", err);
       ws.close();
     };
 
@@ -78,11 +83,10 @@ export const NotificationProvider: React.FC<Props> = ({ userID, children }) => {
       // กำหนดข้อความ toast สั้น ๆ
       // กำหนดข้อความ toast สั้น ๆ
       let toastMessage = "";
-      const isImage =
-        msg.Content.startsWith("") &&
-        /\.(jpg|jpeg|png|gif|webp)$/i.test(msg.Content);
-      const isFile =
-        msg.Content.startsWith("") && !isImage; // ลิงก์แต่ไม่ใช่รูป
+
+      const isUrl = /^https?:\/\//i.test(msg.Content); // เช็คว่าเป็นลิงก์
+      const isImage = isUrl && /\.(jpg|jpeg|png|gif|webp)$/i.test(msg.Content);
+      const isFile = isUrl && !isImage;
 
       if (isImage) {
         toastMessage = `${senderName} ส่งรูปให้คุณ`;
@@ -91,6 +95,7 @@ export const NotificationProvider: React.FC<Props> = ({ userID, children }) => {
       } else {
         toastMessage = `${senderName} ส่งข้อความ: ${msg.Content}`;
       }
+
 
       // แสดง toast
       toast(toastMessage, {
