@@ -29,7 +29,7 @@
 }
 
 /* Floating Background Shapes */
-.floating-shapes {
+/* .floating-shapes {
   position: fixed;
   top: 0;
   left: 0;
@@ -99,7 +99,7 @@
   75% {
     transform: translateY(-10px) rotate(5deg);
   }
-}
+} */
 
 /* Hero Section */
 .hero-section {
