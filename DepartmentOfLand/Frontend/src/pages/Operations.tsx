@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getQueueByDate } from "../service/https/aut/https";
-import { Calendar, Clock, User, ChevronRight, AlertCircle, CheckCircle } from "lucide-react";
+import { Calendar, Clock, User, ChevronRight, AlertCircle,  } from "lucide-react";
 
 function UserMain() {
   const navigate = useNavigate();

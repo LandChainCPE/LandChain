@@ -3,9 +3,7 @@ import {
   UnorderedListOutlined,
   SearchOutlined,
   SwapOutlined,
-  FileProtectOutlined,
   HomeOutlined,
-  SettingOutlined,
   FileTextOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";

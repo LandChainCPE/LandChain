@@ -3,19 +3,15 @@ import {
   MapPin, 
   Shield, 
   FileText, 
-  Clock, 
+  
   AlertCircle, 
   X, 
   Search,
-  Filter,
-  Eye,
-  Calendar,
+
   User,
-  Hash,
-  Map,
+
   Ruler,
-  CheckSquare,
-  XCircle,
+
   Home
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -27,13 +23,16 @@ function VerifyLand() {
   const [landData, setLandData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedLand, setSelectedLand] = useState<any>(null);
+  //@ts-ignore
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
+  //@ts-ignore
   const [confirmAction, setConfirmAction] = useState<string>("");
   const [isHolding, setIsHolding] = useState<boolean>(false);
   const [holdProgress, setHoldProgress] = useState<number>(0);
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
+  //@ts-ignore
   const navigate = useNavigate();
 
   useEffect(() => {

@@ -1,3 +1,4 @@
+//@ts-ignore
 import { CheckCircle, User, Shield, FileText, Clock, AlertCircle, Building2, X, Wallet, Copy, Check, Calendar } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
