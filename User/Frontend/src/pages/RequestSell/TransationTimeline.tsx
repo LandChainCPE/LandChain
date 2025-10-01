@@ -255,11 +255,12 @@ const handleSetsaleinfo = async (transaction: any) => {
 
     // เรียก backend เพื่อเซ็นข้อมูลขาย
     const res = await SetSellInfoHandler(tokenId, priceTHB, buyer);
+    console.log("TokenID:", tokenId);
     const { signature, wei } = res;
 
     console.log("Signature from backend:", signature);
         console.log("Wei from backend:", wei);
-    if (!signature || !wei) {
+    if (!tokenId) {
       Swal.fire({
                       icon: "error",
                       title: "เซ็นต์ข้อมูลล้มเหลว",
@@ -741,10 +742,10 @@ const openETHModalForTransaction = (tx: any) => {
                                 {processingTxId === tx.ID || loadingETH ? (
                                 <>
                                     <span className="spinner-border spinner-border-sm me-2"></span>
-                                    กำลังโอนโฉนด...
+                                    กำลังโอน ETH...
                                 </>
                                 ) : (
-                                "ดำเนินการโอนโฉนด"
+                                "ดำเนินการโอน ETH"
                                 )}
                             </button>
                             ) : (
