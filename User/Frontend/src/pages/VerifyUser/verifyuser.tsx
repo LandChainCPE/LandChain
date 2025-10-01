@@ -5,7 +5,7 @@ import { GetUserIDByWalletAddress } from "../../service/https/bam/bam";
 import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { Container } from "react-bootstrap";
-
+import { useNavigate } from "react-router-dom";
 import contractABI from "./ContractABI.json";
 import Navbar from "../../component/user/Navbar";
 const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
@@ -62,6 +62,7 @@ function VerifyUser() {
   const [wallet, setWallet] = useState<string>("");
   const [signature, setSignature] = useState<string>("");
   const [nameHash, setNameHash] = useState<string>("");
+  const navigate = useNavigate();
 
 const [currentUserId, setCurrentUserId] = useState<number>();
 
@@ -139,6 +140,7 @@ const [currentUserId, setCurrentUserId] = useState<number>();
       );
       await contractInstance.methods.registerOwner(wallet, nameHash, signature).send({ from: wallet });
       alert('Owner registration successful!');
+      navigate(`/user/userdashboard`);
     } catch (error: any) {
       console.error('Error registering owner:', error);
       alert('Error: ' + (error?.message || error));
