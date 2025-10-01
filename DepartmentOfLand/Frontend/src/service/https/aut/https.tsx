@@ -94,7 +94,7 @@ async function DepartmentOfLandVerifyTransaction(transaction_id: number) {
     let response = await fetch(`${apiUrl}/departmentoflandverifytransaction`, requestOptions);
     const result = await response.json();
 
-    return { result };
+    return { response, result };
 };
 
 

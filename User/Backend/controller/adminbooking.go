@@ -36,7 +36,7 @@ func GetBookingData(c *gin.Context) {
 	db := config.DB()
 
 	var bookings []entity.Booking
-	if err := db.Preload("Users").Preload("Time").Preload("ServiceType").Find(&bookings).Error; err != nil {
+	if err := db.Preload("Users").Preload("Time").Preload("ServiceType").Where("service_type_id = ? AND status = ?", 1, "pending").Find(&bookings).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -189,6 +189,12 @@ func VerifyWalletID(c *gin.Context) {
 		return
 	}
 
+	// อัพเดต booking.Status เป็น 'Successful'
+	if err := tx.Model(&booking).Update("status", "Successful").Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update booking status: " + err.Error()})
+		return
+	}
+
 	// commit เมื่อทุกอย่างสำเร็จ
 	if err := tx.Commit().Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to commit transaction: " + err.Error()})
@@ -246,7 +252,7 @@ func VerifyLandtitleID(c *gin.Context) {
 		", Rai:" + fmt.Sprint(land.Rai) +
 		", Ngan:" + fmt.Sprint(land.Ngan) +
 		", SqWa:" + fmt.Sprint(land.SquareWa) +
-		", Subdistrict:" + land.District.NameTH +
+		", Subdistrict:" + land.Subdistrict.NameTH +
 		", District:" + land.District.NameTH +
 		", Province:" + land.Province.NameTH +
 		", UUID:" + uuidStr
@@ -329,8 +335,8 @@ func GetAllLandData(c *gin.Context) {
 	db := config.DB()
 
 	var lands []entity.Landtitle
-	// Preload User, Province, District, Subdistrict relations
-	if err := db.Preload("User").Preload("Province").Preload("District").Preload("Subdistrict").Find(&lands).Error; err != nil {
+	// Preload User, Province, District, Subdistrict relations, filter Status_verify = false
+	if err := db.Preload("User").Preload("Province").Preload("District").Preload("Subdistrict").Where("status_verify = ?", false).Find(&lands).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

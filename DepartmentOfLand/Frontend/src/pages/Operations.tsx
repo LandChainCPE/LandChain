@@ -8,41 +8,52 @@ function UserMain() {
   //@ts-ignore
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    // Default: today in yyyy-mm-dd
+    const today = new Date();
+    return today.toISOString().slice(0, 10);
+  });
 
   // ฟังก์ชันแปลงวันที่จากปี ค.ศ. เป็นปี พ.ศ.
   //@ts-ignore
   const convertToThaiDate = (dateString: string) => {
     const date = new Date(dateString);
-
-    // คำนวณปี พ.ศ.
     const thaiYear = date.getFullYear() + 543;
-
-    // ดึงวันและเดือน
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // เดือนเริ่มต้นที่ 0
-    return `${day}-${month}-${thaiYear}`;
+    const day = date.getDate();
+    const monthNames = [
+      "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+      "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+    ];
+    const month = monthNames[date.getMonth()];
+    return `${day} ${month} ${thaiYear}`;
   };
 
   useEffect(() => {
     navigate("/operations");
     const fetchData = async () => {
       setLoading(true);
-      let { response, result } = await getQueueByDate();
+      let { response, result } = await getQueueByDate(); // ไม่ส่ง selectedDate
       console.log("response", response);
       console.log("result", result);
       if (response.status === 200 && result) {
-        const transformedBookings = result.map((booking: any) => ({
+        // ฟิลเตอร์ข้อมูลตามวันที่ที่เลือก
+        const filtered = result.filter((booking: any) => {
+          // date_booking อาจเป็น ISO string เช่น "2029-08-06T00:00:00Z"
+          const bookingDate = new Date(booking.date_booking);
+          const bookingDateStr = bookingDate.toISOString().slice(0, 10); // yyyy-mm-dd
+          return bookingDateStr === selectedDate;
+        });
+        const transformedBookings = filtered.map((booking: any) => ({
           ...booking,
           date_booking: convertToThaiDate(booking.date_booking), // แปลงวันที่
         }));
         setBookings(transformedBookings);
-        // console.log(res);
       }
       setLoading(false);
     };
 
     fetchData();
-  }, []);
+  }, [selectedDate]);
 
   const handleAction = (item: any) => {
     // ส่ง object ของรายการทั้งหมดไปเป็น state
@@ -68,70 +79,35 @@ function UserMain() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
+    <div className="min-h-screen bg-gradient-to-br from-blue-200/40 via-blue-100/30 to-indigo-200/40 p-3 sm:p-4 md:p-6 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto relative z-10 px-2 sm:px-4 lg:px-0">
+        {/* Header Section + Date Filter */}
         <div className="mb-8 animate-fadeIn">
-          <div className="flex items-center mb-6">
-            <div className="relative">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Calendar className="w-7 h-7 text-white" />
+          <div className="flex flex-col sm:flex-row sm:items-center mb-6 gap-4">
+            <div className="flex items-center">
+              <div className="relative">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Calendar className="w-7 h-7 text-white" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
               </div>
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
-            </div>
-            <div className="ml-4">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                รายการจองคิว
-              </h1>
-              <p className="text-gray-600 text-lg font-medium">Appointment Queue Management System</p>
-            </div>
-          </div>
-          
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
-                  <User className="w-7 h-7 text-white" />
-                </div>
-                <div className="ml-5">
-                  <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">รายการทั้งหมด</p>
-                  <p className="text-3xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                    {bookings.length}
-                  </p>
-                </div>
+              <div className="ml-4">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                  รายการจองคิว
+                </h1>
+                <p className="text-gray-600 text-lg font-medium">Appointment Queue Management System</p>
               </div>
-              <div className="mt-4 h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
             </div>
-
-            <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
-                  <Clock className="w-7 h-7 text-white" />
-                </div>
-                <div className="ml-5">
-                  <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">รอดำเนินการ</p>
-                  <p className="text-3xl font-bold text-gray-800 group-hover:text-amber-600 transition-colors duration-300">
-                    {bookings.length}
-                  </p>
-                </div>
-              </div>
-              <div className="mt-4 h-1 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
-            </div>
-
-            <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
-                  <CheckCircle className="w-7 h-7 text-white" />
-                </div>
-                <div className="ml-5">
-                  <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">เสร็จสิ้นวันนี้</p>
-                  <p className="text-3xl font-bold text-gray-800 group-hover:text-green-600 transition-colors duration-300">
-                    0
-                  </p>
-                </div>
-              </div>
-              <div className="mt-4 h-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
+            <div className="flex items-center gap-2 ml-0 sm:ml-8">
+              <label htmlFor="date-filter" className="text-gray-700 font-semibold mr-2">เลือกวันที่:</label>
+              <input
+                id="date-filter"
+                type="date"
+                value={selectedDate}
+                onChange={e => setSelectedDate(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800 font-semibold bg-white shadow-sm"
+                style={{ minWidth: 140 }}
+              />
             </div>
           </div>
         </div>
@@ -148,35 +124,25 @@ function UserMain() {
           </div>
         ) : (
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden animate-fadeIn">
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-bold text-gray-800">รายการจองคิววันนี้</h3>
-                  <p className="text-gray-600 mt-1">Today's Queue Management</p>
-                </div>
-                <div className="px-4 py-2 bg-blue-100 rounded-full">
-                  <span className="text-blue-700 font-semibold text-sm">{bookings.length} รายการ</span>
-                </div>
-              </div>
-            </div>
+            {/* ...existing code... */}
             
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                   <tr>
-                    <th className="px-8 py-5 text-left text-xs font-bold text-gray-600 uppercase tracking-wider border-b border-gray-200">
+                    <th className="px-8 py-5 text-left text-lg font-extrabold text-gray-800 uppercase tracking-wider border-b-2 border-gray-300">
                       ผู้จอง
                     </th>
-                    <th className="px-8 py-5 text-left text-xs font-bold text-gray-600 uppercase tracking-wider border-b border-gray-200">
+                    <th className="px-8 py-5 text-left text-lg font-extrabold text-gray-800 uppercase tracking-wider border-b-2 border-gray-300">
                       วันที่จอง
                     </th>
-                    <th className="px-8 py-5 text-left text-xs font-bold text-gray-600 uppercase tracking-wider border-b border-gray-200">
+                    <th className="px-8 py-5 text-left text-lg font-extrabold text-gray-800 uppercase tracking-wider border-b-2 border-gray-300">
                       เวลา
                     </th>
-                    <th className="px-8 py-5 text-left text-xs font-bold text-gray-600 uppercase tracking-wider border-b border-gray-200">
+                    <th className="px-8 py-5 text-left text-lg font-extrabold text-gray-800 uppercase tracking-wider border-b-2 border-gray-300">
                       ประเภทการติดต่อ
                     </th>
-                    <th className="px-8 py-5 text-right text-xs font-bold text-gray-600 uppercase tracking-wider border-b border-gray-200">
+                    <th className="px-8 py-5 text-right text-lg font-extrabold text-gray-800 uppercase tracking-wider border-b-2 border-gray-300">
                       การดำเนินการ
                     </th>
                   </tr>
@@ -196,7 +162,7 @@ function UserMain() {
                             <div className="text-lg font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-300">
                               {item.firstname} {item.lastname}
                             </div>
-                            <div className="text-sm text-gray-500">ลูกค้า</div>
+                            {/* ลบคำว่า ลูกค้า */}
                           </div>
                         </div>
                       </td>

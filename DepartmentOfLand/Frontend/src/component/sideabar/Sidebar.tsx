@@ -30,9 +30,9 @@ const Sidebar: React.FC = () => {
     { label: "รายการดำเนินการ", icon: <UnorderedListOutlined />, path: "/operations" },
     { label: "ตรวจสอบโฉนดที่ดิน", icon: <SearchOutlined />, path: "/verifyland" },
     { label: "ตรวจสอบการซื้อขาย", icon: <SwapOutlined />, path: "/transfer" },
-    { label: "ลงทะเบียนโฉนดที่ดิน", icon: <FileProtectOutlined />, path: "/regisland" },
+    // { label: "ลงทะเบียนโฉนดที่ดิน", icon: <FileProtectOutlined />, path: "/regisland" },
     { label: "ตรวจสอบคำร้อง", icon: <FileTextOutlined />, path: "/statepetition" },
-    { label: "การตั้งค่า", icon: <SettingOutlined />, path: "/settings" },
+    // { label: "การตั้งค่า", icon: <SettingOutlined />, path: "/settings" },
   ];
 
   return (

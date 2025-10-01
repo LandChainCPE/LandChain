@@ -60,7 +60,7 @@ function MainDashboard() {
     const fetchData = async () => {
       const dashboard = await fetchDashboardData();
       setData(dashboard);
-      const list = await fetchDashboardlist();
+      // const list = await fetchDashboardlist();
       setLoading(false);
     };
 
@@ -235,85 +235,11 @@ function MainDashboard() {
           </div>
         </div>
 
-        {/* Recent Activities Section */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden animate-fadeIn">
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-gray-200">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-              <div className="flex items-center">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-slate-600 to-slate-700 rounded-lg flex items-center justify-center mr-3 sm:mr-4">
-                  <FileText className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-800">กิจกรรมล่าสุด</h3>
-                  <p className="text-gray-600 mt-1 text-sm sm:text-base">Recent System Activities</p>
-                </div>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                <div className="px-3 py-1 sm:px-4 sm:py-2 bg-blue-100 rounded-full">
-                  <span className="text-blue-700 font-semibold text-xs sm:text-sm">{data.recentActivities.length} กิจกรรม</span>
-                </div>
-                <div className="text-gray-600 text-xs sm:text-sm">
-                  อัพเดตล่าสุด: {new Date().toLocaleTimeString('th-TH')}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-4 sm:p-6 lg:p-8">
-            <div className="space-y-3 sm:space-y-4">
-              {data.recentActivities.map((activity: any, idx: number) => (
-                <div key={idx} className="group hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 rounded-xl p-3 sm:p-4 border border-gray-100 hover:border-gray-200 hover:shadow-lg">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-                    <div className="flex items-start sm:items-center space-x-3 sm:space-x-4 flex-1">
-                      <div className="relative flex-shrink-0">
-                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300 ${
-                          activity.type === "register" ? "bg-gradient-to-r from-blue-500 to-blue-600" :
-                          activity.type === "verify" ? "bg-gradient-to-r from-green-500 to-green-600" :
-                          "bg-gradient-to-r from-purple-500 to-purple-600"
-                        }`}>
-                          {activity.type === "register" && <User className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
-                          {activity.type === "verify" && <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
-                          {activity.type === "onchain" && <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
-                        </div>
-                        <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full border-2 border-white"></div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-300 truncate">
-                          {activity.user}
-                        </div>
-                        <div className="text-sm text-gray-600 mb-2 line-clamp-2">{activity.detail}</div>
-                        <span className={`px-3 py-1 sm:px-4 sm:py-2 inline-flex text-xs sm:text-sm leading-5 font-semibold rounded-full border transition-all duration-300 ${
-                          activity.status === "success" ? "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-200" :
-                          activity.status === "processing" ? "bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border-blue-200" :
-                          activity.status === "completed" ? "bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-800 border-purple-200" :
-                          "bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border-amber-200"
-                        }`}>
-                          {activity.status === "success" && "สำเร็จ"}
-                          {activity.status === "processing" && "กำลังดำเนินการ"}
-                          {activity.status === "completed" && "เสร็จสมบูรณ์"}
-                          {activity.status === "pending" && "รอดำเนินการ"}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-right sm:text-right flex-shrink-0">
-                      <div className="text-gray-500 text-xs sm:text-sm font-mono bg-gray-100 px-2 py-1 sm:px-3 sm:py-1 rounded-lg group-hover:bg-gray-200 transition-colors duration-300">
-                        {activity.time}
-                      </div>
-                      <div className="text-gray-400 text-xs mt-1">เมื่อสักครู่</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Load More Button */}
-            <div className="mt-6 sm:mt-8 text-center">
-              <button className="group inline-flex items-center px-6 py-2 sm:px-8 sm:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                <span>ดูกิจกรรมทั้งหมด</span>
-                <Search className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-              </button>
-            </div>
-          </div>
+        {/* กรมที่ดิน ระบบ LandChain */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden animate-fadeIn p-8 text-center">
+          <h3 className="text-xl font-bold text-gray-800 mb-2">กรมที่ดิน ระบบ LandChain</h3>
+          <p className="text-gray-600 text-base">ระบบบริหารจัดการ Blockchain สำหรับกรมที่ดิน</p>
+          <p className="text-blue-700 mt-4">ยินดีต้อนรับสู่แดชบอร์ด</p>
         </div>
       </div>
     </div>
