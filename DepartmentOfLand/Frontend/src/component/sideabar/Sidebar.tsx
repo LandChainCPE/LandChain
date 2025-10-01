@@ -3,10 +3,9 @@ import {
   UnorderedListOutlined,
   SearchOutlined,
   SwapOutlined,
-  FileProtectOutlined,
   HomeOutlined,
-  SettingOutlined,
   FileTextOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./sidebar.css";
@@ -15,14 +14,23 @@ const Sidebar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const handleLogout = () => {
+    // ลบข้อมูลการเข้าสู่ระบบ
+    sessionStorage.clear();
+    localStorage.clear();
+    
+    // นำทางกลับไปหน้า login
+    navigate("/login");
+  };
+
   const menus = [
     { label: "หน้าหลัก", icon: <HomeOutlined />, path: "/main" },
     { label: "รายการดำเนินการ", icon: <UnorderedListOutlined />, path: "/operations" },
     { label: "ตรวจสอบโฉนดที่ดิน", icon: <SearchOutlined />, path: "/verifyland" },
     { label: "ตรวจสอบการซื้อขาย", icon: <SwapOutlined />, path: "/transfer" },
-    { label: "ลงทะเบียนโฉนดที่ดิน", icon: <FileProtectOutlined />, path: "/regisland" },
+    // { label: "ลงทะเบียนโฉนดที่ดิน", icon: <FileProtectOutlined />, path: "/regisland" },
     { label: "ตรวจสอบคำร้อง", icon: <FileTextOutlined />, path: "/statepetition" },
-    { label: "การตั้งค่า", icon: <SettingOutlined />, path: "/settings" },
+    // { label: "การตั้งค่า", icon: <SettingOutlined />, path: "/settings" },
   ];
 
   return (
@@ -72,9 +80,15 @@ const Sidebar: React.FC = () => {
 
       {/* Footer */}
       <div className="sidebar-footer p-6 border-t border-gray-200">
-        <div className="footer-info text-center">
-          <p className="text-xs text-gray-600">© 2025 กรมที่ดิน</p>
-          <p className="text-xs text-gray-500">ระบบบล็อกเชน</p>
+        {/* Logout Button */}
+        <div className="logout-section mb-4">
+          <button
+            onClick={handleLogout}
+            className="logout-btn w-full flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-white bg-red-600 hover:bg-red-700 border border-red-500 hover:border-red-600 shadow-md hover:shadow-lg"
+          >
+            <LogoutOutlined className="text-lg" />
+            <span className="logout-label">ออกจากระบบ</span>
+          </button>
         </div>
       </div>
     </div>

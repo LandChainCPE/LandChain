@@ -1,6 +1,6 @@
 // @ts-ignore
 import React, { useEffect, useState } from "react";
-import { ArrowRightLeft, User, FileText, CheckCircle, Clock, MapPin, X } from "lucide-react";
+import { ArrowRightLeft, User, FileText, CheckCircle, MapPin, X, AlertCircle } from "lucide-react";
 import { getTransactionLand, DepartmentOfLandVerifyTransaction } from "../service/https/aut/https";
 
 interface LandTransfer {
@@ -32,6 +32,8 @@ interface LandTransfer {
 function Transfer() {
   const [transfers, setTransfers] = useState<LandTransfer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
+  const [selectedTransfer, setSelectedTransfer] = useState<LandTransfer | null>(null);
 
   const convertToThaiDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -102,7 +104,18 @@ function Transfer() {
           price: item.price,
           area: `${item.land_rai || 0} ไร่ ${item.land_ngan || 0} งาน ${item.land_square_wa || 0} ตร.ว.`,
           location: `ตำบล${item.subdistrict} อำเภอ${item.district} จังหวัด${item.province}`,
-          description: `เลขระวาง: ${item.land_survey_number || ''}, หน้าสำรวจ: ${item.land_survey_page || ''}, โฉนด: ${item.land_title_deed_number || ''}, เล่ม: ${item.land_volume || ''}, หน้า: ${item.land_page || ''}`,
+          description: `
+            ระวาง: ${item.land_survey_number || ''}
+            เลขที่ดิน: ${item.land_number || ''}
+            หน้าสำรวจ: ${item.land_survey_page || ''}
+            เลขที่โฉนด: ${item.land_title_deed_number || ''}
+            เล่ม: ${item.land_volume || ''}
+            หน้า: ${item.land_page || ''}
+            ตำบล: ${item.subdistrict || ''}
+            อำเภอ: ${item.district || ''}
+            จังหวัด: ${item.province || ''}
+            ขนาดที่ดิน: ${item.land_rai || 0} ไร่ ${item.land_ngan || 0} งาน ${item.land_square_wa || 0} ตร.วา
+          `.replace(/\n +/g, '\n'),
           transactionType: "sale", // สามารถปรับ logic ตาม backend
           status: "pending", // สามารถปรับ logic ตาม backend
           dateCreated: new Date().toISOString().slice(0,10), // ไม่มี field ใน backend
@@ -118,9 +131,22 @@ function Transfer() {
   }, []);
 
   const handleApprove = async (transferId: number) => {
-    console.log("transaction_id", transferId);
-    const response = await DepartmentOfLandVerifyTransaction(transferId);
-    console.log(response);
+    setShowConfirmModal(true);
+    const found = transfers.find(t => t.transaction_id === transferId);
+    setSelectedTransfer(found || null);
+  };
+
+  const handleConfirmApprove = async () => {
+    if (!selectedTransfer) return;
+    console.log(selectedTransfer.transaction_id);
+    const { response, result } = await DepartmentOfLandVerifyTransaction(selectedTransfer.transaction_id);   ///ทำการอัพเดตต Transaction นั้นเป็น VerifyDepaertmentTrue  และ TypeTransaction เป็น กรมที่ดินตรวจสอบรับรู้แล้ว
+    if(response.status === 200){
+      console.log(result);
+      window.location.reload();
+    } else {
+      alert("เกิดข้อผิดพลาดในการอนุมัติ กรุณาลองใหม่อีกครั้ง");
+      setShowConfirmModal(false);
+    }
   };
 
   const handleReject = (transferId: number) => {
@@ -170,64 +196,6 @@ function Transfer() {
             </div>
           </div>
           
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
-                  <FileText className="w-7 h-7 text-white" />
-                </div>
-                <div className="ml-5">
-                  <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">รายการทั้งหมด</p>
-                  <p className="text-3xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                    {transfers.length}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
-                  <Clock className="w-7 h-7 text-white" />
-                </div>
-                <div className="ml-5">
-                  <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">รอดำเนินการ</p>
-                  <p className="text-3xl font-bold text-gray-800 group-hover:text-amber-600 transition-colors duration-300">
-                    {transfers.filter(t => t.status === 'pending').length}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
-                  <CheckCircle className="w-7 h-7 text-white" />
-                </div>
-                <div className="ml-5">
-                  <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">อนุมัติแล้ว</p>
-                  <p className="text-3xl font-bold text-gray-800 group-hover:text-green-600 transition-colors duration-300">
-                    {transfers.filter(t => t.status === 'approved').length}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
-                  <X className="w-7 h-7 text-white" />
-                </div>
-                <div className="ml-5">
-                  <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">ยกเลิกแล้ว</p>
-                  <p className="text-3xl font-bold text-gray-800 group-hover:text-red-600 transition-colors duration-300">
-                    {transfers.filter(t => t.status === 'rejected').length}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Main Content */}
@@ -374,6 +342,71 @@ function Transfer() {
                       </button>
                     </div>
                   )}
+  {/* Confirmation Modal */}
+  {showConfirmModal && selectedTransfer && (
+    <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl border border-gray-100">
+        <div className="flex justify-between items-start mb-6">
+          <div className="flex items-center">
+            <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center mr-4">
+              <CheckCircle className="w-7 h-7 text-green-600" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900">ยืนยันการอนุมัติ</h3>
+              <p className="text-gray-500 text-sm mt-1">Confirm Land Transfer Approval</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowConfirmModal(false)}
+            className="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="mb-8">
+          <p className="text-gray-700 mb-6 text-lg">
+            คุณต้องการอนุมัติรายการซื้อขายที่ดินนี้หรือไม่?
+          </p>
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-2xl p-6 mb-4">
+            <div className="flex items-center mb-4">
+              <ArrowRightLeft className="w-5 h-5 text-green-600 mr-3" />
+              <span className="font-bold text-green-900 text-lg">รายการซื้อขายที่ดิน</span>
+            </div>
+            <div className="bg-white rounded-xl p-4 shadow-sm">
+              <div className="text-xl font-bold text-green-900">
+                {selectedTransfer.landNumber} - {selectedTransfer.seller.firstname} {selectedTransfer.seller.lastname} → {selectedTransfer.buyer.firstname} {selectedTransfer.buyer.lastname}
+              </div>
+              <div className="text-sm text-gray-600 mt-1">
+                {selectedTransfer.location}
+              </div>
+            </div>
+          </div>
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+            <div className="flex items-start space-x-3">
+              <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-yellow-800">
+                <strong>คำเตือน:</strong> การอนุมัติรายการนี้จะดำเนินการเปลี่ยนสถานะในระบบ กรุณาตรวจสอบข้อมูลให้ถูกต้อง
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-4">
+          <button
+            onClick={() => setShowConfirmModal(false)}
+            className="flex-1 bg-gray-100 text-gray-700 py-4 rounded-xl hover:bg-gray-200 transition-colors font-semibold text-lg"
+          >
+            ยกเลิก
+          </button>
+          <button
+            onClick={handleConfirmApprove}
+            className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg"
+          >
+            ยืนยันอนุมัติ
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
                 </div>
               </div>
             ))}

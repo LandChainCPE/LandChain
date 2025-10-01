@@ -141,6 +141,61 @@
   background: rgba(0, 0, 0, 0.1);
 }
 
+/* Logout Button */
+.logout-section {
+  margin-bottom: 15px;
+}
+
+.logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 15px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-left: 3px solid transparent;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  border-left-color: rgba(244, 63, 94, 0.6);
+  color: #ffffff;
+  transform: translateX(2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.logout-btn:active {
+  transform: translateX(1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logout-btn .anticon {
+  font-size: 16px;
+  margin-right: 10px;
+  color: rgba(244, 63, 94, 0.8);
+  transition: color 0.3s ease;
+}
+
+.logout-btn:hover .anticon {
+  color: rgba(244, 63, 94, 1);
+}
+
+.logout-label {
+  flex: 1;
+  letter-spacing: 0.3px;
+}
+
 .footer-info p {
   margin: 2px 0;
   font-size: 11px;

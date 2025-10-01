@@ -126,6 +126,8 @@ func main() {
 		//admin.GET("getdatauserverification/:userid", controller.GetDataUserVerification)   //เป็นของ User ดึงข้อมูล ผู้ใช้ WalletID  NameHash Signature  เพื่อลงทะเบียนผู้ใช้ลงBlockchain
 		admin.GET("/gettransactionland", controller.GetTransactionLand)
 		admin.POST("/departmentoflandverifytransaction", controller.DepartmentOfLandVerifyTransaction)
+
+		admin.GET("/getcountdatadashboardonchain", controller.GetCountDataDashboardOnchain)
 		//จบ----- อรรถ -------
 
 		admin.GET("/bookings/upcoming-expired", controller.GetUpcomingExpiredBookings)
