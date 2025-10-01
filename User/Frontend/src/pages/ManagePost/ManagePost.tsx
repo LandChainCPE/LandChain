@@ -12,6 +12,7 @@ import {
 import { GetTags, GetDistrict, GetSubdistrict } from "../../service/https/jib/jib";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../component/user/Navbar";
+import { getLocationCoordinates } from "../../components/locationUtils";
 import "./ManagePost.css";
 
 const { Option } = Select;
@@ -149,121 +150,7 @@ const ManagePost: React.FC = () => {
   const [mapDistrictId, setMapDistrictId] = useState<number | undefined>();
   const [mapSubdistrictId, setMapSubdistrictId] = useState<number | undefined>();
 
-  // ===== COORDINATE MAPPING =====
-  const getLocationCoordinates = useCallback((
-    provinceName: string, 
-    districtName?: string, 
-    subdistrictName?: string
-  ): { center: [number, number], zoom: number } => {
-    const detailedCoordinates: Record<string, Record<string, Record<string, [number, number]>>> = {
-      "กรุงเทพมหานคร": {
-        "เขตบางรัก": {
-          "แขวงสี่พระยา": [100.5141, 13.7221],
-          "แขวงมหาพฤฒาราม": [100.5089, 13.7185],
-          "แขวงบางรัก": [100.5167, 13.7251]
-        },
-        "เขตสาทร": {
-          "แขวงสีลม": [100.5330, 13.7278],
-          "แขวงสุริยวงศ์": [100.5289, 13.7245]
-        }
-      },
-      "เชียงใหม่": {
-        "อำเภอเมืองเชียงใหม่": {
-          "ตำบลศรีภูมิ": [98.9817, 18.7875],
-          "ตำบลพระสิงห์": [98.9853, 18.7874],
-          "ตำบลช่างคลาน": [98.9956, 18.7789]
-        },
-        "อำเภอแม่ริม": {
-          "ตำบลแม่ริม": [98.9289, 18.8756],
-          "ตำบลสันโป่ง": [98.9156, 18.8634]
-        }
-      },
-      "ขอนแก่น": {
-        "อำเภอเมืองขอนแก่น": {
-          "ตำบลในเมือง": [102.8431, 16.4322],
-          "ตำบลศิลา": [102.8567, 16.4289]
-        }
-      },
-      "ชลบุรี": {
-        "อำเภอเมืองชลบุรี": {
-          "ตำบลเสม็ด": [100.9847, 13.3611],
-          "ตำบลบ้านสวน": [100.9734, 13.3756]
-        },
-        "อำเภอพัทยา": {
-          "ตำบลหนองปรือ": [100.8767, 12.9234]
-        }
-      },
-      "ภูเก็ต": {
-        "อำเภอเมืองภูเก็ต": {
-          "ตำบลตลาดใหญ่": [98.3923, 7.8804],
-          "ตำบลรัษฎา": [98.3756, 7.8934]
-        }
-      }
-    };
 
-    const provinceCoordinates: Record<string, [number, number]> = {
-      "กรุงเทพมหานคร": [100.5018, 13.7563],
-      "นครราชสีมา": [102.0977, 14.9799],
-      "เชียงใหม่": [98.9853, 18.7061],
-      "ภูเก็ต": [98.3923, 7.8804],
-      "ขอนแก่น": [102.8431, 16.4322],
-      "ชลบุรี": [100.9847, 13.3611],
-      "อุบลราชธานี": [104.8472, 15.2286],
-      "ปราจีนบุรี": [101.3687, 14.0508],
-      "สุราษฎร์ธานี": [99.3210, 9.1382],
-      "สงขลา": [100.6087, 7.2056],
-    };
-
-    // 1. ค้นหาตำบล (zoom 16)
-    if (subdistrictName && districtName) {
-      const normalizedProvince = provinceName.toLowerCase();
-      const normalizedDistrict = districtName.toLowerCase().replace(/อำเภอ/g, '').trim();
-      const normalizedSubdistrict = subdistrictName.toLowerCase().replace(/ตำบล/g, '').trim();
-
-      for (const [province, districts] of Object.entries(detailedCoordinates)) {
-        if (province.toLowerCase().includes(normalizedProvince) || normalizedProvince.includes(province.toLowerCase())) {
-          for (const [district, subdistricts] of Object.entries(districts)) {
-            if (district.toLowerCase().includes(normalizedDistrict) || normalizedDistrict.includes(district.toLowerCase())) {
-              for (const [subdistrict, coords] of Object.entries(subdistricts)) {
-                if (subdistrict.toLowerCase().includes(normalizedSubdistrict) || normalizedSubdistrict.includes(subdistrict.toLowerCase())) {
-                  return { center: coords, zoom: 16 };
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // 2. ค้นหาอำเภอ (zoom 14)
-    if (districtName) {
-      const normalizedProvince = provinceName.toLowerCase();
-      const normalizedDistrict = districtName.toLowerCase().replace(/อำเภอ/g, '').trim();
-
-      for (const [province, districts] of Object.entries(detailedCoordinates)) {
-        if (province.toLowerCase().includes(normalizedProvince) || normalizedProvince.includes(province.toLowerCase())) {
-          for (const [district, subdistricts] of Object.entries(districts)) {
-            if (district.toLowerCase().includes(normalizedDistrict) || normalizedDistrict.includes(district.toLowerCase())) {
-              const firstSubdistrictCoords = Object.values(subdistricts)[0];
-              if (firstSubdistrictCoords) {
-                return { center: firstSubdistrictCoords, zoom: 14 };
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // 3. ค้นหาจังหวัด (zoom 12)
-    for (const [province, coords] of Object.entries(provinceCoordinates)) {
-      if (province.toLowerCase().includes(provinceName.toLowerCase()) ||
-        provinceName.toLowerCase().includes(province.toLowerCase())) {
-        return { center: coords, zoom: 12 };
-      }
-    }
-
-    return { center: DEFAULT_CENTER, zoom: DEFAULT_ZOOM };
-  }, []);
 
   // ===== HELPER FUNCTIONS =====
   const getImageSrc = useCallback((path?: string): string => {
@@ -439,7 +326,7 @@ const ManagePost: React.FC = () => {
 
       const map = new (window as any).mapboxgl.Map({
         container: mapContainerRef.current,
-        style: 'mapbox://styles/mapbox/satellite-v9',
+        style: 'mapbox://styles/mapbox/satellite-streets-v12',
         center: mapCenter,
         zoom: mapZoom
       });
@@ -595,7 +482,7 @@ const ManagePost: React.FC = () => {
         mapRef.current.setZoom(10);
       }
     }
-  }, [provinces, loadDistricts, postForm, getLocationCoordinates]);
+  }, [provinces, loadDistricts, postForm]);
 
   //@ts-ignore
   const handleDistrictChange = useCallback(async (districtId: number) => {
@@ -611,7 +498,7 @@ const ManagePost: React.FC = () => {
         mapRef.current.setZoom(12);
       }
     }
-  }, [districts, loadSubdistricts, postForm, getLocationCoordinates]);
+  }, [districts, loadSubdistricts, postForm]);
 
   //@ts-ignore
   const handleSubdistrictChange = useCallback((subdistrictId: number) => {
@@ -623,7 +510,7 @@ const ManagePost: React.FC = () => {
         mapRef.current.setZoom(14);
       }
     }
-  }, [subdistricts, getLocationCoordinates]);
+  }, [subdistricts]);
 
   const handleMapProvinceChange = useCallback(async (provinceId: number | undefined) => {
     setDistricts([]);
@@ -646,7 +533,7 @@ const ManagePost: React.FC = () => {
         }, 350);
       }
     }
-  }, [provinces, loadDistricts, getLocationCoordinates]);
+  }, [provinces, loadDistricts]);
 
   const handleMapDistrictChange = useCallback(async (districtId: number | undefined) => {
     setSubdistricts([]);
@@ -668,7 +555,7 @@ const ManagePost: React.FC = () => {
         }, 250);
       }
     }
-  }, [provinces, districts, mapProvinceId, loadSubdistricts, getLocationCoordinates]);
+  }, [provinces, districts, mapProvinceId, loadSubdistricts]);
 
   const handleMapSubdistrictChange = useCallback((subdistrictId: number | undefined) => {
     setMapSubdistrictId(subdistrictId);
@@ -687,7 +574,7 @@ const ManagePost: React.FC = () => {
         mapRef.current.easeTo({ center: locationData.center, zoom: locationData.zoom, duration: 1000 });
       }
     }
-  }, [provinces, districts, subdistricts, mapProvinceId, mapDistrictId, getLocationCoordinates]);
+  }, [provinces, districts, subdistricts, mapProvinceId, mapDistrictId]);
 
   const handleToggleDrawingMode = useCallback(() => {
     const newDrawingMode = !isDrawingMode;
@@ -1020,7 +907,7 @@ const ManagePost: React.FC = () => {
     } finally {
       setMapLoading(false);
     }
-  }, [provinces, loadDistricts, loadSubdistricts, getLocationCoordinates]);
+  }, [provinces, loadDistricts, loadSubdistricts]);
 
   const handleLocationChange = useCallback((index: number, field: 'latitude' | 'longitude', value: number) => {
     if (isNaN(value) || value === null || value === undefined) return;
