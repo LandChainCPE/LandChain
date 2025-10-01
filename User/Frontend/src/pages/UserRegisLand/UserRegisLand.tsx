@@ -5,6 +5,7 @@ import { RegisterLand } from "../../service/https/garfield";
 import { GetAllProvinces, GetDistrict, GetSubdistrict, } from "../../service/https/garfield";
 import { useNavigate } from "react-router-dom";
 import { GetUserIDByWalletAddress } from "../../service/https/bam/bam";
+import Navbar from "../../component/user/Navbar";
 
 type ProvinceDTO = { ID: number; name_th: string; name_en?: string };
 type DistrictDTO = { ID: number; name_th: string; province_id: number; name_en?: string };
@@ -216,13 +217,7 @@ const UserRegisLand: React.FC = () => {
 
   return (
     <div className="user-regis-land-container">
-      <div className="floating-shapes">
-        <div className="shape-1"></div>
-        <div className="shape-2"></div>
-        <div className="shape-3"></div>
-        <div className="shape-4"></div>
-      </div>
-
+      <Navbar />
       {/* Hero Section */}
       <div className="hero-section">
         <div className="hero-content">

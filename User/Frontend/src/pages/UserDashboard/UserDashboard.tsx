@@ -2,7 +2,7 @@ import "./UserDashboard.css";
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { GetLandtitlesByUser } from "../../service/https/garfield";
-import { GetInfoUserByWalletID } from "../../service/https/bam/bam";
+import { GetInfoUserByWalletID, CheckVerify } from "../../service/https/bam/bam";
 import { UserCheck, CheckSquare } from "react-feather"; // Assuming 'react-feather' contains the User and Home icons
 import { GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";
 import Navbar from "../../component/user/Navbar";
@@ -142,6 +142,7 @@ const StatCard = ({ title, value, sub }: { title: React.ReactNode; value: React.
 export default function UserProfilePage() {
   // State สำหรับ user info
   const [userInfo, setUserInfo] = useState<{ firstName?: string; lastName?: string; email?: string; user_verification_id?: number }>({});
+  const [isVerified, setIsVerified] = useState<boolean | null>(null);
   const [titles, setTitles] = useState<LandTitle[]>([]);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [isLoadingTitles, setIsLoadingTitles] = useState(true);
@@ -152,7 +153,6 @@ export default function UserProfilePage() {
     setUserError(null);
     GetInfoUserByWalletID().then((result) => {
       if (result && (result.firstName || result.lastName || result.first_name || result.last_name || result.email || result.user_verification_id)) {
-        console.log("Fetched user data:", result);
         setUserInfo({
           firstName: result.firstName || result.first_name || "",
           lastName: result.lastName || result.last_name || "",
@@ -160,14 +160,25 @@ export default function UserProfilePage() {
           user_verification_id: result.user_verification_id || 0,
         });
       } else {
-        console.log("No user data found or invalid format");
         setUserError("ไม่พบข้อมูลผู้ใช้");
       }
     }).catch((error) => {
-      console.error("Failed to fetch user info:", error);
       setUserError("เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้");
     }).finally(() => {
       setIsLoadingUser(false);
+    });
+    // เช็คสถานะ verify
+    CheckVerify().then((res) => {
+      console.log("CheckVerify result:", res);
+      // รองรับหลายรูปแบบ: status_verify, Status_verify, verified
+      if (res && (res.status_verify === true || res.Status_verify === true || res.verified === true)) {
+        setIsVerified(true);
+      } else {
+        setIsVerified(false);
+      }
+    }).catch((err) => {
+      console.log("CheckVerify error:", err);
+      setIsVerified(false);
     });
   }, []);
 
@@ -178,23 +189,23 @@ export default function UserProfilePage() {
 
   useEffect(() => {
     const fetchUserId = async () => {
-    const result = await GetUserIDByWalletAddress();
-    setuserId(result.user_id)
-    if (result.user_id) {
-      GetLandtitlesByUser(result.user_id).then((res) => {
-        if (Array.isArray(res)) {
-          setTotalLandCount(res.length);
-        } else if (res?.result && Array.isArray(res.result)) {
-          setTotalLandCount(res.result.length);
-        } else {
-          setTotalLandCount(0);
-        }
-      }).catch(() => setTotalLandCount(0));
-    } else {
-      setTotalLandCount(0);
+      const result = await GetUserIDByWalletAddress();
+      setuserId(result.user_id)
+      if (result.user_id) {
+        GetLandtitlesByUser(result.user_id).then((res) => {
+          if (Array.isArray(res)) {
+            setTotalLandCount(res.length);
+          } else if (res?.result && Array.isArray(res.result)) {
+            setTotalLandCount(res.result.length);
+          } else {
+            setTotalLandCount(0);
+          }
+        }).catch(() => setTotalLandCount(0));
+      } else {
+        setTotalLandCount(0);
+      }
     }
-  }
-  fetchUserId();
+    fetchUserId();
   }, []);
 
   // State สำหรับจำนวนที่ดินที่ยังไม่ verify จาก backend
@@ -368,7 +379,12 @@ export default function UserProfilePage() {
                 </span>
               ) : (
                 <>
-                  {userInfo.user_verification_id && userInfo.user_verification_id !== 0 ? (
+                  {isVerified === null ? (
+                    <span className="chip chip-soft">
+                      <LoadingSpinner className="icon-sm mr-1" />
+                      กำลังตรวจสอบ...
+                    </span>
+                  ) : isVerified ? (
                     <span className="chip chip-strong" style={{ backgroundColor: 'rgba(34, 197, 94, 0.2)', color: '#16a34a' }}>
                       <BadgeCheck className="icon-sm mr-1" />
                       Verified
@@ -445,12 +461,8 @@ export default function UserProfilePage() {
         </Card>
       </div>
 
-      {/* 3) TITLES STATS */}
+      {/* 2) TITLES STATS */}
       <div className="grid-4">
-        <StatCard
-          title="ที่ดินทั้งหมด"
-          value={isLoadingTitles ? <LoadingSpinner className="icon" /> : totalLandCount}
-        />
         <StatCard
           title="ที่ดินบน Blockchain"
           value={isLoadingTitles ? <LoadingSpinner className="icon" /> : active}

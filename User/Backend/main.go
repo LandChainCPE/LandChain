@@ -36,7 +36,7 @@ func main() {
 	controller.StartBookingCleanupScheduler()
 
 	//อ่านค่าการตอบกลับจาก Smartcontract (ควรใช้ go routine)
-	go controller.ListenSmartContractEvents()
+	go controller.ListenSmartContractEvents()    //ทั้ง Auto ทั้งมือ 
 
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
@@ -231,6 +231,8 @@ func main() {
 		authorized.GET("/user/lands/requestsellbydelete", controller.GetAllRequestSellByUserIDAndDelete)
 		authorized.PUT("/user/lands/put/transation/buyerupdate", controller.UpdateTransactionBuyerAccept)
 		authorized.DELETE("/user/lands/post/:id", controller.DeleteLandsalepostByLandIDandUserID)
+		authorized.PUT("/user/sale/put/updatesetsale/:id", controller.LoadUpdateSetsale)
+		authorized.PUT("/user/sale/put/updatebuy/:id", controller.LoadTransactionAfterBuy)
 
 		authorized.GET("/userinfo/:userId", controller.GetUserinfoByID)
 		authorized.GET("/landtitles/:userId", controller.GetLandtitlesByUser) //ดึงข้อมูล landtitles

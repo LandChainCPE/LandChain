@@ -13,7 +13,7 @@ function Verify() {
 
   const location = useLocation();
   const bookingID = location.state?.booking;
-
+  
   useEffect(() => {
     const fetchData = async () => {
       console.log(bookingID.id);

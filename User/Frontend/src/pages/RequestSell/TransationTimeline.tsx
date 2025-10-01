@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 // @ts-ignore
-import { GetTransationByUserID, GetInfoUserByToken, UpdateTransactionBuyerAccept, SetSellInfoHandler, DeleteTransactionTodelete, GetSaleInfoHandler, DeleteLandsalepostByLandIDandUserID, BuyLandHandler, DeleteTransactionandAllrequest, DeleteTransactionToscucess , DeleteAllRequestBuyByLandID} from "../../service/https/bam/bam";
+import { GetTransationByUserID, GetInfoUserByToken, UpdateTransactionBuyerAccept, SetSellInfoHandler, DeleteTransactionTodelete, GetSaleInfoHandler, DeleteLandsalepostByLandIDandUserID, BuyLandHandler, DeleteTransactionandAllrequest, DeleteTransactionToscucess , DeleteAllRequestBuyByLandID, LoadUpdateSetsale, LoadTransactionAfterBuy} from "../../service/https/bam/bam";
 import './TransactionTimeline.css';
 import Navbar from "../../component/user/Navbar";
 import { Modal, Button } from "react-bootstrap";
@@ -39,18 +39,18 @@ function TransactionTimeline() {
     // }, []);
 
     const fetchTransactions = async () => {
-    try {
-        setLoading(true);
-        const user = await GetInfoUserByToken();
-        setUserId(user.id);
-        const apiTransactions = await GetTransationByUserID(user.id);
-        setTransactions(apiTransactions ?? []);
-    } catch (err) {
-        setError("เกิดข้อผิดพลาดในการดึงข้อมูล");
-    } finally {
-        setLoading(false);
-    }
-};
+        try {
+            setLoading(true);
+            const user = await GetInfoUserByToken();
+            setUserId(user.id);
+            const apiTransactions = await GetTransationByUserID(user.id);
+            setTransactions(apiTransactions ?? []);
+        } catch (err) {
+            setError("เกิดข้อผิดพลาดในการดึงข้อมูล");
+        } finally {
+            setLoading(false);
+     }
+    };
 
     useEffect(() => {
     fetchTransactions();
@@ -263,6 +263,7 @@ const handleSetsaleinfo = async (transaction: any) => {
       Swal.fire({
                       icon: "error",
                       title: "เซ็นต์ข้อมูลล้มเหลว",
+                      text: "โปรดกดอัพเดทข้อมูล",
                       confirmButtonColor: "#e74c3c",
                       });
       setProcessingTxId(null);
@@ -321,6 +322,8 @@ const handleSetsaleinfo = async (transaction: any) => {
 };
 
 
+
+
 const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 
@@ -357,6 +360,42 @@ const handleConfirmDelete = async () => {
     handleCloseDeleteModal();
   }
 };
+
+const handleLoadSets = async (transactionId: number) => {
+  try {
+    // เรียก backend เพื่อโหลดข้อมูลการขาย
+    const saleData = await LoadUpdateSetsale(transactionId);
+
+    // ถ้ามีข้อมูลให้เซ็ต state
+    if (saleData) {
+      setSaleInfos((prev) => ({
+        ...prev,
+        [transactionId]: saleData,
+      }));
+    }
+
+    // fetch transactions ใหม่ล่าสุด
+    await fetchTransactions(); // <-- เพิ่มตรงนี้
+
+    console.log("โหลดข้อมูลการขายสำเร็จ:", saleData);
+
+    // แสดง success alert
+    Swal.fire({
+      icon: "success",
+      title: "โหลดข้อมูลการขายสำเร็จ",
+      confirmButtonColor: "#00fa4fff",
+    });
+  } catch (err) {
+    console.error("โหลดข้อมูลการขายไม่สำเร็จ", err);
+    Swal.fire({
+      icon: "error",
+      title: "เกิดข้อผิดพลาดในการโหลดข้อมูลการขาย",
+      confirmButtonColor: "#e74c3c",
+    });
+  }
+};
+
+
 
 const [showSaleModal, setShowSaleModal] = useState(false);
 
@@ -489,8 +528,9 @@ interface SaleInfoType {
     console.log("Transaction confirmed:", tx.hash);
 
     // ลบ transaction และ sale info
-
-    // await DeleteTransactionToscucess(transactionId);
+    
+    await LoadTransactionAfterBuy(transactionId);
+    await DeleteTransactionToscucess(transactionId);
     await DeleteAllRequestBuyByLandID(tokenId);
     await DeleteLandsalepostByLandIDandUserID(tokenId);
 
@@ -759,6 +799,26 @@ const openETHModalForTransaction = (tx: any) => {
                             </div>
                             )}
 
+                            {userType === "buyer" && tx.BuyerAccepted && tx.SellerAccepted && tx.LandDepartmentApproved && tx.TypetransactionID != 4 && (
+                                <div className="card-actions">
+                                    <button 
+                                    className="btn btn-warning"
+                                    onClick={() => handleLoadSets(tx.ID)}
+                                    disabled={processingTxId === tx.ID || loadingMetamask}
+                                    >
+                                    {processingTxId === tx.ID || loadingMetamask ? (
+                                        <>
+                                        <span className="spinner-border spinner-border-sm me-2"></span>
+                                        กำลังอัพเดทข้อมูลการขายโฉนด
+                                        </>
+                                    ) : (
+                                        "อัพเดทข้อมูลการขายโฉนด"
+                                    )}
+                                    </button>
+                                </div>
+                                )}
+
+
 
 
 
@@ -925,14 +985,6 @@ const openETHModalForTransaction = (tx: any) => {
                                         <span>ผู้ส่ง (คุณ):</span>
                                         <span style={{ maxWidth: "220px", overflowWrap: "break-word", wordBreak: "break-all" }}>
                                             {ethTransaction.toAddress}
-                                        </span>
-                                    </div>
-                                    <div className="summary-item" style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                                        <span>จำนวนเงิน (ETH):</span>
-                                        <span>
-                                            {ethTransaction.amountWei
-                                                ? parseFloat(ethers.formatUnits(ethTransaction.amountWei, "ether")).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 })
-                                                : "N/A"}
                                         </span>
                                     </div>
                                     {/* <div className="summary-item">

@@ -13,7 +13,7 @@ import (
 	"math/big"
 	"os"
 	"strings"
-	"time"
+	// "time"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -84,6 +84,13 @@ func ListenSmartContractEvents() {
 				fmt.Println("metaFields:", metaFields)
 				fmt.Println("TxHash:", vLog.TxHash.Hex())
 
+				//แก้ Emit ให้ Emit มือ 
+				// 1. ทำการหาว่า ที่ Landtitle ที่มี TokenID มากที่สุด  และ มี land_verifications StatusOnchain=True
+				// 2. จะได้ TokenId มากที่สุดที่ Onchain(ในฐานข้อมูลLocal)   
+				// 3. ทำการ TokenID + 1  แล้วนำไปหาที่ GetLandMetadata  ข้อมูลที่ตอบกลับมา จะมี UUID อยู่ 
+				// 4. ทำการหาว่า  uuid ตรงกับ Landtitleไหน  ทำการ ใส่ TokenID + 1 เข้าไป  และ LandVerification ที่ตรงกับ Landtitle  ปรับ Status_onchain = true
+ 				// 5. จบลูป  ทำการวนซ้ำ ทำการ TokenID(เดิม) + 1   แล้วค้นหาใหม่แบบนี้ไปเรื่อยๆ
+
 				// Extract UUID from metaFields
 				uuid := ""
 				fields := strings.Split(metaFields, ",")
@@ -133,27 +140,27 @@ func ListenSmartContractEvents() {
 				}
 
 				//หาว่า metamaskaddress ตรงกับ Userคนไหน
-				var user entity.Users
-				ownerLower := strings.ToLower(owner.Hex())
-				if err := db.Where("metamaskaddress = ?", ownerLower).First(&user).Error; err != nil {
-					log.Println("User not found for wallet:", ownerLower)
-					break
-				}
+				// var user entity.Users
+				// ownerLower := strings.ToLower(owner.Hex())
+				// if err := db.Where("metamaskaddress = ?", ownerLower).First(&user).Error; err != nil {
+				// 	log.Println("User not found for wallet:", ownerLower)
+				// 	break
+				// }
 
-				landID := landtitle.ID
-				// นำ UserID  LandID มาใส่ใน landOwnership
-				landOwnership := entity.LandOwnership{
-					UserID:   user.ID,
-					LandID:   landID,
-					TxHash:   vLog.TxHash.Hex(), //รวมถึง Transaction Hash ด้วย
-					FromDate: time.Now(),
-					ToDate:   nil,
-				}
-				if err := db.Create(&landOwnership).Error; err != nil {
-					log.Println("Failed to create LandOwnership:", err)
-				} else {
-					log.Println("LandOwnership created for UserID:", user.ID, "LandID:", landID)
-				}
+				// landID := landtitle.ID
+				// // นำ UserID  LandID มาใส่ใน landOwnership
+				// landOwnership := entity.LandOwnership{
+				// 	UserID:   user.ID,
+				// 	LandID:   landID,
+				// 	TxHash:   vLog.TxHash.Hex(), //รวมถึง Transaction Hash ด้วย
+				// 	FromDate: time.Now(),
+				// 	ToDate:   nil,
+				// }
+				// if err := db.Create(&landOwnership).Error; err != nil {
+				// 	log.Println("Failed to create LandOwnership:", err)
+				// } else {
+				// 	log.Println("LandOwnership created for UserID:", user.ID, "LandID:", landID)
+				// }
 				/// จบ LandMinted
 
 			case "OwnerRegistered":
@@ -166,7 +173,13 @@ func ListenSmartContractEvents() {
 				fmt.Println("TxHash:", vLog.TxHash.Hex())
 				// แค่ปริ้นออก
 
-				//หาว่า wallet ตรงกับ UserVerification ไหน
+				//แก้ Emit ให้ Emit มือ 
+				//ขั้นตอน 
+				//ผู้ใช้กดตรวจสอบ   ส่งWalletID ไป    GetOwnerInfo    
+				// ตรวจสอบว่า NameHash ที่ได้นั้นตรงกับ Database แล้วทำการ 
+				// อัพเดต StatusOnchain ของ UserVerification  เป็น True
+
+				// 1.หาว่า wallet ตรงกับ UserVerification ไหน
 				db := config.DB()
 				var userVerif entity.UserVerification
 				walletLower := strings.ToLower(wallet.Hex())
@@ -176,9 +189,11 @@ func ListenSmartContractEvents() {
 				}
 				//userVerif.Status_onchain = true
 				// Update UserVerification Status_onchain  เป็น true
+
+				// 2. อัพเดตข้อมูล UserVerification นั้นให้เป็น True   จบ**
 				userVerif.Status_onchain = true
-				txHash := vLog.TxHash.Hex()
-				userVerif.TxHash = &txHash
+				// txHash := vLog.TxHash.Hex()
+				// userVerif.TxHash = &txHash
 				if err := db.Save(&userVerif).Error; err != nil {
 					log.Println("failed to update user_verification status or TxHash:", err)
 				} else {
@@ -200,6 +215,16 @@ func ListenSmartContractEvents() {
 				fmt.Println("buyer:", buyer.Hex())
 				fmt.Println("owner:", owner.Hex())
 				fmt.Println("TxHash:", vLog.TxHash.Hex())
+
+				//แก้ Emit ให้ Emit มือ 
+				//1.ฝั่งผู้ ซื้อ/ขาย กดก็ได้  หรือถ้าง่าย ผู้ซื้อเข้ามาหน้านนี้แล้วค่อยทำ
+				//1. ทำการ Get ค่า TokenID ของการซื้อขายมา   โยนเข้า GetLandMetadata
+																//2. เอา tokenID นนี้ไปตรวจสอบว่าตรงกับ landtitle ไหน
+				//3. เรารู้ TrandsactionID ตอนกด  ปามบอกตอน แมพรู้ ID 
+				
+				//4. ทำการเช็คว่า Transaction นั้น มี ผู้ซื้อ   ผู้ขาย   typetransaction_id = 3
+				//5. ทำการอัพเดต transaction.TypetransactionID = 4
+				//จบ ****
 
 				db := config.DB()
 				// 1. Find Landtitle by tokenId
@@ -231,8 +256,8 @@ func ListenSmartContractEvents() {
 				}
 
 				// 4. Update TxHash and set TypeTransactionID=4
-				txHash := vLog.TxHash.Hex()
-				transaction.TxHash = &txHash      //ใส่ค่า TxHash
+				// txHash := vLog.TxHash.Hex()
+				// transaction.TxHash = &txHash      //ใส่ค่า TxHash
 				transaction.TypetransactionID = 4 // TypetransactionID = 4
 				if err := db.Save(&transaction).Error; err != nil {
 					log.Println("Failed to update Transaction TxHash and TypeTransactionID:", err)
@@ -259,6 +284,18 @@ func ListenSmartContractEvents() {
 				fmt.Println("seller:", seller.Hex())
 				fmt.Println("buyer:", buyer.Hex())
 				fmt.Println("TxHash:", vLog.TxHash.Hex())
+
+
+				//แก้ Emit ให้ Emit มือ  ฝั่งผู้ซื้อเพราะมันอยากได้ของ
+				//1. เรารู้ TokenID + TransactionID
+				//2. โยน TokenID ไปที่ getOwnershipHistory
+				//3. ทำการเช็ค ข้อมูล 2 Wallet สุดท้าย  เทียบกับ Transaction 
+				//4. ถ้าตรง ทำการ Set transaction.TypetransactionID = 5
+				//5. ทำการ Soft Delete transaction นั้น
+				//6. เสร็จ **** 
+
+
+
 				db := config.DB()
 				// 1. Find Landtitle by tokenId
 				var landtitle entity.Landtitle
@@ -282,35 +319,35 @@ func ListenSmartContractEvents() {
 				var sellerUser entity.Users
 				if err := db.Where("metamaskaddress = ?", sellerLower).First(&sellerUser).Error; err != nil {
 					log.Println("Seller user not found for wallet:", sellerLower)
-				} else {
-					var prevOwnership entity.LandOwnership
-					if err := db.Where("land_id = ? AND user_id = ? AND to_date IS NULL", landtitle.ID, sellerUser.ID).First(&prevOwnership).Error; err != nil {
-						log.Println("Previous LandOwnership not found for LandID and SellerID:", landtitle.ID, sellerUser.ID)
-					} else {
-						now := time.Now()
-						prevOwnership.ToDate = &now
-						if err := db.Save(&prevOwnership).Error; err != nil {
-							log.Println("Failed to update previous LandOwnership ToDate:", err)
-						} else {
-							log.Println("Previous LandOwnership ToDate updated for LandID:", landtitle.ID, "SellerID:", sellerUser.ID)
-						}
-					}
-				}
+				} //else {
+				// 	var prevOwnership entity.LandOwnership
+				// 	if err := db.Where("land_id = ? AND user_id = ? AND to_date IS NULL", landtitle.ID, sellerUser.ID).First(&prevOwnership).Error; err != nil {
+				// 		log.Println("Previous LandOwnership not found for LandID and SellerID:", landtitle.ID, sellerUser.ID)
+				// 	} else {
+				// 		now := time.Now()
+				// 		prevOwnership.ToDate = &now
+				// 		if err := db.Save(&prevOwnership).Error; err != nil {
+				// 			log.Println("Failed to update previous LandOwnership ToDate:", err)
+				// 		} else {
+				// 			log.Println("Previous LandOwnership ToDate updated for LandID:", landtitle.ID, "SellerID:", sellerUser.ID)
+				// 		}
+				// 	}
+				// }
 
 				// 4. Create new LandOwnership for buyer
 				//สร้างข้อมูลใหม่ ให้ เป็นเจ้าของปัจจุบันเป้นผู้ซื้อ 
-				newOwnership := entity.LandOwnership{
-					UserID:   buyerUser.ID,
-					LandID:   landtitle.ID,
-					TxHash:   vLog.TxHash.Hex(),
-					FromDate: time.Now(),
-					ToDate:   nil,
-				}
-				if err := db.Create(&newOwnership).Error; err != nil {
-					log.Println("Failed to create new LandOwnership for buyer:", err)
-				} else {
-					log.Println("New LandOwnership created for buyer UserID:", buyerUser.ID, "LandID:", landtitle.ID)
-				}
+				// newOwnership := entity.LandOwnership{
+				// 	UserID:   buyerUser.ID,
+				// 	LandID:   landtitle.ID,
+				// 	TxHash:   vLog.TxHash.Hex(),
+				// 	FromDate: time.Now(),
+				// 	ToDate:   nil,
+				// }
+				// if err := db.Create(&newOwnership).Error; err != nil {
+				// 	log.Println("Failed to create new LandOwnership for buyer:", err)
+				// } else {
+				// 	log.Println("New LandOwnership created for buyer UserID:", buyerUser.ID, "LandID:", landtitle.ID)
+				// }
 
 				// 5. Update Transaction for this purchase (TypeTransactionID=4)
 				var transaction entity.Transaction
