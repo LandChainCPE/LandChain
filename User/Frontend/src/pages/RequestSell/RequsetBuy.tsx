@@ -81,8 +81,12 @@ const RequestBuyPage = () => {
         setRequests(reqRes);
         setDeleteData(delData);
 
-        const tokenIDs = reqRes.map((r: { Landtitle: { TokenID: any; }; }) => r.Landtitle.TokenID);
-        const metaRes = await GetMultipleLandMetadataHandler(tokenIDs);
+        // Collect TokenIDs defensively (some records might have missing Landtitle)
+        const tokenIDs = reqRes
+          .map((r: { Landtitle?: { TokenID?: any } }) => r?.Landtitle?.TokenID)
+          .filter((id: any): id is number => typeof id === "number" && !isNaN(id));
+
+        const metaRes = tokenIDs.length > 0 ? await GetMultipleLandMetadataHandler(tokenIDs) : [];
 
         // สร้าง Map จาก TokenID → parsed MetaFields
         const map = new Map<number, Record<string, string>>();
@@ -127,19 +131,25 @@ const RequestBuyPage = () => {
   // Filter + Search
   const filterData = (data: RequestBuySellType[]) => {
     return data.filter((item) => {
-      const tokenID = item.Landtitle.TokenID.toString();
-      const sellerName = `${item.Seller.Firstname} ${item.Seller.Lastname}`;
-      const buyerName = item.Buyer.Firstname ?? "";
-      const status = item.Status ?? "pending";
-      const meta = metadataMap.get(item.Landtitle.TokenID);
+      const rawTokenId = item?.Landtitle?.TokenID;
+      const tokenID = rawTokenId != null ? rawTokenId.toString() : ""; // prevent calling toString on null
+
+      const sellerFirst = item?.Seller?.Firstname || "";
+      const sellerLast = item?.Seller?.Lastname || "";
+      const sellerName = `${sellerFirst} ${sellerLast}`.trim();
+      const buyerName = item?.Buyer?.Firstname || "";
+      const status = item?.Status ?? "pending";
+      const meta = rawTokenId != null ? metadataMap.get(rawTokenId) : undefined;
 
       const metaValues = Object.values(meta ?? {}).join(" ").toLowerCase();
+      const searchLower = searchTerm.toLowerCase();
 
       const matchSearch =
-        tokenID.includes(searchTerm) ||
-        sellerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        buyerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        metaValues.includes(searchTerm.toLowerCase());
+        (!searchTerm ||
+          tokenID.includes(searchTerm) ||
+          sellerName.toLowerCase().includes(searchLower) ||
+          buyerName.toLowerCase().includes(searchLower) ||
+          metaValues.includes(searchLower));
 
       const matchStatus = filterStatus === "all" ? true : status === filterStatus;
 
@@ -158,8 +168,8 @@ const RequestBuyPage = () => {
   }
 
   const renderCard = (item: RequestBuySellType, isDeleted = false) => {
-    const meta = metadataMap.get(item.Landtitle.TokenID);
-    const status = isDeleted ? "rejected" : item.Status ?? "pending";
+  const meta = item?.Landtitle?.TokenID != null ? metadataMap.get(item.Landtitle.TokenID) : undefined;
+  const status = isDeleted ? "rejected" : item?.Status ?? "pending";
 
     return (
       <div className="request-card-horizontal" key={item.ID}>
@@ -177,7 +187,7 @@ const RequestBuyPage = () => {
         <div className="land-section">
           <div className="land-info-horizontal">
             <div className="token-info">
-              <strong>TokenID: {item.Landtitle.TokenID}</strong>
+              <strong>TokenID: {item?.Landtitle?.TokenID ?? '-'}</strong>
             </div>
             {meta && (
               <div className="land-details-horizontal">
@@ -214,7 +224,7 @@ const RequestBuyPage = () => {
         <div className="owner-section">
           <div className="owner-info-horizontal">
             <div className="owner-title">เจ้าของ</div>
-            <div className="owner-name">{item.Seller.Firstname} {item.Seller.Lastname}</div>
+            <div className="owner-name">{item?.Seller?.Firstname || ''} {item?.Seller?.Lastname || ''}</div>
           </div>
         </div>
 

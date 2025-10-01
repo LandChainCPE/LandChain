@@ -22,11 +22,7 @@ func main() {
 	}
 
 	config.ConnectDatabase()
-
-
-	config.SetupDatabase()
-
-
+	// config.SetupDatabase()
 	db := config.DB()
 	r := gin.Default()
 	hub := websocket.NewHub(db)

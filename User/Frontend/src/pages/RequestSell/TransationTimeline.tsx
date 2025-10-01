@@ -260,16 +260,16 @@ const handleSetsaleinfo = async (transaction: any) => {
 
     console.log("Signature from backend:", signature);
         console.log("Wei from backend:", wei);
-    if (!tokenId) {
-      Swal.fire({
-                      icon: "error",
-                      title: "เซ็นต์ข้อมูลล้มเหลว",
-                      text: "โปรดกดอัพเดทข้อมูล",
-                      confirmButtonColor: "#e74c3c",
-                      });
-      setProcessingTxId(null);
-      return;
-    }
+    // if (!tokenId) {
+    //   Swal.fire({
+    //                   icon: "error",
+    //                   title: "เซ็นต์ข้อมูลล้มเหลว",
+    //                   text: "โปรดกดอัพเดทข้อมูล",
+    //                   confirmButtonColor: "#e74c3c",
+    //                   });
+    //   setProcessingTxId(null);
+    //   return;
+    // }
 
     console.log("=== Debug Sale Info ===");
     console.log("TokenID:", tokenId);
