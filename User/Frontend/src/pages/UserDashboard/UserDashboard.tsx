@@ -162,6 +162,7 @@ export default function UserProfilePage() {
       } else {
         setUserError("ไม่พบข้อมูลผู้ใช้");
       }
+       //@ts-ignore
     }).catch((error) => {
       setUserError("เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้");
     }).finally(() => {
@@ -184,11 +185,13 @@ export default function UserProfilePage() {
 
   // ---------- Titles stats ----------
   // State สำหรับจำนวนที่ดินจาก backend
+   //@ts-ignore
   const [totalLandCount, setTotalLandCount] = useState<number>(0);
   const [userId, setuserId] = useState<number>(0);
 
   useEffect(() => {
     const UserVerificationUpdate = async () => {
+      //@ts-ignore
       let { response, result } = await CheckUserVerificationUpdate();
       // console.log(response);
       console.log(result);

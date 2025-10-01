@@ -272,6 +272,7 @@ const SellPost = () => {
           );
 
           console.log("User land metadata (mapped):", allMetadata);
+          console.log("Land data: ", landMetadata);
           setLandMetadata(allMetadata);
 
           // debug: log ค่าภายใน meta
@@ -310,6 +311,7 @@ const handleSelectLand = async (tokenID: string) => {
     // หาข้อมูล metadata ของโฉนดที่เลือก
     const selectedLandData = landMetadata.find(land => land.tokenID === tokenID);
 
+    console.log("Land data: ", landMetadata);
     // Debug: ดูข้อมูลใน console
     console.log("🔍 Selected Token ID:", tokenID);
     console.log("📋 Selected Land Data:", selectedLandData);
@@ -320,7 +322,7 @@ const handleSelectLand = async (tokenID: string) => {
     if (selectedLandData?.meta) {
       const provinceName = selectedLandData.meta["Province"] || "";
       const districtName = selectedLandData.meta["District"] || "";
-      const subdistrictName = selectedLandData.meta["Subdistrict"] || "";
+      const subdistrictName = selectedLandData.meta["Subdistrict"]|| "";
 
       console.log("🎯 Found location data:", { provinceName, districtName, subdistrictName });
 
@@ -1305,8 +1307,8 @@ useEffect(() => {
 
                                   <div className="land-tokens-container">
                                     {landMetadata.map((land: any, index: number) => {
-                                      const deedNo = land.meta?.["TitleDeedNumber"] || land.meta?.["TitleDeedNumber"] || "-";
-                                      const m = land.meta || {};
+                                       const m = land.meta || {};
+                                      const deedNo = m["TitleDeedNumber"] || land.meta?.["TitleDeedNumber"] || "-";
                                       const map = m["SurveyNumber"] ?? "-";
                                       const landNo = m["LandNumber"] ?? "-";
                                       const surveyPage = m["SurveyPage"] ?? "-";
@@ -1889,7 +1891,7 @@ useEffect(() => {
                 value={formData.province_id}
                 onChange={handleChange}
                 style={styles.input}
-                disabled={loadingP}
+                disabled={loadingP  || !!formData.province_id}
               >
                 <option value="">
                   {loadingP ? "กำลังโหลด..." : "-- เลือกจังหวัด --"}
@@ -1917,7 +1919,7 @@ useEffect(() => {
                 value={formData.district_id}
                 onChange={handleChange}
                 style={styles.input}
-                disabled={!formData.province_id || loadingD}
+                disabled={!formData.province_id || loadingD || !!formData.district_id}
               >
                 <option value="">
                   {loadingD ? "กำลังโหลด..." : "-- เลือกอำเภอ --"}
@@ -1945,12 +1947,12 @@ useEffect(() => {
                 value={formData.subdistrict_id}
                 onChange={handleChange}
                 style={styles.input}
-                disabled={!formData.district_id || loadingS}
+                disabled={!formData.district_id || loadingS || !!formData.subdistrict_id}
               >
                 <option value="">
                   {loadingS ? "กำลังโหลด..." : "-- เลือกตำบล --"}
                 </option>
-                {subdistricts.map((s) => (
+                {subdistricts.map((s) => (  
                   <option key={s.ID} value={String(s.ID)}>
                     {s.name_th}
                   </option>

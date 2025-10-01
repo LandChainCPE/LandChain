@@ -246,7 +246,7 @@ func VerifyLandtitleID(c *gin.Context) {
 		", Rai:" + fmt.Sprint(land.Rai) +
 		", Ngan:" + fmt.Sprint(land.Ngan) +
 		", SqWa:" + fmt.Sprint(land.SquareWa) +
-		", Subdistrict:" + land.District.NameTH +
+		", Subdistrict:" + land.Subdistrict.NameTH +
 		", District:" + land.District.NameTH +
 		", Province:" + land.Province.NameTH +
 		", UUID:" + uuidStr
