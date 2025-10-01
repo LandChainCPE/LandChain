@@ -22,7 +22,11 @@ func main() {
 	}
 
 	config.ConnectDatabase()
-	// config.SetupDatabase()
+
+
+	config.SetupDatabase()
+
+
 	db := config.DB()
 	r := gin.Default()
 	hub := websocket.NewHub(db)
@@ -31,17 +35,19 @@ func main() {
 	controller.InitContract()
 	r.Use(CORSMiddleware())
 	controller.StartCron()
+	controller.StartCron2()
+	// controller.CheckLandVerificationUpdate()
 
 	// เริ่มต้น Scheduler สำหรับลบการจองที่หมดอายุ
 	controller.StartBookingCleanupScheduler()
 
 	//อ่านค่าการตอบกลับจาก Smartcontract (ควรใช้ go routine)
-	go controller.ListenSmartContractEvents()    //ทั้ง Auto ทั้งมือ 
+	// go controller.ListenSmartContractEvents()    //ทั้ง Auto ทั้งมือ 
 
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
-
+	
 	// เพิ่ม/ปรับปรุง API จาก managepost.go
 	r.PUT("/managepost/update/:post_id", controller.UpdatePost)
 	r.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
@@ -238,6 +244,9 @@ func main() {
 		authorized.GET("/landtitles/:userId", controller.GetLandtitlesByUser) //ดึงข้อมูล landtitles
 		// authorized.GET("/land_verification/:userid", controller.GetLandVerificationByUserID) //ดึงข้อมูล land_verification
 		authorized.GET("/user/verify", controller.CheckVerify)
+
+		//อรรถ
+		authorized.GET("checkuserverificationupdate", controller.CheckUserVerificationUpdate)
 	}
 
 	r.GET("/ws/notification/:userID", controller.NotificationWS)

@@ -47,6 +47,18 @@ func StartCron() *cron.Cron {
 	c.AddFunc("@every 10m", func() {
 		fmt.Println("Checking expired transactions at", time.Now())
 		CheckExpiredTransactions()
+		
+	})
+	c.Start()
+	return c
+}
+
+func StartCron2() *cron.Cron {
+	c := cron.New()
+	// ทุก 10 นาที
+	c.AddFunc("@every 5s", func() {
+		fmt.Println("Checking expired transactions at", time.Now())
+		CheckLandVerificationUpdate()
 	})
 	c.Start()
 	return c

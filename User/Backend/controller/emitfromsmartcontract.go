@@ -89,7 +89,8 @@ func ListenSmartContractEvents() {
 				// 2. จะได้ TokenId มากที่สุดที่ Onchain(ในฐานข้อมูลLocal)   
 				// 3. ทำการ TokenID + 1  แล้วนำไปหาที่ GetLandMetadata  ข้อมูลที่ตอบกลับมา จะมี UUID อยู่ 
 				// 4. ทำการหาว่า  uuid ตรงกับ Landtitleไหน  ทำการ ใส่ TokenID + 1 เข้าไป  และ LandVerification ที่ตรงกับ Landtitle  ปรับ Status_onchain = true
- 				// 5. จบลูป  ทำการวนซ้ำ ทำการ TokenID(เดิม) + 1   แล้วค้นหาใหม่แบบนี้ไปเรื่อยๆ
+ 				// 5. จบลูป  ทำการวนซ้ำ ทำการ TokenID(เดิม) + 1   แล้วค้นหาใหม่แบบนี้ไปเรื่อยๆือ
+				//จนกว่าจะเจอ  Err  หรือ
 
 				// Extract UUID from metaFields
 				uuid := ""

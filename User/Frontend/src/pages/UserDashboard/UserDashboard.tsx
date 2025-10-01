@@ -1,7 +1,7 @@
 import "./UserDashboard.css";
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { GetLandtitlesByUser } from "../../service/https/garfield";
+import { GetLandtitlesByUser, CheckUserVerificationUpdate } from "../../service/https/garfield";
 import { GetInfoUserByWalletID, CheckVerify } from "../../service/https/bam/bam";
 import { UserCheck, CheckSquare } from "react-feather"; // Assuming 'react-feather' contains the User and Home icons
 import { GetLandTitleInfoByWallet, GetLandMetadataByToken } from "../../service/https/bam/bam";
@@ -188,6 +188,12 @@ export default function UserProfilePage() {
   const [userId, setuserId] = useState<number>(0);
 
   useEffect(() => {
+    const UserVerificationUpdate = async () => {
+      let { response, result } = await CheckUserVerificationUpdate();
+      // console.log(response);
+      console.log(result);
+    }
+
     const fetchUserId = async () => {
       const result = await GetUserIDByWalletAddress();
       setuserId(result.user_id)
@@ -205,6 +211,7 @@ export default function UserProfilePage() {
         setTotalLandCount(0);
       }
     }
+    UserVerificationUpdate();
     fetchUserId();
   }, []);
 

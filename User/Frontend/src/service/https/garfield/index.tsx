@@ -175,6 +175,20 @@ async function GetLandtitlesByUser(userId: string) {
 }
 
 
+
+// อรรถ
+async function CheckUserVerificationUpdate() {
+    const requestOptions = {
+        method: "GET",
+        headers: getAuthHeaders(),
+    };
+
+    let response = await fetch(`${apiUrl}/checkuserverificationupdate`, requestOptions)
+    const result = await response.json();
+    return { response, result };
+};
+
+
 export {
   getAuthHeaders,
   CreateAccount,
@@ -187,4 +201,5 @@ export {
   GetSubdistrict,
   GetUserinfoByID,
   GetLandtitlesByUser,
+  CheckUserVerificationUpdate
 };
