@@ -51,6 +51,27 @@
   }
 }
 
+@keyframes bounce-slow {
+  0%, 100% { 
+    transform: translateY(0) rotate(0deg); 
+  }
+  50% { 
+    transform: translateY(-10px) rotate(2deg); 
+  }
+}
+
+/* Subtle floating for blockchain square blocks */
+@keyframes block-float {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.9; }
+  50% { transform: translateY(-8px) scale(1.02); opacity: 1; }
+}
+
+/* Slow rotation for ring clusters */
+@keyframes rotate-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.6s ease-out forwards;
 }
@@ -65,6 +86,19 @@
 
 .animate-bounce-subtle {
   animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 3s ease-in-out infinite;
+}
+
+/* Utility classes for new animations */
+.animate-blockFloat {
+  animation: block-float 3.2s ease-in-out infinite;
+}
+
+.animate-rotateSlow {
+  animation: rotate-slow 30s linear infinite;
 }
 
 /* Custom gradient text */

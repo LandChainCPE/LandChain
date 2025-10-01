@@ -1,23 +1,55 @@
-import { User, FileText, Shield, CheckCircle, Building2, Search, ListChecks, Users, FileCheck2 } from "lucide-react";
+import { User, FileText, CheckCircle, Building2, Search, Users, FileCheck2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Loader from "../component/third-patry/Loader";
+import { GetCountDataDashboardOnchain } from "../service/https/aut/https";
 
-// Mock data, replace with real API call
+// Fetch real dashboard data from API
 const fetchDashboardData = async () => {
-  // ตัวอย่างข้อมูล mock
-  return {
-    totalUsers: 128,
-    totalLandVerifications: 54,
-    totalRequests: 32,
-    totalOnChain: 21,
-    recentActivities: [
-      { type: "register", user: "สมชาย ใจดี", time: "09:10", detail: "ลงทะเบียนผู้ใช้ใหม่", status: "success" },
-      { type: "verify", user: "สมหญิง สายใจ", time: "09:15", detail: "ตรวจสอบโฉนด #7543031", status: "processing" },
-      { type: "onchain", user: "สมปอง ทองดี", time: "09:20", detail: "นำโฉนดขึ้น Blockchain", status: "completed" },
-      { type: "register", user: "John Doe", time: "09:25", detail: "ลงทะเบียนผู้ใช้ใหม่", status: "success" },
-      { type: "verify", user: "สมศรี ดีใจ", time: "09:30", detail: "ตรวจสอบโฉนด #7543045", status: "pending" },
-    ],
-  };
+  try {
+    const response = await GetCountDataDashboardOnchain();
+    console.log("Dashboard API response:", response);
+    
+    if (response && response.result) {
+      const {
+        verified_users_count,
+        verified_landtitles_count,
+        land_verification_onchain_count,
+        user_verification_onchain_count
+      } = response.result;
+
+      return {
+        totalUsers: verified_users_count,
+        totalLandVerifications: verified_landtitles_count,
+        totalOnChain: land_verification_onchain_count + user_verification_onchain_count,
+        recentActivities: [
+          { type: "register", user: "สมชาย ใจดี", time: "09:10", detail: "ลงทะเบียนผู้ใช้ใหม่", status: "success" },
+          { type: "verify", user: "สมหญิง สายใจ", time: "09:15", detail: "ตรวจสอบโฉนด #7543031", status: "processing" },
+          { type: "onchain", user: "สมปอง ทองดี", time: "09:20", detail: "นำโฉนดขึ้น Blockchain", status: "completed" },
+          { type: "register", user: "John Doe", time: "09:25", detail: "ลงทะเบียนผู้ใช้ใหม่", status: "success" },
+          { type: "verify", user: "สมศรี ดีใจ", time: "09:30", detail: "ตรวจสอบโฉนด #7543045", status: "pending" },
+        ],
+      };
+    }
+    
+    // Fallback to mock data if API fails
+    return {
+      totalUsers: 0,
+      totalLandVerifications: 0,
+      totalRequests: 0,
+      totalOnChain: 0,
+      recentActivities: [],
+    };
+  } catch (error) {
+    console.error("Error fetching dashboard data:", error);
+    // Return empty data on error
+    return {
+      totalUsers: 0,
+      totalLandVerifications: 0,
+      totalRequests: 0,
+      totalOnChain: 0,
+      recentActivities: [],
+    };
+  }
 };
 
 function MainDashboard() {
@@ -28,8 +60,10 @@ function MainDashboard() {
     const fetchData = async () => {
       const dashboard = await fetchDashboardData();
       setData(dashboard);
+      const list = await fetchDashboardlist();
       setLoading(false);
     };
+
     fetchData();
   }, []);
 
@@ -38,149 +72,231 @@ function MainDashboard() {
   }
 
   return (
-    <>
-      {/* Enhanced Header with Gradient */}
-      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 shadow-xl mb-8 -mx-4 lg:-mx-8 -mt-4 lg:-mt-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-8">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                <Building2 className="h-10 w-10 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-white">กรมที่ดิน</h1>
-                <p className="text-blue-100 text-lg font-medium">LandChain Dashboard</p>
-                <p className="text-blue-200 text-sm">ระบบจัดการโฉนดที่ดินดิจิทัล</p>
-              </div>
+
+    <div className="min-h-screen bg-gradient-to-br from-blue-200/40 via-blue-100/30 to-indigo-200/40 p-3 sm:p-4 md:p-6 relative overflow-hidden">
+      {/* Login-inspired Background Elements (Lighter Version) */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Blockchain Grid Pattern */}
+        <div 
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage: 
+              `linear-gradient(to right, rgba(59,130,246,0.3) 1px, transparent 1px),
+               linear-gradient(to bottom, rgba(59,130,246,0.3) 1px, transparent 1px)`,
+            backgroundSize: '50px 50px'
+          }}
+        />
+        
+        {/* Blockchain Square Clusters (Lighter) */}
+        <div className="absolute inset-0 pointer-events-none select-none">
+          {/* Cluster 1 */}
+          <div className="absolute top-24 left-16 flex flex-col space-y-2 animate-fadeIn opacity-20" style={{animationDelay:'0.2s'}}>
+            <div className="flex space-x-2">
+              <span className="block w-4 h-4 bg-white/15 border border-blue-300/20 rounded-sm backdrop-blur-sm animate-pulse"></span>
+              <span className="block w-4 h-4 bg-blue-400/15 border border-white/15 rounded-sm animate-pulse" style={{animationDelay:'0.4s'}}></span>
+              <span className="block w-4 h-4 bg-white/10 border border-blue-300/15 rounded-sm animate-pulse" style={{animationDelay:'0.8s'}}></span>
             </div>
-            <div className="flex items-center space-x-6">
-              <div className="text-right text-white">
-                <div className="text-sm text-blue-200">วันที่</div>
-                <div className="text-lg font-semibold">{new Date().toLocaleDateString('th-TH')}</div>
-              </div>
-              <div className="flex items-center space-x-3 bg-white bg-opacity-20 text-white px-6 py-3 rounded-full border border-white border-opacity-30 backdrop-blur-sm">
-                <Shield className="w-5 h-5" />
-                <span className="font-medium">ระบบปลอดภัย</span>
-              </div>
+            <div className="flex space-x-2">
+              <span className="block w-4 h-4 bg-gradient-to-br from-white/20 to-blue-300/15 border border-white/20 rounded-sm animate-pulse" style={{animationDelay:'0.6s'}}></span>
+              <span className="block w-4 h-4 bg-white/8 border border-blue-200/15 rounded-sm animate-pulse" style={{animationDelay:'1s'}}></span>
+              <span className="block w-4 h-4 bg-blue-300/12 border border-white/15 rounded-sm animate-pulse" style={{animationDelay:'1.2s'}}></span>
             </div>
           </div>
+          
+          {/* Cluster 2 */}
+          <div className="absolute bottom-28 right-24 grid grid-cols-4 gap-2 animate-fadeIn opacity-15" style={{animationDelay:'0.5s'}}>
+            {Array.from({length:8}).map((_,i)=>(
+              <span key={i} className="w-3 h-3 rounded-sm border backdrop-blur-sm animate-pulse"
+                style={{
+                  animationDelay: `${(i%4)*0.25}s`,
+                  background: i%3===0 ? 'rgba(255,255,255,0.08)' : 'rgba(59,130,246,0.10)',
+                  borderColor: 'rgba(59,130,246,0.15)'
+                }}
+              />
+            ))}
+          </div>
+          
+          {/* Cluster 3 diagonal chain */}
+          <div className="absolute top-1/3 right-1/3 flex flex-col space-y-3 animate-fadeIn opacity-12" style={{animationDelay:'0.8s'}}>
+            {Array.from({length:4}).map((_,i)=>(
+              <div key={i} className="flex space-x-3" style={{transform:`translateX(${i*6}px)`}}>
+                <span className="w-3 h-3 rounded-sm border border-blue-300/15 bg-white/10 animate-pulse" style={{animationDelay:`${i*0.2}s`}}></span>
+                <span className="w-3 h-3 rounded-sm border border-blue-300/20 bg-blue-400/12 animate-pulse" style={{animationDelay:`${i*0.2+0.1}s`}}></span>
+              </div>
+            ))}
+          </div>
         </div>
+        
+        {/* Connecting Lines (Lighter) */}
+        <div className="absolute top-1/4 left-1/5 w-72 h-px bg-gradient-to-r from-transparent via-blue-300/25 to-transparent animate-pulse opacity-40"></div>
+        <div className="absolute top-1/2 right-1/4 w-60 h-px bg-gradient-to-l from-transparent via-blue-400/20 to-transparent animate-pulse opacity-30" style={{animationDelay: '1s'}}></div>
+        <div className="absolute bottom-1/3 left-1/3 w-64 h-px bg-gradient-to-r from-transparent via-blue-300/15 to-transparent animate-pulse opacity-25" style={{animationDelay: '2s'}}></div>
+        
+        {/* Blockchain Nodes (Lighter) */}
+        <div className="absolute top-32 right-40 opacity-25">
+          <div className="w-6 h-6 bg-blue-500/15 rounded-full border-2 border-blue-300/20 animate-pulse"></div>
+          <div className="absolute -top-1 -left-1 w-8 h-8 border border-blue-300/10 rounded-full animate-ping"></div>
+        </div>
+        <div className="absolute bottom-40 left-40 opacity-20">
+          <div className="w-5 h-5 bg-white/10 rounded-full border-2 border-blue-400/25 animate-pulse" style={{animationDelay: '1.5s'}}></div>
+          <div className="absolute -top-1 -left-1 w-7 h-7 border border-blue-300/15 rounded-full animate-ping" style={{animationDelay: '1.5s'}}></div>
+        </div>
+        <div className="absolute top-1/2 left-16 opacity-18">
+          <div className="w-7 h-7 bg-blue-600/12 rounded-full border-2 border-blue-300/18 animate-pulse" style={{animationDelay: '0.5s'}}></div>
+          <div className="absolute -top-1 -left-1 w-9 h-9 border border-blue-300/12 rounded-full animate-ping" style={{animationDelay: '0.5s'}}></div>
+        </div>
+        
+        {/* Connection Line */}
+        <div className="absolute top-24 left-1/2 transform -translate-x-1/2 opacity-20">
+          <div className="flex items-center space-x-4 text-blue-400/25 animate-fadeIn" style={{animationDelay: '1s'}}>
+            <div className="w-2 h-2 rounded-full bg-blue-400/20"></div>
+            <div className="w-16 h-0.5 bg-gradient-to-r from-blue-400/20 to-blue-300/15"></div>
+            <div className="w-2 h-2 rounded-full bg-blue-300/20"></div>
+            <div className="w-16 h-0.5 bg-gradient-to-r from-blue-300/15 to-blue-200/20"></div>
+            <div className="w-2 h-2 rounded-full bg-blue-200/25"></div>
+          </div>
+        </div>
+        
+        {/* Large Background Shapes (Much Lighter) */}
+        <div className="absolute -top-32 -right-32 w-96 h-96 bg-gradient-to-br from-blue-400/5 to-blue-600/3 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-gradient-to-tr from-blue-300/4 to-blue-400/6 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-blue-500/3 to-blue-700/4 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto">
-        {/* Enhanced Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-xl border border-gray-100 p-6 transform hover:scale-105 transition-all duration-300 hover:shadow-2xl overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-bl-full opacity-10"></div>
-            <div className="flex items-center space-x-4 relative z-10">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Users className="w-7 h-7 text-white" />
+      <div className="max-w-7xl mx-auto relative z-10 px-2 sm:px-4 lg:px-0">
+        {/* Header Section */}
+        <div className="mb-6 sm:mb-8 animate-fadeIn">
+          <div className="flex flex-col sm:flex-row sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+            <div className="flex items-center">
+              <div className="relative">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Building2 className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
               </div>
-              <div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">{data.totalUsers}</div>
-                <div className="text-gray-600 font-medium">ผู้ใช้ทั้งหมด</div>
-                <div className="text-blue-600 text-sm font-medium">+12% จากเดือนที่แล้ว</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-xl border border-gray-100 p-6 transform hover:scale-105 transition-all duration-300 hover:shadow-2xl overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-bl-full opacity-10"></div>
-            <div className="flex items-center space-x-4 relative z-10">
-              <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
-                <FileCheck2 className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">{data.totalLandVerifications}</div>
-                <div className="text-gray-600 font-medium">ตรวจสอบโฉนด</div>
-                <div className="text-green-600 text-sm font-medium">+8% จากเดือนที่แล้ว</div>
+              <div className="ml-3 sm:ml-4">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                  กรมที่ดิน Dashboard
+                </h1>
+                <p className="text-gray-600 text-sm sm:text-base lg:text-lg font-medium">LandChain Blockchain Management System</p>
               </div>
             </div>
           </div>
-
-          <div className="bg-white rounded-xl shadow-xl border border-gray-100 p-6 transform hover:scale-105 transition-all duration-300 hover:shadow-2xl overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-bl-full opacity-10"></div>
-            <div className="flex items-center space-x-4 relative z-10">
-              <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
-                <ListChecks className="w-7 h-7 text-white" />
+          
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+              <div className="flex items-center">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
+                  <Users className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                </div>
+                <div className="ml-3 sm:ml-5 flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wider truncate">ลงทะเบียนผู้ใช้ไปแล้ว</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
+                    {data.totalUsers}
+                  </p>
+                  <p className="text-xs text-blue-600 font-medium mt-1 hidden sm:block">ตรวจสอบข้อมูลผู้ใช้ทั้งหมด</p>
+                </div>
               </div>
-              <div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">{data.totalRequests}</div>
-                <div className="text-gray-600 font-medium">คำขอรอดำเนินการ</div>
-                <div className="text-amber-600 text-sm font-medium">รอการอนุมัติ</div>
-              </div>
+              <div className="mt-3 sm:mt-4 h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
             </div>
-          </div>
 
-          <div className="bg-white rounded-xl shadow-xl border border-gray-100 p-6 transform hover:scale-105 transition-all duration-300 hover:shadow-2xl overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-400 to-purple-600 rounded-bl-full opacity-10"></div>
-            <div className="flex items-center space-x-4 relative z-10">
-              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <CheckCircle className="w-7 h-7 text-white" />
+            <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+              <div className="flex items-center">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
+                  <FileCheck2 className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                </div>
+                <div className="ml-3 sm:ml-5 flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wider truncate">ตรวจสอบโฉนดไปแล้ว</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-800 group-hover:text-green-600 transition-colors duration-300">
+                    {data.totalLandVerifications}
+                  </p>
+                  <p className="text-xs text-green-600 font-medium mt-1 hidden sm:block">รายการที่ตรวจสอบแล้ว</p>
+                </div>
               </div>
-              <div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">{data.totalOnChain}</div>
-                <div className="text-gray-600 font-medium">นำขึ้น Blockchain</div>
-                <div className="text-purple-600 text-sm font-medium">เสร็จสมบูรณ์</div>
+              <div className="mt-3 sm:mt-4 h-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
+            </div>
+
+            <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+              <div className="flex items-center">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
+                  <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                </div>
+                <div className="ml-3 sm:ml-5 flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wider truncate">นำขึ้น Blockchain</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-800 group-hover:text-purple-600 transition-colors duration-300">
+                    {data.totalOnChain}
+                  </p>
+                  <p className="text-xs text-purple-600 font-medium mt-1 hidden sm:block">เสร็จสมบูรณ์</p>
+                </div>
               </div>
+              <div className="mt-3 sm:mt-4 h-1 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
             </div>
           </div>
         </div>
 
-        {/* Enhanced Recent Activities */}
-        <div className="bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden">
-          <div className="bg-gradient-to-r from-slate-600 to-slate-700 px-6 py-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-white" />
+        {/* Recent Activities Section */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden animate-fadeIn">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+              <div className="flex items-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-slate-600 to-slate-700 rounded-lg flex items-center justify-center mr-3 sm:mr-4">
+                  <FileText className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">กิจกรรมล่าสุด</h2>
-                  <p className="text-slate-200 text-sm">Recent System Activities</p>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-800">กิจกรรมล่าสุด</h3>
+                  <p className="text-gray-600 mt-1 text-sm sm:text-base">Recent System Activities</p>
                 </div>
               </div>
-              <div className="text-slate-200 text-sm">
-                อัพเดตล่าสุด: {new Date().toLocaleTimeString('th-TH')}
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                <div className="px-3 py-1 sm:px-4 sm:py-2 bg-blue-100 rounded-full">
+                  <span className="text-blue-700 font-semibold text-xs sm:text-sm">{data.recentActivities.length} กิจกรรม</span>
+                </div>
+                <div className="text-gray-600 text-xs sm:text-sm">
+                  อัพเดตล่าสุด: {new Date().toLocaleTimeString('th-TH')}
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="p-6">
-            <div className="space-y-4">
+          <div className="p-4 sm:p-6 lg:p-8">
+            <div className="space-y-3 sm:space-y-4">
               {data.recentActivities.map((activity: any, idx: number) => (
-                <div key={idx} className="group">
-                  <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-200 hover:bg-gray-50">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-md ${
-                        activity.type === "register" ? "bg-gradient-to-br from-blue-500 to-blue-600" :
-                        activity.type === "verify" ? "bg-gradient-to-br from-green-500 to-green-600" :
-                        "bg-gradient-to-br from-purple-500 to-purple-600"
-                      }`}>
-                        {activity.type === "register" && <User className="w-6 h-6 text-white" />}
-                        {activity.type === "verify" && <Search className="w-6 h-6 text-white" />}
-                        {activity.type === "onchain" && <CheckCircle className="w-6 h-6 text-white" />}
+                <div key={idx} className="group hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 rounded-xl p-3 sm:p-4 border border-gray-100 hover:border-gray-200 hover:shadow-lg">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                    <div className="flex items-start sm:items-center space-x-3 sm:space-x-4 flex-1">
+                      <div className="relative flex-shrink-0">
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300 ${
+                          activity.type === "register" ? "bg-gradient-to-r from-blue-500 to-blue-600" :
+                          activity.type === "verify" ? "bg-gradient-to-r from-green-500 to-green-600" :
+                          "bg-gradient-to-r from-purple-500 to-purple-600"
+                        }`}>
+                          {activity.type === "register" && <User className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
+                          {activity.type === "verify" && <Search className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
+                          {activity.type === "onchain" && <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
+                        </div>
+                        <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full border-2 border-white"></div>
                       </div>
-                      <div>
-                        <div className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-300 truncate">
                           {activity.user}
                         </div>
-                        <div className="text-gray-600 text-sm mb-1">{activity.detail}</div>
-                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                          activity.status === "success" ? "bg-green-100 text-green-700" :
-                          activity.status === "processing" ? "bg-blue-100 text-blue-700" :
-                          activity.status === "completed" ? "bg-purple-100 text-purple-700" :
-                          "bg-amber-100 text-amber-700"
+                        <div className="text-sm text-gray-600 mb-2 line-clamp-2">{activity.detail}</div>
+                        <span className={`px-3 py-1 sm:px-4 sm:py-2 inline-flex text-xs sm:text-sm leading-5 font-semibold rounded-full border transition-all duration-300 ${
+                          activity.status === "success" ? "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-200" :
+                          activity.status === "processing" ? "bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border-blue-200" :
+                          activity.status === "completed" ? "bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-800 border-purple-200" :
+                          "bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border-amber-200"
                         }`}>
                           {activity.status === "success" && "สำเร็จ"}
                           {activity.status === "processing" && "กำลังดำเนินการ"}
                           {activity.status === "completed" && "เสร็จสมบูรณ์"}
                           {activity.status === "pending" && "รอดำเนินการ"}
-                        </div>
+                        </span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-gray-500 text-sm font-mono bg-gray-100 px-3 py-1 rounded-lg">
+                    <div className="text-right sm:text-right flex-shrink-0">
+                      <div className="text-gray-500 text-xs sm:text-sm font-mono bg-gray-100 px-2 py-1 sm:px-3 sm:py-1 rounded-lg group-hover:bg-gray-200 transition-colors duration-300">
                         {activity.time}
                       </div>
                       <div className="text-gray-400 text-xs mt-1">เมื่อสักครู่</div>
@@ -191,65 +307,16 @@ function MainDashboard() {
             </div>
 
             {/* Load More Button */}
-            <div className="mt-6 text-center">
-              <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
-                ดูกิจกรรมทั้งหมด
+            <div className="mt-6 sm:mt-8 text-center">
+              <button className="group inline-flex items-center px-6 py-2 sm:px-8 sm:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                <span>ดูกิจกรรมทั้งหมด</span>
+                <Search className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
               </button>
             </div>
           </div>
         </div>
-
-        {/* Additional System Info */}
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
-            <div className="flex items-start space-x-4">
-              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-blue-900 mb-2">ระบบความปลอดภัย</h3>
-                <p className="text-blue-700 text-sm mb-3">
-                  ระบบของเราใช้เทคโนโลยี Blockchain เพื่อรับประกันความปลอดภัยและความโปร่งใสของข้อมูลโฉนดที่ดิน
-                </p>
-                <div className="flex items-center space-x-4 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-blue-700">เชื่อมต่อ Blockchain</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-blue-700">ระบบเข้ารหัส SSL</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">สถานะระบบ</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600 text-sm">Server Status:</span>
-                  <span className="text-green-600 font-medium text-sm">Online</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600 text-sm">Database:</span>
-                  <span className="text-green-600 font-medium text-sm">Connected</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600 text-sm">Blockchain:</span>
-                  <span className="text-green-600 font-medium text-sm">Synced</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-    </>
+    </div>
   );
 }
 

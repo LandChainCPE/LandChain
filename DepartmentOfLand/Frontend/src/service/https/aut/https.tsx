@@ -98,6 +98,20 @@ async function DepartmentOfLandVerifyTransaction(transaction_id: number) {
 };
 
 
+async function GetCountDataDashboardOnchain() {
+    const requestOptions = {
+        method: "GET",
+        headers: getAuthHeaders(),
+    };
+
+    let response = await fetch(`${apiUrl}/getcountdatadashboardonchain`, requestOptions)
+    const result = await response.json();
+    console.log(response);
+    console.log(result);
+
+    return { result };
+};
+
 export {
     getQueueByDate,
     getDataUserForVerify,
@@ -105,5 +119,6 @@ export {
     VerifyWalletID,
     getAllLandData,
     getTransactionLand,
-    DepartmentOfLandVerifyTransaction
+    DepartmentOfLandVerifyTransaction,
+    GetCountDataDashboardOnchain
 }

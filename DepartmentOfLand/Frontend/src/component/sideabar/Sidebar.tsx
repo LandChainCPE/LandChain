@@ -7,6 +7,7 @@ import {
   HomeOutlined,
   SettingOutlined,
   FileTextOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./sidebar.css";
@@ -14,6 +15,15 @@ import "./sidebar.css";
 const Sidebar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // ลบข้อมูลการเข้าสู่ระบบ
+    sessionStorage.clear();
+    localStorage.clear();
+    
+    // นำทางกลับไปหน้า login
+    navigate("/login");
+  };
 
   const menus = [
     { label: "หน้าหลัก", icon: <HomeOutlined />, path: "/main" },
@@ -72,9 +82,15 @@ const Sidebar: React.FC = () => {
 
       {/* Footer */}
       <div className="sidebar-footer p-6 border-t border-gray-200">
-        <div className="footer-info text-center">
-          <p className="text-xs text-gray-600">© 2025 กรมที่ดิน</p>
-          <p className="text-xs text-gray-500">ระบบบล็อกเชน</p>
+        {/* Logout Button */}
+        <div className="logout-section mb-4">
+          <button
+            onClick={handleLogout}
+            className="logout-btn w-full flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-white bg-red-600 hover:bg-red-700 border border-red-500 hover:border-red-600 shadow-md hover:shadow-lg"
+          >
+            <LogoutOutlined className="text-lg" />
+            <span className="logout-label">ออกจากระบบ</span>
+          </button>
         </div>
       </div>
     </div>

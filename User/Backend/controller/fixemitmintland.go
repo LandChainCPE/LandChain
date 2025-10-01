@@ -27,12 +27,13 @@ func CheckLandVerificationUpdate() {
 
 	if maxTokenIDPtr == nil {
 		fmt.Printf("[INFO] MAX TokenID = NULL (ยังไม่มีข้อมูลในฐานข้อมูล)\n")
+		return
 	} else {
 		fmt.Printf("[DEBUG] MAX TokenID ในฐานข้อมูล = %d\n", *maxTokenIDPtr)
 	}
 
 	// 2. เตรียม TokenID ถัดไป (TokenID ที่มากที่สุด + 1)
-	nextTokenID := *maxTokenIDPtr + 1
+	nextTokenID := *maxTokenIDPtr + 1   
 	fmt.Printf("[DEBUG] เริ่มตรวจสอบที่ TokenID = %d\n", nextTokenID)
 
 	for {

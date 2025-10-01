@@ -7,7 +7,7 @@ const Layout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen flex">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -44,10 +44,8 @@ const Layout: React.FC = () => {
         </div>
 
         {/* Page content */}
-        <main className="flex-1 p-4 lg:p-8 overflow-auto">
-          <div className="max-w-7xl mx-auto">
-            <Outlet />
-          </div>
+        <main className="flex-1 overflow-auto">
+          <Outlet />
         </main>
       </div>
     </div>
