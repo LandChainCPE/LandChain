@@ -92,8 +92,8 @@ const Navbar = () => {
   const toggleMobileMenu = () => setShowMobileMenu(!showMobileMenu);
 
   const handleLogout = () => {
-    sessionStorage.removeItem("isLogin");
-    sessionStorage.removeItem("userID");
+    localStorage.clear();
+    sessionStorage.clear();
     window.location.href = "/";
   };
 

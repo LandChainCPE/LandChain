@@ -6,12 +6,12 @@ import (
 	"log"
 	"os"
 
-	"time"
+	// "time"
 
 	"encoding/csv"
 	"strconv"
 
-	"github.com/google/uuid"
+	// "github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -118,9 +118,19 @@ func SetupDatabase() {
 
 		RefRole := uint(1)
 		RefRole2 := uint(2)
-		db.Create(&entity.Users{Firstname: "Rattapon", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0555555555", Metamaskaddress: "0x81c7a15ae0b72cade82d428844cff477f6e364b5", RoleID: RefRole2}) // db.Create(&entity.Users{Name: "Aut", Email: "@goods", Phonenumber: "0912345679", Password: "Aut123456", Land: "ผหก5ป58ก", RoleID: RefRole})
-		db.Create(&entity.Users{Firstname: "Panachai", Lastname: "Potisuwan", Email: "Panachai@gmail.com", Phonenumber: "0555555554", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f4444", RoleID: RefRole})
-		db.Create(&entity.Users{Firstname: "Noth", Lastname: "Potisuwan", Email: "Noth@gmail.com", Phonenumber: "0555555556", Metamaskaddress: "0xBfa3668b4A0A4593904427F777C9343bBd5f6666", RoleID: RefRole})
+		
+		//Aut  Azure
+		db.Create(&entity.Users{Firstname: "RattaponChome", Lastname: "Phonthaisong", Email: "ponthaisongfc@gmail.com", Phonenumber: "0685231245", Metamaskaddress: "0x81c7a15ae0b72cade82d428844cff477f6e364b5", RoleID: RefRole2}) 
+		db.Create(&entity.Users{Firstname: "PanachaiBrave", Lastname: "Potisuwan", Email: "Panachai@gmail.com", Phonenumber: "0889741245", Metamaskaddress: "0xc3dce9c6953f9d64527f80e7682078b3643d6b2e", RoleID: RefRole})
+		db.Create(&entity.Users{Firstname: "NothEdge", Lastname: "Potisuwan", Email: "Noth@gmail.com", Phonenumber: "0657412369", Metamaskaddress: "0x29bb9d73db3255afe50e56ebc68b2198bfa43003", RoleID: RefRole})
+		db.Create(&entity.Users{Firstname: "TestFirefox", Lastname: "Suranaree", Email: "Suranaree@gmail.com", Phonenumber: "0998541236", Metamaskaddress: "0x49c5c43f7fda86522bbfceffba8c0dbc4700a129", RoleID: RefRole})
+
+		//Jo   LocalHost
+		// db.Create(&entity.Users{Firstname: "RattaponJChome", Lastname: "JPhonthaisong", Email: "Jponthaisongfc@gmail.com", Phonenumber: "0685231245", Metamaskaddress: "0x2ac553f505a5e05b1a61fe02efaed2a30036e233", RoleID: RefRole2}) 
+		// db.Create(&entity.Users{Firstname: "PanachaiJBrave", Lastname: "JPotisuwan", Email: "JPanachai@gmail.com", Phonenumber: "0889741245", Metamaskaddress: "0xf274e000d3c461dd7fc3e839579451c89a5d0d36", RoleID: RefRole})
+		// db.Create(&entity.Users{Firstname: "NothJEdge", Lastname: "JPotisuwan", Email: "JNoth@gmail.com", Phonenumber: "0657412369", Metamaskaddress: "0x89b08eb07278f2568a36e65cabd910ccb022ab1d", RoleID: RefRole})
+		//db.Create(&entity.Users{Firstname: "TestFirefox", Lastname: "Suranaree", Email: "Suranaree@gmail.com", Phonenumber: "0998541236", Metamaskaddress: "0xeb1ff86eeeb4d356dec18401cc5657f0a14d9c8c", RoleID: RefRole})
+
 
 		// //RefServiceType := uint(1)
 		// db.Create(&entity.Users{Name: "Jo", Password: "jo123456", Land: "12กท85", RoleID: RefRole,})
@@ -245,12 +255,12 @@ func SetupDatabase() {
 		db.Create(&entity.Time{Timework: "14:00 - 15:00", MaxCapacity: 5, BranchID: RefBranch})
 		db.Create(&entity.Time{Timework: "15:00 - 16:00", MaxCapacity: 5, BranchID: RefBranch})
 
-		RefTimeID := uint(1)
-		RefTimeID1 := uint(6)
-		RefTypeID := uint(2)
-		startTime := time.Date(2029, time.August, 6, 9, 0, 0, 0, time.UTC)
-		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID, UserID: RefTimeID, BranchID: RefTimeID, ServiceTypeID: RefTypeID})
-		db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID1, UserID: RefTypeID, BranchID: RefTypeID, ServiceTypeID: RefTypeID})
+		// RefTimeID := uint(1)
+		// RefTimeID1 := uint(6)
+		// RefTypeID := uint(2)
+		// startTime := time.Date(2029, time.August, 6, 9, 0, 0, 0, time.UTC)
+		// db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID, UserID: RefTimeID, BranchID: RefTimeID, ServiceTypeID: RefTypeID})
+		// db.Create(&entity.Booking{DateBooking: startTime.Format("2006-01-02 15:04:05"), Status: "Process", TimeID: RefTimeID1, UserID: RefTypeID, BranchID: RefTypeID, ServiceTypeID: RefTypeID})
 
 		db.Create(&entity.Typetransaction{StatusNameTh: "รอผู้ซื้อ/ผู้ขายตกลง", StatusNameEn: "in_progress"})
 		db.Create(&entity.Typetransaction{StatusNameTh: "ถูกยกเลิกหรือหมดอายุ", StatusNameEn: "cancelled"})
@@ -262,93 +272,94 @@ func SetupDatabase() {
 		db.Create(&entity.Typetransaction{StatusNameTh: "เสร็จสิ้น", StatusNameEn: "completed"})
 
 		// // สร้าง LandProvinces
-		db.Create(&entity.Transaction{LandID: 1, BuyerID: 2, SellerID: 4, TypetransactionID: 1})
+		// db.Create(&entity.Transaction{LandID: 1, BuyerID: 2, SellerID: 4, TypetransactionID: 1})
 
-		db.Create(&entity.Landtitle{
-			TokenID:            nil,
-			IsLocked:           false,
-			SurveyNumber:       "5336 IV 8632",
-			LandNumber:         "๑๑",
-			SurveyPage:         "๙๔๖๑",
-			TitleDeedNumber:    "12345",
-			Volume:             "10",
-			Page:               "20",
-			Rai:                5,
-			Ngan:               2,
-			SquareWa:           50,
-			Status_verify:      false,
-			ProvinceID:         38,   // Replace with actual ProvinceID
-			DistrictID:         537,  // Replace with actual DistrictID
-			SubdistrictID:      4320, // Replace with actual SubdistrictID
-			LandVerificationID: nil,  // Replace with actual LandVerificationID if available
-			UserID:             1,    // Replace with actual UserID
-			Uuid:               uuid.New().String(),
-		})
+		// db.Create(&entity.Landtitle{
+		// 	TokenID:            nil,
+		// 	IsLocked:           false,
+		// 	SurveyNumber:       "5336 IV 8632",
+		// 	LandNumber:         "๑๑",
+		// 	SurveyPage:         "๙๔๖๑",
+		// 	TitleDeedNumber:    "12345",
+		// 	Volume:             "10",
+		// 	Page:               "20",
+		// 	Rai:                5,
+		// 	Ngan:               2,
+		// 	SquareWa:           50,
+		// 	Status_verify:      false,
+		// 	ProvinceID:         38,   // Replace with actual ProvinceID
+		// 	DistrictID:         537,  // Replace with actual DistrictID
+		// 	SubdistrictID:      4320, // Replace with actual SubdistrictID
+		// 	LandVerificationID: nil,  // Replace with actual LandVerificationID if available
+		// 	UserID:             1,    // Replace with actual UserID
+		// 	Uuid:               uuid.New().String(),
+		// })
 
-		db.Create(&entity.Landtitle{
-			TokenID:            nil,
-			IsLocked:           false,
-			SurveyNumber:       "5336 IV 8632",
-			LandNumber:         "๑๑",
-			SurveyPage:         "๙๔๖๑",
-			TitleDeedNumber:    "12345",
-			Volume:             "10",
-			Page:               "20",
-			Rai:                3,
-			Ngan:               2,
-			SquareWa:           50,
-			Status_verify:      false,
-			ProvinceID:         16,   // Replace with actual ProvinceID
-			DistrictID:         138,  // Replace with actual DistrictID
-			SubdistrictID:      1371, // Replace with actual SubdistrictID
-			LandVerificationID: nil,  // Replace with actual LandVerificationID if available
-			UserID:             1,    // Replace with actual UserID
-			Uuid:               uuid.New().String(),
-		})
+		// db.Create(&entity.Landtitle{
+		// 	TokenID:            nil,
+		// 	IsLocked:           false,
+		// 	SurveyNumber:       "231458 IS 8632",
+		// 	LandNumber:         "๓๕",
+		// 	SurveyPage:         "๔๓๒",
+		// 	TitleDeedNumber:    "5621",
+		// 	Volume:             "20",
+		// 	Page:               "20",
+		// 	Rai:                3,
+		// 	Ngan:               2,
+		// 	SquareWa:           50,
+		// 	Status_verify:      false,
+		// 	ProvinceID:         16,   // Replace with actual ProvinceID
+		// 	DistrictID:         138,  // Replace with actual DistrictID
+		// 	SubdistrictID:      1371, // Replace with actual SubdistrictID
+		// 	LandVerificationID: nil,  // Replace with actual LandVerificationID if available
+		// 	UserID:             1,    // Replace with actual UserID
+		// 	Uuid:               uuid.New().String(),
+		// })
 
-		db.Create(&entity.Landtitle{
-			TokenID:            nil,
-			IsLocked:           false,
-			SurveyNumber:       "5336 IV 8632",
-			LandNumber:         "๑๑",
-			SurveyPage:         "๙๔๖๑",
-			TitleDeedNumber:    "12345",
-			Volume:             "10",
-			Page:               "20",
-			Rai:                2,
-			Ngan:               2,
-			SquareWa:           50,
-			Status_verify:      false,
-			ProvinceID:         6,   // Replace with actual ProvinceID
-			DistrictID:         87,  // Replace with actual DistrictID
-			SubdistrictID:      568, // Replace with actual SubdistrictID
-			LandVerificationID: nil, // Replace with actual LandVerificationID if available
-			UserID:             1,   // Replace with actual UserID
-			Uuid:               uuid.New().String(),
-		})
+		// db.Create(&entity.Landtitle{
+		// 	TokenID:            nil,
+		// 	IsLocked:           false,
+		// 	SurveyNumber:       "25569 IV 23679",
+		// 	LandNumber:         "๑๑",
+		// 	SurveyPage:         "๙๔๖๑",
+		// 	TitleDeedNumber:    "12345",
+		// 	Volume:             "10",
+		// 	Page:               "20",
+		// 	Rai:                2,
+		// 	Ngan:               2,
+		// 	SquareWa:           50,
+		// 	Status_verify:      false,
+		// 	ProvinceID:         6,   // Replace with actual ProvinceID
+		// 	DistrictID:         87,  // Replace with actual DistrictID
+		// 	SubdistrictID:      568, // Replace with actual SubdistrictID
+		// 	LandVerificationID: nil, // Replace with actual LandVerificationID if available
+		// 	UserID:             1,   // Replace with actual UserID
+		// 	Uuid:               uuid.New().String(),
+		// })
 
-		db.Create(&entity.Landtitle{
-			TokenID:            nil,
-			IsLocked:           false,
-			SurveyNumber:       "5336 IV 8632",
-			LandNumber:         "๑๑",
-			SurveyPage:         "๙๔๖๑",
-			TitleDeedNumber:    "12345",
-			Volume:             "10",
-			Page:               "20",
-			Rai:                5,
-			Ngan:               2,
-			SquareWa:           50,
-			Status_verify:      false,
-			ProvinceID:         6,   // Replace with actual ProvinceID
-			DistrictID:         87,  // Replace with actual DistrictID
-			SubdistrictID:      568, // Replace with actual SubdistrictID
-			LandVerificationID: nil, // Replace with actual LandVerificationID if available
-			UserID:             1,   // Replace with actual UserID
-			Uuid:               uuid.New().String(),
-		})
+		// db.Create(&entity.Landtitle{
+		// 	TokenID:            nil,
+		// 	IsLocked:           false,
+		// 	SurveyNumber:       "5236 IV 8632",
+		// 	LandNumber:         "๑๑",
+		// 	SurveyPage:         "๙๔๖๑",
+		// 	TitleDeedNumber:    "12345",
+		// 	Volume:             "10",
+		// 	Page:               "20",
+		// 	Rai:                5,
+		// 	Ngan:               2,
+		// 	SquareWa:           50,
+		// 	Status_verify:      false,
+		// 	ProvinceID:         6,   // Replace with actual ProvinceID
+		// 	DistrictID:         87,  // Replace with actual DistrictID
+		// 	SubdistrictID:      568, // Replace with actual SubdistrictID
+		// 	LandVerificationID: nil, // Replace with actual LandVerificationID if available
+		// 	UserID:             1,   // Replace with actual UserID
+		// 	Uuid:               uuid.New().String(),
+		// })
 
-		db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 2, SellerID: 3})
+		//db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 2, SellerID: 3})
+
 		// db.Create(&entity.RequestBuySell{LandID: 1, BuyerID: 3, SellerID: 4, RequestBuySellTypeID: 1})
 		// db.Create(&entity.RequestBuySell{LandID: 2, BuyerID: 2, SellerID: 4, RequestBuySellTypeID: 1})
 		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
@@ -359,21 +370,21 @@ func SetupDatabase() {
 		db.Create(&entity.State{Name: "กำลังดำเนินการ", Color: "blue"})
 		db.Create(&entity.State{Name: "เสร็จสิ้น", Color: "green"})
 
-		log.Println("✅ States have been seeded successfully")
+		// log.Println("✅ States have been seeded successfully")
 
 		// ✅ Seed Petition
-		db.Create(&entity.Petition{
-			FirstName:   "มาลี",
-			LastName:    "มาดี",
-			Tel:         "0987654321",
-			Email:       "j@gmail.com",
-			Description: "โฉนดเก่าหาย",
-			Date:        "2025-07-31",
-			Topic:       "ขอคัดสำเนาโฉนด",
-			StateID:     1,
-			UserID:      1,
-		})
-		log.Println("✅ Petition created successfully")
+		// db.Create(&entity.Petition{
+		// 	FirstName:   "มาลี",
+		// 	LastName:    "มาดี",
+		// 	Tel:         "0987654321",
+		// 	Email:       "j@gmail.com",
+		// 	Description: "โฉนดเก่าหาย",
+		// 	Date:        "2025-07-31",
+		// 	Topic:       "ขอคัดสำเนาโฉนด",
+		// 	StateID:     1,
+		// 	UserID:      1,
+		// })
+		// log.Println("✅ Petition created successfully")
 
 		// ✅ Seed Tags
 		db.Create(&entity.Tag{Tag: "ติดถนน"})
@@ -383,7 +394,7 @@ func SetupDatabase() {
 		db.Create(&entity.Tag{Tag: "ใกล้MRT"})
 		db.Create(&entity.Tag{Tag: "ติดภูเขา"})
 
-		log.Println("✅ Tags have been inserted successfully")
+		// log.Println("✅ Tags have been inserted successfully")
 
 		// ✅ Seed Landpost
 		// post := entity.Landsalepost{
@@ -418,120 +429,120 @@ func SetupDatabase() {
 		// }
 		// log.Println("✅ Landpost with tags created successfully")
 
-		db.Create(&entity.Transaction{
-			Amount:         1500,
-			BuyerAccepted:  true,
-			SellerAccepted: true,
-			//MoneyChecked:           false,
-			LandDepartmentApproved: false,
-			//Expire:                 time.Now().AddDate(0, 0, 7),
-			TypetransactionID: 1,
-			BuyerID:           3,
-			SellerID:          2,
-			LandID:            2,
-			// TxHash:            nil,
-		})
+		// db.Create(&entity.Transaction{
+		// 	Amount:         1500,
+		// 	BuyerAccepted:  true,
+		// 	SellerAccepted: true,
+		// 	//MoneyChecked:           false,
+		// 	LandDepartmentApproved: false,
+		// 	//Expire:                 time.Now().AddDate(0, 0, 7),
+		// 	TypetransactionID: 1,
+		// 	BuyerID:           3,
+		// 	SellerID:          2,
+		// 	LandID:            2,
+		// 	// TxHash:            nil,
+		// })
 
-		db.Create(&entity.Transaction{
-			Amount:         15000,
-			BuyerAccepted:  true,
-			SellerAccepted: true,
-			//MoneyChecked:           true,
-			LandDepartmentApproved: true,
-			//Expire:                 time.Now().AddDate(0, 0, 7),
-			TypetransactionID: 2,
-			BuyerID:           2,
-			SellerID:          3,
-			LandID:            2,
-			// TxHash:            nil,
-		})
+		// db.Create(&entity.Transaction{
+		// 	Amount:         15000,
+		// 	BuyerAccepted:  true,
+		// 	SellerAccepted: true,
+		// 	//MoneyChecked:           true,
+		// 	LandDepartmentApproved: true,
+		// 	//Expire:                 time.Now().AddDate(0, 0, 7),
+		// 	TypetransactionID: 2,
+		// 	BuyerID:           2,
+		// 	SellerID:          3,
+		// 	LandID:            2,
+		// 	// TxHash:            nil,
+		// })
 
-		db.Create(&entity.Roomchat{User1ID: 3, User2ID: 1})
-		db.Create(&entity.Roomchat{User1ID: 3, User2ID: 2})
+		// db.Create(&entity.Roomchat{User1ID: 3, User2ID: 1})
+		// db.Create(&entity.Roomchat{User1ID: 3, User2ID: 2})
 
 		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 2, RequestBuySellTypeID: 1})
 		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 4, SellerID: 3, RequestBuySellTypeID: 1})
-		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 1, SellerID: 2})
-		db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 2, SellerID: 3})
+		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 1, SellerID: 2})
+		// db.Create(&entity.RequestBuySell{LandID: 3, BuyerID: 2, SellerID: 3})
 		// 🔸 สร้าง Roomchat หลังจากสร้าง Landsalepost แล้ว
-		createRoomchatsAndMessages()
+		// createRoomchatsAndMessages()
 	}
-
-	log.Println("✅ Database Migrated & Seeded Successfully")
-
-} // <<<<<<<<<<<<<< ปิดฟังก์ชัน SetupDatabase()
-// แยกการสร้าง Roomchat และ Message ออกมาเป็น function แยก
-func createRoomchatsAndMessages() {
-	var post entity.Landsalepost
-	if err := db.Where("num_of_land_title = ?", "180").First(&post).Error; err != nil {
-		log.Println("❌ Cannot find Landsalepost with num_of_land_title = 180")
-		return
-	}
-
-	// รายชื่อผู้ใช้ที่ต้องการสร้างห้องแชท
-	userIDs := []uint{2, 3}
-
-	for _, userID := range userIDs {
-		// เช็คว่ามี Roomchat นี้อยู่แล้วหรือยัง
-		var existingRoomchat entity.Roomchat
-		err := db.Where("landsalepost_id = ? AND user_id = ?", post.ID, userID).First(&existingRoomchat).Error
-		if err == nil {
-			log.Println("⚠️ Roomchat already exists for UserID:", userID)
-			continue
-		}
-
-		// สร้าง Roomchat ใหม่
-		// 	roomchat := entity.Roomchat{
-		// 		LandsalepostID: post.ID,
-		// 		UserID:         userID,
-		// 	}
-
-		// 	if err := db.Create(&roomchat).Error; err != nil {
-		// 		log.Println("❌ Failed to create Roomchat for user", userID, ":", err)
-		// 		continue
-		// 	}
-		// 	log.Println("✅ Created Roomchat for UserID:", userID, "RoomchatID:", roomchat.ID)
-
-		// 	// เพิ่มข้อความตัวอย่างในห้องแชท
-		// 	messages := []entity.Message{
-		// 		{
-		// 			Message:    "สวัสดีครับ สนใจที่ดินแปลงนี้ไหม?",
-		// 			Time:       time.Now(),
-		// 			RoomchatID: roomchat.ID,
-		// 		},
-		// 		{
-		// 			Message:    "สนใจครับ อยากทราบรายละเอียดเพิ่มเติม",
-		// 			Time:       time.Now().Add(1 * time.Minute),
-		// 			RoomchatID: roomchat.ID,
-		// 		},
-		// 		{
-		// 			Message:    "ที่ดินขนาด 5 ไร่ ราคา 2 ล้านบาทครับ",
-		// 			Time:       time.Now().Add(2 * time.Minute),
-		// 			RoomchatID: roomchat.ID,
-		// 		},
-		// 	}
-
-		// 	if err := db.Create(&messages).Error; err != nil {
-		// 		log.Println("❌ Failed to create messages for UserID:", userID, ":", err)
-		// 	} else {
-		// 		log.Println("✅ Created messages for UserID:", userID)
-		// 	}
-	}
-
-	log.Println("✅ Database Migrated & Seeded Successfully")
-
-	// ✅ Seed State (แยกจาก Users)
-	// var stateCount int64
-	// db.Model(&entity.State{}).Count(&stateCount)
-	// if stateCount == 0 {
-	// 	db.Create(&entity.State{Name: "รอตรวจสอบ", Color: "orange"})
-	// 	db.Create(&entity.State{Name: "กำลังดำเนินการ", Color: "blue"})
-	// 	db.Create(&entity.State{Name: "เสร็จสิ้น", Color: "green"})
-	// }
 
 	// log.Println("✅ Database Migrated & Seeded Successfully")
 
-}
+} // <<<<<<<<<<<<<< ปิดฟังก์ชัน SetupDatabase()
+// แยกการสร้าง Roomchat และ Message ออกมาเป็น function แยก
+// func createRoomchatsAndMessages() {
+// 	var post entity.Landsalepost
+// 	if err := db.Where("num_of_land_title = ?", "180").First(&post).Error; err != nil {
+// 		log.Println("❌ Cannot find Landsalepost with num_of_land_title = 180")
+// 		return
+// 	}
+
+// 	// รายชื่อผู้ใช้ที่ต้องการสร้างห้องแชท
+// 	userIDs := []uint{2, 3}
+
+// 	for _, userID := range userIDs {
+// 		// เช็คว่ามี Roomchat นี้อยู่แล้วหรือยัง
+// 		var existingRoomchat entity.Roomchat
+// 		err := db.Where("landsalepost_id = ? AND user_id = ?", post.ID, userID).First(&existingRoomchat).Error
+// 		if err == nil {
+// 			log.Println("⚠️ Roomchat already exists for UserID:", userID)
+// 			continue
+// 		}
+
+// 		// สร้าง Roomchat ใหม่
+// 		// 	roomchat := entity.Roomchat{
+// 		// 		LandsalepostID: post.ID,
+// 		// 		UserID:         userID,
+// 		// 	}
+
+// 		// 	if err := db.Create(&roomchat).Error; err != nil {
+// 		// 		log.Println("❌ Failed to create Roomchat for user", userID, ":", err)
+// 		// 		continue
+// 		// 	}
+// 		// 	log.Println("✅ Created Roomchat for UserID:", userID, "RoomchatID:", roomchat.ID)
+
+// 		// 	// เพิ่มข้อความตัวอย่างในห้องแชท
+// 		// 	messages := []entity.Message{
+// 		// 		{
+// 		// 			Message:    "สวัสดีครับ สนใจที่ดินแปลงนี้ไหม?",
+// 		// 			Time:       time.Now(),
+// 		// 			RoomchatID: roomchat.ID,
+// 		// 		},
+// 		// 		{
+// 		// 			Message:    "สนใจครับ อยากทราบรายละเอียดเพิ่มเติม",
+// 		// 			Time:       time.Now().Add(1 * time.Minute),
+// 		// 			RoomchatID: roomchat.ID,
+// 		// 		},
+// 		// 		{
+// 		// 			Message:    "ที่ดินขนาด 5 ไร่ ราคา 2 ล้านบาทครับ",
+// 		// 			Time:       time.Now().Add(2 * time.Minute),
+// 		// 			RoomchatID: roomchat.ID,
+// 		// 		},
+// 		// 	}
+
+// 		// 	if err := db.Create(&messages).Error; err != nil {
+// 		// 		log.Println("❌ Failed to create messages for UserID:", userID, ":", err)
+// 		// 	} else {
+// 		// 		log.Println("✅ Created messages for UserID:", userID)
+// 		// 	}
+// 	}
+
+// 	log.Println("✅ Database Migrated & Seeded Successfully")
+
+// 	// ✅ Seed State (แยกจาก Users)
+// 	// var stateCount int64
+// 	// db.Model(&entity.State{}).Count(&stateCount)
+// 	// if stateCount == 0 {
+// 	// 	db.Create(&entity.State{Name: "รอตรวจสอบ", Color: "orange"})
+// 	// 	db.Create(&entity.State{Name: "กำลังดำเนินการ", Color: "blue"})
+// 	// 	db.Create(&entity.State{Name: "เสร็จสิ้น", Color: "green"})
+// 	// }
+
+// 	// log.Println("✅ Database Migrated & Seeded Successfully")
+
+// }
 func ImportProvincesCSV(db *gorm.DB, filePath string) {
 	file, err := os.Open(filePath)
 	if err != nil {
