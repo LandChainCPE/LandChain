@@ -25,15 +25,16 @@ func CheckLandVerificationUpdate() {
 		Select("MAX(landtitles.token_id)").
 		Scan(&maxTokenIDPtr)
 
+	// If MAX token is NULL set starting point to 0 (search from 0), else start from max+1
+	var nextTokenID uint
 	if maxTokenIDPtr == nil {
-		fmt.Printf("[INFO] MAX TokenID = NULL (ยังไม่มีข้อมูลในฐานข้อมูล)\n")
-		return
+		fmt.Printf("[INFO] MAX TokenID = NULL -> เริ่มตรวจสอบจาก 0\n")
+		nextTokenID = 0
 	} else {
 		fmt.Printf("[DEBUG] MAX TokenID ในฐานข้อมูล = %d\n", *maxTokenIDPtr)
+		nextTokenID = *maxTokenIDPtr + 1
 	}
 
-	// 2. เตรียม TokenID ถัดไป (TokenID ที่มากที่สุด + 1)
-	nextTokenID := *maxTokenIDPtr + 1   
 	fmt.Printf("[DEBUG] เริ่มตรวจสอบที่ TokenID = %d\n", nextTokenID)
 
 	for {
