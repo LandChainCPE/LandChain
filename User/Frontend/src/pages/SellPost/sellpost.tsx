@@ -2023,6 +2023,7 @@ useEffect(() => {
           </div>
         </div>
       )}
+      
       {/* Step 4: Location */}
       {currentStep === 4 && (
         <div style={{ 
