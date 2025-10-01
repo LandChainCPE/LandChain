@@ -22,7 +22,7 @@ func main() {
 	}
 
 	config.ConnectDatabase()
-	// config.SetupDatabase()
+	config.SetupDatabase()
 	db := config.DB()
 	r := gin.Default()
 	hub := websocket.NewHub(db)
@@ -41,7 +41,7 @@ func main() {
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "API RUNNING... PostgreSQL connected ✅")
 	})
-
+	
 	// เพิ่ม/ปรับปรุง API จาก managepost.go
 	r.PUT("/managepost/update/:post_id", controller.UpdatePost)
 	r.DELETE("/bookings/delete-expired", controller.DeleteExpiredBookingsManual)
