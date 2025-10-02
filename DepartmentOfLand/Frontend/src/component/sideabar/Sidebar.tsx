@@ -29,7 +29,7 @@ const Sidebar: React.FC = () => {
     { label: "ตรวจสอบโฉนดที่ดิน", icon: <SearchOutlined />, path: "/verifyland" },
     { label: "ตรวจสอบการซื้อขาย", icon: <SwapOutlined />, path: "/transfer" },
     // { label: "ลงทะเบียนโฉนดที่ดิน", icon: <FileProtectOutlined />, path: "/regisland" },
-    { label: "ตรวจสอบคำร้อง", icon: <FileTextOutlined />, path: "/statepetition" },
+    // { label: "ตรวจสอบคำร้อง", icon: <FileTextOutlined />, path: "/statepetition" },
     // { label: "การตั้งค่า", icon: <SettingOutlined />, path: "/settings" },
   ];
 
