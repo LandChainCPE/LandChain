@@ -4,7 +4,7 @@ import {
   SearchOutlined,
   SwapOutlined,
   HomeOutlined,
-  FileTextOutlined,
+  // FileTextOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";

@@ -190,7 +190,7 @@ func VerifyWalletID(c *gin.Context) {
 	}
 
 	// อัพเดต booking.Status เป็น 'Successful'
-	if err := tx.Model(&booking).Update("status", "Successful").Error; err != nil {
+	if err := tx.Model(&booking).Update("status", "success").Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update booking status: " + err.Error()})
 		return
 	}
