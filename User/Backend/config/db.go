@@ -126,10 +126,10 @@ func SetupDatabase() {
 		db.Create(&entity.Users{Firstname: "TestFirefox", Lastname: "Suranaree", Email: "Suranaree@gmail.com", Phonenumber: "0998541236", Metamaskaddress: "0x49c5c43f7fda86522bbfceffba8c0dbc4700a129", RoleID: RefRole})
 
 		//Jo   LocalHost
-		// db.Create(&entity.Users{Firstname: "RattaponJChome", Lastname: "JPhonthaisong", Email: "Jponthaisongfc@gmail.com", Phonenumber: "0685231245", Metamaskaddress: "0x2ac553f505a5e05b1a61fe02efaed2a30036e233", RoleID: RefRole2}) 
-		// db.Create(&entity.Users{Firstname: "PanachaiJBrave", Lastname: "JPotisuwan", Email: "JPanachai@gmail.com", Phonenumber: "0889741245", Metamaskaddress: "0xf274e000d3c461dd7fc3e839579451c89a5d0d36", RoleID: RefRole})
-		// db.Create(&entity.Users{Firstname: "NothJEdge", Lastname: "JPotisuwan", Email: "JNoth@gmail.com", Phonenumber: "0657412369", Metamaskaddress: "0x89b08eb07278f2568a36e65cabd910ccb022ab1d", RoleID: RefRole})
-		//db.Create(&entity.Users{Firstname: "TestFirefox", Lastname: "Suranaree", Email: "Suranaree@gmail.com", Phonenumber: "0998541236", Metamaskaddress: "0xeb1ff86eeeb4d356dec18401cc5657f0a14d9c8c", RoleID: RefRole})
+		db.Create(&entity.Users{Firstname: "RattaponJChome", Lastname: "JPhonthaisong", Email: "Jponthaisongfc@gmail.com", Phonenumber: "0685231245", Metamaskaddress: "0x2ac553f505a5e05b1a61fe02efaed2a30036e233", RoleID: RefRole2}) 
+		db.Create(&entity.Users{Firstname: "PanachaiJBrave", Lastname: "JPotisuwan", Email: "JPanachai@gmail.com", Phonenumber: "0889741245", Metamaskaddress: "0xf274e000d3c461dd7fc3e839579451c89a5d0d36", RoleID: RefRole})
+		db.Create(&entity.Users{Firstname: "NothJEdge", Lastname: "JPotisuwan", Email: "JNoth@gmail.com", Phonenumber: "0657412369", Metamaskaddress: "0x89b08eb07278f2568a36e65cabd910ccb022ab1d", RoleID: RefRole})
+		db.Create(&entity.Users{Firstname: "TestFirefox", Lastname: "Suranaree", Email: "Suranaree@gmail.com", Phonenumber: "0998541236", Metamaskaddress: "0xeb1ff86eeeb4d356dec18401cc5657f0a14d9c8c", RoleID: RefRole})
 
 
 		// //RefServiceType := uint(1)
